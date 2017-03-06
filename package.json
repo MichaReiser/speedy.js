@@ -1,0 +1,24 @@
+{
+  "name": "speedyjs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Micha Reiser <micha@famreiser.ch>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^18.1.1",
+    "jest": "^19.0.2",
+    "typescript": "next"
+  },
+  "peerDependencies": {
+    "typescript": "^2.2.1"
+  },
+  "dependencies": {
+    "@types/node": "^7.0.5",
+    "@types/winston": "^2.2.0",
+    "winston": "^2.3.1"
+  },
+
+  "scripts": {
+    "deploy": "cd cases && llvm-dis fib.bc && docker run --rm -v $(pwd):/src -t emscripten s2wasm fib.s -o fib-opt.wast && docker run --rm -v $(pwd):/src -t emscripten wasm-as fib-opt.wast -o fib-opt.wasm && cp fib-opt.wasm ../../webassembly-benchmark && cd .."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "pretty": true,
+    "strictNullChecks": true,
+    "target": "es5",
+    "lib": ["es6" ],
+    "sourceMap": true
+  }
+}
