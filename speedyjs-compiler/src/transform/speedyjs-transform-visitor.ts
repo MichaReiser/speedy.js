@@ -8,7 +8,7 @@ const log = debug("visitor");
 export class SpeedyJSTransformVisitor implements TransformVisitor {
     private inSpeedyJSFunction = false;
 
-    constructor(private program: ts.Program, private llvmEmitter: CodeGenerator) {}
+    constructor(private program: ts.Program, private codeGenerator: CodeGenerator) {}
 
     visitFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration, context: TransformVisitorContext) {
         if (isSpeedyJSFunction(functionDeclaration)) {
@@ -18,7 +18,7 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
             this.inSpeedyJSFunction = true;
 
             try {
-                this.llvmEmitter.generate(functionDeclaration, this.program);
+                this.codeGenerator.generate(functionDeclaration, this.program);
                 // replace function with wasm include
                 return functionDeclaration;
             } finally {

@@ -13,9 +13,11 @@ class FirstLiteralTokenCodeGenerator implements ValueSyntaxCodeGenerator<ts.Lite
 
     generateValue(node: ts.LiteralLikeNode, context: CodeGenerationContext): llvm.Value {
         const type = context.typeChecker.getTypeAtLocation(node);
-        switch (type.flags) {
-            case ts.TypeFlags.NumberLiteral:
-                return llvm.ConstantFP.get(context.llvmContext, +node.text);
+        if (type.flags & ts.TypeFlags.IntLiteral) {
+            return llvm.ConstantInt.get(context.llvmContext, +node.text);
+        }
+        if (type.flags & ts.TypeFlags.NumberLiteral) {
+            return llvm.ConstantFP.get(context.llvmContext, +node.text);
         }
         throw new Error("Unsupported first literal token");
     }

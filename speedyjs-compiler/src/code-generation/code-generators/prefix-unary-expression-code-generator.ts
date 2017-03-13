@@ -14,16 +14,22 @@ class PrefixUnaryExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.
 
         switch (node.operator) {
             case ts.SyntaxKind.PlusPlusToken:
-                if (type.flags === ts.TypeFlags.Number) {
-                    updatedValue = context.builder.createFAdd(value, llvm.ConstantFP.get(context.llvmContext, 1));
+                if (type.flags & ts.TypeFlags.Int) {
+                    updatedValue = context.builder.createAdd(value, llvm.ConstantInt.get(context.llvmContext, 1));
                     break;
                 }
+
+                if (type.flags & ts.TypeFlags.Number) {
+                    updatedValue = context.builder.createFAdd(value, llvm.ConstantFP.get(context.llvmContext, 1.0));
+                    break;
+                }
+
 
             default:
                 throw new Error(`Unsupported unary operator ${ts.SyntaxKind[node.operator]}`);
         }
 
-        return context.builder.createStore(updatedValue, context.scope.getVariable(symbol)); // TODO this fails for properties
+        return context.builder.createStore(updatedValue, context.scope.getVariable(symbol)); // FIXME this fails for properties
     }
 
     generate(node: ts.PrefixUnaryExpression, context: CodeGenerationContext): void {

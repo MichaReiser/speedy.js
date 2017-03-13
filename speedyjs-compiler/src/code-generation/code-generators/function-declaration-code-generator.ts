@@ -3,6 +3,7 @@ import * as llvm from "llvm-node";
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "../util/type-mapping";
+import {ArrayCodeGeneratorHelper} from "../util/array-code-generator-helper";
 
 class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.FunctionDeclaration> {
     syntaxKind = ts.SyntaxKind.FunctionDeclaration;
@@ -24,12 +25,12 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         const returnType = context.typeChecker.getReturnTypeOfSignature(signature);
         const symbol = context.typeChecker.getSymbolAtLocation(functionDeclaration.name);
 
-        const llvmReturnType = toLLVMType(returnType, context.llvmContext);
+        const llvmReturnType = toLLVMType(returnType, context);
         const parameters: llvm.Type[] = [];
 
         for (const parameter of functionDeclaration.parameters) {
             const parameterType = context.typeChecker.getTypeAtLocation(parameter);
-            parameters.push(toLLVMType(parameterType, context.llvmContext));
+            parameters.push(toLLVMType(parameterType, context));
         }
 
         const functionType = llvm.FunctionType.get(llvmReturnType, parameters, false);
@@ -46,7 +47,7 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         // add args to scope
         const args = fun.getArguments();
         for (let i = 0; i < signature.parameters.length; ++i) {
-            const type = toLLVMType(context.typeChecker.getTypeAtLocation(functionDeclaration.parameters[i]), context.llvmContext);
+            const type = toLLVMType(context.typeChecker.getTypeAtLocation(functionDeclaration.parameters[i]), context);
             const allocation = context.builder.createAlloca(type, undefined, signature.parameters[i].name);
             context.builder.createStore(args[i], allocation);
             context.scope.addVariable(signature.parameters[i], allocation);
@@ -75,6 +76,9 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
             context.builder.setInsertionPoint(returnBlock);
         }
 
+        // Cleanup Heap
+        this.cleanUpHeap(context);
+
         // Add Return Statement
         if (context.scope.returnAllocation) {
             context.builder.createRet(context.builder.createLoad(context.scope.returnAllocation, "return"));
@@ -86,6 +90,16 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         llvm.verifyFunction(fun);
 
         return fun;
+    }
+
+    private cleanUpHeap(context: CodeGenerationContext) {
+        for (const variable of context.scope.getAllVariables()) {
+            const type = context.typeChecker.getTypeOfSymbolAtLocation(variable, variable.getDeclarations()[0]);
+            if (type.getSymbol() && type.getSymbol().name === "Array") {
+                const arrayCodeGeneratorHelper = new ArrayCodeGeneratorHelper(context);
+                arrayCodeGeneratorHelper.delete(context.scope.getNested(variable), ArrayCodeGeneratorHelper.getElementTypeFor(type, context));
+            }
+        }
     }
 
 }

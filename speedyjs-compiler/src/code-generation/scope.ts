@@ -7,6 +7,7 @@ export class Scope {
     private functions = new Map<ts.Symbol, llvm.Function>();
     private returnAlloca: llvm.AllocaInst | undefined;
     private retBlock: llvm.BasicBlock | undefined;
+    private children: Scope[] = [];
 
     constructor(private parent?: Scope) {}
 
@@ -53,6 +54,32 @@ export class Scope {
         return variable!;
     }
 
+    getNested(symbol: ts.Symbol): llvm.AllocaInst {
+        const scopes = [this, ...this.children];
+
+        for (const scope of scopes) {
+            if (scope.hasVariable(symbol)) {
+                return scope.getVariable(symbol);
+            }
+        }
+
+        assert(false, `Variable with ${symbol.name} is not defined in this or any child scope.`);
+        return undefined!;
+    }
+
+    getVariables(): ts.Symbol[] {
+        return Array.from(this.variables.keys());
+    }
+
+    getAllVariables(): ts.Symbol[] {
+        const childVariables = this.children.map(child => child.getAllVariables());
+        return Array.prototype.concat.apply(this.getVariables(), childVariables);
+    }
+
+    hasVariable(symbol: ts.Symbol): boolean {
+        return this.variables.has(symbol);
+    }
+
     removeVariable(symbol: ts.Symbol): void {
         assert(symbol, "symbol is undefined");
         this.variables.delete(symbol);
@@ -84,7 +111,9 @@ export class Scope {
     }
 
     enterChild(): Scope {
-        return new Scope(this);
+        const child = new Scope(this);
+        this.children.push(child);
+        return child;
     }
 
     exitChild(): Scope {

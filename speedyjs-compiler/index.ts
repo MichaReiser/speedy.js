@@ -47,7 +47,7 @@ function run() {
     }
 
     if (commandLine.options.version) {
-        ts.sys.write(`speedyjs ${packageJson.version}${ts.sys.newLine}`);
+        ts.sys.write(`speedy.js ${packageJson.version}${ts.sys.newLine}`);
         return ts.sys.exit(ts.ExitStatus.Success);
     }
 

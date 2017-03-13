@@ -19,6 +19,6 @@
   },
 
   "scripts": {
-    "deploy": "cd cases && llvm-dis fib.bc && docker run --rm -v $(pwd):/src -t emscripten s2wasm fib.s -o fib-opt.wast && docker run --rm -v $(pwd):/src -t emscripten wasm-as fib-opt.wast -o fib-opt.wasm && cp fib-opt.wasm ../../webassembly-benchmark && cd .."
+    "deploy": "cd cases && node ../index.js && llvm-dis fib.bc && s2wasm fib.s -o fib-opt.wast -l /Users/micha/.emscripten_cache/wasm/wasm_compiler_rt.a --emscripten-glue --global-base=1024 --initial-memory=16777216 && wasm-as fib-opt.wast -o fib-opt.wasm && cp fib-opt.wasm ../../../webassembly-benchmark/ && cd .."
   }
 }

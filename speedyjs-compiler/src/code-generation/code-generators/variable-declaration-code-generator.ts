@@ -10,7 +10,7 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
     generate(variableDeclaration: ts.VariableDeclaration, context: CodeGenerationContext): void {
         const symbol = context.typeChecker.getSymbolAtLocation(variableDeclaration.name);
         const type = context.typeChecker.getTypeAtLocation(variableDeclaration);
-        const llvmType = toLLVMType(type, context.llvmContext);
+        const llvmType = toLLVMType(type, context);
 
         const allocation = createAllocationInEntryBlock(context.builder.getInsertBlock().parent!, llvmType, symbol.name); // TODO test if function is set
 

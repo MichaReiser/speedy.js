@@ -7,6 +7,8 @@ import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {Scope} from "./scope";
 
+const log = debug("DefaultCodeGenerationContext");
+
 /**
  * Default implementation of the code generation context
  */
@@ -33,14 +35,19 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     }
 
     generateVoid(node: ts.Node): void {
-        return this.getCodeGenerator(node).generate(node, this);
+        log(`Generate node '${node.getText(node.getSourceFile())}'`);
+        this.getCodeGenerator(node).generate(node, this);
+        log(`Generated node '${node.getText(node.getSourceFile())}'`);
     }
 
     generate(node: ts.Node): llvm.Value {
         const codeGenerator = this.getCodeGenerator(node);
         assert((codeGenerator as any).generateValue, `Code Generator ${codeGenerator.constructor.name} for node of kind ${ts.SyntaxKind[node.kind]} is not a ValueSyntaxCodeGenerator`);
         const valueEmitter = codeGenerator as ValueSyntaxCodeGenerator<ts.Node>;
+
+        log(`Generate value for node '${node.getText(node.getSourceFile())}'`);
         const value = valueEmitter.generateValue(node, this);
+        log(`Generated value for node '${node.getText(node.getSourceFile())}' is '${value}'`);
 
         assert(value, `Code Generator ${JSON.stringify(codeGenerator)} returned no value`);
         return value;
@@ -56,7 +63,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         assert(syntaxKind, "Code Generator returned undefined as syntax kind");
         assert(!this.codeGenerators.has(syntaxKind), `An other Code Generator is already registered for the syntax kind ${ts.SyntaxKind[syntaxKind]}`);
 
-        debug(`Register Code Generator for syntax kind ${ts.SyntaxKind[syntaxKind]}`);
+        log(`Register Code Generator for syntax kind ${ts.SyntaxKind[syntaxKind]}`);
 
         this.codeGenerators.set(syntaxKind, codeGenerator);
     }
