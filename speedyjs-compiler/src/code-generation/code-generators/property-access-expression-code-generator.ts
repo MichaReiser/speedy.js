@@ -1,6 +1,5 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import * as assert from "assert";
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ArrayCodeGeneratorHelper} from "../util/array-code-generator-helper";

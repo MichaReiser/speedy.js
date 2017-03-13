@@ -14,6 +14,7 @@ class ElementAccessExpressionCodeGenerator implements ValueSyntaxCodeGenerator<t
         const arrayCodeGeneratorHelper = new ArrayCodeGeneratorHelper(context);
 
         const array = context.generate(node.expression);
+        // const array = context.scope.getVariable(context.typeChecker.getSymbolAtLocation(node.expression)); // FIXME fails with properties
         const index = context.generate(node.argumentExpression!); // TODO: What if absent? when is this the case???
 
         return arrayCodeGeneratorHelper.getElement(array, index, arrayCodeGeneratorHelper.getElementType(node.expression));

@@ -3,6 +3,7 @@ import * as llvm from "llvm-node";
 
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {toLLVMType} from "../util/type-mapping";
 
 class IdentifierCodeGenerator implements ValueSyntaxCodeGenerator<ts.Identifier> {
     syntaxKind = ts.SyntaxKind.Identifier;
@@ -14,7 +15,9 @@ class IdentifierCodeGenerator implements ValueSyntaxCodeGenerator<ts.Identifier>
             return context.scope.getFunction(symbol);
         }
 
-        return context.builder.createLoad(context.scope.getVariable(symbol), symbol.name);
+        const llvmType = toLLVMType(context.typeChecker.getTypeAtLocation(identifier), context);
+
+        return context.builder.createAlignedLoad(context.scope.getVariable(symbol), context.module.dataLayout.getPrefTypeAlignment(llvmType), symbol.name);
     }
 
     generate(node: ts.Identifier, context: CodeGenerationContext): void {

@@ -1,7 +1,6 @@
 import * as ts from "typescript";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGeneratorHelper} from "../util/array-code-generator-helper";
 
 /**
  * Code Generator for a block ({}) statement
