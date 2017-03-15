@@ -29,10 +29,45 @@ DLL_PUBLIC ALWAYS_INLINE void array_set_i32(CArrayI32 array, size_t index, int32
 DLL_PUBLIC ALWAYS_INLINE void array_set_f64(CArrayF64 array, size_t index, double value);
 DLL_PUBLIC ALWAYS_INLINE void array_set_ptr(CArrayPtr array, size_t index, void* value);
 
+DLL_PUBLIC ALWAYS_INLINE CArrayI1 array_fill_ii_i1(CArrayI1 array, bool value, int32_t start);
+DLL_PUBLIC ALWAYS_INLINE CArrayI32 array_fill_ii_i32(CArrayI32 array, int32_t value, int32_t start);
+DLL_PUBLIC ALWAYS_INLINE CArrayF64 array_fill_ii_f64(CArrayF64 array, double value, int32_t start);
+DLL_PUBLIC ALWAYS_INLINE CArrayPtr array_fill_ii_ptr(CArrayPtr array, void* value, int32_t start);
+
+DLL_PUBLIC ALWAYS_INLINE CArrayI1 array_fill_iii_i1(CArrayI1 array, bool value, int32_t start, int32_t end);
+DLL_PUBLIC ALWAYS_INLINE CArrayI32 array_fill_iii_i32(CArrayI32 array, int32_t value, int32_t start, int32_t end);
+DLL_PUBLIC ALWAYS_INLINE CArrayF64 array_fill_iii_f64(CArrayF64 array, double value, int32_t start, int32_t end);
+DLL_PUBLIC ALWAYS_INLINE CArrayPtr array_fill_iii_ptr(CArrayPtr array, void* value, int32_t start, int32_t end);
+
+DLL_PUBLIC ALWAYS_INLINE size_t array_push_i1(CArrayI1 array, bool* elements, size_t numElements);
+DLL_PUBLIC ALWAYS_INLINE size_t array_push_i32(CArrayI32 array, int32_t* elements, size_t numElements);
+DLL_PUBLIC ALWAYS_INLINE size_t array_push_f64(CArrayF64 array, double* elements, size_t numElements);
+DLL_PUBLIC ALWAYS_INLINE size_t array_push_ptr(CArrayPtr array, void** elements, size_t numElements);
+
+DLL_PUBLIC ALWAYS_INLINE size_t array_unshift_i1(CArrayI1 array, bool* elements, size_t numElements);
+DLL_PUBLIC ALWAYS_INLINE size_t array_unshift_i32(CArrayI32 array, int32_t* elements, size_t numElements);
+DLL_PUBLIC ALWAYS_INLINE size_t array_unshift_f64(CArrayF64 array, double* elements, size_t numElements);
+DLL_PUBLIC ALWAYS_INLINE size_t array_unshift_ptr(CArrayPtr array, void** elements, size_t numElements);
+
+DLL_PUBLIC ALWAYS_INLINE bool array_pop_i1(CArrayI1 array);
+DLL_PUBLIC ALWAYS_INLINE int32_t array_pop_i32(CArrayI32 array);
+DLL_PUBLIC ALWAYS_INLINE double array_pop_f64(CArrayF64 array);
+DLL_PUBLIC ALWAYS_INLINE void* array_pop_ptr(CArrayPtr array);
+
+DLL_PUBLIC ALWAYS_INLINE bool array_shift_i1(CArrayI1 array);
+DLL_PUBLIC ALWAYS_INLINE int32_t array_shift_i32(CArrayI32 array);
+DLL_PUBLIC ALWAYS_INLINE double array_shift_f64(CArrayF64 array);
+DLL_PUBLIC ALWAYS_INLINE void* array_shift_ptr(CArrayPtr array);
+
 DLL_PUBLIC ALWAYS_INLINE size_t array_length_i1(CArrayI1);
 DLL_PUBLIC ALWAYS_INLINE size_t array_length_i32(CArrayI32);
 DLL_PUBLIC ALWAYS_INLINE size_t array_length_f64(CArrayF64);
 DLL_PUBLIC ALWAYS_INLINE size_t array_length_ptr(CArrayPtr);
+
+DLL_PUBLIC ALWAYS_INLINE void array_set_length_i1(CArrayI1, size_t newSize);
+DLL_PUBLIC ALWAYS_INLINE void array_set_length_i32(CArrayI32, size_t newSize);
+DLL_PUBLIC ALWAYS_INLINE void array_set_length_f64(CArrayF64, size_t newSize);
+DLL_PUBLIC ALWAYS_INLINE void array_set_length_ptr(CArrayPtr, size_t newSize);
 
 DLL_PUBLIC ALWAYS_INLINE void delete_array_i1(CArrayI1 array);
 DLL_PUBLIC ALWAYS_INLINE void delete_array_i32(CArrayI32 array);

@@ -49,20 +49,140 @@ void array_set_ptr(CArrayPtr array, size_t index, void* value) {
     static_cast<Array<void*>*>(array)->set(index, value);
 }
 
+CArrayI1 array_fill_ii_i1(CArrayI1 array, bool value, int32_t start) {
+    static_cast<Array<bool>*>(array)->fill(value, start);
+    return array;
+}
+
+CArrayI32 array_fill_ii_i32(CArrayI32 array, int32_t value, int32_t start) {
+    static_cast<Array<int32_t>*>(array)->fill(value, start);
+    return array;
+}
+
+CArrayF64 array_fill_ii_f64(CArrayF64 array, double value, int32_t start) {
+    static_cast<Array<double>*>(array)->fill(value, start);
+    return array;
+}
+
+CArrayPtr array_fill_ii_ptr(CArrayPtr array, void* value, int32_t start) {
+    static_cast<Array<void*>*>(array)->fill(value, start);
+    return array;
+}
+
+CArrayI1 array_fill_iii_i1(CArrayI1 array, bool value, int32_t start, int32_t end) {
+    static_cast<Array<bool>*>(array)->fill(value, start, end);
+    return array;
+}
+
+CArrayI32 array_fill_iii_i32(CArrayI32 array, int32_t value, int32_t start, int32_t end) {
+    static_cast<Array<int32_t>*>(array)->fill(value, start, end);
+    return array;
+}
+
+CArrayF64 array_fill_iii_f64(CArrayF64 array, double value, int32_t start, int32_t end) {
+    static_cast<Array<double>*>(array)->fill(value, start, end);
+    return array;
+}
+
+CArrayPtr array_fill_iii_ptr(CArrayPtr array, void* value, int32_t start, int32_t end) {
+    static_cast<Array<void*>*>(array)->fill(value, start, end);
+    return array;
+}
+
+size_t array_push_i1(CArrayI1 array, bool* elements, size_t numElements) {
+    return static_cast<Array<bool>*>(array)->push(elements, numElements);
+}
+
+size_t array_push_i32(CArrayI32 array, int32_t* elements, size_t numElements) {
+    return static_cast<Array<int32_t>*>(array)->push(elements, numElements);
+}
+
+size_t array_push_f64(CArrayF64 array, double* elements, size_t numElements) {
+    return static_cast<Array<double>*>(array)->push(elements, numElements);
+}
+
+size_t array_push_ptr(CArrayPtr array, void** elements, size_t numElements) {
+    return static_cast<Array<void*>*>(array)->push(elements, numElements);
+}
+
+size_t array_unshift_i1(CArrayI1 array, bool* elements, size_t numElements) {
+    return static_cast<Array<bool>*>(array)->unshift(elements, numElements);
+}
+
+size_t array_unshift_i32(CArrayI32 array, int32_t* elements, size_t numElements) {
+    return static_cast<Array<int32_t>*>(array)->unshift(elements, numElements);
+}
+
+size_t array_unshift_f64(CArrayF64 array, double* elements, size_t numElements) {
+    return static_cast<Array<double>*>(array)->unshift(elements, numElements);
+}
+
+size_t array_unshift_ptr(CArrayPtr array, void** elements, size_t numElements) {
+    return static_cast<Array<void*>*>(array)->unshift(elements, numElements);
+}
+
+bool array_pop_i1(CArrayI1 array) {
+    return static_cast<Array<bool>*>(array)->pop();
+}
+
+int32_t array_pop_i32(CArrayI32 array) {
+    return static_cast<Array<int32_t>*>(array)->pop();
+}
+
+double array_pop_f64(CArrayF64 array) {
+    return static_cast<Array<double>*>(array)->pop();
+}
+
+void* array_pop_ptr(CArrayPtr array) {
+    return static_cast<Array<void*>*>(array)->pop();
+}
+
+bool array_shift_i1(CArrayI1 array) {
+    return static_cast<Array<bool>*>(array)->shift();
+}
+
+int32_t array_shift_i32(CArrayI32 array) {
+    return static_cast<Array<int32_t>*>(array)->shift();
+}
+
+double array_shift_f64(CArrayF64 array) {
+    return static_cast<Array<double>*>(array)->shift();
+}
+
+void* array_shift_ptr(CArrayPtr array) {
+    return static_cast<Array<void*>*>(array)->shift();
+}
+
 size_t array_length_i1(CArrayI1 array) {
-    return static_cast<Array<bool>*>(array)->length;
+    return static_cast<Array<bool>*>(array)->size();
 }
 
 size_t array_length_i32(CArrayI32 array) {
-    return static_cast<Array<int32_t>*>(array)->length;
+    return static_cast<Array<int32_t>*>(array)->size();
 }
 
 size_t array_length_f64(CArrayF64 array) {
-    return static_cast<Array<double>*>(array)->length;
+    return static_cast<Array<double>*>(array)->size();
 }
 
 size_t array_length_ptr(CArrayPtr array) {
-    return static_cast<Array<void*>*>(array)->length;
+    return static_cast<Array<void*>*>(array)->size();
+}
+
+void array_set_length_i1(CArrayI1 array, size_t newSize) {
+    static_cast<Array<bool>*>(array)->resize(newSize);
+}
+
+void array_set_length_i32(CArrayI32 array, size_t newSize) {
+    static_cast<Array<int32_t>*>(array)->resize(newSize);
+}
+
+void array_set_length_f64(CArrayF64 array, size_t newSize) {
+    static_cast<Array<double>*>(array)->resize(newSize);
+}
+
+void array_set_length_ptr(CArrayPtr array, size_t newSize) {
+    static_cast<Array<void*>*>(array)->resize(newSize);
 }
 
 void delete_array_i1(CArrayI1 array) {

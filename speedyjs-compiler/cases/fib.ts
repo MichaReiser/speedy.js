@@ -27,9 +27,7 @@ export function nsieve(size: int): int {
     "use speedyjs"
 
     const isPrime = new Array<boolean>(size);
-    for (let i = 0; i < isPrime.length; ++i) {
-        isPrime[i] = true;
-    }
+    isPrime.fill(true);
 
     let count = 0;
 

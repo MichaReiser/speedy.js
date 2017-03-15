@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "../util/type-mapping";
-import {ArrayCodeGeneratorHelper} from "../util/array-code-generator-helper";
+import {ArrayCodeGenerator} from "../util/array-code-generator";
 
 class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.FunctionDeclaration> {
     syntaxKind = ts.SyntaxKind.FunctionDeclaration;
@@ -96,8 +96,8 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         for (const variable of context.scope.getAllVariables()) {
             const type = context.typeChecker.getTypeOfSymbolAtLocation(variable, variable.getDeclarations()[0]);
             if (type.getSymbol() && type.getSymbol().name === "Array") {
-                const arrayCodeGeneratorHelper = new ArrayCodeGeneratorHelper(context);
-                arrayCodeGeneratorHelper.delete(context.scope.getNested(variable), ArrayCodeGeneratorHelper.getElementTypeFor(type, context));
+                const arrayCodeGeneratorHelper = ArrayCodeGenerator.create(type, context);
+                arrayCodeGeneratorHelper.free(context.scope.getNested(variable));
             }
         }
     }

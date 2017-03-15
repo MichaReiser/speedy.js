@@ -3,12 +3,14 @@ import * as llvm from "llvm-node";
 import * as assert from "assert";
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {ArrayCodeGenerator} from "../util/array-code-generator";
 
 class CallExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.CallExpression> {
     syntaxKind = ts.SyntaxKind.CallExpression;
 
     generateValue(callExpression: ts.CallExpression, context: CodeGenerationContext): llvm.Value {
         const callee = callExpression.expression;
+
         if (callee.kind === ts.SyntaxKind.PropertyAccessExpression) {
             const object = (callee as ts.PropertyAccessExpression).expression;
             const symbol = context.typeChecker.getSymbolAtLocation(callee);
@@ -20,16 +22,25 @@ class CallExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.CallExp
                     return this.callSqrt(callExpression, context);
                 }
             }
+
+            if (ArrayCodeGenerator.isArrayNode(object, context)) {
+                const arrayCodeGenerator = ArrayCodeGenerator.create(object, context);
+                return arrayCodeGenerator.invoke(callee as ts.PropertyAccessExpression, callExpression.arguments.map(arg => context.generate(arg)));
+            }
         }
 
-        return this.callDeclaredFunction(context, callExpression);
+        const fun = this.getDeclaredFunction(context, callExpression);
+        return this.callFunction(fun, callExpression, context);
     }
 
-    private callDeclaredFunction(context: CodeGenerationContext, callExpression: ts.CallExpression) {
+    private getDeclaredFunction(context: CodeGenerationContext, callExpression: ts.CallExpression): llvm.Function {
         const expression = context.generate(callExpression.expression);
         assert(expression instanceof llvm.Function, "Callee is not a function");
 
-        const callee = expression as llvm.Function;
+        return expression as llvm.Function;
+    }
+
+    private callFunction(callee: llvm.Function, callExpression: ts.CallExpression, context: CodeGenerationContext) {
         const signature = context.typeChecker.getResolvedSignature(callExpression);
         assert(signature.parameters.length === callee.getArguments().length, "Calling functions with more or less arguments than declared parameters is not yet supported");
 

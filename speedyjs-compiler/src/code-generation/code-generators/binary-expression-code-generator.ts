@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGeneratorHelper} from "../util/array-code-generator-helper";
+import {ArrayCodeGenerator} from "../util/array-code-generator";
 
 
 function isAssignmentToArray(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): boolean {
@@ -10,7 +10,17 @@ function isAssignmentToArray(binaryExpression: ts.BinaryExpression, context: Cod
         return false;
     }
 
-    return ArrayCodeGeneratorHelper.isArrayAccess(binaryExpression.left, context);
+    return ArrayCodeGenerator.isArrayAccess(binaryExpression.left, context);
+}
+
+function isAssignmentToArrayLength(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): boolean {
+    if (binaryExpression.operatorToken.kind !== ts.SyntaxKind.FirstAssignment && binaryExpression.operatorToken.kind !== ts.SyntaxKind.LastAssignment) {
+        return false;
+    }
+
+    return binaryExpression.left.kind === ts.SyntaxKind.PropertyAccessExpression &&
+        ArrayCodeGenerator.isArrayNode((binaryExpression.left as ts.PropertyAccessExpression).expression, context)
+        && (binaryExpression.left as ts.PropertyAccessExpression).name.text === "length";
 }
 
 /**
@@ -24,6 +34,10 @@ class BinaryExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.Binar
             return this.handleArrayAssignment(binaryExpression, context);
         }
 
+        if (isAssignmentToArrayLength(binaryExpression, context)) {
+            return this.handleArrayLengthAssignment(binaryExpression, context);
+        }
+
         return this.handleBinaryExpression(binaryExpression, context);
     }
 
@@ -32,16 +46,25 @@ class BinaryExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.Binar
     }
 
     private handleArrayAssignment(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): llvm.Value {
-        const arrayCodeGeneratorHelper = new ArrayCodeGeneratorHelper(context);
         const elementAccessExpression = binaryExpression.left as ts.ElementAccessExpression;
+        const arrayCodeGeneratorHelper = ArrayCodeGenerator.create(elementAccessExpression.expression, context);
 
         const array = context.generate(elementAccessExpression.expression);
         const index = context.generate(elementAccessExpression.argumentExpression!); // TODO, what if undefined
         const right = context.generate(binaryExpression.right);
-        const elementType = arrayCodeGeneratorHelper.getElementType(elementAccessExpression.expression);
+        arrayCodeGeneratorHelper.setElement(array, index, right);
 
-        arrayCodeGeneratorHelper.setElement(array, index, right, elementType);
         return right;
+    }
+
+    private handleArrayLengthAssignment(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext) {
+        const propertyAccess = binaryExpression.left as ts.PropertyAccessExpression;
+        const arrayCodeGenerator = ArrayCodeGenerator.create(propertyAccess.expression, context);
+
+        const array = context.generate(propertyAccess.expression);
+        const length = context.generate(binaryExpression.right);
+
+        return arrayCodeGenerator.setLength(array, length);
     }
 
     private handleBinaryExpression(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): llvm.Value {

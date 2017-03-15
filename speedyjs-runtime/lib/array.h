@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <new>
+#include <algorithm>
 #include "macros.h"
 
 const size_t CAPACITY_GROW_FACTOR = 2;
@@ -21,16 +22,16 @@ const size_t DEFAULT_CAPACITY = 16;
  * Differences to vector:
  * This Class does use memset to default initialize the elements and not the allocator.
  * @tparam T type of the elements stored in the array
+ * TODO Change size to int32_t to match ts
  */
 template<typename T>
 class Array {
-public:
+private:
     /**
      * The length of the array
      */
     size_t length;
 
-private:
     /**
      * The capacity of the {@link elements}
      */
@@ -48,26 +49,22 @@ public:
      * @param elements the elements contained in the array with the length equal to size. If absent, the elements are default
      * initialized.
      */
-    Array(size_t size, T* elements = nullptr) {
-        this->length = size;
-        this->capacity = size;
-
-        if (capacity == 0) {
+    Array(size_t size=0, const T* elements = nullptr) {
+        if (size == 0) {
             this->elements = nullptr;
         } else {
-            auto* allocation = std::malloc(sizeof(T) * size);
-            if (allocation == nullptr) {
-                throw std::bad_alloc {};
-            }
-
-            this->elements = static_cast<T*>(allocation);
+            this->elements = Array<T>::allocateElements(size);
 
             if (elements == nullptr) {
-                std::memset(this->elements, 0, sizeof(T) * size);
+                // This is quite expensive, if there is a GC that guarantees zeroed memory, this is no longer needed
+                std::fill_n(this->elements, size, T {});
             } else {
-                std::memcpy(this->elements, elements, size * sizeof(T));
+                std::copy(elements, elements + size, this->elements);
             }
         }
+
+        this->capacity = size;
+        this->length = size;
     }
 
     inline ~Array() {
@@ -101,33 +98,170 @@ public:
         elements[index] = value;
     }
 
-private:
+    inline void fill(const T value, int32_t start=0) {
+        this->fill(value, start, this->length);
+    }
+
     /**
-     * Resizes the array that it can hold at least {@link newSize} elements and updates the array pointer
-     * @param array pointer to the array to resize
-     * @param newSize the new size
-     * @throws {@link std::bad_alloc} if the array could not be allocated
+     * Sets the value of the array elements in between start and end to the given constant
+     * @param value the value to set
+     * @param start the start from which the values should be initialized
+     * @param end the end where the value should no longer be set (exclusive)
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill
      */
-    void resize(size_t newSize) {
-        if (capacity < newSize) {
-            size_t newCapacity = capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR;
-            if (newCapacity < newSize) {
-                newCapacity = newSize;
-            }
+    inline void fill(const T value, int32_t start, int32_t end) {
+        size_t startIndex = start < 0 ? this->length + start : static_cast<size_t>(start);
+        size_t endIndex = end < 0 ? this->length + end : static_cast<size_t>(end);
 
-            auto* allocation = std::realloc(this->elements, newCapacity * sizeof(T));
-
-            if (allocation == nullptr) {
-                throw std::bad_alloc {};
-            }
-
-            this->elements = static_cast<T*>(allocation);
-            this->capacity = newCapacity;
+        if (startIndex >= this->length) {
+            throw std::out_of_range { "Start index is out of range" };
         }
 
-        std::memset(&this->elements[this->length], 0, (newSize - this->length) * sizeof(T)); // Default initialize values
+        if (endIndex > this->length) {
+            throw std::out_of_range { "End index is out of range" };
+        }
+
+        if (endIndex < startIndex) {
+            return;
+        }
+
+        std::fill(this->elements + startIndex, this->elements + endIndex, value);
+    }
+
+    /**
+     * Adds one or several new elements to the and of the array
+     * @param elements the elements to add, not a nullptr
+     * @param numElements the number of elements to add
+     * @return the new length of the array
+     */
+    inline size_t push(const T* elements, size_t numElements) {
+        const auto newLength = this->length + numElements;
+        this->ensureCapacity(newLength);
+
+        std::copy(elements, elements + numElements, &this->elements[this->length]);
+        this->length = newLength;
+
+        return newLength;
+    }
+
+    /**
+     * Adds an element to the beginning of the array and returns the new length
+     * @param elements the elements to add
+     * @param numElements the number of elements to add
+     * @return the new length after inserting the given element
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
+     */
+    inline size_t unshift(const T* elements, size_t numElements) {
+        const size_t newLength = this->length + numElements;
+        this->ensureCapacity(newLength);
+
+        std::copy(this->elements, this->elements + this->length, this->elements + numElements);
+        std::copy(elements, elements + numElements, this->elements);
+
+        this->length = newLength;
+        return newLength;
+    }
+
+    /**
+     * Removes the last element and returns it
+     * @return the last element
+     * @throws {@link std::out_of_range} if the array is empty
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop
+     */
+    inline T pop() {
+        if (this->length == 0) {
+            throw std::out_of_range { "Array is empty" };
+        }
+
+        return this->elements[--this->length];
+    }
+
+    /**
+     * Removes the first element and returns it
+     * @return the first element
+     * @throws {@link std::out_of_range} if the array is empty
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
+     */
+    inline T shift() {
+        if (this->length == 0) {
+            throw std::out_of_range { "Array is empty"};
+        }
+
+        const T element = this->elements[0];
+        std::copy(this->elements + 1, this->elements + this->length, this->elements);
+        --this->length;
+        return element;
+    }
+
+    /**
+     * Returns the size of the array
+     * @return the size
+     */
+    inline size_t size() const {
+        return length;
+    }
+
+    /**
+     * Resizes the array to the new size.
+     * @param newSize the new size
+     */
+    inline void resize(size_t newSize) {
+        ensureCapacity(newSize);
+
+        // No reduce
+        if (this->length < newSize) {
+            std::fill_n(&this->elements[this->length], newSize - this->length, T {}); // Default initialize values
+        }
 
         length = newSize;
+    }
+
+private:
+    /**
+     * Ensures that the capacity of the array is at lest of the given size
+     * @param min the minimal required capacity
+     */
+    void ensureCapacity(size_t min) {
+        if (capacity >= min) {
+            return;
+        }
+
+        if (min > INT32_MAX) {
+            throw std::out_of_range { "Array size exceeded max limit"};
+        }
+
+        size_t newCapacity = capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR;
+
+        if (newCapacity < min) {
+            newCapacity = min;
+        }
+
+        if (newCapacity > INT32_MAX) {
+            newCapacity = INT32_MAX;
+        }
+
+        this->elements = Array<T>::allocateElements(newCapacity, this->elements);
+        this->capacity = newCapacity;
+    }
+
+    /**
+     * (Re) Allocates an array for the elements with the given capacity
+     * @param capacity the capacity to allocate
+     * @param elements existing pointer to the elements array, in this case, a reallocate is performed
+     * @returns the pointer to the allocated array
+     */
+    static inline T* allocateElements(size_t capacity, T* elements = nullptr) {
+        if (capacity > INT32_MAX) {
+            throw std::out_of_range { "Array size exceeded max limit"};
+        }
+
+        auto* allocation = std::realloc(elements, capacity * sizeof(T));
+
+        if (allocation == nullptr) {
+            throw std::bad_alloc {};
+        }
+
+        return static_cast<T*>(allocation);
     }
 };
 
