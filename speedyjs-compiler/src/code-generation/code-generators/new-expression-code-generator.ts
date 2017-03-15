@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import * as assert from "assert";
 import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGeneratorHelper} from "../util/array-code-generator-helper";
+import {ArrayCodeGenerator} from "../util/array-code-generator";
 
 /**
  * Code Generator for new statements
@@ -12,7 +12,7 @@ class NewExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.NewExpre
     syntaxKind = ts.SyntaxKind.NewExpression;
 
     generateValue(newExpression: ts.NewExpression, context: CodeGenerationContext): llvm.Value {
-        if (ArrayCodeGeneratorHelper.isArrayNode(newExpression.expression, context)) {
+        if (ArrayCodeGenerator.isArrayNode(newExpression.expression, context)) {
             return this.newArrayExpression(newExpression, context);
         }
 
@@ -24,17 +24,15 @@ class NewExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.NewExpre
     }
 
     private newArrayExpression(newExpression: ts.NewExpression, context: CodeGenerationContext) {
-        const arrayCodeGeneratorHelper = new ArrayCodeGeneratorHelper(context);
-
-        const elementType = arrayCodeGeneratorHelper.getElementType(newExpression);
+        const arrayCodeGeneratorHelper = ArrayCodeGenerator.create(newExpression, context);
 
         if (newExpression.arguments.length === 1) {
             assert (context.typeChecker.getTypeAtLocation(newExpression.arguments[0]).flags & ts.TypeFlags.NumberLike, "size of new Array(size) call needs to be a number");
             const size = context.generate(newExpression.arguments[0]);
 
-            return arrayCodeGeneratorHelper.newArray(size, elementType);
+            return arrayCodeGeneratorHelper.newArray(size);
         } else {
-            return arrayCodeGeneratorHelper.newArray(newExpression.arguments, elementType);
+            return arrayCodeGeneratorHelper.newArray(newExpression.arguments);
         }
     }
 }
