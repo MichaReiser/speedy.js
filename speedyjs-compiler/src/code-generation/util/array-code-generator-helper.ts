@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as assert from "assert";
 import {CodeGenerationContext} from "../code-generation-context";
-import {toLLVMType} from "./type-mapping";
+import {toLLVMType, getLLVMArrayType} from "./type-mapping";
 import {createAllocationInEntryBlock} from "./allocations";
 
 export class ArrayCodeGeneratorHelper {
@@ -57,31 +57,53 @@ export class ArrayCodeGeneratorHelper {
             return this.createArrayWithElements(sizeOrElements, elementType);
         }
         return this.createArrayOfSize(sizeOrElements, elementType);
-
     }
 
-    getElement(array: llvm.Value, index: llvm.Value, elementType: ts.Type): llvm.Value {
+    getElement(arrayPtr: llvm.Value, index: llvm.Value, elementType: ts.Type): llvm.Value {
+        // const llvmElementType = toLLVMType(elementType, this.context);
+        // const structType = getLLVMArrayType(elementType, this.context);
+        //
+        // const array = this.context.builder.createInBoundsGEP(arrayPtr, [llvm.ConstantInt.get(this.context.llvmContext, 0)]);
+        //
+        // const size = this.context.builder.createInBoundsGEP(array, [llvm.ConstantInt.get(this.context.llvmContext, 0), llvm.ConstantInt.get(this.context.llvmContext, 0)]);
+        // const elements = this.context.builder.createInBoundsGEP(array, [llvm.ConstantInt.get(this.context.llvmContext, 0), llvm.ConstantInt.get(this.context.llvmContext, 2)]);
+        //
+        // const pointerToIndex = this.context.builder.createInBoundsGEP(elements, [llvm.ConstantInt.get(this.context.llvmContext, 0), index]);
+        // return this.context.builder.createLoad(pointerToIndex);
+
         const getFunction = this.getArrayFunction("array_get", elementType, () => {
-            return llvm.FunctionType.get(toLLVMType(elementType, this.context), [llvm.Type.getInt8PtrTy(this.context.llvmContext), llvm.Type.getInt32Ty(this.context.llvmContext)], false);
+            return llvm.FunctionType.get(toLLVMType(elementType, this.context), [getLLVMArrayType(elementType, this.context), llvm.Type.getInt32Ty(this.context.llvmContext)], false);
         });
 
-        return this.context.builder.createCall(getFunction, [array, index], "array.get");
+        return this.context.builder.createCall(getFunction, [arrayPtr, index], "array.get");
     }
 
     setElement(array: llvm.Value, index: llvm.Value, value: llvm.Value,  elementType: ts.Type): llvm.Value {
+        // const array = this.context.builder.createInBoundsGEP(arrayPtr, [llvm.ConstantInt.get(this.context.llvmContext, 0)]);
+        //
+        // const size = this.context.builder.createInBoundsGEP(array, [llvm.ConstantInt.get(this.context.llvmContext, 0), llvm.ConstantInt.get(this.context.llvmContext, 0)]);
+        // const elements = this.context.builder.createInBoundsGEP(array, [llvm.ConstantInt.get(this.context.llvmContext, 0), llvm.ConstantInt.get(this.context.llvmContext, 2)]);
+        //
+        // const pointerToIndex = this.context.builder.createInBoundsGEP(elements, [llvm.ConstantInt.get(this.context.llvmContext, 0), index]);
+        // return this.context.builder.createStore(value, pointerToIndex);
+
         const setFunction = this.getArrayFunction("array_set", elementType, () => {
-            return llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [llvm.Type.getInt8PtrTy(this.context.llvmContext), llvm.Type.getInt32Ty(this.context.llvmContext), toLLVMType(elementType, this.context)], false);
+            return llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [getLLVMArrayType(elementType, this.context), llvm.Type.getInt32Ty(this.context.llvmContext), toLLVMType(elementType, this.context)], false);
         });
 
         return this.context.builder.createCall(setFunction, [array, index, value ]);
     }
 
-    getLength(array: llvm.Value, elementType: ts.Type): llvm.Value {
+    getLength(arrayPtr: llvm.Value, elementType: ts.Type): llvm.Value {
+        // const array = this.context.builder.createInBoundsGEP(arrayPtr, [llvm.ConstantInt.get(this.context.llvmContext, 0)]);
+        //
+        // const size = this.context.builder.createInBoundsGEP(array, [llvm.ConstantInt.get(this.context.llvmContext, 0), llvm.ConstantInt.get(this.context.llvmContext, 0)]);
+        // return this.context.builder.createLoad(size, "size");
         const lengthFunction = this.getArrayFunction("array_length", elementType, () => {
-            return llvm.FunctionType.get(llvm.Type.getInt32Ty(this.context.llvmContext), [llvm.Type.getInt8PtrTy(this.context.llvmContext)], false);
+            return llvm.FunctionType.get(llvm.Type.getInt32Ty(this.context.llvmContext), [getLLVMArrayType(elementType, this.context)], false);
         });
 
-        return this.context.builder.createCall(lengthFunction, [array], "array.length");
+        return this.context.builder.createCall(lengthFunction, [arrayPtr], "array.length");
     }
 
     // push...
@@ -134,7 +156,9 @@ export class ArrayCodeGeneratorHelper {
         return this.getArrayFunction("new_array", elementType, () => {
             const llvmElementType = toLLVMType(elementType, this.context);
 
-            return llvm.FunctionType.get(llvm.Type.getInt8PtrTy(this.context.llvmContext), [llvm.Type.getInt32Ty(this.context.llvmContext), llvmElementType.getPointerTo()], false);
+            const arrayType = getLLVMArrayType(elementType, this.context);
+            return llvm.FunctionType.get(arrayType, [llvm.Type.getInt32Ty(this.context.llvmContext), llvmElementType.getPointerTo()], false);
+            // return llvm.FunctionType.get(llvm.Type.getInt8PtrTy(this.context.llvmContext), [llvm.Type.getInt32Ty(this.context.llvmContext), llvmElementType.getPointerTo()], false);
         });
     }
 
@@ -147,6 +171,7 @@ export class ArrayCodeGeneratorHelper {
             fun = llvm.Function.create(type, llvm.LinkageTypes.ExternalLinkage, fullName, this.context.module);
         }
 
+        // fun.addFnAttr("alwaysinline");
         return fun;
     }
 
@@ -171,10 +196,10 @@ export class ArrayCodeGeneratorHelper {
     }
 
     delete(array: llvm.AllocaInst, elementType: ts.Type) {
-        const deleteFunciton = this.getArrayFunction("delete_array", elementType, () => {
-            return llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [llvm.Type.getInt8PtrTy(this.context.llvmContext)], false);
+        const deleteFunction = this.getArrayFunction("delete_array", elementType, () => {
+            return llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [getLLVMArrayType(elementType, this.context)], false);
         });
 
-        this.context.builder.createCall(deleteFunciton, [this.context.builder.createLoad(array)]);
+        this.context.builder.createCall(deleteFunction, [this.context.builder.createLoad(array)]);
     }
 }

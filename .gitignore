@@ -1,1 +1,17 @@
 # Created by .ignore support plugin (hsz.mobi)
+*.js
+*.map
+speedyjs-compiler/.idea
+speedyjs-compiler/node_modules
+speedyjs-runtime/.idea
+speedyjs-runtime/cmake-build-debug
+speedyjs-runtime/cmake-build-release
+speedyjs-compiler/cases/fib-opt.wasm
+speedyjs-compiler/cases/fib-opt.wast
+speedyjs-compiler/cases/fib.bc
+speedyjs-compiler/cases/fib.ll
+speedyjs-compiler/cases/fib.o
+speedyjs-compiler/cases/fib.o.ll
+speedyjs-compiler/cases/fib.s
+speedyjs-compiler/cases/fib.wast.mappedGlobals
+speedyjs-runtime/emcc-output

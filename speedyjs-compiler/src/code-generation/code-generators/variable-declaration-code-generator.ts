@@ -15,7 +15,7 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         const allocation = createAllocationInEntryBlock(context.builder.getInsertBlock().parent!, llvmType, symbol.name); // TODO test if function is set
 
         if (variableDeclaration.initializer) {
-            context.builder.createStore(context.generate(variableDeclaration.initializer), allocation);
+            context.builder.createAlignedStore(context.generate(variableDeclaration.initializer), allocation, context.module.dataLayout.getPrefTypeAlignment(llvmType));
         }
 
         context.scope.addVariable(symbol, allocation);

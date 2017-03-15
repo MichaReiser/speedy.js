@@ -8,7 +8,8 @@ import {CodeGenerationContext} from "./code-generation-context";
 
 const WASM_TRIPLE = "wasm32-unknown-unknown";
 
-const runtimeBCFile = ts.sys.resolvePath("../../speedyjs-runtime/runtime.o");
+const runtimeBCFile = ts.sys.resolvePath("../../speedyjs-runtime/cmake-build-release/CMakeFiles/speedyjs-runtime.dir/lib/array-api.cc.o");
+// const runtimeBCFile = ts.sys.resolvePath("../../speedyjs-runtime/runtime.o");
 
 export class PerFileCodeGenerator implements CodeGenerator {
     private codeGenerationContexts = new Map<ts.SourceFile, CodeGenerationContext>();
@@ -38,7 +39,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
                 child_process.execSync(`llvm-link ${oFileName} '${runtimeBCFile}' -o ${bcFileName} '/Users/micha/.emscripten_cache/wasm/libc.bc' '/Users/micha/.emscripten_cache/wasm/dlmalloc.bc' '/Users/micha/.emscripten_cache/wasm/wasm-libc.bc' '/Users/micha/.emscripten_cache/wasm/libcxx/locale_f4231af9.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/memory_94d0033a.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/mutex_4dfab851.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/new_ac351dc4.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/stdexcept_10f6f70f.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/string_c368c26d.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/system_error_7474feb6.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/condition_variable_74a5d15a.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/exception_a86a4271.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxxabi.bc'`);
                 // c
                 // child_process.execSync(`llvm-link ${oFileName} -o ${bcFileName} '/Users/micha/.emscripten_cache/wasm/libc.bc' '/Users/micha/.emscripten_cache/wasm/dlmalloc.bc' '/Users/micha/.emscripten_cache/wasm/wasm-libc.bc' '${runtimeBCFile}'`);
-                child_process.execSync(`opt ${bcFileName} -o ${bcFileName} -strip-debug -disable-verify -internalize -internalize-public-api-list=nsieve,isPrime,malloc,free,__errno_location,memcpy,memmove,memset,__cxa_can_catch,__cxa_is_pointer_type  -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false -O3`);
+                child_process.execSync(`opt ${bcFileName} -o ${bcFileName} -strip-debug -disable-verify -internalize -internalize-public-api-list=nsieve,isPrime,fib,malloc,free,__errno_location,memcpy,memmove,memset,__cxa_can_catch,__cxa_is_pointer_type  -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false -O3`);
                 child_process.execSync(`llc ${bcFileName} -march=wasm32 -filetype=asm -asm-verbose=false -thread-model=single -combiner-global-alias-analysis=false -enable-emscripten-cxx-exceptions -enable-emscripten-sjlj -o ${sFileName} `);
             }
         }
@@ -60,8 +61,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
             const target = llvm.TargetRegistry.lookupTarget(WASM_TRIPLE);
             const targetMachine = target.createTargetMachine(WASM_TRIPLE, "generic");
-            const dataLayout = targetMachine.createDataLayout();
-            module.setDataLayout(dataLayout);
+            module.dataLayout = targetMachine.createDataLayout();
             module.targetTriple = WASM_TRIPLE;
 
             codeGenerationContext = this.llvmEmitterContextFactory.createContext(program, this.context, module);

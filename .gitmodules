@@ -1,0 +1,3 @@
+[submodule "speedyjs-runtime/test/googletest"]
+	path = speedyjs-runtime/test/googletest
+	url = https://github.com/google/googletest.git
