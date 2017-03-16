@@ -1,14 +1,18 @@
 {
-  "name": "speedyjs",
-  "version": "1.0.0",
+  "name": "speedyjs-compiler",
+  "version": "0.0.1",
   "main": "index.js",
+  "bin": "index.js",
   "author": "Micha Reiser <micha@famreiser.ch>",
   "license": "MIT",
+  "repository": "https://github.com/MichaReiser/speedy.js.git",
   "devDependencies": {
     "@types/jest": "^18.1.1",
+    "gulp": "^3.9.1",
     "jest": "^19.0.2",
+    "merge-stream": "^1.0.1",
     "ts-jest": "^19.0.1",
-    "typescript": "next"
+    "typescript": "https://github.com/MichaReiser/TypeScript.git#int-type-release"
   },
   "peerDependencies": {
     "typescript": "^2.2.1"
@@ -16,12 +20,17 @@
   "dependencies": {
     "@types/debug": "^0.0.29",
     "@types/node": "^7.0.5",
-    "debug": "^2.6.3"
+    "@types/tmp": "0.0.32",
+    "debug": "^2.6.3",
+    "llvm-node": "^0.1.1",
+    "speedyjs-runtime": "0.x.x",
+    "tmp": "0.0.31"
   },
   "scripts": {
+    "install": "node ./scripts/install-dependencies.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "deploy": "cd cases && node ../index.js && llvm-dis fib.bc && s2wasm fib.s -o fib-opt.wast -l /Users/micha/.emscripten_cache/wasm/wasm_compiler_rt.a --emscripten-glue --global-base=1024 --initial-memory=16777216 && wasm-as fib-opt.wast -o fib-opt.wasm && cp fib-opt.wasm ../../../webassembly-benchmark/ && cd .."
+    "deploy": "export DEBUG=* && cd cases && node ../index.js && cp fib.wasm /Users/micha/git/webassembly-benchmark/fib-opt.wasm && cd .."
   },
   "jest": {
     "transform": {

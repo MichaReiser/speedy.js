@@ -1,0 +1,24 @@
+{
+  "name": "speedyjs-runtime",
+  "version": "0.0.1",
+  "description": "Runtime of SpeedyJS",
+  "main": "index.js",
+  "typings": "index.ts",
+  "repository": "https://github.com/MichaReiser/speedy.js.git",
+  "scripts": {
+    "build": "node ./scripts/install-dependencies.js && gulp build",
+    "test": "gulp test"
+  },
+  "author": "Micha Reiser <micha@famreiser.ch>",
+  "license": "MIT",
+  "devDependencies": {
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "merge-stream": "^1.0.1",
+    "run-sequence": "^1.2.2",
+    "tmp": "0.0.31"
+  },
+  "dependencies": {
+    "@types/node": "^7.0.8"
+  }
+}

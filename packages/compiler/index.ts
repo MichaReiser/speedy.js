@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 const packageJson = require("./package.json");

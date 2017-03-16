@@ -1,0 +1,8 @@
+src/**/*.js
+test/**/*.js
+cases/**/*.js
+*.map
+cases/fib.wasm
+tools
+index.js
+

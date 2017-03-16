@@ -1,0 +1,39 @@
+{
+  "name": "speedyjs-benchmark",
+  "version": "0.0.0",
+  "description": "Speedy.js Benchmark",
+  "main": "index.js",
+  "scripts": {
+    "start": "karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichaReiser/speedy.js.git"
+  },
+  "keywords": [
+    "speedy.js",
+    "benchmark"
+  ],
+  "author": "Micha Reiser <micha@famreiser.ch>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MichaReiser/speedy.js/issues"
+  },
+  "homepage": "https://github.com/MichaReiser/speedy.js#readme",
+  "dependencies": {
+    "benchmark": "git+https://github.com/meanjoe45/benchmark.js.git",
+    "karma": "^1.5.0",
+    "karma-benchmark": "git+https://github.com/MichaReiser/karma-benchmark.git#peer-deps-published",
+    "karma-benchmark-reporter": "^0.1.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-json-reporter": "git+https://github.com/MichaReiser/karma-json-reporter.git#correctly-output-result",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^2.0.3",
+    "speedyjs-compiler": "0.x.x",
+    "ts-loader": "^2.0.2",
+    "typescript": "git+https://github.com/MichaReiser/TypeScript.git#int-type-release",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.2"
+  }
+}

@@ -4,7 +4,7 @@ import * as assert from "assert";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "./type-mapping";
 import {isNode} from "../../util/instance-tests";
-import {llvmArrayValue} from "./llvm-array-helpers";
+import {llvmArrayValue, allocateLlvmArrayWith} from "./llvm-array-helpers";
 
 export class ArrayCodeGenerator {
     private llvmArrayType: llvm.Type;
