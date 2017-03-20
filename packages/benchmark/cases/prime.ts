@@ -1,7 +1,8 @@
 export function isPrime(value: int): boolean {
     "use speedyjs";
+
     if (value <= 1) {
-        return false
+        return false;
     }
 
     for (let i = 2; i <= Math.sqrt(value); ++i) {

@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
     devtool: "#source-map",
-    entry: "./specs/benchmark.js",
+    entry: "./benchmarks-frontend.js",
 
     output: {
         path: path.resolve(__dirname, "dist"),
@@ -18,7 +18,7 @@ module.exports = {
             {
                 test: /\.ts$/,
                 loader: "ts-loader",
-                exclude: path.resolve("./cases")
+                include: path.resolve("./cases")
             }
         ],
         noParse: [
@@ -26,7 +26,6 @@ module.exports = {
         ]
     },
     devServer: {
-        contentBase: path.join(__dirname, "dist"),
         compress: true
     }
 };

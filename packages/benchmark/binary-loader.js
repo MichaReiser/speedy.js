@@ -1,3 +1,7 @@
+/**
+ * Webpack Loader for binary files.
+ * Returns an Uint8Array with the binary content
+ */
 module.exports = function (content) {
     this.cacheable && this.cacheable();
     this.value = content;

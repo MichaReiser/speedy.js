@@ -4,7 +4,9 @@
   "description": "Speedy.js Benchmark",
   "main": "index.js",
   "scripts": {
-    "start": "karma start"
+    "start": "webpack-dev-server",
+    "build:wasm": "speedyjs-compiler cases",
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
@@ -21,7 +23,7 @@
   },
   "homepage": "https://github.com/MichaReiser/speedy.js#readme",
   "dependencies": {
-    "benchmark": "git+https://github.com/meanjoe45/benchmark.js.git",
+    "benchmark": "git+https://github.com/MichaReiser/benchmark.js.git",
     "karma": "^1.5.0",
     "karma-benchmark": "git+https://github.com/MichaReiser/karma-benchmark.git#peer-deps-published",
     "karma-benchmark-reporter": "^0.1.1",

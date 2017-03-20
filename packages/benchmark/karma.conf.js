@@ -1,5 +1,8 @@
 module.exports = function (config) {
 
+    const webpackConfig = require("./webpack.config");
+    webpackConfig.entry = undefined;
+
     config.set({
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -23,7 +26,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            "specs/benchmark.js"
+            "karma-benchmarks.js"
         ],
 
         // list of files to exclude
@@ -32,23 +35,16 @@ module.exports = function (config) {
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            "./specs/benchmark.js": ["webpack", "sourcemap"]
+            "karma-benchmarks.js": ["webpack", "sourcemap"]
         },
 
         captureTimeout: 60000,
         browserNoActivityTimeout: 120000,
 
-        webpack: require("./webpack.config.js"),
+        webpack: webpackConfig,
         webpackMiddleware: {
             stats: {
                 chunks: false
-            }
-        },
-
-        client: {
-            mocha: {
-                // change Karma's debug.html to the mocha web reporter
-                reporter: 'html'
             }
         },
 
@@ -63,7 +59,7 @@ module.exports = function (config) {
         logLevel: config.LOG_INFO,
 
         // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: false,
+        autoWatch: true,
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
@@ -75,7 +71,7 @@ module.exports = function (config) {
 
         // Concurrency level
         // how many browser should be started simultaneous
-        concurrency: 1,
+        concurrency: 1
     });
 };
 

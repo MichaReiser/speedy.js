@@ -21,8 +21,11 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
     }
 
-    generate(node: ts.Node, program: ts.Program) {
-        this.getCodeGenerationContext(node, program).generateVoid(node);
+    generateEntryFunction(fn: ts.FunctionDeclaration, program: ts.Program) {
+        const context = this.getCodeGenerationContext(fn, program);
+
+        context.generateVoid(fn);
+        context.addEntryFunction(fn.name!.text); // TODO function declaration without name?
     }
 
     write() {
@@ -37,8 +40,10 @@ export class PerFileCodeGenerator implements CodeGenerator {
                 const compiledFileName = buildDirectory.getTempFileName(`${plainFileName}.o`);
                 llvm.writeBitcodeToFile(context.module, compiledFileName);
 
-                const linked = this.link(compiledFileName, buildDirectory.getTempFileName(`${plainFileName}-linked.o`), buildDirectory);
-                const optimized = optimize(linked, ["fib", "isPrime", "nsieve"], buildDirectory.getTempFileName(`${plainFileName}-opt.o`));
+                const entryFunctions = context.getEntryFunctionNames();
+                const linked = this.link(compiledFileName, buildDirectory.getTempFileName(`${plainFileName}-linked.o`), buildDirectory, entryFunctions);
+                const optimized = optimize(linked, entryFunctions, buildDirectory.getTempFileName(`${plainFileName}-opt.o`));
+
                 const assembly = llc(optimized, buildDirectory.getTempFileName(`${plainFileName}.s`));
                 const wast = s2wasm(assembly, buildDirectory.getTempFileName(`${plainFileName}.wast`));
 
@@ -59,13 +64,13 @@ export class PerFileCodeGenerator implements CodeGenerator {
         }
     }
 
-    private link(file: string, linkedFileName: string, buildDirectory: BuildDirectory): string {
+    private link(file: string, linkedFileName: string, buildDirectory: BuildDirectory, entryFunctionNames: string[]): string {
         const llvmLinker = new LLVMLink(buildDirectory);
 
         llvmLinker.addByteCodeFile(file);
         llvmLinker.addRuntime();
 
-        llvmLinker.link(linkedFileName, ["fib", "isPrime", "nsieve"]);
+        llvmLinker.link(linkedFileName, entryFunctionNames);
         return linkedFileName;
     }
 

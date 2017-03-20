@@ -14,6 +14,7 @@ const log = debug("DefaultCodeGenerationContext");
  */
 export class DefaultCodeGenerationContext implements CodeGenerationContext {
     private fallbackCodeGenerator?: FallbackCodeGenerator;
+    private entryFunctions = new Set<string>();
 
     program: ts.Program;
     llvmContext: llvm.LLVMContext;
@@ -70,6 +71,15 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
     setFallbackCodeGenerator(fallbackCodeGenerator?: FallbackCodeGenerator) {
         this.fallbackCodeGenerator = fallbackCodeGenerator;
+    }
+
+    addEntryFunction(name: string) {
+        assert(name, "Name is required");
+        this.entryFunctions.add(name);
+    }
+
+    getEntryFunctionNames() {
+        return Array.from(this.entryFunctions.values());
     }
 
     enterChildScope(): Scope {

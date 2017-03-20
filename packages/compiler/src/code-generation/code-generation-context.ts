@@ -19,6 +19,17 @@ export interface CodeGenerationContext {
     generateChildren(node: ts.Node): void;
     generate(node: ts.Node): llvm.Value;
 
+    /**
+     * Adds the name of an entry function
+     * @param name the name of the entry function
+     */
+    addEntryFunction(name: string);
+
+    /**
+     * Returns the names of all entry functions
+     */
+    getEntryFunctions(): string[];
+
     enterChildScope(): Scope;
     leaveChildScope(): Scope;
 }

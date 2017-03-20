@@ -1,3 +1,5 @@
+"use strict";
+
 const TEST_CASES = {
     "fib": {
         fnName: "fib",
@@ -95,7 +97,7 @@ function createMemory() {
  */
 async function loadWasmModule(name) {
     const mem = createMemory();
-    const bytes = new Uint8Array(require("../cases/" + name + ".wasm"));
+    const bytes = new Uint8Array(require("./cases/" + name + ".wasm"));
 
     const { instance } = await WebAssembly.instantiate(bytes.buffer, {
         env: {
@@ -112,17 +114,8 @@ async function loadWasmModule(name) {
             "__cxa_throw": function () {
                 console.log("__cxa_throw", arguments);
             },
-            "__cxa_begin_catch": function () {
-                console.log("__cxa_begin_catch", arguments);
-            },
-            "__cxa_end_catch": function () {
-                console.log("__cxa_end_catch", arguments);
-            },
             "__cxa_find_matching_catch_2": function () {
                 console.log("__cxa_find_matching_catch_2", arguments);
-            },
-            "__cxa_find_matching_catch_3": function () {
-                console.log("__cxa_find_matching_catch_3", arguments);
             },
             "__cxa_free_exception": function () {
                 console.log("__cxa_free_exception", arguments);
@@ -133,77 +126,13 @@ async function loadWasmModule(name) {
             "abort": function (what) {
                 console.error("Abort WASM for reason: " + what);
             },
-            "exit": function (what) {
-                console.error("Exit", what);
-            },
-            "invoke_i": function (index) { // whut? why?
-                // console.log("invoke_i", arguments);
-                return instance.exports.dynCall_i(index)
-            },
-            "invoke_ii": function (index, a1) { // whut? why?
-                // console.log("invoke_ii", arguments);
-                return instance.exports.dynCall_ii(index, a1);
-            },
             "invoke_iii": function (index, a1, a2) {
                 // console.log("invoke_iii", arguments);
                 return instance.exports.dynCall_iii(index, a1, a2);
             },
-            "invoke_iiii": function (index, a1, a2, a3) {
-                // console.log("invoke_iiii", arguments);
-                return instance.exports.dynCall_iiii(index, a1, a2, a3);
-            },
-            "invoke_v": function (index) {
-                // console.log("invoke_v", arguments);
-                return instance.exports.dynCall_v(index);
-            },
-            "invoke_vi": function (index, a1) {
-                // console.log("invoke_vi", arguments);
-                return instance.exports.dynCall_vi(index, a1);
-            },
-            "invoke_vii": function (index, a1, a2) {
-                // console.log("invoke_vii", arguments);
-                return instance.exports.dynCall_vii(index, a1, a2);
-            },
             "invoke_viii": function (index, a1, a2, a3) {
                 // console.log("invoke_viii", arguments);
                 return instance.exports.dynCall_viii(index, a1, a2, a3);
-            },
-            "invoke_viiii": function (index, a1, a2, a3, a4) {
-                // console.log("invoke_viiii", arguments);
-                return instance.exports.dynCall_viiii(index, a1, a2, a3, a4);
-            },
-            "__syscall140": function () {
-                console.log("__syscall140", arguments);
-            },
-            "__syscall146": function () {
-                console.log("__syscall146", arguments);
-            },
-            "__syscall54": function () {
-                console.log("__syscall54", arguments);
-            },
-            "__syscall6": function () {
-                console.log("__syscall6", arguments);
-            },
-            "pthread_self": function () {
-                console.log("pthread_self", arguments)
-            },
-            "pthread_cleanup_pop": function () {
-                console.log("pthread_cleanup_pop", arguments)
-            },
-            "pthread_cleanup_push": function () {
-                console.log("pthread_cleanup_push", arguments)
-            },
-            "pthread_getspecific": function () {
-                console.log("pthread_getspecific", arguments)
-            },
-            "pthread_setspecific": function () {
-                console.log("pthread_setspecific", arguments)
-            },
-            "pthread_key_create": function () {
-                console.log("pthread_key_create", arguments)
-            },
-            "pthread_once": function () {
-                console.log("pthread_once", arguments)
             },
             "sbrk": mem._sbrk
         }
@@ -214,46 +143,68 @@ async function loadWasmModule(name) {
 
 function getJsFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
-    const args = testCase.args;
     const fnName = TEST_CASES[caseName].fnName || caseName;
+    const fn = require("./cases/" + caseName + ".ts")[fnName];
 
-    return function () {
-        const jsFunction = require("../cases/" + caseName + ".js")[fnName];
-        return jsFunction.apply(undefined, args);
+    const wrapped = function () {
+        return fn.apply(undefined, testCase.args);
     };
+
+    const jsResult = wrapped();
+    if (jsResult != testCase.result) {
+        console.error(`JS Result for Test Case ${caseName} returned ${jsResult} instead of ${testCase.result}`);
+    }
+
+    return wrapped;
 }
 
 async function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
-    const args = testCase.args;
-
     const instance = await loadWasmModule(caseName);
+    const fnName = testCase.fnName || caseName;
+    const fn = instance.exports[fnName];
 
-    const fnName = TEST_CASES[caseName].fnName || caseName;
-
-    return function () {
-        const wasmFunction = instance.exports[fnName];
-        return wasmFunction.apply(undefined, args);
+    const wrapped = function () {
+        return fn.apply(undefined, testCase.args);
     };
+
+    const wasmResult = wrapped();
+    if (wasmResult != testCase.result) {
+        console.error(`WASM Result for Test Case ${caseName} returned ${wasmResult} instead of ${testCase.result}`);
+    }
+
+    return wrapped;
 }
 
-for (const testCase of Object.keys(TEST_CASES)) {
-    suite(testCase, function () {
-        let wasmFunction = undefined;
-        benchmark("js", getJsFunctionForTestCase(testCase));
-        benchmark("wasm", function (deferred) {
-            wasmFunction();
-            deferred.resolve();
-        },
-        {
-            defer: true,
-            setup: function (deferred) {
-                getWasmFunctionForTestCase(testCase)
-                    .then(function (wasmFn) {
-                        wasmFunction = wasmFn;
-                        deferred.suResolve();
-                    });
-            }
+function runBenchmarks() {
+    for (const testCase of Object.keys(TEST_CASES)) {
+        suite(testCase, function () {
+            let wasmFn = undefined;
+            const jsFn = getJsFunctionForTestCase(testCase);
+
+            benchmark("js", function (deferred) {
+                jsFn();
+                deferred.resolve();
+            }, { defer: true });
+
+            benchmark("wasm", function (deferred) {
+                wasmFn();
+                deferred.resolve();
+            },
+            {
+                defer: true,
+                setup: function (deferred) {
+                    getWasmFunctionForTestCase(testCase)
+                        .then(function (loadedWasmFn) {
+                            wasmFn = loadedWasmFn;
+                            deferred.suResolve();
+                        });
+                }
+            });
         });
-    });
+    }
 }
+
+module.exports = runBenchmarks;
+
+

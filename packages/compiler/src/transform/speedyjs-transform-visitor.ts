@@ -18,7 +18,7 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
             this.inSpeedyJSFunction = true;
 
             try {
-                this.codeGenerator.generate(functionDeclaration, this.program);
+                this.codeGenerator.generateEntryFunction(functionDeclaration, this.program);
                 // replace function with wasm include
                 return functionDeclaration;
             } finally {

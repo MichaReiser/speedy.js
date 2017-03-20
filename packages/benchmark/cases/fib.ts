@@ -1,5 +1,5 @@
 export function fib(value: int): int {
-    "use speedyjs"
+    "use speedyjs";
 
     if (value <= 2) {
         return 1;

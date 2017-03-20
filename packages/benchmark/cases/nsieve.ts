@@ -1,5 +1,5 @@
 export function nsieve(size: int): int {
-    "use speedyjs"
+    "use speedyjs";
 
     const isPrime = new Array<boolean>(size);
     isPrime.fill(true);
