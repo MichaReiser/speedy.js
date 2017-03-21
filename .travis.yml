@@ -2,6 +2,7 @@ language: node_js
 node_js:
 - node
 sudo: required
+cache: ccache
 
 addons:
   apt:
@@ -14,29 +15,35 @@ addons:
     - libjsoncpp0
     - libobjc-4.9-dev
     - libstdc++6
+    - checkinstall
 env:
-- CC=clang-5.0
-- CXX=clang++-5.0
-- LLVM=/usr/local/bin
+- LLVM=/usr/bin GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0" EMCC_WASM_BACKEND=1
 
 before_install:
+- wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
 - wget http://famreiser.ch/llvm/llvm-5.0-webassembly.tar.gz
 - mkdir llvm && tar -xzf llvm-5.0-webassembly.tar.gz -C llvm
-- cd llvm && ls -al . && sudo dpkg -i clang-5.0_5.0~svn298096-1~exp1_amd64.deb libclang1-5.0_5.0~svn298096-1~exp1_amd64.deb libclang-5.0-dev_5.0~svn298096-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn298096-1~exp1_amd64.deb libllvm5.0_5.0~svn298096-1~exp1_amd64.deb llvm-5.0_5.0~svn298096-1~exp1_amd64.deb llvm-5.0-runtime_5.0~svn298096-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn298096-1~exp1_amd64.deb && cd ..
+- cd llvm && sudo dpkg -i clang-5.0_5.0~svn298275-1~exp1_amd64.deb libclang1-5.0_5.0~svn298275-1~exp1_amd64.deb libclang-5.0-dev_5.0~svn298275-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn298275-1~exp1_amd64.deb libllvm5.0_5.0~svn298275-1~exp1_amd64.deb llvm-5.0_5.0~svn298275-1~exp1_amd64.deb llvm-5.0-runtime_5.0~svn298275-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn298275-1~exp1_amd64.deb && cd ..
+- sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 50
+- sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang-5.0 50
+- export CC=clang-5.0
+- export CXX=clang++-5.0
 
 install:
-- llvm-config-5.0 --version || true
-- npm install llvm-node --LLVM_CONFIG=llvm-config-5.0
 - npm install
 - npm run bootstrap || true
+- npm run build || true
+
+after_success:
 - cat npm-debug.log || true
 - cat packages/compiler/npm-debug.log || true
 - cat packages/runtime/npm-debug.log || true
 - cat packages/benchmark/npm-debug.log || true
 - cat lerna-debug.log || true
-- exit 1
-- npm run build
 
 after_failure:
 - cat npm-debug.log || true
+- cat packages/compiler/npm-debug.log || true
+- cat packages/runtime/npm-debug.log || true
+- cat packages/benchmark/npm-debug.log || true
 - cat lerna-debug.log || true

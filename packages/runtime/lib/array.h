@@ -56,8 +56,10 @@ public:
             this->elements = Array<T>::allocateElements(size);
 
             if (elements == nullptr) {
+#ifdef SAFE
                 // This is quite expensive, if there is a GC that guarantees zeroed memory, this is no longer needed
                 std::fill_n(this->elements, size, T {});
+#endif
             } else {
                 std::copy(elements, elements + size, this->elements);
             }
@@ -78,9 +80,11 @@ public:
      * @throws {@link std::out_of_range} if the index is <= length
      */
     inline T get(size_t index) const {
+ #ifdef SAFE
         if (length <= index) {
             throw std::out_of_range{"Index out of bound"};
         }
+ #endif
 
         return elements[index];
     }
@@ -91,9 +95,11 @@ public:
      * @param value the value to set at the given index
      */
     inline void set(size_t index, T value) {
+ #ifdef SAFE
         if (length <= index) {
             this->resize(index + 1);
         }
+ #endif
 
         elements[index] = value;
     }
@@ -113,6 +119,7 @@ public:
         size_t startIndex = start < 0 ? this->length + start : static_cast<size_t>(start);
         size_t endIndex = end < 0 ? this->length + end : static_cast<size_t>(end);
 
+ #ifdef SAFE
         if (startIndex >= this->length) {
             throw std::out_of_range { "Start index is out of range" };
         }
@@ -124,6 +131,7 @@ public:
         if (endIndex < startIndex) {
             return;
         }
+ #endif
 
         std::fill(this->elements + startIndex, this->elements + endIndex, value);
     }
@@ -169,9 +177,11 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop
      */
     inline T pop() {
+ #ifdef SAFE
         if (this->length == 0) {
             throw std::out_of_range { "Array is empty" };
         }
+ #endif
 
         return this->elements[--this->length];
     }
@@ -183,9 +193,11 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
      */
     inline T shift() {
+#ifdef SAFE
         if (this->length == 0) {
             throw std::out_of_range { "Array is empty"};
         }
+#endif
 
         const T element = this->elements[0];
         std::copy(this->elements + 1, this->elements + this->length, this->elements);
@@ -209,9 +221,11 @@ public:
         ensureCapacity(newSize);
 
         // No reduce
+#ifdef SAFE
         if (this->length < newSize) {
             std::fill_n(&this->elements[this->length], newSize - this->length, T {}); // Default initialize values
         }
+#endif
 
         length = newSize;
     }

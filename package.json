@@ -6,7 +6,7 @@
   },
   "scripts": {
     "build": "lerna run build --stream --loglevel verbose",
-    "bootstrap": "node ./scripts/bootstrap.js",
+    "bootstrap": "lerna bootstrap --stream --loglevel verbose",
     "test": "lerna run test --stream"
   },
   "dependencies": {}

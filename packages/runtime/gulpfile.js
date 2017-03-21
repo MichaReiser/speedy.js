@@ -17,8 +17,9 @@ gulp.task("build", function (cb) {
     runSequence(
         "build:clean",
         "build:libs",
-        "build:runtime",
-        ["copy:release", "copy:libs"],
+        "build:runtime:configure",
+        ["build:runtime:safe", "build:runtime:unsafe"],
+        ["copy:release:safe", "copy:release:unsafe", "copy:libs"],
         cb
     );
 });
@@ -40,12 +41,28 @@ gulp.task("build:clean", function () {
      ]);
 });
 
-gulp.task("build:runtime", function () {
+gulp.task("build:runtime:configure", function () {
     fs.mkdirSync("cmake-build-release");
 
     const emscriptenCMake = path.resolve("./tools/emscripten/cmake/Modules/Platform/Emscripten.cmake");
-    const command = util.format('cmake -E chdir cmake-build-release cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%s" .. && cmake --build cmake-build-release --target speedyjs-runtime', emscriptenCMake);
+    const command = util.format('cmake -E chdir cmake-build-release cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%s" ..', emscriptenCMake);
 
+    const env = Object.create(process.env);
+    env.EM_CONFIG = path.resolve("./.emscripten");
+
+    child_process.execSync(command, { env: env, stdio: "inherit" });
+});
+
+gulp.task("build:runtime:safe", function () {
+    const command = "cmake --build cmake-build-release --target speedyjs-runtime";
+    const env = Object.create(process.env);
+    env.EM_CONFIG = path.resolve("./.emscripten");
+
+    child_process.execSync(command, { env: env, stdio: "inherit" });
+});
+
+gulp.task("build:runtime:unsafe", function () {
+    const command = "cmake --build cmake-build-release --target speedyjs-runtime-unsafe";
     const env = Object.create(process.env);
     env.EM_CONFIG = path.resolve("./.emscripten");
 
@@ -84,19 +101,20 @@ gulp.task("build:libs", function() {
 });
 
 gulp.task("copy:libs", function () {
-    return gulp.src([
-        path.join(EMSCRIPTEN_CACHE_DIR, "wasm", "dlmalloc.bc"),
-        path.join(EMSCRIPTEN_CACHE_DIR, "wasm", "libc.bc"),
-        path.join(EMSCRIPTEN_CACHE_DIR, "wasm", "libcxx.a"),
-        path.join(EMSCRIPTEN_CACHE_DIR, "wasm", "libcxxabi.bc"),
-        path.join(EMSCRIPTEN_CACHE_DIR, "wasm", "wasm-libc.bc"),
-        path.join(EMSCRIPTEN_CACHE_DIR, "wasm", "wasm_compiler_rt.a")
-    ]).pipe(gulp.dest("./bin"));
+    const libs = ["dlmalloc.bc", "libc.bc", "libcxx.a", "libcxxabi.bc", "wasm-libc.bc", "wasm_compiler_rt.a"];
+    const src = gulp.src(libs.map(lib => path.join(EMSCRIPTEN_CACHE_DIR, "wasm", lib)));
+
+    return src.pipe(gulp.dest("./bin/shared"));
 });
 
-gulp.task("copy:release", function () {
+gulp.task("copy:release:safe", function () {
     return gulp.src("./cmake-build-release/CMakeFiles/speedyjs-runtime.dir/lib/*.o")
-        .pipe(gulp.dest("./bin"));
+        .pipe(gulp.dest("./bin/safe"));
+});
+
+gulp.task("copy:release:unsafe", function () {
+    return gulp.src("./cmake-build-release/CMakeFiles/speedyjs-runtime-unsafe.dir/lib/*.o")
+        .pipe(gulp.dest("./bin/unsafe"));
 });
 
 gulp.task("test:clean", function () {

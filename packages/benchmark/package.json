@@ -34,7 +34,7 @@
     "karma-webpack": "^2.0.3",
     "speedyjs-compiler": "0.x.x",
     "ts-loader": "^2.0.2",
-    "typescript": "git+https://github.com/MichaReiser/TypeScript.git#int-type-release",
+    "typescript": "MichaReiser/TypeScript#release",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.2"
   }

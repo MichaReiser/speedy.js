@@ -11,11 +11,7 @@
     "gulp": "^3.9.1",
     "jest": "^19.0.2",
     "merge-stream": "^1.0.1",
-    "ts-jest": "^19.0.1",
-    "typescript": "https://github.com/MichaReiser/TypeScript.git#int-type-release"
-  },
-  "peerDependencies": {
-    "typescript": "^2.2.1"
+    "ts-jest": "^19.0.1"
   },
   "dependencies": {
     "@types/debug": "^0.0.29",
@@ -24,7 +20,8 @@
     "debug": "^2.6.3",
     "llvm-node": "^0.1.1",
     "speedyjs-runtime": "0.x.x",
-    "tmp": "0.0.31"
+    "tmp": "0.0.31",
+    "typescript": "MichaReiser/TypeScript#release"
   },
   "scripts": {
     "install": "node ./scripts/install-dependencies.js",

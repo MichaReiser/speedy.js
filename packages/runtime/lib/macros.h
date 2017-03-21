@@ -5,6 +5,16 @@
 #ifndef SPEEDYJS_RUNTIME_MACROS_H
 #define SPEEDYJS_RUNTIME_MACROS_H
 
+/**
+ * Defines if the runtime should be memory safe or not. If defined, runtime is memory safe, otherwise the runtime
+ * might emit checks needed to guarantee memory safety to increase performance.
+ */
+#ifndef SAFE
+    #ifndef UNSAFE
+        #define SAFE
+    #endif
+#endif
+
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef BUILDING_DLL
     #ifdef __GNUC__

@@ -48,17 +48,18 @@ cd llvm-toolchain-snapshot...
 
 Edit `debian/rules` and Search for `CMAKE_EXTRA =`. Change it to `CMAKE_EXTRA=-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly`
 
-Build Binary but disable unit tests first.
+Build Binary but disable unit tests first. `Parallel=3` indicates how many processes are used for building. The more cores you have, the better!
 
 ```sh
-export DEB_BUILD_OPTIONS=nocheck
+export DEB_BUILD_OPTIONS="nocheck parallel=3"
 fakeroot debian/rules binary
 ```
 
 Compress Output
 
 ```sh
-tar -cvzf tarballname.tar.gz *.deb
+cd ..
+tar -cvjf tarballname.tar.bz2 *.deb
 ```
 
 
