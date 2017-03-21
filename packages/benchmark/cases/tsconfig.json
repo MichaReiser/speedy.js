@@ -1,8 +1,15 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es6",
-        "noImplicitAny": false,
-        "sourceMap": true
-    }
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "lib": [
+      "es6",
+      "es2015"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ]
 }

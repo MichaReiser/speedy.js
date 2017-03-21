@@ -2,23 +2,24 @@ import * as ts from "typescript";
 import debug = require("debug");
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 import {CodeGenerator} from "../code-generation/code-generator";
+import {CompilationContext} from "../compilation-context";
 
 const log = debug("visitor");
 
 export class SpeedyJSTransformVisitor implements TransformVisitor {
     private inSpeedyJSFunction = false;
 
-    constructor(private program: ts.Program, private codeGenerator: CodeGenerator) {}
+    constructor(private compilationContext: CompilationContext, private codeGenerator: CodeGenerator) {}
 
     visitFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration, context: TransformVisitorContext) {
         if (isSpeedyJSFunction(functionDeclaration)) {
-            const name = getName(functionDeclaration, this.program.getTypeChecker());
+            const name = getName(functionDeclaration, this.compilationContext.program.getTypeChecker());
             log(`Enable SpeedyJS for ${name}`);
 
             this.inSpeedyJSFunction = true;
 
             try {
-                this.codeGenerator.generateEntryFunction(functionDeclaration, this.program);
+                this.codeGenerator.generateEntryFunction(functionDeclaration, this.compilationContext);
                 // replace function with wasm include
                 return functionDeclaration;
             } finally {

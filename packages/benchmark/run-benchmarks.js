@@ -126,6 +126,10 @@ async function loadWasmModule(name) {
             "abort": function (what) {
                 console.error("Abort WASM for reason: " + what);
             },
+            "invoke_ii": function (index, a1) {
+                // console.log("invoke_iii", arguments);
+                return instance.exports.dynCall_ii(index, a1);
+            },
             "invoke_iii": function (index, a1, a2) {
                 // console.log("invoke_iii", arguments);
                 return instance.exports.dynCall_iii(index, a1, a2);

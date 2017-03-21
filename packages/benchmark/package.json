@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "build:wasm": "speedyjs-compiler cases",
+    "build:wasm": "cd cases && speedyjs-compiler",
     "test": "karma start"
   },
   "repository": {

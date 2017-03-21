@@ -11,11 +11,7 @@
     "lib": ["es6" ],
     "sourceMap": true
   },
-  "exclude": [
-    "cases/**/*"
-  ],
   "include": [
-    "src/**/*",
-    "test/**/*"
+    "src/**/*"
   ]
 }

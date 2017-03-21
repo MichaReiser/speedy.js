@@ -57,21 +57,23 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         const returnBlock = llvm.BasicBlock.create(context.llvmContext, "returnBlock");
         context.scope.returnBlock = returnBlock;
 
-        if (returnType.flags === ts.TypeFlags.Void) {
-            context.builder.createRetVoid();
-        } else {
+        if (returnType.flags !== ts.TypeFlags.Void) {
             context.scope.returnAllocation = context.builder.createAlloca(llvmReturnType, undefined, "returnValue");
         }
 
         context.generateVoid(functionDeclaration.body);
 
         // Current Block is empty, so we can use the current block instead of the return block
-        if (context.builder.getInsertBlock().empty) {
-            returnBlock.replaceAllUsesWith(context.builder.getInsertBlock());
+        const predecessor = context.builder.getInsertBlock();
+        if (predecessor.empty) {
+            returnBlock.replaceAllUsesWith(predecessor);
             returnBlock.release();
         } else if (returnBlock.useEmpty()) { // No return statement
             returnBlock.release();
         } else { // at least one return statement
+            if (!predecessor.getTerminator()) {
+                context.builder.createBr(returnBlock); // Fall through to return block
+            }
             fun.addBasicBlock(returnBlock);
             context.builder.setInsertionPoint(returnBlock);
         }
@@ -82,12 +84,18 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         // Add Return Statement
         if (context.scope.returnAllocation) {
             context.builder.createRet(context.builder.createLoad(context.scope.returnAllocation, "return"));
+        } else {
+            context.builder.createRetVoid();
         }
 
         context.leaveChildScope();
 
-        fun.dump();
-        llvm.verifyFunction(fun);
+        try {
+            llvm.verifyFunction(fun);
+        } catch (ex) {
+            fun.dump();
+            throw ex;
+        }
 
         return fun;
     }

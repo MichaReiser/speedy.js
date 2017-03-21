@@ -24,7 +24,8 @@
     "typescript": "MichaReiser/TypeScript#release"
   },
   "scripts": {
-    "install": "node ./scripts/install-dependencies.js",
+    "preinstall": "node ./scripts/install-dependencies.js",
+    "start": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
     "deploy": "export DEBUG=* && cd cases && node ../index.js && cp fib.wasm /Users/micha/git/webassembly-benchmark/fib-opt.wasm && cd .."
@@ -38,6 +39,9 @@
     "moduleFileExtensions": [
       "ts",
       "js"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/test/cases/.*\\.(js|ll)$"
     ]
   }
 }

@@ -20,6 +20,10 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         throw new Error(`Any type not supported, annotated the type`);
     }
 
+    if (type.flags & ts.TypeFlags.Void) {
+        return llvm.Type.getVoidTy(context.llvmContext);
+    }
+
     if (type.flags & ts.TypeFlags.Object) {
         const symbol = type.getSymbol();
 

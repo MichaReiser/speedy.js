@@ -9,6 +9,7 @@ import {CodeGenerationContext} from "./code-generation-context";
 import {DefaultCodeGenerationContext} from "./default-code-generation-context";
 import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
+import {CompilationContext} from "../compilation-context";
 
 const log = debug("DefaultLLVMEmitContextFactory");
 
@@ -21,8 +22,8 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
     constructor(private fallbackCodeGenerator?: FallbackCodeGenerator) {}
 
-    createContext(program: ts.Program, llvmContext: llvm.LLVMContext, module: llvm.Module): CodeGenerationContext {
-        const context = new DefaultCodeGenerationContext(program, llvmContext, module);
+    createContext(compilationContext: CompilationContext, module: llvm.Module): CodeGenerationContext {
+        const context = new DefaultCodeGenerationContext(compilationContext, module);
 
         const codeGenerators = this.getCodeGenerators();
 

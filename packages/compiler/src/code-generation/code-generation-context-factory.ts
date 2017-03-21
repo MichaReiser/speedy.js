@@ -1,6 +1,6 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "./code-generation-context";
+import {CompilationContext} from "../compilation-context";
 
 /**
  * Factory that creates the code generator emitter context
@@ -9,10 +9,9 @@ export interface CodeGenerationContextFactory {
 
     /**
      * Creates a new llvm emit context
-     * @param program the program
-     * @param context the llvm context
+     * @param compilationContext the compilation context
      * @param module the llvm module
-     * @return the emit context
+     * @return the code generation context
      */
-    createContext(program: ts.Program, context: llvm.LLVMContext, module: llvm.Module): CodeGenerationContext;
+    createContext(compilationContext: CompilationContext, module: llvm.Module): CodeGenerationContext;
 }

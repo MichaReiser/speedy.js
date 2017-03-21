@@ -10,6 +10,7 @@ import {SpeedyJSTransformVisitor} from "./src/transform/speedyjs-transform-visit
 import {PerFileCodeGenerator} from "./src/code-generation/per-file-code-generator";
 import {DefaultCodeGenerationContextFactory} from "./src/code-generation/default-code-generation-context-factory";
 import {NotYetImplementedCodeGenerator} from "./src/code-generation/not-yet-implemented-code-generator";
+import {Compiler} from "./src/compiler";
 
 llvm.initializeAllTargets();
 llvm.initializeAllTargetInfos();
@@ -18,21 +19,14 @@ llvm.initializeAllTargetMCs();
 llvm.initializeAllAsmParsers();
 
 function parseConfigFile(configFileName: string, commandLine: ts.ParsedCommandLine): ts.ParsedCommandLine {
-    const configurationFile = ts.readConfigFile(configFileName, ts.sys.readFile);
-    if (configurationFile.error) {
-        reportDiagnostics([configurationFile.error]);
-        ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
-    }
-
     const configurationFileText = ts.sys.readFile(configFileName);
-    const configAsJson = ts.parseConfigFileTextToJson(configFileName, configurationFileText);
-
-    if (configAsJson.error) {
-        reportDiagnostics([configAsJson.error]);
+    const jsonConfig = ts.parseConfigFileTextToJson(configFileName, configurationFileText);
+    if (jsonConfig.error) {
+        reportDiagnostics([jsonConfig.error]);
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
     }
 
-    const parsedConfiguration = ts.parseJsonConfigFileContent(configAsJson, ts.sys, ".", commandLine.options, configFileName);
+    const parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, ".", commandLine.options, configFileName);
     if (parsedConfiguration.errors.length > 0) {
         reportDiagnostics(parsedConfiguration.errors);
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
@@ -60,68 +54,27 @@ function run() {
         ts.sys.exit(ts.ExitStatus.Success);
     }
 
-    const configuration = parseConfigFile(configFileName, commandLine);
-    const rootFileNames = configuration.fileNames;
-    const compilerOptions = configuration.options;
+    let rootFileNames: string[] = [];
+    let compilerOptions;
 
-    const compilerHost = ts.createCompilerHost(compilerOptions);
-
-    const program: ts.Program = ts.createProgram(rootFileNames, compilerOptions, compilerHost);
-    const diagnostics = [...program.getSyntacticDiagnostics(), ...program.getOptionsDiagnostics(), ...program.getGlobalDiagnostics(), ...program.getSemanticDiagnostics() ];
-
-    const context = new llvm.LLVMContext();
-    const llvmEmitter = new PerFileCodeGenerator(context, new DefaultCodeGenerationContextFactory(new NotYetImplementedCodeGenerator()));
-
-    const logUnknownVisitor = new LogUnknownTransformVisitor();
-    const speedyJSVisitor = new SpeedyJSTransformVisitor(program, llvmEmitter);
-
-    const emitResult = program.emit(undefined, undefined, undefined, undefined, { before: [
-        createTransformVisitorFactory(logUnknownVisitor),
-        createTransformVisitorFactory(speedyJSVisitor)
-    ]});
-
-    llvmEmitter.write();
-
-    reportDiagnostics(emitResult.diagnostics, compilerHost);
-
-    if (emitResult.emitSkipped && diagnostics.length > 0) {
-        return ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
-    } else if (diagnostics.length > 0) {
-        return ts.ExitStatus.DiagnosticsPresent_OutputsGenerated;
+    if (configFileName) {
+        const configuration = parseConfigFile(configFileName, commandLine);
+        rootFileNames = configuration.fileNames;
+        compilerOptions = configuration.options;
+    } else {
+        rootFileNames = commandLine.fileNames;
+        compilerOptions = commandLine.options;
     }
 
-    return ts.sys.exit(ts.ExitStatus.Success);
+    const compilerHost = ts.createCompilerHost(compilerOptions);
+    const compiler = new Compiler(compilerOptions, compilerHost);
+
+    const { diagnostics, exitStatus } = compiler.compile(rootFileNames);
+    if (diagnostics.length > 0) {
+        reportDiagnostics(diagnostics);
+    }
+
+    return ts.sys.exit(exitStatus);
 }
 
 run();
-
-/*
-function transformerFactory<T extends ts.Node>(context: ts.TransformationContext): ts.Transformer<T> {
-    context.enableSubstitution(ts.SyntaxKind.FunctionDeclaration);
-    return function myTransformer<T extends ts.Node>(node: T): T {
-        if (isPrologueDirective(node)) {
-            if (node.expression.text === "use speedyjs") {
-                node.expression.text = "use strict";
-            }
-            return ts.createStatement(ts.createLiteral("use strict"));
-        }
-        if (isFunctionDeclaration(node)) {
-            return ts.createFunctionDeclaration();
-            const functionDeclaration = node as ts.FunctionDeclaration;
-            const symbol = typeChecker.getSymbolAtLocation(node);
-            for (const child of node.body.statements) {
-
-                    break;
-            }
-        }
-
-        return ts.visitEachChild(node, myTransformer, context);
-    };
-}
-
-
-
-function isFunctionDeclaration(node: ts.Node): node is ts.FunctionDeclaration {
-    return node.kind === ts.SyntaxKind.FunctionDeclaration;
-}
-*/

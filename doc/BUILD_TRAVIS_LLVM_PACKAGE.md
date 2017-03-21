@@ -59,7 +59,7 @@ Compress Output
 
 ```sh
 cd ..
-tar -cvjf tarballname.tar.bz2 *.deb
+tar -cvzf tarballname.tar.gz *.deb
 ```
 
 

@@ -3,9 +3,10 @@ import * as llvm from "llvm-node";
 import * as assert from "assert";
 import * as debug from "debug";
 import {SyntaxCodeGenerator, ValueSyntaxCodeGenerator} from "./syntax-code-generator";
-import {CodeGenerationContext} from "./code-generation-context";
+import {CodeGenerationContext, CodeGenerationOptions} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {Scope} from "./scope";
+import {CompilationContext} from "../compilation-context";
 
 const log = debug("DefaultCodeGenerationContext");
 
@@ -16,19 +17,27 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     private fallbackCodeGenerator?: FallbackCodeGenerator;
     private entryFunctions = new Set<string>();
 
-    program: ts.Program;
-    llvmContext: llvm.LLVMContext;
-    module: llvm.Module;
+    options: CodeGenerationOptions;
     builder: llvm.IRBuilder;
     scope = new Scope();
 
     private codeGenerators = new Map<ts.SyntaxKind, SyntaxCodeGenerator<ts.Node>>();
 
-    constructor(program: ts.Program, context: llvm.LLVMContext, module: llvm.Module) {
-        this.program = program;
-        this.llvmContext = context;
-        this.module = module;
-        this.builder = new llvm.IRBuilder(context);
+    constructor(public compilationContext: CompilationContext, public module: llvm.Module, options?: CodeGenerationOptions) {
+        this.builder = new llvm.IRBuilder(this.compilationContext.llvmContext);
+        this.options = Object.assign({}, {
+            emitLLVM: true,
+            unsafe: true,
+            wasmOpt: true
+        }, options);
+    }
+
+    get program() {
+        return this.compilationContext.program;
+    }
+
+    get llvmContext() {
+        return this.compilationContext.llvmContext;
     }
 
     get typeChecker() {
