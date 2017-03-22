@@ -47,26 +47,17 @@ gulp.task("build:runtime:configure", function () {
     const emscriptenCMake = path.resolve("./tools/emscripten/cmake/Modules/Platform/Emscripten.cmake");
     const command = util.format('cmake -E chdir cmake-build-release cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%s" ..', emscriptenCMake);
 
-    const env = Object.create(process.env);
-    env.EM_CONFIG = path.resolve("./.emscripten");
-
-    child_process.execSync(command, { env: env, stdio: "inherit" });
+    child_process.execSync(command, { env: process.env, stdio: "inherit" });
 });
 
 gulp.task("build:runtime:safe", function () {
     const command = "cmake --build cmake-build-release --target speedyjs-runtime";
-    const env = Object.create(process.env);
-    env.EM_CONFIG = path.resolve("./.emscripten");
-
-    child_process.execSync(command, { env: env, stdio: "inherit" });
+    child_process.execSync(command, { env: process.env, stdio: "inherit" });
 });
 
 gulp.task("build:runtime:unsafe", function () {
     const command = "cmake --build cmake-build-release --target speedyjs-runtime-unsafe";
-    const env = Object.create(process.env);
-    env.EM_CONFIG = path.resolve("./.emscripten");
-
-    child_process.execSync(command, { env: env, stdio: "inherit" });
+    child_process.execSync(command, { env: process.env, stdio: "inherit" });
 });
 
 /**

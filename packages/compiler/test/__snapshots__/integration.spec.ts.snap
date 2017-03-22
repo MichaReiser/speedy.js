@@ -87,6 +87,7 @@ entry:
   %count = alloca i32
   %arg = alloca i32
   store i32 %arg1, i32* %arg
+  store i32 0, i32* %count, align 4
   %arg2 = load i32, i32* %arg, align 4
   %0 = icmp sgt i32 %arg2, 10
   br i1 %0, label %then, label %else
@@ -224,6 +225,7 @@ entry:
   %y = alloca i32
   store i32 %y2, i32* %y
   %returnValue = alloca i32
+  store i32 0, i32* %result, align 4
   %x3 = load i32, i32* %x, align 4
   %y4 = load i32, i32* %y, align 4
   %0 = icmp slt i32 %x3, %y4
@@ -321,6 +323,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 define void @uninitializedVariableDeclaration() {
 entry:
   %x = alloca double
+  store double 0.000000e+00, double* %x, align 8
   ret void
 }
 "

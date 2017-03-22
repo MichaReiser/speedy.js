@@ -1,5 +1,8 @@
 import * as ts from "typescript";
+import * as debug from "debug";
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
+
+const LOG = debug("transform/LogUnknownTransformVisitor");
 
 /**
  * Logs yet unknown ts.Nodes
@@ -62,7 +65,7 @@ export class LogUnknownTransformVisitor implements TransformVisitor {
     }
 
     fallback<T extends ts.Node>(node: T, context: TransformVisitorContext): T {
-        console.log(`Unknown Node Type ${ts.SyntaxKind[node.kind]} - ${(node.constructor as any).name}`);
+        LOG(`Unknown Node Type ${ts.SyntaxKind[node.kind]} - ${(node.constructor as any).name}`);
         return context.visitEachChild(node);
     }
 }

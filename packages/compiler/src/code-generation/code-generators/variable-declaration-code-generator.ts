@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "../util/type-mapping";
@@ -13,9 +14,16 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         const llvmType = toLLVMType(type, context);
 
         const allocation = createAllocationInEntryBlock(context.builder.getInsertBlock().parent!, llvmType, symbol.name); // TODO test if function is set
+        let initializer: llvm.Value | undefined;
 
         if (variableDeclaration.initializer) {
-            context.builder.createAlignedStore(context.generate(variableDeclaration.initializer), allocation, context.module.dataLayout.getPrefTypeAlignment(llvmType));
+            initializer = context.generate(variableDeclaration.initializer);
+        } else if (!context.compilationContext.compilerOptions.unsafe) {
+            initializer = llvm.Constant.getNullValue(llvmType);
+        }
+
+        if (initializer) {
+            context.builder.createAlignedStore(initializer, allocation, context.module.dataLayout.getPrefTypeAlignment(llvmType));
         }
 
         context.scope.addVariable(symbol, allocation);

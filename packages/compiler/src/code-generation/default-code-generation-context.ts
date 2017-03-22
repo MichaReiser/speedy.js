@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import * as assert from "assert";
 import * as debug from "debug";
 import {SyntaxCodeGenerator, ValueSyntaxCodeGenerator} from "./syntax-code-generator";
-import {CodeGenerationContext, CodeGenerationOptions} from "./code-generation-context";
+import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {Scope} from "./scope";
 import {CompilationContext} from "../compilation-context";
@@ -17,19 +17,13 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     private fallbackCodeGenerator?: FallbackCodeGenerator;
     private entryFunctions = new Set<string>();
 
-    options: CodeGenerationOptions;
     builder: llvm.IRBuilder;
     scope = new Scope();
 
     private codeGenerators = new Map<ts.SyntaxKind, SyntaxCodeGenerator<ts.Node>>();
 
-    constructor(public compilationContext: CompilationContext, public module: llvm.Module, options?: CodeGenerationOptions) {
+    constructor(public compilationContext: CompilationContext, public module: llvm.Module) {
         this.builder = new llvm.IRBuilder(this.compilationContext.llvmContext);
-        this.options = Object.assign({}, {
-            emitLLVM: true,
-            unsafe: true,
-            wasmOpt: true
-        }, options);
     }
 
     get program() {

@@ -25,7 +25,7 @@ describe("Compiler Integration", () => {
 
     for (const testCase of cases) {
         test(path.basename(testCase).replace("case.ts", ""), () => {
-            const options = { };
+            const options = { emitLLVM: true };
             const compilerHost = ts.createCompilerHost(options);
             const compiler = new Compiler(options, compilerHost);
 

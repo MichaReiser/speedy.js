@@ -32,49 +32,41 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
     write() {
         for (const [sourceFile, context] of Array.from(this.codeGenerationContexts.entries())) {
-            llvm.verifyModule(context.module);
             if (context.module.empty) {
                 continue;
             }
 
-            const buildDirectory = BuildDirectory.createTempBuildDirectory();
-            const plainFileName = path.basename(sourceFile.fileName.replace(".ts", ""));
-
-            if (context.options.emitLLVM) {
-                const llc = context.module.print();
-                context.compilationContext.compilerHost.writeFile(this.getOutputFileName(sourceFile, context, ".ll"), llc, false);
-            } else {
-                const biteCodeFileName = buildDirectory.getTempFileName(`${plainFileName}.o`);
-                llvm.writeBitcodeToFile(context.module, biteCodeFileName);
-                const entryFunctions = context.getEntryFunctionNames();
-                const linked = this.link(biteCodeFileName, buildDirectory.getTempFileName(`${plainFileName}-linked.o`), buildDirectory, context);
-                const optimized = optimize(linked, entryFunctions, buildDirectory.getTempFileName(`${plainFileName}-opt.o`));
-
-                const assembly = llc(optimized, buildDirectory.getTempFileName(`${plainFileName}.s`));
-                const wast = s2wasm(assembly, buildDirectory.getTempFileName(`${plainFileName}.wast`));
-
-                const wasmFileName = this.getOutputFileName(sourceFile, context);
-                if (context.options.wasmOpt) {
-                    wasmOpt(wast, wasmFileName);
-                } else {
-                    wasmAs(wast, wasmFileName);
-                }
-            }
-
-            //
-
-            /** .cpp.o files extracted from libcxxa */
-            // c++
-            // child_process.execSync(`llvm-link ${oFileName} '${runtimeBCFile}' -o ${bcFileName} '/Users/micha/.emscripten_cache/wasm/libc.bc' '/Users/micha/.emscripten_cache/wasm/dlmalloc.bc' '/Users/micha/.emscripten_cache/wasm/wasm-libc.bc' '/Users/micha/.emscripten_cache/wasm/libcxx/locale_f4231af9.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/memory_94d0033a.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/mutex_4dfab851.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/new_ac351dc4.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/stdexcept_10f6f70f.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/string_c368c26d.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/system_error_7474feb6.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/condition_variable_74a5d15a.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/ios_2dc9ca0b.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/thread_f7ffe72e.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/future_d543f9db.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/exception_a86a4271.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxxabi.bc'`);
-            // child_process.execSync(`llvm-link ${oFileName} '${runtimeBCFile}' -o ${bcFileName} '/Users/micha/.emscripten_cache/wasm/libc.bc' '/Users/micha/.emscripten_cache/wasm/dlmalloc.bc' '/Users/micha/.emscripten_cache/wasm/wasm-libc.bc' '/Users/micha/.emscripten_cache/wasm/libcxx/locale_f4231af9.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/memory_94d0033a.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/mutex_4dfab851.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/new_ac351dc4.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/stdexcept_10f6f70f.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/string_c368c26d.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/system_error_7474feb6.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/condition_variable_74a5d15a.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/exception_a86a4271.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxxabi.bc'`);
-            // child_process.execSync(`llvm-link ${oFileName} '${runtimeBCFile}' -o ${bcFileName} '/Users/micha/.emscripten_cache/wasm/libc.bc' '/Users/micha/.emscripten_cache/wasm/dlmalloc.bc' '/Users/micha/.emscripten_cache/wasm/wasm-libc.bc' '/Users/micha/.emscripten_cache/wasm/libcxx/new_f9ca4a31.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxx/stdexcept_7cc53a40.cpp.o' '/Users/micha/.emscripten_cache/wasm/libcxxabi.bc'`);
-            // c
-            // child_process.execSync(`llvm-link ${oFileName} -o ${bcFileName} '/Users/micha/.emscripten_cache/wasm/libc.bc' '/Users/micha/.emscripten_cache/wasm/dlmalloc.bc' '/Users/micha/.emscripten_cache/wasm/wasm-libc.bc' '${runtimeBCFile}'`);
-            // child_process.execSync(`opt ${bcFileName} -o ${bcFileName} -strip-debug -disable-verify -internalize -internalize-public-api-list=nsieve,isPrime,fib,malloc,free,__errno_location,memcpy,memmove,memset,__cxa_can_catch,__cxa_is_pointer_type  -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false -O3`);
-            // child_process.execSync(`llc ${bcFileName} -march=wasm32 -filetype=asm -asm-verbose=false -thread-model=single -combiner-global-alias-analysis=false -enable-emscripten-cxx-exceptions -enable-emscripten-sjlj -o ${sFileName} `);
-
-            buildDirectory.remove();
+            llvm.verifyModule(context.module);
+            this.writeModule(sourceFile, context);
         }
+    }
+
+    private writeModule(sourceFile: ts.SourceFile, context: CodeGenerationContext) {
+        const buildDirectory = BuildDirectory.createTempBuildDirectory();
+        const plainFileName = path.basename(sourceFile.fileName.replace(".ts", ""));
+
+        if (context.compilationContext.compilerOptions.emitLLVM) {
+            const llc = context.module.print();
+            context.compilationContext.compilerHost.writeFile(this.getOutputFileName(sourceFile, context, ".ll"), llc, false);
+        } else {
+            const biteCodeFileName = buildDirectory.getTempFileName(`${plainFileName}.o`);
+            llvm.writeBitcodeToFile(context.module, biteCodeFileName);
+            const entryFunctions = context.getEntryFunctionNames();
+            const linked = this.link(biteCodeFileName, buildDirectory.getTempFileName(`${plainFileName}-linked.o`), buildDirectory, context);
+            const optimized = optimize(linked, entryFunctions, buildDirectory.getTempFileName(`${plainFileName}-opt.o`));
+
+            const assembly = llc(optimized, buildDirectory.getTempFileName(`${plainFileName}.s`));
+            const wast = s2wasm(assembly, buildDirectory.getTempFileName(`${plainFileName}.wast`));
+
+            const wasmFileName = this.getOutputFileName(sourceFile, context);
+            if (context.compilationContext.compilerOptions.binaryenOpt) {
+                wasmOpt(wast, wasmFileName);
+            } else {
+                wasmAs(wast, wasmFileName);
+            }
+        }
+
+        buildDirectory.remove();
     }
 
     private getOutputFileName(sourceFile: ts.SourceFile, context: CodeGenerationContext, fileExtension=".wasm") {
@@ -91,7 +83,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         const llvmLinker = new LLVMLink(buildDirectory);
 
         llvmLinker.addByteCodeFile(file);
-        llvmLinker.addRuntime(context.options.unsafe);
+        llvmLinker.addRuntime(context.compilationContext.compilerOptions.unsafe);
         llvmLinker.addSharedLibraries();
 
         return llvmLinker.link(linkedFileName, context.getEntryFunctionNames());

@@ -3,21 +3,10 @@ import * as llvm from "llvm-node";
 import {Scope} from "./scope";
 import {CompilationContext} from "../compilation-context";
 
-export interface CodeGenerationOptions {
-    unsafe?: boolean;
-    wasmOpt?: boolean;
-    emitLLVM?: boolean;
-}
-
 /**
  * The stateful code generation context
  */
 export interface CodeGenerationContext {
-
-    /**
-     * Indicator that the unsafe runtime should be used
-     */
-    readonly options: CodeGenerationOptions;
 
     readonly compilationContext: CompilationContext;
 

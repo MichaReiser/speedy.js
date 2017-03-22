@@ -2,15 +2,15 @@
 
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import * as program from "commander";
+
 const packageJson = require("./package.json");
 import {reportDiagnostics} from "./src/util/diagnostics";
-import {createTransformVisitorFactory} from "./src/transform/transform-visitor";
-import {LogUnknownTransformVisitor} from "./src/transform/log-unknown-transform-visitor";
-import {SpeedyJSTransformVisitor} from "./src/transform/speedyjs-transform-visitor";
-import {PerFileCodeGenerator} from "./src/code-generation/per-file-code-generator";
-import {DefaultCodeGenerationContextFactory} from "./src/code-generation/default-code-generation-context-factory";
-import {NotYetImplementedCodeGenerator} from "./src/code-generation/not-yet-implemented-code-generator";
 import {Compiler} from "./src/compiler";
+import {IExportedCommand} from "commander";
+import {SpeedyJSCompilerOptions} from "./src/speedyjs-compiler-options";
+
+
 
 llvm.initializeAllTargets();
 llvm.initializeAllTargetInfos();
@@ -18,7 +18,28 @@ llvm.initializeAllAsmPrinters();
 llvm.initializeAllTargetMCs();
 llvm.initializeAllAsmParsers();
 
-function parseConfigFile(configFileName: string, commandLine: ts.ParsedCommandLine): ts.ParsedCommandLine {
+interface CommandLineArguments extends IExportedCommand {
+    files: string[],
+    config?: string,
+    unsafe?: boolean;
+    emitLLVM?: boolean;
+    binaryenOpt?: boolean;
+}
+
+function parseCommandLine(): CommandLineArguments {
+    program
+        .version(packageJson.version)
+        .usage("[options] [files ...]")
+        .option("-c --config <configFile>", "The path to the tsconfig.json")
+        .option("--unsafe", "Use the unsafe runtime system")
+        .option("--emit-llvm", "Emit LLVM Assembly Code instead of WASM files")
+        .option("--binaryen-opt", "Optimize using Binaryen opt")
+        .parse(process.argv);
+
+    return program as CommandLineArguments;
+}
+
+function parseConfigFile(configFileName: string): ts.ParsedCommandLine {
     const configurationFileText = ts.sys.readFile(configFileName);
     const jsonConfig = ts.parseConfigFileTextToJson(configFileName, configurationFileText);
     if (jsonConfig.error) {
@@ -26,7 +47,7 @@ function parseConfigFile(configFileName: string, commandLine: ts.ParsedCommandLi
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
     }
 
-    const parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, ".", commandLine.options, configFileName);
+    const parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, ".", undefined, configFileName);
     if (parsedConfiguration.errors.length > 0) {
         reportDiagnostics(parsedConfiguration.errors);
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
@@ -35,37 +56,39 @@ function parseConfigFile(configFileName: string, commandLine: ts.ParsedCommandLi
     return parsedConfiguration;
 }
 
-function run() {
-    const commandLine = ts.parseCommandLine(ts.sys.args);
-    if (commandLine.errors.length > 0) {
-        reportDiagnostics(commandLine.errors);
-        return ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
-    }
-
-    if (commandLine.options.version) {
-        ts.sys.write(`speedy.js ${packageJson.version}${ts.sys.newLine}`);
-        return ts.sys.exit(ts.ExitStatus.Success);
-    }
-
-    const configFileName = ts.findConfigFile(ts.sys.getCurrentDirectory(), ts.sys.fileExists);
-
-    if (commandLine.fileNames.length === 0 && !configFileName) {
-        ts.sys.write("TODO");
-        ts.sys.exit(ts.ExitStatus.Success);
-    }
-
+function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName: string) {
     let rootFileNames: string[] = [];
-    let compilerOptions;
+    let compilerOptions: SpeedyJSCompilerOptions;
 
-    if (configFileName) {
-        const configuration = parseConfigFile(configFileName, commandLine);
+    if (tsConfigFileName) {
+        const configuration = parseConfigFile(tsConfigFileName);
         rootFileNames = configuration.fileNames;
         compilerOptions = configuration.options;
     } else {
-        rootFileNames = commandLine.fileNames;
-        compilerOptions = commandLine.options;
+        rootFileNames = commandLine.files;
+        compilerOptions = ts.getDefaultCompilerOptions();
     }
 
+    compilerOptions.unsafe = commandLine.unsafe;
+    compilerOptions.binaryenOpt = commandLine.binaryenOpt;
+    compilerOptions.emitLLVM = commandLine.emitLLVM;
+
+    return { rootFileNames, compilerOptions };
+}
+
+function run() {
+    const commandLine = parseCommandLine();
+
+    const configFileName = commandLine.config || ts.findConfigFile(ts.sys.getCurrentDirectory(), ts.sys.fileExists);
+
+    if (commandLine.args.length === 0 && !configFileName) {
+        ts.sys.write("Pass either a config file or the files to use");
+        commandLine.outputHelp();
+        ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
+    }
+
+
+    const { compilerOptions, rootFileNames } = getCompilerOptions(commandLine, configFileName);
     const compilerHost = ts.createCompilerHost(compilerOptions);
     const compiler = new Compiler(compilerOptions, compilerHost);
 

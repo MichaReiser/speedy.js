@@ -7,7 +7,7 @@
     "start": "webpack-dev-server",
     "build:wasm": "cd ./cases && speedyjs",
     "build:wasm-unsafe": "cd ./cases && speedyjs --unsafe",
-    "build:wasm-dualOpt": "cd cases && speedyjs --binaryenOpt",
+    "build:wasm-dualOpt": "cd cases && speedyjs --binaryen-opt",
     "benchmark": "karma start"
   },
   "repository": {

@@ -12,7 +12,7 @@ export class Compiler {
         this.compilerHost = ts.createCompilerHost(compilerOptions);
     }
 
-    compile(rootFileNames: string[], writeFile?: ts.WriteFileCallback): { exitStatus: ts.ExitStatus, diagnostics: ts.Diagnostic[] } {
+    compile(rootFileNames: string[]): { exitStatus: ts.ExitStatus, diagnostics: ts.Diagnostic[] } {
         const program: ts.Program = ts.createProgram(rootFileNames, this.compilerOptions, this.compilerHost);
         const diagnostics = [...program.getSyntacticDiagnostics(), ...program.getOptionsDiagnostics(), ...program.getGlobalDiagnostics(), ...program.getSemanticDiagnostics() ];
 
@@ -30,6 +30,7 @@ export class Compiler {
             llvmContext: context,
             program
         };
+
 
         const speedyJSVisitor = new SpeedyJSTransformVisitor(compilationContext, llvmEmitter);
 
