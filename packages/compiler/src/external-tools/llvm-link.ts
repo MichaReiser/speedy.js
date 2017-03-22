@@ -4,7 +4,7 @@ import * as ts from "typescript";
 import * as assert from "assert";
 import * as debug from "debug";
 import { execLLVM } from "./tools";
-import { SHARED_LIBRARIES_DIRECTORY, SAFE_RUNTIME_DIRECTORY, UNSAFE_RUNTIME_DIRECTORY, COMPILER_RT_FILE } from "speedyjs-runtime";
+import { SHARED_LIBRARIES_DIRECTORY, SAFE_RUNTIME, UNSAFE_RUNTIME, COMPILER_RT_FILE } from "speedyjs-runtime";
 import {BuildDirectory} from "../code-generation/build-directory";
 import {LLVMByteCodeSymbolsResolver} from "./llvm-nm";
 
@@ -33,20 +33,18 @@ export class LLVMLink {
         this.byteCodeFiles.push(file);
     }
 
-    addSharedLibraries(): void {
-        this.addObjectFilesFromDirectory(SHARED_LIBRARIES_DIRECTORY);
-    }
-
     /**
      * Adds the files needed by the runtime
      * @param unsafe should the unsafe runtime (without safe memory guarantees) be used
      */
     addRuntime(unsafe=false): void {
         if (unsafe) {
-            this.addObjectFilesFromDirectory(UNSAFE_RUNTIME_DIRECTORY);
+            this.byteCodeFiles.push(UNSAFE_RUNTIME);
         } else {
-            this.addObjectFilesFromDirectory(SAFE_RUNTIME_DIRECTORY);
+            this.byteCodeFiles.push(SAFE_RUNTIME);
         }
+
+        this.addObjectFilesFromDirectory(SHARED_LIBRARIES_DIRECTORY);
     }
 
     private addObjectFilesFromDirectory(directory: string): void {

@@ -19,7 +19,7 @@ gulp.task("build", function (cb) {
         "build:libs",
         "build:runtime:configure",
         ["build:runtime:safe", "build:runtime:unsafe"],
-        ["copy:release:safe", "copy:release:unsafe", "copy:libs"],
+        ["copy:release", "copy:libs"],
         cb
     );
 });
@@ -45,9 +45,12 @@ gulp.task("build:runtime:configure", function () {
     fs.mkdirSync("cmake-build-release");
 
     const emscriptenCMake = path.resolve("./tools/emscripten/cmake/Modules/Platform/Emscripten.cmake");
-    const command = util.format('cmake -E chdir cmake-build-release cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%s" ..', emscriptenCMake);
+    const command = util.format('cmake -E chdir cmake-build-release cmake -DCMAKE_BUILD_TYPE=Release -DEMSCRIPTEN_GENERATE_BITCODE_STATIC_LIBRARIES=ON -DCMAKE_TOOLCHAIN_FILE="%s" ..', emscriptenCMake);
 
-    child_process.execSync(command, { env: process.env, stdio: "inherit" });
+    const env = Object.create(process.env);
+    env.EM_CONFIG = path.resolve("./.emscripten");
+
+    child_process.execSync(command, { env: env, stdio: "inherit" });
 });
 
 gulp.task("build:runtime:safe", function () {
@@ -71,9 +74,6 @@ gulp.task("build:libs", function() {
         fs.mkdirSync(EMSCRIPTEN_CACHE_DIR);
     }
 
-    const env = Object.create(process.env);
-    env.EM_CONFIG = path.resolve("./.emscripten");
-
     const em = path.resolve("./tools/emscripten/em++");
     const sourceTmpFile = tmp.fileSync({ postfix: ".cc" });
     fs.writeFileSync(sourceTmpFile.name,
@@ -86,7 +86,11 @@ gulp.task("build:libs", function() {
 
     const outputTmpFile = tmp.fileSync({ postfix: ".js" });
 
-    child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR), { env: env, stdio: "inherit" });
+    child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s --em-config %s", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR, path.resolve("./.emscripten")),
+        {
+            env: process.env,
+            stdio: "inherit"
+        });
     sourceTmpFile.removeCallback();
     outputTmpFile.removeCallback();
 });
@@ -98,14 +102,11 @@ gulp.task("copy:libs", function () {
     return src.pipe(gulp.dest("./bin/shared"));
 });
 
-gulp.task("copy:release:safe", function () {
-    return gulp.src("./cmake-build-release/CMakeFiles/speedyjs-runtime.dir/lib/*.o")
-        .pipe(gulp.dest("./bin/safe"));
-});
-
-gulp.task("copy:release:unsafe", function () {
-    return gulp.src("./cmake-build-release/CMakeFiles/speedyjs-runtime-unsafe.dir/lib/*.o")
-        .pipe(gulp.dest("./bin/unsafe"));
+gulp.task("copy:release", function () {
+    return gulp.src([
+        "./cmake-build-release/libspeedyjs-runtime.bc",
+        "./cmake-build-release/libspeedyjs-runtime-unsafe.bc"
+    ]).pipe(gulp.dest("./bin"));
 });
 
 gulp.task("test:clean", function () {

@@ -84,7 +84,6 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
         llvmLinker.addByteCodeFile(file);
         llvmLinker.addRuntime(context.compilationContext.compilerOptions.unsafe);
-        llvmLinker.addSharedLibraries();
 
         return llvmLinker.link(linkedFileName, context.getEntryFunctionNames());
     }
