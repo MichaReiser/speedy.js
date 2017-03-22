@@ -20,7 +20,7 @@ function gitCloneOrPull(repository, target) {
 }
 
 function make(directory) {
-    exec("make -C %s -j%d", directory, os.cpus().length);
+    exec("make -C %s -j%d", directory, os.cpus().length + 1);
 }
 
 module.exports = {

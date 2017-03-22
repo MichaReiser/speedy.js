@@ -17,7 +17,7 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     }
 
     if (type.flags & ts.TypeFlags.Any) {
-        throw new Error(`Any type not supported, annotated the type`);
+        throw new Error(`Any type not supported, annotate the type`);
     }
 
     if (type.flags & ts.TypeFlags.Void) {
@@ -32,5 +32,5 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         }
     }
 
-    throw new Error(`Unsupported type ${type.intrinsicName} ${type.flags} (${context.typeChecker.typeToString(type)}`);
+    throw new Error(`Unsupported type ${(type as any).intrinsicName} ${type.flags} (${context.typeChecker.typeToString(type)}`);
 }

@@ -6,8 +6,9 @@
   "typings": "index.ts",
   "repository": "https://github.com/MichaReiser/speedy.js.git",
   "scripts": {
-    "build": "node ./scripts/install-dependencies.js && gulp build",
-    "test": "gulp test"
+    "preinstall": "node ./scripts/install-dependencies.js",
+    "test": "gulp test",
+    "prepublish": "tsc && gulp build"
   },
   "author": "Micha Reiser <micha@famreiser.ch>",
   "license": "MIT",
@@ -16,7 +17,8 @@
     "gulp": "^3.9.1",
     "merge-stream": "^1.0.1",
     "run-sequence": "^1.2.2",
-    "tmp": "0.0.31"
+    "tmp": "0.0.31",
+    "typescript": "^2.2.1"
   },
   "dependencies": {
     "@types/node": "^7.0.8"

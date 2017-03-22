@@ -12,6 +12,7 @@
     "sourceMap": true
   },
   "include": [
+    "index.ts",
     "src/**/*"
   ]
 }

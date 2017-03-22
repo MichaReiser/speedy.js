@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "build:wasm": "cd cases && speedyjs-compiler",
-    "test": "karma start"
+    "build:wasm": "cd ./cases && speedyjs",
+    "build:wasm-unsafe": "cd ./cases && speedyjs --unsafe",
+    "build:wasm-dualOpt": "cd cases && speedyjs --binaryenOpt",
+    "benchmark": "karma start"
   },
   "repository": {
     "type": "git",

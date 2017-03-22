@@ -2,7 +2,9 @@
   "name": "speedyjs-compiler",
   "version": "0.0.1",
   "main": "index.js",
-  "bin": "index.js",
+  "bin": {
+    "speedyjs": "./index.js"
+  },
   "author": "Micha Reiser <micha@famreiser.ch>",
   "license": "MIT",
   "repository": "https://github.com/MichaReiser/speedy.js.git",
@@ -14,21 +16,25 @@
     "ts-jest": "^19.0.1"
   },
   "dependencies": {
+    "@types/commander": "^2.3.31",
     "@types/debug": "^0.0.29",
+    "@types/lodash": "^4.14.56",
     "@types/node": "^7.0.5",
     "@types/tmp": "0.0.32",
+    "commander": "^2.9.0",
     "debug": "^2.6.3",
     "llvm-node": "^0.1.1",
+    "lodash": "^4.17.4",
     "speedyjs-runtime": "0.x.x",
     "tmp": "0.0.31",
     "typescript": "MichaReiser/TypeScript#release"
   },
   "scripts": {
     "preinstall": "node ./scripts/install-dependencies.js",
+    "prepublish": "tsc",
     "start": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "deploy": "export DEBUG=* && cd cases && node ../index.js && cp fib.wasm /Users/micha/git/webassembly-benchmark/fib-opt.wasm && cd .."
+    "test:watch": "jest --watch"
   },
   "jest": {
     "transform": {
