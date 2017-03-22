@@ -10,6 +10,7 @@ class CallExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.CallExp
 
     generateValue(callExpression: ts.CallExpression, context: CodeGenerationContext): llvm.Value {
         const callee = callExpression.expression;
+        const probablyFun = context.resolve(context.typeChecker.getSymbolAtLocation(callee));
 
         if (callee.kind === ts.SyntaxKind.PropertyAccessExpression) {
             const object = (callee as ts.PropertyAccessExpression).expression;

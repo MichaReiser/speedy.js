@@ -31,7 +31,6 @@ export class Compiler {
             program
         };
 
-
         const speedyJSVisitor = new SpeedyJSTransformVisitor(compilationContext, llvmEmitter);
 
         const emitResult = program.emit(undefined, undefined, undefined, undefined, { before: [

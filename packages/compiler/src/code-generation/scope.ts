@@ -120,4 +120,8 @@ export class Scope {
         assert(this.parent, "Cannot leave root scope");
         return this.parent!;
     }
+
+    hasFunction(symbol: ts.Symbol) {
+        return this.functions.has(symbol);
+    }
 }

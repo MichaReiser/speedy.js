@@ -73,4 +73,6 @@ export interface CodeGenerationContext {
 
     enterChildScope(): Scope;
     leaveChildScope(): Scope;
+
+    resolve(symbol: ts.Symbol): llvm.Value;
 }

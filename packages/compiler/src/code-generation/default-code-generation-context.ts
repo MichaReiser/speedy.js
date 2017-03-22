@@ -95,6 +95,30 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         return this.scope;
     }
 
+    resolve(node: ts.Node): llvm.Value {
+        const symbol = this.typeChecker.getSymbolAtLocation(node);
+
+        if (symbol.flags & (ts.SymbolFlags.Function | ts.SymbolFlags.Constructor | ts.SymbolFlags.Method) && this.scope.hasFunction(symbol)) {
+            return this.scope.getFunction(symbol);
+        }
+
+        if (symbol.flags & ts.SymbolFlags.Variable && this.scope.hasVariable(symbol)) {
+            return this.scope.getVariable(symbol);
+        }
+
+        // otherwise it needs to a built in or is not defined
+        if (symbol.flags & ts.SymbolFlags.Method) {
+            const parent = node.parent!;
+
+            const parentType = this.typeChecker.getTypeAtLocation(node.parent!);
+            const parentSymbol = parentType.getSymbol();
+            // use symbol to retrieve built in operation
+            // add method to function table to avoid lookup in the future
+        }
+
+        throw new Error(`Failed to resolve symbol ${this.typeChecker.symbolToString(symbol)}`);
+    }
+
     private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node> | FallbackCodeGenerator {
         const codeGenerator = this.codeGenerators.get(node.kind) || this.fallbackCodeGenerator;
 
