@@ -3,9 +3,9 @@ import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "../util/type-mapping";
-import {createAllocationInEntryBlock} from "../util/allocations";
+import {Allocation} from "../value/allocation";
 
-class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclaration> {
+class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclaration, void> {
     syntaxKind = ts.SyntaxKind.VariableDeclaration;
 
     generate(variableDeclaration: ts.VariableDeclaration, context: CodeGenerationContext): void {
@@ -13,17 +13,17 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         const type = context.typeChecker.getTypeAtLocation(variableDeclaration);
         const llvmType = toLLVMType(type, context);
 
-        const allocation = createAllocationInEntryBlock(context.builder.getInsertBlock().parent!, llvmType, symbol.name); // TODO test if function is set
+        const allocation = Allocation.createInEntryBlock(type, context, (variableDeclaration.name as ts.Identifier).text);
         let initializer: llvm.Value | undefined;
 
         if (variableDeclaration.initializer) {
-            initializer = context.generate(variableDeclaration.initializer);
+            initializer = context.generateValue(variableDeclaration.initializer).generateIR();
         } else if (!context.compilationContext.compilerOptions.unsafe) {
             initializer = llvm.Constant.getNullValue(llvmType);
         }
 
         if (initializer) {
-            context.builder.createAlignedStore(initializer, allocation, context.module.dataLayout.getPrefTypeAlignment(llvmType));
+            allocation.generateAssignmentIR(initializer);
         }
 
         context.scope.addVariable(symbol, allocation);

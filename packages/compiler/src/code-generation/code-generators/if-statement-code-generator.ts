@@ -3,12 +3,12 @@ import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 
-class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement> {
+class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement, void> {
     syntaxKind = ts.SyntaxKind.IfStatement;
 
     generate(ifStatement: ts.IfStatement, context: CodeGenerationContext): void {
-        const condition = context.generate(ifStatement.expression);
-        const fun = context.builder.getInsertBlock().parent!; // todo.. guarantee that function exists
+        const condition = context.generateValue(ifStatement.expression).generateIR();
+        const fun = context.scope.enclosingFunction.getLLVMFunction();
 
         let thenBlock = llvm.BasicBlock.create(context.llvmContext, "then", fun);
         let elseBlock = llvm.BasicBlock.create(context.llvmContext, "else");
@@ -17,7 +17,7 @@ class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement> {
         context.builder.createCondBr(condition, thenBlock, elseBlock);
 
         context.builder.setInsertionPoint(thenBlock);
-        context.generateVoid(ifStatement.thenStatement);
+        context.generate(ifStatement.thenStatement);
         thenBlock = context.builder.getInsertBlock();
 
         if (!thenBlock.getTerminator()) {
@@ -28,7 +28,7 @@ class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement> {
         context.builder.setInsertionPoint(elseBlock);
 
         if (ifStatement.elseStatement) {
-            context.generateVoid(ifStatement.elseStatement);
+            context.generate(ifStatement.elseStatement);
             elseBlock = context.builder.getInsertBlock();
         }
 

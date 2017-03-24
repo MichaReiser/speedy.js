@@ -4,7 +4,7 @@ import * as debug from "debug";
 import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 
-const log = debug("NotYetImplementedCodeGenerator");
+const log = debug("code-generation/not-yet-implemented-generator");
 
 /**
  * code Generator implementation that logs a message to the console.

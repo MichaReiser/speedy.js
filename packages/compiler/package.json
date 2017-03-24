@@ -41,13 +41,13 @@
       ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js",
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|js)$",
+    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|js)$",
     "moduleFileExtensions": [
       "ts",
       "js"
     ],
     "modulePathIgnorePatterns": [
-      "<rootDir>/test/cases/.*\\.(js|ll)$"
+      "<rootDir>/__tests__/cases/.*\\.(js|ll)$"
     ]
   }
 }

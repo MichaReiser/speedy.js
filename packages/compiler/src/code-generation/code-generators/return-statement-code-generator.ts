@@ -3,7 +3,7 @@ import * as assert from "assert";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 
-class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnStatement> {
+class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnStatement, void> {
     syntaxKind = ts.SyntaxKind.ReturnStatement;
 
     generate(node: ts.ReturnStatement, context: CodeGenerationContext): void {
@@ -12,8 +12,8 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
 
         if (node.expression) {
             assert(returnAllocation, "No return allocation present but return statement with value present");
-            const returnValue = context.generate(node.expression);
-            context.builder.createStore(returnValue, returnAllocation!);
+            const returnValue = context.generateValue(node.expression);
+            returnAllocation!.generateAssignmentIR(returnValue);
         }
 
         assert(returnBlock, "No return block present (not inside of a function?)");

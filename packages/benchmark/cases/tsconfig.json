@@ -4,8 +4,8 @@
     "target": "es6",
     "noImplicitAny": false,
     "sourceMap": true,
+    "pretty": true,
     "lib": [
-      "es6",
       "es2015"
     ]
   },

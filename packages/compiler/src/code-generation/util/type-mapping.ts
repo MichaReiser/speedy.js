@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGenerator} from "./array-code-generator";
+import {CodeGenerationError} from "../code-generation-exception";
 
 export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
     if ((type.flags & ts.TypeFlags.IntLike) === ts.TypeFlags.Int) {
@@ -25,12 +25,11 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     }
 
     if (type.flags & ts.TypeFlags.Object) {
-        const symbol = type.getSymbol();
-
-        if (symbol.name === "Array" && !context.scope.hasVariable(symbol)) { // OK, this is a built in array
-            return ArrayCodeGenerator.getLLVMArrayType(context);
+        const classReference = context.scope.getClass(type.getSymbol());
+        if (classReference) {
+            return classReference.getLLVMType(type);
         }
     }
 
-    throw new Error(`Unsupported type ${(type as any).intrinsicName} ${type.flags} (${context.typeChecker.typeToString(type)}`);
+    throw CodeGenerationError.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
 }

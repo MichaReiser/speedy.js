@@ -1,25 +1,27 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {Primitive} from "../value/primitive";
+import {CodeGenerationError} from "../code-generation-exception";
 
-class FirstLiteralTokenCodeGenerator implements ValueSyntaxCodeGenerator<ts.LiteralLikeNode> {
+class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralLikeNode, Primitive> {
     syntaxKind = ts.SyntaxKind.FirstLiteralToken;
 
-    generate(node: ts.LiteralLikeNode, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
-    }
-
-    generateValue(node: ts.LiteralLikeNode, context: CodeGenerationContext): llvm.Value {
+    generate(node: ts.LiteralLikeNode, context: CodeGenerationContext): Primitive {
         const type = context.typeChecker.getTypeAtLocation(node);
+        let value: llvm.Value;
+
         if (type.flags & ts.TypeFlags.IntLiteral) {
-            return llvm.ConstantInt.get(context.llvmContext, +node.text);
+            value = llvm.ConstantInt.get(context.llvmContext, +node.text);
+        } else if (type.flags & ts.TypeFlags.NumberLiteral) {
+            value = llvm.ConstantFP.get(context.llvmContext, +node.text);
+        } else {
+            throw CodeGenerationError.unsupportedLiteralType(node, context.typeChecker.typeToString(type));
         }
-        if (type.flags & ts.TypeFlags.NumberLiteral) {
-            return llvm.ConstantFP.get(context.llvmContext, +node.text);
-        }
-        throw new Error("Unsupported first literal token");
+
+        return new Primitive(value, type);
     }
 }
 

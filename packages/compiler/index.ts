@@ -10,8 +10,6 @@ import {Compiler} from "./src/compiler";
 import {IExportedCommand} from "commander";
 import {SpeedyJSCompilerOptions} from "./src/speedyjs-compiler-options";
 
-
-
 llvm.initializeAllTargets();
 llvm.initializeAllTargetInfos();
 llvm.initializeAllAsmPrinters();
@@ -22,7 +20,7 @@ interface CommandLineArguments extends IExportedCommand {
     files: string[],
     config?: string,
     unsafe?: boolean;
-    emitLLVM?: boolean;
+    emitLlvm?: boolean;
     binaryenOpt?: boolean;
 }
 
@@ -71,7 +69,7 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
 
     compilerOptions.unsafe = commandLine.unsafe;
     compilerOptions.binaryenOpt = commandLine.binaryenOpt;
-    compilerOptions.emitLLVM = commandLine.emitLLVM;
+    compilerOptions.emitLLVM = commandLine.emitLlvm;
 
     return { rootFileNames, compilerOptions };
 }

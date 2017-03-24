@@ -3,16 +3,16 @@ import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 
-class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement> {
+class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, void> {
     syntaxKind = ts.SyntaxKind.ForStatement;
 
     generate(forStatement: ts.ForStatement, context: CodeGenerationContext): void {
         if (forStatement.initializer) {
-            context.generateVoid(forStatement.initializer);
+            context.generate(forStatement.initializer);
         }
 
         let forEntry: llvm.BasicBlock;
-        const fun = context.builder.getInsertBlock().parent!; // TODO ensure that inside function
+        const fun = context.scope.enclosingFunction.getLLVMFunction();
         const successor = llvm.BasicBlock.create(context.llvmContext, "for-successor");
         let body = llvm.BasicBlock.create(context.llvmContext, "for-body");
 
@@ -21,8 +21,7 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement> 
             context.builder.createBr(forBlock);
             context.builder.setInsertionPoint(forBlock);
 
-            const condition = context.generate(forStatement.condition);
-
+            const condition = context.generateValue(forStatement.condition).generateIR();
             context.builder.createCondBr(condition, body, successor);
 
             forEntry = forBlock;
@@ -34,12 +33,12 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement> 
         fun.addBasicBlock(body);
         context.builder.setInsertionPoint(body);
 
-        context.generateVoid(forStatement.statement);
+        context.generate(forStatement.statement);
         body = context.builder.getInsertBlock();
 
         if (!body.getTerminator()) {
             if (forStatement.incrementor) {
-                context.generateVoid(forStatement.incrementor);
+                context.generate(forStatement.incrementor);
             }
 
             context.builder.createBr(forEntry);

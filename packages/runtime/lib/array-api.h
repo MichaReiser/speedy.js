@@ -1,13 +1,22 @@
 #include <stdint.h>
 #include <cstdlib>
 #include "macros.h"
+#include "array.h"
 
 #ifndef SPEEDYJS_RUNTIME_ARRAY_API_H
 #define SPEEDYJS_RUNTIME_ARRAY_API_H
 
+typedef struct {
+    void* ptr;
+} Math;
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern Math math {};
+extern Math* mathPtr = &math;
 
 typedef void* CArrayI1;
 typedef void* CArrayI32;

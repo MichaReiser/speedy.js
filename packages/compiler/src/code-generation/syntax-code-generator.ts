@@ -1,12 +1,12 @@
 import * as ts from "typescript";
-import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "./code-generation-context";
+import {Value} from "./value/value";
 
 /**
  * Code Generator for a specific TS Syntax Kind
  * Code Generators are stateless. State needs to be stored inside of the @link CodeGenerationContext
  */
-export interface SyntaxCodeGenerator<T extends ts.Node> {
+export interface SyntaxCodeGenerator<T extends ts.Node, R extends Value | void> {
 
     /**
      * Returns the syntax kind of the nodes @link{T} handled by this code generator.
@@ -15,18 +15,10 @@ export interface SyntaxCodeGenerator<T extends ts.Node> {
     readonly syntaxKind: ts.SyntaxKind;
 
     /**
-     * Generates the code for the givne node
+     * Generates the code for the given node
      * @param node the node to emit
+     * @returns either the value that is the result of this node or void
      */
-    generate(node: T, context: CodeGenerationContext): void;
+    generate(node: T, context: CodeGenerationContext): R;
 }
-
-/**
- * An code generator for a node that returns a value. This is not the case for all code generatrs, e.g.
- * a block does not return a value.
- */
-export interface ValueSyntaxCodeGenerator<T extends ts.Node> extends SyntaxCodeGenerator<T> {
-    generateValue(node: T, context: CodeGenerationContext): llvm.Value;
-}
-
 

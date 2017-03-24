@@ -1,7 +1,7 @@
 import * as debug from "debug";
 import {execBinaryen} from "./tools";
 
-const LOG = debug("Binaryen:wasm-opt");
+const LOG = debug("external-tools/binaryen-opt");
 const EXECUTABLE_NAME = "wasm-opt";
 
 /**

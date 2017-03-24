@@ -1,18 +1,16 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "../util/type-mapping";
-import {ArrayCodeGenerator} from "../util/array-code-generator";
+import {FunctionReference} from "../value/function-reference";
+import {Allocation} from "../value/allocation";
+import {ObjectReference} from "../value/object-reference";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
-class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.FunctionDeclaration> {
+class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.FunctionDeclaration, FunctionReference> {
     syntaxKind = ts.SyntaxKind.FunctionDeclaration;
 
-    generate(node: ts.FunctionDeclaration, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
-    }
-
-    generateValue(functionDeclaration: ts.FunctionDeclaration, context: CodeGenerationContext): llvm.Value {
+    generate(functionDeclaration: ts.FunctionDeclaration, context: CodeGenerationContext): FunctionReference {
         if (!functionDeclaration.body) {
             throw new Error(`Cannot transform function declaration without body`)
         }
@@ -35,10 +33,10 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
 
         const functionType = llvm.FunctionType.get(llvmReturnType, parameters, false);
         const fun = llvm.Function.create(functionType, llvm.LinkageTypes.ExternalLinkage, symbol.name, context.module);
+        const functionReference = context.functionReference(fun, signature);
 
-        context.scope.addFunction(symbol, fun);
-
-        context.enterChildScope();
+        context.scope.addFunction(symbol, functionReference);
+        context.enterChildScope(functionReference);
 
         const entryBlock = llvm.BasicBlock.create(context.llvmContext, "entry", fun);
 
@@ -47,9 +45,12 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         // add args to scope
         const args = fun.getArguments();
         for (let i = 0; i < signature.parameters.length; ++i) {
-            const type = toLLVMType(context.typeChecker.getTypeAtLocation(functionDeclaration.parameters[i]), context);
-            const allocation = context.builder.createAlloca(type, undefined, signature.parameters[i].name);
-            context.builder.createStore(args[i], allocation);
+            const parameter = functionDeclaration.parameters[i];
+            const argumentIdentifier = parameter.name as ts.Identifier;
+            const type = context.typeChecker.getTypeAtLocation(parameter);
+            const allocation = Allocation.create(type, context, argumentIdentifier.text);
+
+            allocation.generateAssignmentIR(args[i]);
             context.scope.addVariable(signature.parameters[i], allocation);
             args[i].name = signature.parameters[i].name;
         }
@@ -58,10 +59,10 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
         context.scope.returnBlock = returnBlock;
 
         if (returnType.flags !== ts.TypeFlags.Void) {
-            context.scope.returnAllocation = context.builder.createAlloca(llvmReturnType, undefined, "returnValue");
+            context.scope.returnAllocation = Allocation.create(returnType, context, "return");
         }
 
-        context.generateVoid(functionDeclaration.body);
+        context.generate(functionDeclaration.body);
 
         // Current Block is empty, so we can use the current block instead of the return block
         const predecessor = context.builder.getInsertBlock();
@@ -83,7 +84,7 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
 
         // Add Return Statement
         if (context.scope.returnAllocation) {
-            context.builder.createRet(context.builder.createLoad(context.scope.returnAllocation, "return"));
+            context.builder.createRet(context.scope.returnAllocation.generateIR());
         } else {
             context.builder.createRetVoid();
         }
@@ -97,15 +98,16 @@ class FunctionDeclarationCodeGenerator implements ValueSyntaxCodeGenerator<ts.Fu
             throw ex;
         }
 
-        return fun;
+        return functionReference;
     }
 
     private cleanUpHeap(context: CodeGenerationContext) {
         for (const variable of context.scope.getAllVariables()) {
-            const type = context.typeChecker.getTypeOfSymbolAtLocation(variable, variable.getDeclarations()[0]);
-            if (type.getSymbol() && type.getSymbol().name === "Array") {
-                const arrayCodeGeneratorHelper = ArrayCodeGenerator.create(type, context);
-                arrayCodeGeneratorHelper.free(context.scope.getNested(variable));
+            const variableAllocation = context.scope.getNested(variable);
+            // TODO Property members cannnot be identified this way
+            if (variableAllocation!.type.flags & ts.TypeFlags.Object) {
+                const object = variableAllocation!.dereference() as ObjectReference;
+                object.destruct();
             }
         }
     }

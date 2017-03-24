@@ -1,33 +1,16 @@
 import * as ts from "typescript";
-import * as llvm from "llvm-node";
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGenerator} from "../util/array-code-generator";
+import {ObjectReference} from "../value/object-reference";
+import {ObjectPropertyReference} from "../value/object-property-reference";
 
-class PropertyAccessExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.PropertyAccessExpression> {
+class PropertyAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PropertyAccessExpression, ObjectPropertyReference> {
     syntaxKind = ts.SyntaxKind.PropertyAccessExpression;
 
-    generateValue(propertyExpression: ts.PropertyAccessExpression, context: CodeGenerationContext): llvm.Value {
-        if (ArrayCodeGenerator.isArrayNode(propertyExpression.expression, context)) {
-            return this.generateArrayPropertyAccess(propertyExpression, context);
-        }
+    generate(propertyExpression: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference {
+        const object = context.generateValue(propertyExpression.expression).dereference() as ObjectReference;
 
-        throw new Error("Property Access Expression not yet supported");
-    }
-
-    generate(node: ts.PropertyAccessExpression, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
-    }
-
-    private generateArrayPropertyAccess(propertyExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
-        const arrayCodeGeneratorHelper = ArrayCodeGenerator.create(propertyExpression.expression, context);
-        const array = context.generate(propertyExpression.expression);
-
-        if (propertyExpression.name.text === "length") {
-            return arrayCodeGeneratorHelper.getLength(array);
-        }
-
-        throw new Error(`Unsupported Array method ${propertyExpression.name.text}`);
+        return object.getProperty(propertyExpression);
     }
 }
 

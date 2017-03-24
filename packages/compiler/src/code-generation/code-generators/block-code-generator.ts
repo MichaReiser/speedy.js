@@ -5,15 +5,13 @@ import {CodeGenerationContext} from "../code-generation-context";
 /**
  * Code Generator for a block ({}) statement
  */
-class BlockCodeGenerator implements SyntaxCodeGenerator<ts.Block> {
+class BlockCodeGenerator implements SyntaxCodeGenerator<ts.Block, void> {
 
     syntaxKind = ts.SyntaxKind.Block;
 
     generate(node: ts.Block, context: CodeGenerationContext): void {
         context.enterChildScope();
-
-        ts.forEachChild(node, child => context.generateVoid(child));
-
+        context.generateChildren(node);
         context.leaveChildScope();
     }
 }

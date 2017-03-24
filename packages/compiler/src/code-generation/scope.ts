@@ -1,24 +1,28 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as assert from "assert";
+import {FunctionReference} from "./value/function-reference";
+import {Allocation} from "./value/allocation";
+import {ClassReference} from "./value/class-reference";
 
 export class Scope {
-    private variables = new Map<ts.Symbol, llvm.AllocaInst>();
-    private functions = new Map<ts.Symbol, llvm.Function>();
-    private returnAlloca: llvm.AllocaInst | undefined;
+    private variables = new Map<ts.Symbol, Allocation>();
+    private functions = new Map<ts.Symbol, FunctionReference>();
+    private classes = new Map<ts.Symbol, ClassReference>();
+    private returnAlloca: Allocation | undefined;
     private retBlock: llvm.BasicBlock | undefined;
     private children: Scope[] = [];
 
-    constructor(private parent?: Scope) {}
+    constructor(private parent?: Scope, private fn?: FunctionReference) {}
 
     /**
      * Stores the function result. Only present in a function that is non void
      */
-    get returnAllocation(): llvm.AllocaInst | undefined {
+    get returnAllocation(): Allocation | undefined {
         return this.returnAlloca || (this.parent ? this.parent.returnAllocation : undefined);
     }
 
-    set returnAllocation(allocation: llvm.AllocaInst | undefined) {
+    set returnAllocation(allocation: Allocation | undefined) {
         this.returnAlloca = allocation;
     }
 
@@ -34,7 +38,18 @@ export class Scope {
         this.retBlock = returnBlock;
     }
 
-    addVariable(symbol: ts.Symbol, value: llvm.AllocaInst): void {
+    /**
+     * Returns a reference to the function in which this scope is defined
+     * @return {FunctionReference} the function
+     */
+    get enclosingFunction(): FunctionReference {
+        const result = this.fn || (this.parent ? this.parent.enclosingFunction : undefined);
+        assert(result, "Code generation always needs to be inside of a function");
+
+        return result!;
+    }
+
+    addVariable(symbol: ts.Symbol, value: Allocation): void {
         assert(symbol, "symbol is undefined");
         assert(value, "value is undefined");
         assert(!this.variables.has(symbol), `Variable ${symbol.name} is already defined in scope`);
@@ -42,7 +57,7 @@ export class Scope {
         this.variables.set(symbol, value);
     }
 
-    getVariable(symbol: ts.Symbol): llvm.AllocaInst {
+    getVariable(symbol: ts.Symbol): Allocation {
         assert(symbol, "symbol is undefined");
 
         const variable = this.variables.get(symbol);
@@ -54,17 +69,16 @@ export class Scope {
         return variable!;
     }
 
-    getNested(symbol: ts.Symbol): llvm.AllocaInst {
-        const scopes = [this, ...this.children];
-
-        for (const scope of scopes) {
-            if (scope.hasVariable(symbol)) {
-                return scope.getVariable(symbol);
-            }
+    getNested(symbol: ts.Symbol): Allocation | undefined {
+        if (this.hasVariable(symbol)) {
+            return this.getVariable(symbol);
         }
 
-        assert(false, `Variable with ${symbol.name} is not defined in this or any child scope.`);
-        return undefined!;
+        for (const scope of this.children) {
+            return scope.getNested(symbol);
+        }
+
+        return undefined;
     }
 
     getVariables(): ts.Symbol[] {
@@ -77,23 +91,18 @@ export class Scope {
     }
 
     hasVariable(symbol: ts.Symbol): boolean {
-        return this.variables.has(symbol);
+        return this.variables.has(symbol) || (!!this.parent && this.parent.hasVariable(symbol));
     }
 
-    removeVariable(symbol: ts.Symbol): void {
+    addFunction(symbol: ts.Symbol, fn: FunctionReference): void {
+        assert(fn, "function is undefined");
         assert(symbol, "symbol is undefined");
-        this.variables.delete(symbol);
-    }
-
-    addFunction(symbol: ts.Symbol, value: llvm.Function): void {
-        assert(symbol, "symbol is undefined");
-        assert(value, "value is undefined");
         assert(!this.functions.has(symbol), `function ${symbol.name} is already defined in scope`);
 
-        this.functions.set(symbol, value);
+        this.functions.set(symbol, fn);
     }
 
-    getFunction(symbol: ts.Symbol): llvm.Function {
+    getFunction(symbol: ts.Symbol): FunctionReference {
         assert(symbol, "symbol is undefined");
 
         const fun = this.functions.get(symbol);
@@ -105,13 +114,27 @@ export class Scope {
         return fun!;
     }
 
-    removeFunction(symbol: ts.Symbol): void {
-        assert(symbol, "symbol is undefined");
-        this.functions.delete(symbol);
+    addClass(classReference: ClassReference) {
+        assert(classReference, "class reference is undefined");
+        assert(!this.classes.has(classReference.symbol), `class ${classReference.name} is already defined`)
+
+        this.classes.set(classReference.symbol, classReference);
     }
 
-    enterChild(): Scope {
-        const child = new Scope(this);
+    getClass(symbol: ts.Symbol): ClassReference {
+        assert(symbol, "symbol is undefined");
+
+        const cls = this.classes.get(symbol);
+        if (!cls && this.parent) {
+            return this.parent.getClass(symbol);
+        }
+
+        assert(cls, `Class ${symbol.name} is not defined in scope`);
+        return cls!;
+    }
+
+    enterChild(fn?: FunctionReference): Scope {
+        const child = new Scope(this, fn);
         this.children.push(child);
         return child;
     }
