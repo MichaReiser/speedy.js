@@ -9,7 +9,7 @@ import {BuildDirectory} from "../code-generation/build-directory";
 import {LLVMByteCodeSymbolsResolver} from "./llvm-nm";
 
 const EXECUTABLE_NAME = "llvm-link";
-const LOG = debug("LLVMLink");
+const LOG = debug("external-tools/llvm-link");
 
 export class LLVMLink {
 
@@ -28,7 +28,7 @@ export class LLVMLink {
      * @param file the file to be linked
      */
     addByteCodeFile(file: string) {
-        assert(ts.sys.fileExists(file), `The file ${file} to link does not exist.`);
+        assert(file && ts.sys.fileExists(file), `The file ${file} to link does not exist.`);
 
         this.byteCodeFiles.push(file);
     }
@@ -39,9 +39,9 @@ export class LLVMLink {
      */
     addRuntime(unsafe=false): void {
         if (unsafe) {
-            this.byteCodeFiles.push(UNSAFE_RUNTIME);
+            this.addByteCodeFile(UNSAFE_RUNTIME);
         } else {
-            this.byteCodeFiles.push(SAFE_RUNTIME);
+            this.addByteCodeFile(SAFE_RUNTIME);
         }
 
         this.addObjectFilesFromDirectory(SHARED_LIBRARIES_DIRECTORY);

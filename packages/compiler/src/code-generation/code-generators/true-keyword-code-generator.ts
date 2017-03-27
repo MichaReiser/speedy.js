@@ -1,19 +1,16 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Primitive} from "../value/primitive";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
-class TrueKeywordCodeGenerator implements ValueSyntaxCodeGenerator<ts.BooleanLiteral> {
+class TrueKeywordCodeGenerator implements SyntaxCodeGenerator<ts.BooleanLiteral, Primitive> {
     syntaxKind = ts.SyntaxKind.TrueKeyword;
 
-    generateValue(node: ts.BooleanLiteral, context: CodeGenerationContext): llvm.Value {
-        return llvm.ConstantInt.getTrue(context.llvmContext);
+    generate(node: ts.BooleanLiteral, context: CodeGenerationContext): Primitive {
+        const trueValue = llvm.ConstantInt.getTrue(context.llvmContext);
+        return new Primitive(trueValue, context.typeChecker.getTypeAtLocation(node));
     }
-
-    generate(node: ts.BooleanLiteral, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
-    }
-
 }
 
 export default TrueKeywordCodeGenerator;

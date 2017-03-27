@@ -2,13 +2,19 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as assert from "assert";
 import * as debug from "debug";
-import {SyntaxCodeGenerator, ValueSyntaxCodeGenerator} from "./syntax-code-generator";
+
+import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {Scope} from "./scope";
 import {CompilationContext} from "../compilation-context";
+import {Value} from "./value/value";
+import {FunctionReference} from "./value/function-reference";
+import {ObjectReference} from "./value/object-reference";
+import {MethodReference} from "./value/method-reference";
+import {Primitive} from "./value/primitive";
 
-const log = debug("DefaultCodeGenerationContext");
+const log = debug("code-generation/default-code-generation-context");
 
 /**
  * Default implementation of the code generation context
@@ -20,7 +26,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     builder: llvm.IRBuilder;
     scope = new Scope();
 
-    private codeGenerators = new Map<ts.SyntaxKind, SyntaxCodeGenerator<ts.Node>>();
+    private codeGenerators = new Map<ts.SyntaxKind, SyntaxCodeGenerator<ts.Node, Value | void>>();
 
     constructor(public compilationContext: CompilationContext, public module: llvm.Module) {
         this.builder = new llvm.IRBuilder(this.compilationContext.llvmContext);
@@ -38,30 +44,34 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         return this.program.getTypeChecker();
     }
 
-    generateVoid(node: ts.Node): void {
-        log(`Generate node '${node.getText(node.getSourceFile())}'`);
-        this.getCodeGenerator(node).generate(node, this);
-        log(`Generated node '${node.getText(node.getSourceFile())}'`);
+    generateValue(node: ts.Node): Value {
+        const result = this.generate(node);
+
+        assert(result, `Generator for node of kind ${ts.SyntaxKind[node.kind]} returned no value but caller expected value`);
+        return result!;
     }
 
-    generate(node: ts.Node): llvm.Value {
+    generate(node: ts.Node): void | Value {
+        log(`Generate node ${ts.SyntaxKind[node.kind]}`);
         const codeGenerator = this.getCodeGenerator(node);
-        assert((codeGenerator as any).generateValue, `Code Generator ${codeGenerator.constructor.name} for node of kind ${ts.SyntaxKind[node.kind]} is not a ValueSyntaxCodeGenerator`);
-        const valueEmitter = codeGenerator as ValueSyntaxCodeGenerator<ts.Node>;
-
-        log(`Generate value for node '${node.getText(node.getSourceFile())}'`);
-        const value = valueEmitter.generateValue(node, this);
-        log(`Generated value for node '${node.getText(node.getSourceFile())}' is '${value}'`);
-
-        assert(value, `Code Generator ${JSON.stringify(codeGenerator)} returned no value`);
-        return value;
+        return codeGenerator.generate(node, this);
     }
 
     generateChildren(node: ts.Node): void {
-        ts.forEachChild(node, child => this.generateVoid(child));
+        ts.forEachChild(node, child => {
+            this.generate(child)
+        });
     }
 
-    registerCodeGenerator(codeGenerator: SyntaxCodeGenerator<ts.Node>): void {
+    assignValue(target: Value, value: Value) {
+        if (target.isAssignable()) {
+            target.generateAssignmentIR(value);
+        } else {
+            throw new Error(`Assignment to readonly value ${target}`);
+        }
+    }
+
+    registerCodeGenerator(codeGenerator: SyntaxCodeGenerator<ts.Node, Value | void>): void {
         assert(codeGenerator);
         const syntaxKind = codeGenerator.syntaxKind;
         assert(syntaxKind, "Code Generator returned undefined as syntax kind");
@@ -85,17 +95,54 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         return Array.from(this.entryFunctions.values());
     }
 
-    enterChildScope(): Scope {
-        this.scope = this.scope.enterChild();
+    enterChildScope(fn?: FunctionReference): Scope {
+        this.scope = this.scope.enterChild(fn);
         return this.scope;
     }
 
     leaveChildScope(): Scope {
+        const child = this.scope;
         this.scope = this.scope.exitChild();
-        return this.scope;
+        return child;
     }
 
-    private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node> | FallbackCodeGenerator {
+    functionReference(fn: llvm.Function, signature: ts.Signature): FunctionReference {
+        return new FunctionReference(fn, signature, this);
+    }
+
+    methodReference(object: ObjectReference, method: llvm.Function, signature: ts.Signature): MethodReference {
+        return new MethodReference(object, method, signature, this);
+    }
+
+    value(value: llvm.Value, type: ts.Type): Value {
+        const symbol = type.getSymbol();
+
+        if (type.flags & (ts.TypeFlags.BooleanLike | ts.TypeFlags.NumberLike | ts.TypeFlags.IntLike)) {
+            return new Primitive(value, type);
+        }
+
+        if (symbol.flags & ts.SymbolFlags.Function) {
+            const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
+            assert(signatures.length === 0, "Overloaded methods not yet supported");
+            return this.functionReference(value as llvm.Function, signatures[0]);
+        }
+
+        if (symbol.flags & ts.SymbolFlags.Method) {
+            // TODO Objekt erstellen und dann methode
+            // Requires special return object that contains the method function pointer and as
+            // well the object reference ptr
+            throw new Error("Returning methods is not yet supported");
+        }
+
+        if (type.flags & ts.TypeFlags.Object) {
+            const classReference = this.scope.getClass(symbol);
+            return classReference.objectFor(value, type);
+        }
+
+        throw Error(`Unable to convert llvm value of type ${this.typeChecker.typeToString(type)} to Value object.`);
+    }
+
+    private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node, Value | void> | FallbackCodeGenerator {
         const codeGenerator = this.codeGenerators.get(node.kind) || this.fallbackCodeGenerator;
 
         assert(codeGenerator, `No Code Generator registered for syntax kind ${ts.SyntaxKind[node.kind]} nor is a fallback code generator defined`);

@@ -5,7 +5,7 @@ function isPrime(x: int) {
         return false;
     }
 
-    for (let i = 2; i < Math.sqrt(x); ++i) {
+    for (let i = 2; i < (Math.sqrt(x) | 0); ++i) {
         if (x % i === 0) {
             return false;
         }

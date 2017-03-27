@@ -1,27 +1,31 @@
 import * as ts from "typescript";
-import * as llvm from "llvm-node";
 
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {toLLVMType} from "../util/type-mapping";
+import {CodeGenerationError} from "../code-generation-exception";
+import {FunctionReference} from "../value/function-reference";
+import {ClassReference} from "../value/class-reference";
+import {Allocation} from "../value/allocation";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
-class IdentifierCodeGenerator implements ValueSyntaxCodeGenerator<ts.Identifier> {
+class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, FunctionReference | Allocation | ClassReference> {
     syntaxKind = ts.SyntaxKind.Identifier;
 
-    generateValue(identifier: ts.Identifier, context: CodeGenerationContext): llvm.Value | llvm.Function {
+    generate(identifier: ts.Identifier, context: CodeGenerationContext): FunctionReference | Allocation | ClassReference {
         const symbol = context.typeChecker.getSymbolAtLocation(identifier);
 
-        if (symbol.flags  === ts.SymbolFlags.Function) {
+        if (symbol.flags & ts.SymbolFlags.Function) {
             return context.scope.getFunction(symbol);
         }
 
-        const llvmType = toLLVMType(context.typeChecker.getTypeAtLocation(identifier), context);
+        if (symbol.flags & ts.SymbolFlags.Variable && context.scope.hasVariable(symbol)) {
+            return context.scope.getVariable(symbol);
+        }
 
-        return context.builder.createAlignedLoad(context.scope.getVariable(symbol), context.module.dataLayout.getPrefTypeAlignment(llvmType), symbol.name);
-    }
+        if (symbol.flags & ts.SymbolFlags.Type) {
+            return context.scope.getClass(symbol);
+        }
 
-    generate(node: ts.Identifier, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
+        throw CodeGenerationError.unsupportedIdentifier(identifier);
     }
 }
 

@@ -1,22 +1,26 @@
 import * as ts from "typescript";
-import * as llvm from "llvm-node";
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGenerator} from "../util/array-code-generator";
+import {ArrayClassReference} from "../value/array-class-reference";
+import {ArrayReference} from "../value/array-reference";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
 /**
  * Code Generator for [1, 2, ...] array expressions
  */
-class ArrayLiteralExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.ArrayLiteralExpression> {
+class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.ArrayLiteralExpression, ArrayReference> {
     syntaxKind = ts.SyntaxKind.ArrayLiteralExpression;
 
-    generateValue(arrayLiteral: ts.ArrayLiteralExpression, context: CodeGenerationContext): llvm.Value {
-        const arrayCodeGenerator = ArrayCodeGenerator.create(arrayLiteral, context);
-        return arrayCodeGenerator.newArray(arrayLiteral.elements);
-    }
+    generate(arrayLiteral: ts.ArrayLiteralExpression, context: CodeGenerationContext): ArrayReference {
+        let type = context.typeChecker.getTypeAtLocation(arrayLiteral);
+        const elementType = ArrayReference.getElementType(type);
 
-    generate(node: ts.ArrayLiteralExpression, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
+        if (elementType.flags & ts.TypeFlags.Undefined) {
+            type = context.typeChecker.getContextualType(arrayLiteral);
+        }
+
+        const arrayClass = context.scope.getClass(type.getSymbol()) as ArrayClassReference;
+
+        return arrayClass.fromLiteral(type, arrayLiteral.elements.map(value => context.generateValue(value)));
     }
 }
 

@@ -2,7 +2,7 @@ import * as debug from "debug";
 import {execBinaryen} from "./tools";
 import {COMPILER_RT_FILE} from "speedyjs-runtime";
 
-const LOG = debug("Binaryen:s2wasm");
+const LOG = debug("external-tools/binaryen-s2wasm");
 const EXECUTABLE_NAME = "s2wasm";
 
 /**

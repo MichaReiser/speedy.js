@@ -1,6 +1,7 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as path from "path";
+import * as debug from "debug";
 
 import {CodeGenerator} from "./code-generator";
 import {DefaultCodeGenerationContextFactory} from "./default-code-generation-context-factory";
@@ -15,18 +16,18 @@ import {wasmOpt} from "../external-tools/binaryen-opt";
 import {CompilationContext} from "../compilation-context";
 
 const WASM_TRIPLE = "wasm32-unknown-unknown";
+const LOG = debug("code-generation/per-file-code-generator");
 
 export class PerFileCodeGenerator implements CodeGenerator {
     private codeGenerationContexts = new Map<ts.SourceFile, CodeGenerationContext>();
 
     constructor(private context: llvm.LLVMContext, private codeGenerationContextFactory = new DefaultCodeGenerationContextFactory()) {
-
     }
 
-    generateEntryFunction(fn: ts.FunctionDeclaration, compilationContext: CompilationContext) {
+    generateEntryFunction(fn: ts.FunctionDeclaration, compilationContext: CompilationContext): void {
         const context = this.getCodeGenerationContext(fn, compilationContext);
 
-        context.generateVoid(fn);
+        context.generate(fn);
         context.addEntryFunction(fn.name!.text); // TODO function declaration without name?
     }
 
@@ -36,8 +37,10 @@ export class PerFileCodeGenerator implements CodeGenerator {
                 continue;
             }
 
+            LOG(`Emit module for source file ${sourceFile.fileName}.`);
             llvm.verifyModule(context.module);
             this.writeModule(sourceFile, context);
+            LOG(`Module for source file ${sourceFile.fileName} emitted.`);
         }
     }
 
@@ -72,7 +75,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
     private getOutputFileName(sourceFile: ts.SourceFile, context: CodeGenerationContext, fileExtension=".wasm") {
         const withNewExtension = sourceFile.fileName.replace(".ts", fileExtension);
         if (context.compilationContext.compilerOptions.outDir) {
-            const relativeName = path.relative(context.compilationContext.compilerHost.getCurrentDirectory(), withNewExtension);
+            const relativeName = path.relative(context.compilationContext.rootDir, withNewExtension);
             return path.join(context.compilationContext.compilerOptions.outDir, relativeName);
         }
 

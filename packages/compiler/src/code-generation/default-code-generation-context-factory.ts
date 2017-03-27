@@ -10,6 +10,9 @@ import {DefaultCodeGenerationContext} from "./default-code-generation-context";
 import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {CompilationContext} from "../compilation-context";
+import {ArrayClassReference} from "./value/array-class-reference";
+import {MathClassReference} from "./value/math-class-reference";
+import {Value} from "./value/value";
 
 const log = debug("DefaultLLVMEmitContextFactory");
 
@@ -18,7 +21,7 @@ const log = debug("DefaultLLVMEmitContextFactory");
  */
 export class DefaultCodeGenerationContextFactory implements CodeGenerationContextFactory {
 
-    private codeGenerators?: SyntaxCodeGenerator<ts.Node>[];
+    private codeGenerators?: SyntaxCodeGenerator<ts.Node, Value | void>[];
 
     constructor(private fallbackCodeGenerator?: FallbackCodeGenerator) {}
 
@@ -33,10 +36,28 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
         context.setFallbackCodeGenerator(this.fallbackCodeGenerator);
 
+        this.registerGlobals(context);
+
         return context;
     }
 
-    private getCodeGenerators(): SyntaxCodeGenerator<ts.Node>[] {
+    private registerGlobals(context: CodeGenerationContext): void {
+        const builtins = context.compilationContext.builtIns;
+
+        const arraySymbol = builtins.get("Array");
+        if (arraySymbol) {
+            context.scope.addClass(ArrayClassReference.create(arraySymbol, context));
+        }
+
+        const mathSymbol = builtins.get("Math");
+        if (mathSymbol) {
+            const mathClassReference = MathClassReference.create(mathSymbol, context);
+            context.scope.addClass(mathClassReference);
+            context.scope.addVariable(mathSymbol, mathClassReference.createGlobalVariable(mathSymbol));
+        }
+    }
+
+    private getCodeGenerators(): SyntaxCodeGenerator<ts.Node, Value | void>[] {
         if (!this.codeGenerators) {
             this.codeGenerators = this.loadCodeGenerators();
         }
@@ -44,7 +65,7 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
         return this.codeGenerators;
     }
 
-    private loadCodeGenerators(): SyntaxCodeGenerator<ts.Node>[] {
+    private loadCodeGenerators(): SyntaxCodeGenerator<ts.Node, Value | void>[] {
         const fileNames = fs.readdirSync(`${__dirname}/code-generators`);
         const codeGeneratorFiles = fileNames.filter(file => file.endsWith("code-generator.js"));
 
@@ -58,7 +79,7 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
             log("Dynamically loaded code generator %s", codeGeneratorFile);
 
-            return new constructorFunction() as SyntaxCodeGenerator<ts.Node>;
+            return new constructorFunction() as SyntaxCodeGenerator<ts.Node, Value | void>;
         });
     }
 }

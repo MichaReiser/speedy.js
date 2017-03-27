@@ -1,46 +1,82 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Value} from "../value/value";
+import {CodeGenerationError} from "../code-generation-exception";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
-class PrefixUnaryExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.PrefixUnaryExpression> {
+class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PrefixUnaryExpression, Value> {
     syntaxKind = ts.SyntaxKind.PrefixUnaryExpression;
 
-    generateValue(node: ts.PrefixUnaryExpression, context: CodeGenerationContext): llvm.Value {
-        const value = context.generate(node.operand);
+    generate(node: ts.PrefixUnaryExpression, context: CodeGenerationContext): Value {
+        const left = context.generateValue(node.operand);
+        const leftValue = left.generateIR();
         const type = context.typeChecker.getTypeAtLocation(node.operand);
-        const symbol = context.typeChecker.getSymbolAtLocation(node.operand);
-        let result: llvm.Value;
+        let result: llvm.Value | undefined;
 
         switch (node.operator) {
-            case ts.SyntaxKind.PlusPlusToken:
-                if (type.flags & ts.TypeFlags.Int) {
-                    result = context.builder.createAdd(value, llvm.ConstantInt.get(context.llvmContext, 1));
-                    context.builder.createStore(result, context.scope.getVariable(symbol));
-                    break;
+            case ts.SyntaxKind.ExclamationToken:
+                if (type.flags & ts.TypeFlags.BooleanLike) {
+                    result = context.builder.createNeg(leftValue);
+                } else if (type.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createICmpNE(leftValue, llvm.ConstantInt.get(context.llvmContext, 0));
+                } else if (type.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpONE(leftValue, llvm.ConstantFP.get(context.llvmContext, 0));
                 }
 
-                if (type.flags & ts.TypeFlags.Number) {
-                    result = context.builder.createFAdd(value, llvm.ConstantFP.get(context.llvmContext, 1.0));
-                    context.builder.createStore(result, context.scope.getVariable(symbol));
-                    break;
-                }
+                break;
 
             case ts.SyntaxKind.MinusToken:
-                if (type.flags & ts.TypeFlags.IntLike || type.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createNeg(value);
-                    break;
+                if (type.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createNeg(leftValue);
+                } else if (type.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFNeg(leftValue);
                 }
 
-            default:
-                throw new Error(`Unsupported unary operator ${ts.SyntaxKind[node.operator]}`);
+                break;
+
+            case ts.SyntaxKind.MinusMinusToken:
+                if (type.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createSub(leftValue, llvm.ConstantInt.get(context.llvmContext, 1));
+                } else if (type.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFSub(leftValue, llvm.ConstantFP.get(context.llvmContext, 1.0));
+                }
+
+                break;
+
+            case ts.SyntaxKind.PlusPlusToken:
+                if (type.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createAdd(leftValue, llvm.ConstantInt.get(context.llvmContext, 1));
+                    context.assignValue(left, context.value(result, type));
+                } else if (type.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFAdd(leftValue, llvm.ConstantFP.get(context.llvmContext, 1.0));
+                    context.assignValue(left, context.value(result, type));
+                }
+
+                break;
+
+            case ts.SyntaxKind.TildeToken:
+                let intValue: llvm.Value | undefined;
+                if (type.flags & ts.TypeFlags.IntLike) {
+                    intValue = leftValue;
+                } else if (type.flags & (ts.TypeFlags.BooleanLike)) {
+                    intValue = context.builder.createIntCast(leftValue, llvm.Type.getInt32Ty(context.llvmContext), true);
+                } else if (type.flags & ts.TypeFlags.NumberLike) {
+                    intValue = context.builder.createFPToSI(leftValue, llvm.Type.getInt32Ty(context.llvmContext));
+                }
+
+                if (intValue) {
+                    result = context.builder.createXor(intValue, llvm.Constant.getAllOnesValue(llvm.Type.getInt32Ty(context.llvmContext)));
+                }
+
+                break;
         }
 
-        return result; // FIXME this fails for properties
-    }
+        if (!result) {
+            throw CodeGenerationError.unsupportedUnaryOperation(node, context.typeChecker.typeToString(type));
+        }
 
-    generate(node: ts.PrefixUnaryExpression, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
+        return context.value(result, type);
     }
 }
 

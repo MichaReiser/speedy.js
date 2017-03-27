@@ -1,96 +1,114 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {ValueSyntaxCodeGenerator} from "../syntax-code-generator";
+import {Value} from "../value/value";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ArrayCodeGenerator} from "../util/array-code-generator";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {CodeGenerationError} from "../code-generation-exception";
+import {MathObjectReference} from "../value/math-object-reference";
 
-
-function isAssignmentToArray(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): boolean {
-    if (binaryExpression.operatorToken.kind !== ts.SyntaxKind.FirstAssignment && binaryExpression.operatorToken.kind !== ts.SyntaxKind.LastAssignment) {
-        return false;
-    }
-
-    return ArrayCodeGenerator.isArrayAccess(binaryExpression.left, context);
-}
-
-function isAssignmentToArrayLength(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): boolean {
-    if (binaryExpression.operatorToken.kind !== ts.SyntaxKind.FirstAssignment && binaryExpression.operatorToken.kind !== ts.SyntaxKind.LastAssignment) {
-        return false;
-    }
-
-    return binaryExpression.left.kind === ts.SyntaxKind.PropertyAccessExpression &&
-        ArrayCodeGenerator.isArrayNode((binaryExpression.left as ts.PropertyAccessExpression).expression, context)
-        && (binaryExpression.left as ts.PropertyAccessExpression).name.text === "length";
+function isAssignment(operatorToken: ts.BinaryOperatorToken) {
+    return operatorToken.kind === ts.SyntaxKind.EqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.PlusEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.MinusEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.AsteriskAsteriskEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.AsteriskEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.SlashEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.PercentEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.AmpersandEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.BarEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.CaretEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.LessThanLessThanEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken ||
+        operatorToken.kind === ts.SyntaxKind.GreaterThanGreaterThanEqualsToken;
 }
 
 /**
- * Code Generator for binary expressions, e.g. 5+3
+ * Code Generator for binary expressions, e.g. 5+3 but also x = 3, or x += 3
  */
-class BinaryExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.BinaryExpression> {
+class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpression, Value> {
     syntaxKind = ts.SyntaxKind.BinaryExpression;
 
-    generateValue(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): llvm.Value {
-        if (isAssignmentToArray(binaryExpression, context)) {
-            return this.handleArrayAssignment(binaryExpression, context);
-        }
-
-        if (isAssignmentToArrayLength(binaryExpression, context)) {
-            return this.handleArrayLengthAssignment(binaryExpression, context);
-        }
-
-        return this.handleBinaryExpression(binaryExpression, context);
-    }
-
-    generate(node: ts.BinaryExpression, context: CodeGenerationContext): void {
-        this.generateValue(node, context);
-    }
-
-    private handleArrayAssignment(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): llvm.Value {
-        const elementAccessExpression = binaryExpression.left as ts.ElementAccessExpression;
-        const arrayCodeGeneratorHelper = ArrayCodeGenerator.create(elementAccessExpression.expression, context);
-
-        const array = context.generate(elementAccessExpression.expression);
-        const index = context.generate(elementAccessExpression.argumentExpression!); // TODO, what if undefined
-        const right = context.generate(binaryExpression.right);
-        arrayCodeGeneratorHelper.setElement(array, index, right);
-
-        return right;
-    }
-
-    private handleArrayLengthAssignment(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext) {
-        const propertyAccess = binaryExpression.left as ts.PropertyAccessExpression;
-        const arrayCodeGenerator = ArrayCodeGenerator.create(propertyAccess.expression, context);
-
-        const array = context.generate(propertyAccess.expression);
-        const length = context.generate(binaryExpression.right);
-
-        return arrayCodeGenerator.setLength(array, length);
-    }
-
-    private handleBinaryExpression(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): llvm.Value {
-        const left = context.generate(binaryExpression.left);
-        const right = context.generate(binaryExpression.right);
+    generate(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): Value {
+        const left = context.generateValue(binaryExpression.left);
+        const right = context.generateValue(binaryExpression.right);
+        const rightLLVMValue = right.generateIR();
 
         const leftType = context.typeChecker.getTypeAtLocation(binaryExpression.left);
+        const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
+
         let result: llvm.Value | undefined;
-        // const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
-        // assert(rightType.flags === leftType.flags, `Right and left type of binary expression have to be equal (left: ${ts.TypeFlags[leftType.flags]}, right: ${ts.TypeFlags[rightType.flags]})`);
 
         switch (binaryExpression.operatorToken.kind) {
-            case ts.SyntaxKind.AsteriskEqualsToken:
             case ts.SyntaxKind.AsteriskToken:
-                if (leftType.flags & ts.TypeFlags.Int) {
-                    result = context.builder.createMul(left, right);
+            case ts.SyntaxKind.AsteriskEqualsToken:
+                if (leftType.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createMul(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFMul(left.generateIR(), rightLLVMValue);
                 }
 
                 break;
 
-            case ts.SyntaxKind.PlusEqualsToken:
-            case ts.SyntaxKind.PlusToken:
+            case ts.SyntaxKind.AsteriskAsteriskToken:
+            case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.NumberLike)) {
+                    result = MathObjectReference.pow(left.generateIR(), rightLLVMValue, leftType, context);
+                }
+
+                break;
+
+            case ts.SyntaxKind.BarToken:
+            case ts.SyntaxKind.BarEqualsToken:
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createAdd(left, right);
+                    result = context.builder.createOr(left.generateIR(), rightLLVMValue);
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFAdd(left, right);
+                    result = context.builder.createFPToSI(left.generateIR(), llvm.Type.getInt32Ty(context.llvmContext));
+                }
+
+                break;
+
+            case ts.SyntaxKind.EqualsEqualsEqualsToken:
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                    result = context.builder.createICmpEQ(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpOEQ(left.generateIR(), rightLLVMValue);
+                }
+
+                break;
+
+            case ts.SyntaxKind.GreaterThanToken:
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                    result = context.builder.createICmpSGT(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpOGT(left.generateIR(), rightLLVMValue);
+                }
+
+                break;
+
+            case ts.SyntaxKind.GreaterThanEqualsToken:
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                    result = context.builder.createICmpSGE(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpOGE(left.generateIR(), rightLLVMValue);
+                }
+
+                break;
+
+            case ts.SyntaxKind.LessThanToken: {
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                    result = context.builder.createICmpSLT(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpULT(left.generateIR(), rightLLVMValue);
+                }
+
+                break;
+            }
+
+            case ts.SyntaxKind.LessThanEqualsToken:
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                    result = context.builder.createICmpSLE(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpULE(left.generateIR(), rightLLVMValue);
                 }
 
                 break;
@@ -98,89 +116,58 @@ class BinaryExpressionCodeGenerator implements ValueSyntaxCodeGenerator<ts.Binar
             case ts.SyntaxKind.MinusEqualsToken:
             case ts.SyntaxKind.MinusToken:
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSub(left, right);
+                    result = context.builder.createSub(left.generateIR(), rightLLVMValue);
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFSub(left, right);
-                }
-
-                break;
-
-            case ts.SyntaxKind.GreaterThanToken: {
-                if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSGT(left, right);
-                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOGT(left, right);
-                }
-
-                break;
-            }
-
-            case ts.SyntaxKind.LessThanToken: {
-                if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSLT(left, right);
-                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpULT(left, right);
-                }
-
-                break;
-            }
-
-            case ts.SyntaxKind.SlashEqualsToken:
-            case ts.SyntaxKind.SlashToken: {
-                if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSDiv(left, right);
-                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFDiv(left, right);
-                }
-
-                break;
-            }
-
-            case ts.SyntaxKind.EqualsEqualsEqualsToken:
-                if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpEQ(left, right);
-                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOEQ(left, right);
-                }
-                break;
-
-            case ts.SyntaxKind.LessThanEqualsToken:
-                if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSLE(left, right);
-                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpULE(left, right);
+                    result = context.builder.createFSub(left.generateIR(), rightLLVMValue);
                 }
 
                 break;
 
             case ts.SyntaxKind.PercentToken:
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSRem(left, right);
+                    result = context.builder.createSRem(left.generateIR(), rightLLVMValue);
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFRem(left, right);
+                    result = context.builder.createFRem(left.generateIR(), rightLLVMValue);
                 }
 
                 break;
 
+            case ts.SyntaxKind.PlusEqualsToken:
+            case ts.SyntaxKind.PlusToken:
+                if (leftType.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createAdd(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFAdd(left.generateIR(), rightLLVMValue);
+                }
+
+                break;
+
+            case ts.SyntaxKind.SlashEqualsToken:
+            case ts.SyntaxKind.SlashToken: {
+                if (leftType.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createSDiv(left.generateIR(), rightLLVMValue);
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFDiv(left.generateIR(), rightLLVMValue);
+                }
+
+                break;
+            }
+
             case ts.SyntaxKind.FirstAssignment:
-                // FIXME we need to get the allocation of the left hand side... but that might no be that easy what if it is an array or object element?
-                result = context.builder.createStore(right, context.scope.getVariable(context.typeChecker.getSymbolAtLocation(binaryExpression.left)));
+                result = rightLLVMValue;
         }
 
         if (!result) {
-            throw new Error(`Unsupported binary operator ${ts.SyntaxKind[binaryExpression.operatorToken.kind]}`);
+            throw CodeGenerationError.unsupportedBinaryOperation(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(leftType));
         }
 
-        switch (binaryExpression.operatorToken.kind) {
-            case ts.SyntaxKind.MinusEqualsToken:
-            case ts.SyntaxKind.AsteriskEqualsToken:
-            case ts.SyntaxKind.SlashEqualsToken:
-            case ts.SyntaxKind.PlusEqualsToken:
-                // FIXME we need to get the allocation of the left hand side... but that might no be that easy what if it is an array or object element?
-                context.builder.createStore(result, context.scope.getVariable(context.typeChecker.getSymbolAtLocation(binaryExpression.left)));
+        const resultValue = context.value(result, rightType);
+
+        if (isAssignment(binaryExpression.operatorToken)) {
+            context.assignValue(left, resultValue);
         }
 
-        return result;
+        return resultValue;
     }
 }
 

@@ -23,7 +23,7 @@
     "@types/tmp": "0.0.32",
     "commander": "^2.9.0",
     "debug": "^2.6.3",
-    "llvm-node": "^0.1.1",
+    "llvm-node": "^0.1.9",
     "lodash": "^4.17.4",
     "speedyjs-runtime": "0.x.x",
     "tmp": "0.0.31",
@@ -41,13 +41,13 @@
       ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js",
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|js)$",
+    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|js)$",
     "moduleFileExtensions": [
       "ts",
       "js"
     ],
     "modulePathIgnorePatterns": [
-      "<rootDir>/test/cases/.*\\.(js|ll)$"
+      "<rootDir>/__tests__/cases/.*\\.(js|ll)$"
     ]
   }
 }

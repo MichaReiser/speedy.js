@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 
-class VariableDeclarationListCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclarationList> {
+class VariableDeclarationListCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclarationList, void> {
     syntaxKind = ts.SyntaxKind.VariableDeclarationList;
 
     generate(variableDeclarationList: ts.VariableDeclarationList, context: CodeGenerationContext): void {

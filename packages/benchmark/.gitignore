@@ -1,5 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 cases/*.wasm
 cases/*.js
+cases/*.ll
 results.json
 dist

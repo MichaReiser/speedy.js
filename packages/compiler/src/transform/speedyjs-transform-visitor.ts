@@ -21,11 +21,11 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
             try {
                 this.codeGenerator.generateEntryFunction(functionDeclaration, this.compilationContext);
                 // replace function with wasm include
-                return functionDeclaration;
             } finally {
                 log(`Disable SpeedyJS for ${name}`);
                 this.inSpeedyJSFunction = false;
             }
+            return functionDeclaration;
         } else {
             return context.visitEachChild(functionDeclaration);
         }
