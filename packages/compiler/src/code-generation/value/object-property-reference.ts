@@ -15,7 +15,7 @@ export class ObjectPropertyReference implements AssignableValue {
     }
 
     getValue(): Value {
-        return FunctionReference.invoke(this.getter!, [this.object], this.type, this.context);
+        return FunctionReference.invoke(this.getter!, [this.object], this.type, this.context)!;
     }
 
     generateAssignmentIR(value: Value): void {

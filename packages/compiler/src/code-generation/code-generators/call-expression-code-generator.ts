@@ -6,10 +6,10 @@ import {FunctionReference} from "../value/function-reference";
 import {Value} from "../value/value";
 import {ObjectReference} from "../value/object-reference";
 
-class CallExpressionCodeGenerator implements SyntaxCodeGenerator<ts.CallExpression, Value> {
+class CallExpressionCodeGenerator implements SyntaxCodeGenerator<ts.CallExpression, Value | void> {
     syntaxKind = ts.SyntaxKind.CallExpression;
 
-    generate(callExpression: ts.CallExpression, context: CodeGenerationContext): Value {
+    generate(callExpression: ts.CallExpression, context: CodeGenerationContext): Value | void {
         let callee: FunctionReference;
 
         if (callExpression.expression.kind === ts.SyntaxKind.PropertyAccessExpression) {

@@ -4,6 +4,7 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {CodeGenerationError} from "../code-generation-exception";
 import {FunctionReference} from "./function-reference";
 import {BuiltInObjectReference} from "./built-in-object-reference";
+import {toLLVMType} from "../util/type-mapping";
 
 /**
  * Wrapper for the built in Math object
@@ -51,5 +52,50 @@ export class MathObjectReference extends BuiltInObjectReference {
         }
 
         return new SqrtFunction(this.context);
+    }
+
+    /**
+     * Calls the pow function
+     * @param lhs the left hand side value (base)
+     * @param rhs the right hand side value (exponent)
+     * @param type the type of the left and right hand side
+     * @param context the context
+     * @return the result of the pow operation
+     */
+    static pow(lhs: llvm.Value, rhs: llvm.Value, type: ts.Type, context: CodeGenerationContext) {
+        const powFn = this.getPowFunction(type, context);
+        const powArgs = this.getPowCallArguments(lhs, rhs, type, context);
+        const result = context.builder.createCall(powFn, powArgs);
+
+        if (type.flags & ts.TypeFlags.IntLike) {
+            return context.builder.createFPToSI(result, toLLVMType(type, context));
+        }
+
+        return result;
+    }
+
+    private static getPowFunction(type: ts.Type, context: CodeGenerationContext) {
+        let intrinsicName: string;
+        let lhsType: llvm.Type;
+        if (type.flags & ts.TypeFlags.IntLike) {
+            intrinsicName = "llvm.powi.f32";
+            lhsType = llvm.Type.getFloatTy(context.llvmContext);
+        } else {
+            intrinsicName = "llvm.pow.f64";
+            lhsType = llvm.Type.getDoubleTy(context.llvmContext);
+        }
+
+        return context.module.getOrInsertFunction(
+            intrinsicName,
+            llvm.FunctionType.get(lhsType, [lhsType, toLLVMType(type, context)], false)
+        );
+    }
+
+    private static getPowCallArguments(lhs: llvm.Value, rhs: llvm.Value, type: ts.Type, context: CodeGenerationContext) {
+        if (type.flags & ts.TypeFlags.IntLike) {
+            lhs = context.builder.createSIToFP(lhs, llvm.Type.getFloatTy(context.llvmContext));
+        }
+
+        return [lhs, rhs];
     }
 }

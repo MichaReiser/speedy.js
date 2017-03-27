@@ -63,6 +63,14 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         });
     }
 
+    assignValue(target: Value, value: Value) {
+        if (target.isAssignable()) {
+            target.generateAssignmentIR(value);
+        } else {
+            throw new Error(`Assignment to readonly value ${target}`);
+        }
+    }
+
     registerCodeGenerator(codeGenerator: SyntaxCodeGenerator<ts.Node, Value | void>): void {
         assert(codeGenerator);
         const syntaxKind = codeGenerator.syntaxKind;
@@ -93,8 +101,9 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     }
 
     leaveChildScope(): Scope {
+        const child = this.scope;
         this.scope = this.scope.exitChild();
-        return this.scope;
+        return child;
     }
 
     functionReference(fn: llvm.Function, signature: ts.Signature): FunctionReference {
@@ -105,24 +114,23 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         return new MethodReference(object, method, signature, this);
     }
 
-    value(value: llvm.Value, type: ts.Type) {
+    value(value: llvm.Value, type: ts.Type): Value {
         const symbol = type.getSymbol();
 
         if (type.flags & (ts.TypeFlags.BooleanLike | ts.TypeFlags.NumberLike | ts.TypeFlags.IntLike)) {
             return new Primitive(value, type);
         }
 
-        if (symbol.flags === ts.SymbolFlags.Function) {
-            // what if it is a function?
+        if (symbol.flags & ts.SymbolFlags.Function) {
             const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
             assert(signatures.length === 0, "Overloaded methods not yet supported");
             return this.functionReference(value as llvm.Function, signatures[0]);
         }
 
-        if (symbol.flags === ts.SymbolFlags.Method) {
+        if (symbol.flags & ts.SymbolFlags.Method) {
             // TODO Objekt erstellen und dann methode
-            // Mittels Type kann die Klasse gefunden werden
-            // Mittels symbol kann dann die Methode identifiziert werden (solange keine overloads)
+            // Requires special return object that contains the method function pointer and as
+            // well the object reference ptr
             throw new Error("Returning methods is not yet supported");
         }
 
@@ -131,7 +139,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
             return classReference.objectFor(value, type);
         }
 
-        throw Error("OhOH");
+        throw Error(`Unable to convert llvm value of type ${this.typeChecker.typeToString(type)} to Value object.`);
     }
 
     private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node, Value | void> | FallbackCodeGenerator {

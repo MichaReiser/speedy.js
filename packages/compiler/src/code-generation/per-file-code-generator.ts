@@ -22,7 +22,6 @@ export class PerFileCodeGenerator implements CodeGenerator {
     private codeGenerationContexts = new Map<ts.SourceFile, CodeGenerationContext>();
 
     constructor(private context: llvm.LLVMContext, private codeGenerationContextFactory = new DefaultCodeGenerationContextFactory()) {
-
     }
 
     generateEntryFunction(fn: ts.FunctionDeclaration, compilationContext: CompilationContext): void {
@@ -76,7 +75,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
     private getOutputFileName(sourceFile: ts.SourceFile, context: CodeGenerationContext, fileExtension=".wasm") {
         const withNewExtension = sourceFile.fileName.replace(".ts", fileExtension);
         if (context.compilationContext.compilerOptions.outDir) {
-            const relativeName = path.relative(context.compilationContext.compilerHost.getCurrentDirectory(), withNewExtension);
+            const relativeName = path.relative(context.compilationContext.rootDir, withNewExtension);
             return path.join(context.compilationContext.compilerOptions.outDir, relativeName);
         }
 

@@ -43,7 +43,7 @@ export class FunctionReference implements Value {
         return this;
     }
 
-    invoke(args: Value[] | llvm.Value[]): Value {
+    invoke(args: Value[] | llvm.Value[]): Value | void {
         const llvmArgs = args.length === 0 || args[0] instanceof llvm.Value ? args as llvm.Value[]: (args as Value[]).map(arg => arg.generateIR());
         const callArgs = this.getCallArguments(llvmArgs);
 
@@ -60,19 +60,7 @@ export class FunctionReference implements Value {
         return args;
     }
 
-    static invokeVoid(fn: llvm.Constant, args: Value[] | llvm.Value[], context: CodeGenerationContext): void {
-        let llvmArgs: llvm.Value[];
-
-        if (args.length === 0 || args[0] instanceof llvm.Value) {
-            llvmArgs = args as llvm.Value[];
-        } else {
-            llvmArgs = (args as Value[]).map(arg => arg.generateIR());
-        }
-
-        context.builder.createCall(fn, llvmArgs);
-    }
-
-    static invoke(fn: llvm.Constant, args: Value[] | llvm.Value[], returnType: ts.Type, context: CodeGenerationContext): Value {
+    static invoke(fn: llvm.Constant, args: Value[] | llvm.Value[], returnType: ts.Type, context: CodeGenerationContext): Value | void {
         let llvmArgs: llvm.Value[];
 
         if (args.length === 0 || args[0] instanceof llvm.Value) {
@@ -82,6 +70,11 @@ export class FunctionReference implements Value {
         }
 
         const result = context.builder.createCall(fn, llvmArgs);
+
+        if (returnType.flags & ts.TypeFlags.Void) {
+            return;
+        }
+
         return context.value(result, returnType);
     }
 }

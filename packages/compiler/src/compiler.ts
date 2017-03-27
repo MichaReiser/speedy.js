@@ -37,8 +37,9 @@ export class Compiler {
             compilerOptions: this.compilerOptions,
             llvmContext: context,
             program,
-            builtIns
-        };
+            builtIns,
+            rootDir: (program as any).getCommonSourceDirectory()
+    };
 
         const speedyJSVisitor = new SpeedyJSTransformVisitor(compilationContext, llvmEmitter);
 

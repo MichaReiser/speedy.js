@@ -41,8 +41,6 @@ export class ArrayClassReference extends ClassReference {
         const elementType = ArrayReference.getElementType(signature.getReturnType());
         const parameters = signature.getParameters();
         switch (parameters.length) {
-            case 0:
-                return new EmptyArrayConstructorFunction(elementType, signature, this.context);
             case 1:
                 if (signature.parameters[0].name === "arrayLength") {
                     return new ArrayOfSizeConstructorFunction(elementType, signature, this.context);
@@ -55,19 +53,6 @@ export class ArrayClassReference extends ClassReference {
 
     getLLVMType(type: ts.Type): llvm.Type {
         return ArrayReference.getArrayType(this.context);
-    }
-}
-
-class EmptyArrayConstructorFunction extends FunctionReference {
-
-    constructor(private elementType: ts.Type, signature: ts.Signature, context: CodeGenerationContext) {
-        super(getConstructorFunction(elementType, context), signature, context);
-    }
-
-    getCallArguments(args: llvm.Value[]) {
-        assert(args.length === 0, "The new Array<T>() constructor cannot be called with any arguments");
-        const elementPtrType = toLLVMType(this.elementType, this.context).getPointerTo();
-        return [llvm.ConstantInt.get(this.context.llvmContext, 0), llvm.ConstantPointerNull.get(elementPtrType)];
     }
 }
 
@@ -97,7 +82,12 @@ class ArrayOfElementsConstructorFunction extends FunctionReference {
 
 function getArgumentsForConstructorPassingElements(elements: llvm.Value[], elementType: ts.Type, context: CodeGenerationContext) {
     const llvmElementType = toLLVMType(elementType, context);
-    const elementsArray = llvmArrayValue(elements, llvmElementType, context, "elements");
+    let elementsArray;
+    if (elements.length === 0) {
+        elementsArray = llvm.ConstantPointerNull.get(llvmElementType.getPointerTo());
+    } else {
+        elementsArray = llvmArrayValue(elements, llvmElementType, context, "elements");
+    }
 
     return [ llvm.ConstantInt.get(context.llvmContext, elements.length), elementsArray ];
 }

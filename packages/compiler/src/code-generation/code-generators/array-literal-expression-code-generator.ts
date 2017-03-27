@@ -11,7 +11,13 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
     syntaxKind = ts.SyntaxKind.ArrayLiteralExpression;
 
     generate(arrayLiteral: ts.ArrayLiteralExpression, context: CodeGenerationContext): ArrayReference {
-        const type = context.typeChecker.getTypeAtLocation(arrayLiteral);
+        let type = context.typeChecker.getTypeAtLocation(arrayLiteral);
+        const elementType = ArrayReference.getElementType(type);
+
+        if (elementType.flags & ts.TypeFlags.Undefined) {
+            type = context.typeChecker.getContextualType(arrayLiteral);
+        }
+
         const arrayClass = context.scope.getClass(type.getSymbol()) as ArrayClassReference;
 
         return arrayClass.fromLiteral(type, arrayLiteral.elements.map(value => context.generateValue(value)));

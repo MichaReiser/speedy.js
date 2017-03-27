@@ -39,7 +39,6 @@ class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Functio
         context.enterChildScope(functionReference);
 
         const entryBlock = llvm.BasicBlock.create(context.llvmContext, "entry", fun);
-
         context.builder.setInsertionPoint(entryBlock);
 
         // add args to scope

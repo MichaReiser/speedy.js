@@ -65,6 +65,14 @@ export interface CodeGenerationContext {
     generate(node: ts.Node): void | Value;
 
     /**
+     * Assigns the given value to the target if the target is assignable
+     * @param target the target to which the value is to be assigned
+     * @param value the value to assign
+     * @throws if the target cannot be assigned a value
+     */
+    assignValue(target: Value, value: Value);
+
+    /**
      * Adds the name of an entry function
      * @param name the name of the entry function
      */
@@ -81,11 +89,33 @@ export interface CodeGenerationContext {
      */
     enterChildScope(fn?: FunctionReference): Scope;
 
+    /**
+     * Leaves the current child scope
+     * @returns the left scope
+     */
     leaveChildScope(): Scope;
 
-    value(value: llvm.Value, type: ts.Type)
+    /**
+     * Creates a value object for the given llvm value
+     * @param value the llvm value to wrap
+     * @param type the type of the value
+     * @returns the value object wrapper
+     */
+    value(value: llvm.Value, type: ts.Type): Value;
 
+    /**
+     * Creates a function reference to the given llvm function
+     * @param fn the llvm function
+     * @param signature the signature of the function
+     * @returns the function reference
+     */
     functionReference(fn: llvm.Function, signature: ts.Signature): FunctionReference;
 
+    /**
+     * Creates a method reference for the given object and llvm function
+     * @param object the object to which the method belongs
+     * @param method the function implementing the method
+     * @param signature the signature of the method
+     */
     methodReference(object: ObjectReference, method: llvm.Function, signature: ts.Signature): MethodReference;
 }

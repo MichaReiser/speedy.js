@@ -56,6 +56,14 @@ export class CodeGenerationError extends Error {
     static unsupportedIdentifier(identifier: ts.Identifier) {
         return CodeGenerationError.createException(identifier, diagnostics.UnsupportedIdentifier, identifier.text);
     }
+
+    static unsupportedBinaryOperation(binaryExpression: ts.BinaryExpression, leftType: string, rightType: string) {
+        return CodeGenerationError.createException(binaryExpression, diagnostics.UnsupportedBinaryOperation, ts.SyntaxKind[binaryExpression.operatorToken.kind], leftType, rightType);
+    }
+
+    static unsupportedUnaryOperation(node: ts.PrefixUnaryExpression, type: string) {
+        return CodeGenerationError.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operand.kind], type);
+    }
 }
 
 
@@ -87,5 +95,13 @@ const diagnostics = {
     "UnsupportedIdentifier": {
         message: "Unsupported type or kind of identifier '%s'",
         code: 100006
+    },
+    "UnsupportedBinaryOperation": {
+        message: "The binary operator %s is not supported for the left and right hand side types '%s' '%s'",
+        code: 100007
+    },
+    UnsupportedUnaryOperation: {
+        message: "The unary operator %s is not supported for the type '%s'",
+        code: 100008
     }
 };

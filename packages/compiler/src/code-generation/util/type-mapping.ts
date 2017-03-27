@@ -4,11 +4,11 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {CodeGenerationError} from "../code-generation-exception";
 
 export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
-    if ((type.flags & ts.TypeFlags.IntLike) === ts.TypeFlags.Int) {
+    if (type.flags & ts.TypeFlags.IntLike) {
         return llvm.Type.getInt32Ty(context.llvmContext);
     }
 
-    if ((type.flags & ts.TypeFlags.NumberLike) === ts.TypeFlags.Number) {
+    if (type.flags & ts.TypeFlags.NumberLike) {
         return llvm.Type.getDoubleTy(context.llvmContext);
     }
 
@@ -31,5 +31,6 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         }
     }
 
-    throw CodeGenerationError.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
+    const declaration = type.getSymbol().getDeclarations()[0];
+    throw CodeGenerationError.unsupportedType(declaration, context.typeChecker.typeToString(type));
 }

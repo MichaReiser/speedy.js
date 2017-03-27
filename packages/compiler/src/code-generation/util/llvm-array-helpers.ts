@@ -25,8 +25,12 @@ export function allocateLlvmArrayWith(elements: llvm.Value[], elementType: llvm.
 }
 
 export function llvmArrayValue(elements: llvm.Value[] | ts.Node[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.Value {
+    if (elements.length === 0) {
+        return llvm.ConstantPointerNull.get(elementType.getPointerTo());
+    }
+
     let values: llvm.Value[];
-    if (elements.length === 0 || elements[0] instanceof llvm.Value) {
+    if (elements[0] instanceof llvm.Value) {
         values = elements as llvm.Value[];
     } else {
         values = (elements as ts.Node[]).map(element => context.generateValue(element).generateIR());

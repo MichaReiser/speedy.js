@@ -10,10 +10,10 @@ export class MethodReference extends FunctionReference {
         super(fn, signature, context);
     }
 
-    invoke(args: Value[] | llvm.Value[]): Value {
+    invoke(args: Value[] | llvm.Value[]): Value | void {
         const llvmArgs = args.length === 0 || args[0] instanceof llvm.Value ? args as llvm.Value[]: (args as Value[]).map(arg => arg.generateIR());
         const callArgs = this.getCallArguments(llvmArgs);
 
-        return super.invoke([this.object.generateIR(), ...callArgs]);
+        return super.invokeWithArgs([this.object.generateIR(), ...callArgs]);
     }
 }

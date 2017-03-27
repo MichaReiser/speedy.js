@@ -48,16 +48,15 @@ export class ArrayReference extends BuiltInObjectReference {
         switch (symbol.name) {
             case "fill":
                 return this.createFillFunction(signature, callExpression.arguments.length);
+            case "unshift":
             case "push":
-                return this.createPushFunction(signature);
+                return this.createPushOrUnshiftFunction(symbol, signature);
             case "pop":
                 fn = this.createPopFunction();
                 break;
             case "shift":
                 fn = this.createShiftFunction();
                 break;
-            case "unshift":
-                return this.createUnshiftFunction(signature);
             default:
                 return this.throwUnsupportedBuiltIn(callExpression, symbol);
         }
@@ -68,6 +67,11 @@ export class ArrayReference extends BuiltInObjectReference {
     private createFillFunction(signature: ts.Signature, numberOfArguments: number) {
         const fnName = this.getFunctionName(numberOfArguments <= 2 ? "array_fill_ii" : "array_fill_iii");
         const argTypes = [this.llvmArrayType, this.llvmElementType, this.sizeType];
+
+        if (numberOfArguments > 2) {
+            argTypes.push(this.sizeType);
+        }
+
         const fillFunction = this.context.module.getOrInsertFunction(fnName, llvm.FunctionType.get(this.llvmArrayType, argTypes, false)) as llvm.Function;
 
         class FillMethod extends MethodReference {
@@ -93,17 +97,17 @@ export class ArrayReference extends BuiltInObjectReference {
         return this.context.module.getOrInsertFunction(this.getFunctionName("pop"), llvm.FunctionType.get(this.llvmElementType, [this.llvmArrayType], false)) as llvm.Function;
     }
 
-    private createPushFunction(signature: ts.Signature) {
-        const pushFunction = this.context.module.getOrInsertFunction(
-            this.getFunctionName("push"),
+    private createPushOrUnshiftFunction(symbol: ts.Symbol, signature: ts.Signature) {
+        const pushOrUnshiftFunction = this.context.module.getOrInsertFunction(
+            this.getFunctionName(symbol.name),
             llvm.FunctionType.get(this.sizeType, [this.llvmArrayType, this.llvmElementType.getPointerTo(), this.sizeType], false)
         ) as llvm.Function;
 
         const llvmElementType = this.llvmElementType;
 
-        class PushMethod extends MethodReference {
+        class PushOrUnshiftMethod extends MethodReference {
             constructor(array: ArrayReference, context: CodeGenerationContext) {
-                super(array, pushFunction, signature, context);
+                super(array, pushOrUnshiftFunction, signature, context);
             }
 
             getCallArguments(args: llvm.Value[]) {
@@ -114,7 +118,7 @@ export class ArrayReference extends BuiltInObjectReference {
             }
         }
 
-        return new PushMethod(this, this.context);
+        return new PushOrUnshiftMethod(this, this.context);
     }
 
     private createShiftFunction() {
@@ -122,30 +126,6 @@ export class ArrayReference extends BuiltInObjectReference {
             this.getFunctionName("shift"),
             llvm.FunctionType.get(this.llvmElementType, [this.llvmArrayType], false)
         ) as llvm.Function;
-    }
-
-    private createUnshiftFunction(signature: ts.Signature) {
-        const unshiftFunction = this.context.module.getOrInsertFunction(
-            this.getFunctionName("unshift"),
-            llvm.FunctionType.get(this.sizeType, [this.llvmArrayType, this.llvmElementType.getPointerTo(), this.sizeType], false)
-        ) as llvm.Function;
-
-        const llvmElementType = this.llvmElementType;
-
-        class UnshiftMethod extends MethodReference {
-            constructor(array: ArrayReference, context: CodeGenerationContext) {
-                super(array, unshiftFunction, signature, context);
-            }
-
-            getCallArguments(args: llvm.Value[]) {
-                return [
-                    llvmArrayValue(args, llvmElementType, this.context),
-                    llvm.ConstantInt.get(this.context.llvmContext, args.length)
-                ];
-            }
-        }
-
-        return new UnshiftMethod(this, this.context);
     }
 
     protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression): ObjectPropertyReference {

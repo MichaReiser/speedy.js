@@ -9,4 +9,5 @@ export interface CompilationContext {
     readonly compilerOptions: SpeedyJSCompilerOptions;
     readonly llvmContext: llvm.LLVMContext;
     readonly builtIns: BuiltInSymbols;
+    readonly rootDir: string;
 }
