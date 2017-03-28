@@ -24,7 +24,7 @@ export class MathClassReference extends ClassReference {
      * @return {Allocation} the allocation of the global math object
      */
     createGlobalVariable(symbol: ts.Symbol) {
-        const mathType = this.context.typeChecker.getDeclaredTypeOfSymbol(symbol);
+        const mathType = this.context.typeChecker.getDeclaredTypeOfSymbol(symbol) as ts.ObjectType;
         const structType = this.getObjectType(mathType);
         const struct = llvm.ConstantStruct.get(structType, [this.typeInformation]);
 
@@ -42,7 +42,7 @@ export class MathClassReference extends ClassReference {
         throw new Error(`Math object cannot be instantiated`);
     }
 
-    objectFor(pointer: llvm.Value, type: ts.Type): ObjectReference {
+    objectFor(pointer: llvm.Value, type: ts.ObjectType): ObjectReference {
         return new MathObjectReference(pointer, type, this.context);
     }
 }

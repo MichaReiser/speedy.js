@@ -3,8 +3,7 @@ project(speedyjs-runtime)
 
 # Following flags need to be set when invoking cmake -DCMAKE_TOOLCHAIN_FILE=~/git/emscripten/cmake/Modules/Platform/Emscripten.cmake
 set(CMAKE_CXX_STANDARD 11)
-set(SOURCE_FILES lib/array-api.h lib/macros.h lib/array-api.cc lib/array.h)
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(SOURCE_FILES lib/array-api.cc lib/macros.h lib/array.h)
 
 set(EM_CONFIG_PATH "${CMAKE_SOURCE_DIR}/.emscripten")
 set(EMSCRIPTEN_COMPILE_FLAGS --cache "${CMAKE_SOURCE_DIR}/.emscripten_cache" --emscripten-cxx --em-config "${EM_CONFIG_PATH}")
@@ -16,5 +15,3 @@ target_compile_options(speedyjs-runtime PRIVATE ${EMSCRIPTEN_COMPILE_FLAGS})
 target_compile_options(speedyjs-runtime-unsafe PRIVATE ${EMSCRIPTEN_COMPILE_FLAGS} -DUNSAFE)
 
 add_subdirectory(test)
-
-# target_link_libraries(speedyjs-runtime)

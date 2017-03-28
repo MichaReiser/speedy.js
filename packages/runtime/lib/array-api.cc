@@ -1,202 +1,286 @@
-#include "array-api.h"
+#include <stdint.h>
+#include "macros.h"
 #include "array.h"
 
-CArrayI1 new_array_i1(size_t size, bool* elements) {
+#ifndef SPEEDYJS_RUNTIME_ARRAY_API_H
+#define SPEEDYJS_RUNTIME_ARRAY_API_H
+
+// see RuntimeSystemNameMangler for the naming schema used
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+//---------------------------------------------------------------------------------
+// new
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructori(int32_t size) {
+    return new Array<bool>(size);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructoriPb(int32_t size, bool* elements) {
     return new Array<bool>(size, elements);
 }
 
-CArrayI32 new_array_i32(size_t size, int32_t * elements) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructori(int32_t size) {
+    return new Array<int32_t>(size);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructoriPi(int32_t size, int32_t* elements) {
     return new Array<int32_t>(size, elements);
 }
 
-CArrayF64 new_array_f64(size_t size, double* elements) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructori(int32_t size) {
+    return new Array<double>(size);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructoriPd(int32_t size, double* elements) {
     return new Array<double>(size, elements);
 }
 
-CArrayPtr new_array_ptr(size_t size, void** elements) {
-    return new Array<void *>(size, elements);
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructor() {
+    return new Array<void*>();
 }
 
-bool array_get_i1(CArrayI1  array, size_t index) {
-    return static_cast<Array<bool>*>(array)->get(index);
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructori(int32_t size) {
+    return new Array<void*>(size);
 }
 
-int32_t array_get_i32(CArrayI32  array, size_t index) {
-    return static_cast<Array<int32_t>*>(array)->get(index);
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructoriPv(int32_t size, void** elements) {
+    return new Array<void*>(size, elements);
 }
 
-double array_get_f64(CArrayF64 array, size_t index) {
-    return static_cast<Array<double>*>(array)->get(index);
+//---------------------------------------------------------------------------------
+// get
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE bool ArrayIb_geti(Array<bool>* array, int32_t index) {
+    return array->get(index);
 }
 
-void* array_get_ptr(CArrayPtr array, size_t index) {
-    return static_cast<Array<void*>*>(array)->get(index);
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_geti(Array<int32_t>* array, int32_t index) {
+    return array->get(index);
 }
 
-void array_set_i1(CArrayI1  array, size_t index, bool value) {
-    static_cast<Array<bool>*>(array)->set(index, value);
+DLL_PUBLIC ALWAYS_INLINE double ArrayId_geti(Array<double>* array, int32_t index) {
+    return array->get(index);
 }
 
-void array_set_i32(CArrayI32  array, size_t index, int32_t value) {
-    static_cast<Array<int32_t>*>(array)->set(index, value);
+DLL_PUBLIC ALWAYS_INLINE void* ArrayIPv_geti(Array<void*>* array, int32_t index) {
+    return array->get(index);
 }
 
-void array_set_f64(CArrayF64 array, size_t index, double value) {
-    static_cast<Array<double>*>(array)->set(index, value);
+//---------------------------------------------------------------------------------
+// set
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayIb_setib(Array<bool>* array, int32_t index, bool value) {
+    array->set(index, value);
 }
 
-void array_set_ptr(CArrayPtr array, size_t index, void* value) {
-    static_cast<Array<void*>*>(array)->set(index, value);
+DLL_PUBLIC ALWAYS_INLINE void ArrayIi_setii(Array<int32_t>* array, int32_t index, int32_t value) {
+    array->set(index, value);
 }
 
-CArrayI1 array_fill_ii_i1(CArrayI1 array, bool value, int32_t start) {
-    static_cast<Array<bool>*>(array)->fill(value, start);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayId_setid(Array<double>* array, int32_t index, double value) {
+    array->set(index, value);
 }
 
-CArrayI32 array_fill_ii_i32(CArrayI32 array, int32_t value, int32_t start) {
-    static_cast<Array<int32_t>*>(array)->fill(value, start);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_setiPv(Array<void*>* array, int32_t index, void* value) {
+    array->set(index, value);
 }
 
-CArrayF64 array_fill_ii_f64(CArrayF64 array, double value, int32_t start) {
-    static_cast<Array<double>*>(array)->fill(value, start);
-    return array;
+//---------------------------------------------------------------------------------
+// fill
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillb(Array<bool>* array, bool value) {
+    array->fill(value);
 }
 
-CArrayPtr array_fill_ii_ptr(CArrayPtr array, void* value, int32_t start) {
-    static_cast<Array<void*>*>(array)->fill(value, start);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillbi(Array<bool>* array, bool value, int32_t start) {
+    array->fill(value, start);
 }
 
-CArrayI1 array_fill_iii_i1(CArrayI1 array, bool value, int32_t start, int32_t end) {
-    static_cast<Array<bool>*>(array)->fill(value, start, end);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillbii(Array<bool>* array, bool value, int32_t start, int32_t end) {
+    array->fill(value, start, end);
 }
 
-CArrayI32 array_fill_iii_i32(CArrayI32 array, int32_t value, int32_t start, int32_t end) {
-    static_cast<Array<int32_t>*>(array)->fill(value, start, end);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayIi_filli(Array<int32_t>* array, int32_t value) {
+    array->fill(value);
 }
 
-CArrayF64 array_fill_iii_f64(CArrayF64 array, double value, int32_t start, int32_t end) {
-    static_cast<Array<double>*>(array)->fill(value, start, end);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayIi_fillii(Array<int32_t>* array, int32_t value, int32_t start) {
+    array->fill(value, start);
 }
 
-CArrayPtr array_fill_iii_ptr(CArrayPtr array, void* value, int32_t start, int32_t end) {
-    static_cast<Array<void*>*>(array)->fill(value, start, end);
-    return array;
+DLL_PUBLIC ALWAYS_INLINE void ArrayIi_filliii(Array<int32_t>* array, int32_t value, int32_t start, int32_t end) {
+    array->fill(value, start, end);
 }
 
-size_t array_push_i1(CArrayI1 array, bool* elements, size_t numElements) {
-    return static_cast<Array<bool>*>(array)->push(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE void ArrayId_filld(Array<double>* array, double value) {
+    array->fill(value);
 }
 
-size_t array_push_i32(CArrayI32 array, int32_t* elements, size_t numElements) {
-    return static_cast<Array<int32_t>*>(array)->push(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE void ArrayId_filldi(Array<double>* array, double value, int32_t start) {
+    array->fill(value, start);
 }
 
-size_t array_push_f64(CArrayF64 array, double* elements, size_t numElements) {
-    return static_cast<Array<double>*>(array)->push(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE void ArrayId_filldii(Array<double>* array, double value, int32_t start, int32_t end) {
+    array->fill(value, start, end);
 }
 
-size_t array_push_ptr(CArrayPtr array, void** elements, size_t numElements) {
-    return static_cast<Array<void*>*>(array)->push(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPv(Array<void*>* array, void* value) {
+    array->fill(value);
 }
 
-size_t array_unshift_i1(CArrayI1 array, bool* elements, size_t numElements) {
-    return static_cast<Array<bool>*>(array)->unshift(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvi(Array<void*>* array, void* value, int32_t start) {
+    array->fill(value, start);
 }
 
-size_t array_unshift_i32(CArrayI32 array, int32_t* elements, size_t numElements) {
-    return static_cast<Array<int32_t>*>(array)->unshift(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvii(Array<void*>* array, void* value, int32_t start, int32_t end) {
+    array->fill(value, start, end);
 }
 
-size_t array_unshift_f64(CArrayF64 array, double* elements, size_t numElements) {
-    return static_cast<Array<double>*>(array)->unshift(elements, numElements);
+//---------------------------------------------------------------------------------
+// push
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_pushPbi(Array<bool>* array, bool* elements, int32_t numElements) {
+    return array->push(elements, numElements);
 }
 
-size_t array_unshift_ptr(CArrayPtr array, void** elements, size_t numElements) {
-    return static_cast<Array<void*>*>(array)->unshift(elements, numElements);
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_pushPii(Array<int32_t>* array, int32_t* elements, int32_t numElements) {
+    return array->push(elements, numElements);
 }
 
-bool array_pop_i1(CArrayI1 array) {
-    return static_cast<Array<bool>*>(array)->pop();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_pushPdi(Array<double>* array, double* elements, int32_t numElements) {
+    return array->push(elements, numElements);
 }
 
-int32_t array_pop_i32(CArrayI32 array) {
-    return static_cast<Array<int32_t>*>(array)->pop();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_pushPvi(Array<void*>* array, void** elements, int32_t numElements) {
+    return array->push(elements, numElements);
 }
 
-double array_pop_f64(CArrayF64 array) {
-    return static_cast<Array<double>*>(array)->pop();
+//---------------------------------------------------------------------------------
+// unshift
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_unshiftPbi(Array<bool>* array, bool* elements, int32_t numElements) {
+    return array->unshift(elements, numElements);
 }
 
-void* array_pop_ptr(CArrayPtr array) {
-    return static_cast<Array<void*>*>(array)->pop();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_unshiftPii(Array<int32_t>* array, int32_t* elements, int32_t numElements) {
+    return array->unshift(elements, numElements);
 }
 
-bool array_shift_i1(CArrayI1 array) {
-    return static_cast<Array<bool>*>(array)->shift();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_unshiftPdi(Array<double>* array, double* elements, int32_t numElements)  {
+    return array->unshift(elements, numElements);
 }
 
-int32_t array_shift_i32(CArrayI32 array) {
-    return static_cast<Array<int32_t>*>(array)->shift();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_unshiftPvi(Array<void*>* array, void** elements, int32_t numElements) {
+    return array->unshift(elements, numElements);
 }
 
-double array_shift_f64(CArrayF64 array) {
-    return static_cast<Array<double>*>(array)->shift();
+//---------------------------------------------------------------------------------
+// pop
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE bool ArrayIb_pop(Array<bool>* array) {
+    return array->pop();
 }
 
-void* array_shift_ptr(CArrayPtr array) {
-    return static_cast<Array<void*>*>(array)->shift();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_pop(Array<int32_t>* array) {
+    return array->pop();
 }
 
-size_t array_length_i1(CArrayI1 array) {
-    return static_cast<Array<bool>*>(array)->size();
+DLL_PUBLIC ALWAYS_INLINE double ArrayId_pop(Array<double>* array) {
+    return array->pop();
 }
 
-size_t array_length_i32(CArrayI32 array) {
-    return static_cast<Array<int32_t>*>(array)->size();
+DLL_PUBLIC ALWAYS_INLINE void* ArrayIPv_pop(Array<void*>* array) {
+    return array->pop();
 }
 
-size_t array_length_f64(CArrayF64 array) {
-    return static_cast<Array<double>*>(array)->size();
+//---------------------------------------------------------------------------------
+// shift
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE bool ArrayIb_shift(Array<bool>* array) {
+    return array->shift();
 }
 
-size_t array_length_ptr(CArrayPtr array) {
-    return static_cast<Array<void*>*>(array)->size();
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_shift(Array<int32_t>* array) {
+    return array->shift();
 }
 
-void array_set_length_i1(CArrayI1 array, size_t newSize) {
-    static_cast<Array<bool>*>(array)->resize(newSize);
+DLL_PUBLIC ALWAYS_INLINE double ArrayId_shift(Array<double>* array) {
+    return array->shift();
 }
 
-void array_set_length_i32(CArrayI32 array, size_t newSize) {
-    static_cast<Array<int32_t>*>(array)->resize(newSize);
+DLL_PUBLIC ALWAYS_INLINE void* ArrayIPv_shift(Array<void*>* array) {
+    return array->shift();
 }
 
-void array_set_length_f64(CArrayF64 array, size_t newSize) {
-    static_cast<Array<double>*>(array)->resize(newSize);
+//---------------------------------------------------------------------------------
+// length
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_length(Array<bool>* array) {
+    return array->size();
 }
 
-void array_set_length_ptr(CArrayPtr array, size_t newSize) {
-    static_cast<Array<void*>*>(array)->resize(newSize);
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_length(Array<int32_t>* array) {
+    return array->size();
 }
 
-void delete_array_i1(CArrayI1 array) {
-    delete static_cast<Array<bool>*>(array);
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_length(Array<double>* array) {
+    return array->size();
 }
 
-void delete_array_i32(CArrayI32 array) {
-    delete static_cast<Array<int32_t>*>(array);
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_length(Array<void*>* array) {
+    return array->size();
 }
 
-void delete_array_f64(CArrayF64 array) {
-    delete static_cast<Array<double>*>(array);
+DLL_PUBLIC ALWAYS_INLINE void ArrayIb_lengthi(Array<bool>* array, int32_t size) {
+    array->resize(size);
 }
 
-void delete_array_ptr(CArrayPtr array) {
-    delete static_cast<Array<void*>*>(array);
+DLL_PUBLIC ALWAYS_INLINE void ArrayIi_lengthi(Array<int32_t>* array, int32_t size) {
+    array->resize(size);
 }
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayId_lengthi(Array<double>* array, int32_t size) {
+    array->resize(size);
+}
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_lengthi(Array<void*>* array, int32_t size) {
+    array->resize(size);
+}
+
+//---------------------------------------------------------------------------------
+// free
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayIb_free(Array<bool>* array) {
+    delete array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayIi_free(Array<int32_t>* array) {
+    delete array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayId_free(Array<double>* array) {
+    delete array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_free(Array<void*>* array) {
+    delete array;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif //SPEEDYJS_RUNTIME_ARRAY_API_H

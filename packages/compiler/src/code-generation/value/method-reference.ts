@@ -6,8 +6,9 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {Value} from "./value";
 
 export class MethodReference extends FunctionReference {
-    constructor(private object: ObjectReference, fn: llvm.Function, signature: ts.Signature, context: CodeGenerationContext) {
-        super(fn, signature, context);
+
+    constructor(private object: ObjectReference, fn: llvm.Function, returnType: ts.Type, context: CodeGenerationContext) {
+        super(fn, returnType, context);
     }
 
     invoke(args: Value[] | llvm.Value[]): Value | void {

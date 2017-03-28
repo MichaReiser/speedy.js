@@ -106,12 +106,12 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         return child;
     }
 
-    functionReference(fn: llvm.Function, signature: ts.Signature): FunctionReference {
-        return new FunctionReference(fn, signature, this);
+    functionReference(fn: llvm.Function, returnType: ts.Type): FunctionReference {
+        return new FunctionReference(fn, returnType, this);
     }
 
-    methodReference(object: ObjectReference, method: llvm.Function, signature: ts.Signature): MethodReference {
-        return new MethodReference(object, method, signature, this);
+    methodReference(object: ObjectReference, method: llvm.Function, returnType: ts.Type): MethodReference {
+        return new MethodReference(object, method, returnType, this);
     }
 
     value(value: llvm.Value, type: ts.Type): Value {
@@ -124,7 +124,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         if (symbol.flags & ts.SymbolFlags.Function) {
             const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
             assert(signatures.length === 0, "Overloaded methods not yet supported");
-            return this.functionReference(value as llvm.Function, signatures[0]);
+            return this.functionReference(value as llvm.Function, signatures[0].getReturnType());
         }
 
         if (symbol.flags & ts.SymbolFlags.Method) {
@@ -136,7 +136,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
         if (type.flags & ts.TypeFlags.Object) {
             const classReference = this.scope.getClass(symbol);
-            return classReference.objectFor(value, type);
+            return classReference.objectFor(value, type as ts.ObjectType);
         }
 
         throw Error(`Unable to convert llvm value of type ${this.typeChecker.typeToString(type)} to Value object.`);

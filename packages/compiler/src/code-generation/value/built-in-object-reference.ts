@@ -14,7 +14,7 @@ export abstract class BuiltInObjectReference implements ObjectReference {
     private functions = new Map<ts.Symbol, FunctionReference>();
     private properties = new Map<ts.Symbol, ObjectPropertyReference>();
 
-    constructor(protected objectAddress: llvm.Value, public type: ts.Type, protected context: CodeGenerationContext) {
+    constructor(protected objectAddress: llvm.Value, public type: ts.ObjectType, protected context: CodeGenerationContext) {
         assert(objectAddress.type.isPointerTy(), `Object address needs to be a pointer type`);
     }
 
@@ -70,9 +70,21 @@ export abstract class BuiltInObjectReference implements ObjectReference {
         return fn;
     }
 
-    protected throwUnsupportedBuiltIn(node: ts.CallLikeExpression, symbol: ts.Symbol): never;
+    /**
+     * Throws an exception for an unsupported call expression
+     */
+    protected throwUnsupportedBuiltIn(node: ts.CallExpression, symbol: ts.Symbol): never;
+
+    /**
+     * Throws an exception for a unsupported element access
+     */
     protected throwUnsupportedBuiltIn(node: ts.ElementAccessExpression): never;
+
+    /**
+     * Throws an exception for an unsupported index accesss
+     */
     protected throwUnsupportedBuiltIn(node: ts.PropertyAccessExpression): never;
+
     protected throwUnsupportedBuiltIn(node: any, symbol?: ts.Symbol): never {
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
             throw CodeGenerationError.builtInDoesNotSupportElementAccess(node, this.typeName);

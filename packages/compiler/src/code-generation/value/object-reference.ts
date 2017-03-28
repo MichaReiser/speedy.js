@@ -12,6 +12,11 @@ import {FunctionReference} from "./function-reference";
 export interface ObjectReference extends AssignableValue {
 
     /**
+     * The type of the object, e.g. Array
+     */
+    type: ts.Type;
+
+    /**
      * Returns the function for the given call expression
      * @param callExpression the function call
      * @returns called function of the call expression
