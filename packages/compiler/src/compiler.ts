@@ -33,11 +33,11 @@ export class Compiler {
         const logUnknownVisitor = new LogUnknownTransformVisitor();
         const builtIns = BuiltInSymbols.create(program, this.compilerHost, this.compilerOptions);
         const compilationContext: CompilationContext = {
+            builtIns,
             compilerHost: this.compilerHost,
             compilerOptions: this.compilerOptions,
             llvmContext: context,
             program,
-            builtIns,
             rootDir: (program as any).getCommonSourceDirectory()
     };
 

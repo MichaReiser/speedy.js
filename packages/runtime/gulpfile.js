@@ -17,8 +17,7 @@ gulp.task("build", function (cb) {
     runSequence(
         "build:clean",
         "build:libs",
-        "build:runtime:configure",
-        ["build:runtime:safe", "build:runtime:unsafe"],
+        "build:runtime",
         ["copy:release", "copy:libs"],
         cb
     );
@@ -41,8 +40,18 @@ gulp.task("build:clean", function () {
      ]);
 });
 
+gulp.task("build:runtime", function (cb) {
+    runSequence(
+        "build:runtime:configure",
+        ["build:runtime:safe", "build:runtime:unsafe"],
+        cb
+    );
+});
+
 gulp.task("build:runtime:configure", function () {
-    fs.mkdirSync("cmake-build-release");
+    if (!fs.existsSync("cmake-build-release")) {
+        fs.mkdirSync("cmake-build-release");
+    }
 
     const emscriptenCMake = path.resolve("./tools/emscripten/cmake/Modules/Platform/Emscripten.cmake");
     const command = util.format('cmake -E chdir cmake-build-release cmake -DCMAKE_BUILD_TYPE=Release -DEMSCRIPTEN_GENERATE_BITCODE_STATIC_LIBRARIES=ON -DCMAKE_TOOLCHAIN_FILE="%s" ..', emscriptenCMake);

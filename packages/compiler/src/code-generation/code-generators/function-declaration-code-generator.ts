@@ -33,7 +33,7 @@ class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Functio
 
         const functionType = llvm.FunctionType.get(llvmReturnType, parameters, false);
         const fun = llvm.Function.create(functionType, llvm.LinkageTypes.ExternalLinkage, symbol.name, context.module);
-        const functionReference = context.functionReference(fun, signature);
+        const functionReference = context.functionReference(fun, returnType);
 
         context.scope.addFunction(symbol, functionReference);
         context.enterChildScope(functionReference);
@@ -93,7 +93,6 @@ class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Functio
         try {
             llvm.verifyFunction(fun);
         } catch (ex) {
-            fun.dump();
             throw ex;
         }
 
@@ -103,7 +102,7 @@ class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Functio
     private cleanUpHeap(context: CodeGenerationContext) {
         for (const variable of context.scope.getAllVariables()) {
             const variableAllocation = context.scope.getNested(variable);
-            // TODO Property members cannnot be identified this way
+            // TODO Property members, anonymous arrays are not identified by this approach, aliased members are released multiple times
             if (variableAllocation!.type.flags & ts.TypeFlags.Object) {
                 const object = variableAllocation!.dereference() as ObjectReference;
                 object.destruct();

@@ -20,7 +20,7 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
 
         const arrayClass = context.scope.getClass(type.getSymbol()) as ArrayClassReference;
 
-        return arrayClass.fromLiteral(type, arrayLiteral.elements.map(value => context.generateValue(value)));
+        return arrayClass.fromLiteral(type as ts.ObjectType, arrayLiteral.elements.map(value => context.generateValue(value)));
     }
 }
 

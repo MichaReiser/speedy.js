@@ -27,7 +27,7 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     if (type.flags & ts.TypeFlags.Object) {
         const classReference = context.scope.getClass(type.getSymbol());
         if (classReference) {
-            return classReference.getLLVMType(type);
+            return classReference.getLLVMType(type as ts.ObjectType);
         }
     }
 

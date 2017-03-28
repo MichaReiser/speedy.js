@@ -12,6 +12,9 @@ import {MethodReference} from "./value/method-reference";
  */
 export interface CodeGenerationContext {
 
+    /**
+     * The compilation context
+     */
     readonly compilationContext: CompilationContext;
 
     /**
@@ -106,16 +109,16 @@ export interface CodeGenerationContext {
     /**
      * Creates a function reference to the given llvm function
      * @param fn the llvm function
-     * @param signature the signature of the function
+     * @param returnType the return type of the function
      * @returns the function reference
      */
-    functionReference(fn: llvm.Function, signature: ts.Signature): FunctionReference;
+    functionReference(fn: llvm.Function, returnType: ts.Type): FunctionReference;
 
     /**
      * Creates a method reference for the given object and llvm function
      * @param object the object to which the method belongs
      * @param method the function implementing the method
-     * @param signature the signature of the method
+     * @param returnType the return type of the method
      */
-    methodReference(object: ObjectReference, method: llvm.Function, signature: ts.Signature): MethodReference;
+    methodReference(object: ObjectReference, method: llvm.Function, returnType: ts.Type): MethodReference;
 }

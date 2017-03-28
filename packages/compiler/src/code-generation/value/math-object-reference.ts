@@ -13,7 +13,7 @@ export class MathObjectReference extends BuiltInObjectReference {
 
     typeName = "Math";
 
-    constructor(objAddr: llvm.Value, type: ts.Type, context: CodeGenerationContext) {
+    constructor(objAddr: llvm.Value, type: ts.ObjectType, context: CodeGenerationContext) {
         super(objAddr, type, context);
     }
 
@@ -39,7 +39,7 @@ export class MathObjectReference extends BuiltInObjectReference {
 
         class SqrtFunction extends FunctionReference {
             constructor(context: CodeGenerationContext) {
-                super(fn, signature, context);
+                super(fn, signature.getReturnType(), context);
             }
 
             getCallArguments(args: llvm.Value[]) {

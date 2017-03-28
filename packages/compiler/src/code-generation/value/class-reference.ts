@@ -42,17 +42,17 @@ export abstract class ClassReference implements Value {
         return this;
     }
 
-    getLLVMType(type: ts.Type): llvm.Type {
+    getLLVMType(type: ts.ObjectType): llvm.Type {
         return this.getObjectType(type).getPointerTo();
     }
 
     protected abstract getFields(type: ts.Type): llvm.Type[];
 
-    abstract getConstructor(signature: ts.Signature): FunctionReference;
+    abstract getConstructor(newExpression: ts.NewExpression): FunctionReference;
 
-    abstract objectFor(pointer: llvm.Value, type: ts.Type): ObjectReference;
+    abstract objectFor(pointer: llvm.Value, type: ts.ObjectType): ObjectReference;
 
-    protected getObjectType(type: ts.Type) {
+    protected getObjectType(type: ts.ObjectType) {
         return llvm.StructType.get(this.context.llvmContext, [
             this.typeInformation.type,
             ...this.getFields(type)

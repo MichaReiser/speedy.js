@@ -4,10 +4,10 @@ import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
 import {BuiltInSymbols} from "./built-in-symbols";
 
 export interface CompilationContext {
+    readonly builtIns: BuiltInSymbols;
     readonly compilerHost: ts.CompilerHost;
-    readonly program: ts.Program;
     readonly compilerOptions: SpeedyJSCompilerOptions;
     readonly llvmContext: llvm.LLVMContext;
-    readonly builtIns: BuiltInSymbols;
+    readonly program: ts.Program;
     readonly rootDir: string;
 }

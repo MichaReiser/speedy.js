@@ -13,16 +13,16 @@
 #include <algorithm>
 #include "macros.h"
 
-const size_t CAPACITY_GROW_FACTOR = 2;
-const size_t DEFAULT_CAPACITY = 16;
+const int32_t CAPACITY_GROW_FACTOR = 2;
+const int32_t DEFAULT_CAPACITY = 16;
 
 /**
  * Implementation of the JS Array. Grows when more elements are added.
+ * int32_t is used as there is no uint32_t in speedyjs.
  *
  * Differences to vector:
  * This Class does use memset to default initialize the elements and not the allocator.
  * @tparam T type of the elements stored in the array
- * TODO Change size to int32_t to match ts
  */
 template<typename T>
 class Array {
@@ -30,12 +30,12 @@ private:
     /**
      * The length of the array
      */
-    size_t length;
+    int32_t length;
 
     /**
      * The capacity of the {@link elements}
      */
-    size_t capacity;
+    int32_t capacity;
 
     /**
      * The elements stored in the array. Has the size of {@link capacity}. All elements up to {@link length} are initialized
@@ -49,7 +49,7 @@ public:
      * @param elements the elements contained in the array with the length equal to size. If absent, the elements are default
      * initialized.
      */
-    Array(size_t size=0, const T* elements = nullptr) {
+    Array(int32_t size=0, const T* elements = nullptr) {
         if (size == 0) {
             this->elements = nullptr;
         } else {
@@ -79,7 +79,7 @@ public:
      * @return the element at the given index
      * @throws {@link std::out_of_range} if the index is <= length
      */
-    inline T get(size_t index) const {
+    inline T get(int32_t index) const {
  #ifdef SAFE
         if (length <= index) {
             throw std::out_of_range{"Index out of bound"};
@@ -94,7 +94,7 @@ public:
      * @param index the index of the element where the value is to be set
      * @param value the value to set at the given index
      */
-    inline void set(size_t index, T value) {
+    inline void set(int32_t index, T value) {
  #ifdef SAFE
         if (length <= index) {
             this->resize(index + 1);
@@ -116,15 +116,15 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill
      */
     inline void fill(const T value, int32_t start, int32_t end) {
-        size_t startIndex = start < 0 ? this->length + start : static_cast<size_t>(start);
-        size_t endIndex = end < 0 ? this->length + end : static_cast<size_t>(end);
+        int32_t startIndex = start < 0 ? this->length + start : start;
+        int32_t endIndex = end < 0 ? this->length + end : end;
 
  #ifdef SAFE
-        if (startIndex >= this->length) {
+        if (startIndex < 0 || startIndex >= this->length) {
             throw std::out_of_range { "Start index is out of range" };
         }
 
-        if (endIndex > this->length) {
+        if (endIndex < 0 || endIndex > this->length) {
             throw std::out_of_range { "End index is out of range" };
         }
 
@@ -142,7 +142,7 @@ public:
      * @param numElements the number of elements to add
      * @return the new length of the array
      */
-    inline size_t push(const T* elements, size_t numElements) {
+    inline int32_t push(const T* elements, int32_t numElements) {
         const auto newLength = this->length + numElements;
         this->ensureCapacity(newLength);
 
@@ -159,8 +159,8 @@ public:
      * @return the new length after inserting the given element
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
      */
-    inline size_t unshift(const T* elements, size_t numElements) {
-        const size_t newLength = this->length + numElements;
+    inline int32_t unshift(const T* elements, int32_t numElements) {
+        const int32_t newLength = this->length + numElements;
         this->ensureCapacity(newLength);
 
         std::copy(this->elements, this->elements + this->length, this->elements + numElements);
@@ -209,7 +209,7 @@ public:
      * Returns the size of the array
      * @return the size
      */
-    inline size_t size() const {
+    inline int32_t size() const {
         return length;
     }
 
@@ -217,7 +217,13 @@ public:
      * Resizes the array to the new size.
      * @param newSize the new size
      */
-    inline void resize(size_t newSize) {
+    inline void resize(int32_t newSize) {
+#ifdef SAFE
+        if (newSize < 0) {
+            throw std::out_of_range("Size needs to be a positive number");
+        }
+#endif
+
         ensureCapacity(newSize);
 
         // No reduce
@@ -235,7 +241,7 @@ private:
      * Ensures that the capacity of the array is at lest of the given size
      * @param min the minimal required capacity
      */
-    void ensureCapacity(size_t min) {
+    void ensureCapacity(int32_t min) {
         if (capacity >= min) {
             return;
         }
@@ -244,7 +250,7 @@ private:
             throw std::out_of_range { "Array size exceeded max limit"};
         }
 
-        size_t newCapacity = capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR;
+        int32_t newCapacity = capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR;
 
         if (newCapacity < min) {
             newCapacity = min;
@@ -264,7 +270,13 @@ private:
      * @param elements existing pointer to the elements array, in this case, a reallocate is performed
      * @returns the pointer to the allocated array
      */
-    static inline T* allocateElements(size_t capacity, T* elements = nullptr) {
+    static inline T* allocateElements(int32_t capacity, T* elements = nullptr) {
+#ifdef SAFE
+        if (capacity < 0) {
+            throw std::out_of_range("Size needs to be a positive number");
+        }
+#endif
+
         if (capacity > INT32_MAX) {
             throw std::out_of_range { "Array size exceeded max limit"};
         }
