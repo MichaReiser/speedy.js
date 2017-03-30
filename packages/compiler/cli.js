@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var path = require("path");
 var ts = require("typescript");
 var program = require("commander");
 var packageJson = require("./package.json");
@@ -31,7 +32,7 @@ function parseConfigFile(configFileName) {
         diagnostics_1.reportDiagnostics([jsonConfig.error]);
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
     }
-    var parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, ".", undefined, configFileName);
+    var parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, path.dirname(configFileName), undefined, configFileName);
     if (parsedConfiguration.errors.length > 0) {
         diagnostics_1.reportDiagnostics(parsedConfiguration.errors);
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);

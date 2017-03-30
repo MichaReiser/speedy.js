@@ -123,7 +123,7 @@ for-header:                                       ; preds = %if-successor8, %if-
   %x3 = load i32, i32* %x, align 4
   %1 = sitofp i32 %x3 to double
   %2 = call double @llvm.sqrt.f64(double %1)
-  %3 = fptosi double %2 to i32
+  %3 = call i32 @toInt32d(double %2)
   %i4 = load i32, i32* %i, align 4
   %4 = icmp slt i32 %i4, %3
   br i1 %4, label %for-body, label %for-successor
@@ -156,6 +156,8 @@ returnBlock:                                      ; preds = %for-successor, %the
 
 ; Function Attrs: nounwind readnone
 declare double @llvm.sqrt.f64(double) #0
+
+declare i32 @toInt32d(double)
 
 attributes #0 = { nounwind readnone }
 "

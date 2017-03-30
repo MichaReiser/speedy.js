@@ -1,6 +1,7 @@
 import * as ts from "typescript";
 import * as assert from "assert";
 import {getTypeOfParentObject} from "./util/object-helper";
+import {TypeChecker} from "../type-checker";
 
 export interface FunctionCallArgument {
     /**
@@ -62,7 +63,7 @@ export interface FunctionCallDescription {
     sourceFile?: ts.SourceFile;
 }
 
-export function createFunctionDescriptorForCall(callExpression: ts.NewExpression | ts.CallExpression, typeChecker: ts.TypeChecker): FunctionCallDescription {
+export function createFunctionDescriptorForCall(callExpression: ts.NewExpression | ts.CallExpression, typeChecker: TypeChecker): FunctionCallDescription {
     const signature = typeChecker.getResolvedSignature(callExpression);
     return {
         arguments: getArgumentsFromCall(signature, callExpression.arguments || [], typeChecker),
@@ -73,7 +74,7 @@ export function createFunctionDescriptorForCall(callExpression: ts.NewExpression
     };
 }
 
-function getObjectType(signature: ts.Signature, callExpression: ts.CallExpression | ts.NewExpression, typeChecker: ts.TypeChecker): ts.ObjectType | undefined {
+function getObjectType(signature: ts.Signature, callExpression: ts.CallExpression | ts.NewExpression, typeChecker: TypeChecker): ts.ObjectType | undefined {
     if (signature.declaration.kind === ts.SyntaxKind.ConstructSignature) {
         return signature.getReturnType() as ts.ObjectType;
     }
@@ -81,7 +82,7 @@ function getObjectType(signature: ts.Signature, callExpression: ts.CallExpressio
     return getTypeOfParentObject(callExpression.expression, typeChecker);
 }
 
-function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeChecker: ts.TypeChecker) {
+function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeChecker: TypeChecker) {
     if (declaration.kind === ts.SyntaxKind.ConstructSignature) {
         return "constructor";
     } else {
@@ -90,7 +91,7 @@ function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeCheck
     }
 }
 
-function getArgumentsFromCall(signature: ts.Signature, args: ts.Node[], typeChecker: ts.TypeChecker) {
+function getArgumentsFromCall(signature: ts.Signature, args: ts.Node[], typeChecker: TypeChecker) {
     let callArguments: FunctionCallArgument[] = [];
 
     for (let i = 0; i < signature.declaration.parameters.length; ++i) {

@@ -11,16 +11,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 //---------------------------------------------------------------------------------
 // new
 //---------------------------------------------------------------------------------
-
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructori(int32_t size) {
     return new Array<bool>(size);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructoriPb(int32_t size, bool* elements) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructorPbi(bool* elements, int32_t size) {
     return new Array<bool>(size, elements);
 }
 
@@ -28,7 +28,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructori(int32_t size) {
     return new Array<int32_t>(size);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructoriPi(int32_t size, int32_t* elements) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructorPii(int32_t* elements, int32_t size) {
     return new Array<int32_t>(size, elements);
 }
 
@@ -36,7 +36,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructori(int32_t size) {
     return new Array<double>(size);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructoriPd(int32_t size, double* elements) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructorPdi(double* elements, int32_t size) {
     return new Array<double>(size, elements);
 }
 
@@ -48,7 +48,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructori(int32_t size) {
     return new Array<void*>(size);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructoriPv(int32_t size, void** elements) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPvi(void** elements, int32_t size) {
     return new Array<void*>(size, elements);
 }
 

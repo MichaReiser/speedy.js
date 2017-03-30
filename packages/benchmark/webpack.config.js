@@ -10,13 +10,6 @@ module.exports = {
     },
 
     module: {
-        rules: [
-            {
-                test: /\.ts$/,
-                loader: "ts-loader",
-                include: path.resolve("./cases")
-            }
-        ],
         noParse: [
             /benchmark\/benchmark\.js/
         ]

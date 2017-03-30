@@ -1,4 +1,4 @@
-async function arrayFill() {
+async function arrayFill(): Promise<void> {
     "use speedyjs";
 
     const array = new Array<number>(100);

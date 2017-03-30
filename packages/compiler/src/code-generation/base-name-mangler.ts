@@ -13,7 +13,7 @@ export abstract class BaseNameMangler implements NameMangler {
     }
 
     private get typeChecker() {
-        return this.compilationContext.program.getTypeChecker();
+        return this.compilationContext.typeChecker;
     }
 
     /**
@@ -144,7 +144,7 @@ export abstract class BaseNameMangler implements NameMangler {
             return `${objectName}${typeArgumentsPostfix}`;
         }
 
-        throw new Error(`Unsupported runtime type ${this.compilationContext.program.getTypeChecker().typeToString(type)}`);
+        throw new Error(`Unsupported runtime type ${this.typeChecker.typeToString(type)}`);
     }
 }
 

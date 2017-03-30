@@ -1,8 +1,6 @@
-src/**/*.js
-test/**/*.js
+!__integrationtests__/index.js
+**/*.js
 __tests__/code-generation/tmp
 *.map
-cases/fib.wasm
 tools
-index.js
 

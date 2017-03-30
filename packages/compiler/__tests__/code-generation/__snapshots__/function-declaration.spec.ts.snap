@@ -18,7 +18,6 @@ entry:
   %count = alloca i32
   %arg = alloca i32
   store i32 %arg1, i32* %arg, align 4
-  store i32 0, i32* %count, align 4
   %arg2 = load i32, i32* %arg, align 4
   %0 = icmp sgt i32 %arg2, 10
   br i1 %0, label %then, label %else

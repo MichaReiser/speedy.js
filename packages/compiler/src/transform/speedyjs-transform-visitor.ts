@@ -4,6 +4,7 @@ import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 import {CodeGenerator} from "../code-generation/code-generator";
 import {CompilationContext} from "../compilation-context";
 import {CodeGenerationError} from "../code-generation/code-generation-error";
+import {TypeChecker} from "../type-checker";
 
 const LOG = debug("transform/speedyjs-transform-visitor");
 
@@ -24,7 +25,7 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
             return context.visitEachChild(functionDeclaration);
         }
 
-        const name = getName(functionDeclaration, this.compilationContext.program.getTypeChecker());
+        const name = getName(functionDeclaration, this.compilationContext.typeChecker);
 
         LOG(`Found SpeedyJS Function ${name}`);
         validateSpeedyJSFunction(functionDeclaration);
@@ -75,7 +76,7 @@ function validateSpeedyJSFunction(fun: ts.FunctionDeclaration) {
     }
 }
 
-function getName(functionDeclaration: ts.FunctionDeclaration, typeChecker: ts.TypeChecker) {
+function getName(functionDeclaration: ts.FunctionDeclaration, typeChecker: TypeChecker) {
     if (!functionDeclaration.name) {
         return "**anonymous**";
     }

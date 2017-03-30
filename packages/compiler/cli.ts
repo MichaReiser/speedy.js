@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import * as path from "path";
 import * as ts from "typescript";
 import * as program from "commander";
 
@@ -50,7 +51,7 @@ function parseConfigFile(configFileName: string): ts.ParsedCommandLine {
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
     }
 
-    const parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, ".", undefined, configFileName);
+    const parsedConfiguration = ts.parseJsonConfigFileContent(jsonConfig.config, ts.sys, path.dirname(configFileName), undefined, configFileName);
     if (parsedConfiguration.errors.length > 0) {
         reportDiagnostics(parsedConfiguration.errors);
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
@@ -92,7 +93,6 @@ function run() {
         commandLine.outputHelp();
         ts.sys.exit(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
     }
-
 
     const { compilerOptions, rootFileNames } = getCompilerOptions(commandLine, configFileName);
     const compilerHost = ts.createCompilerHost(compilerOptions);

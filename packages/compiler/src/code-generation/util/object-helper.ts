@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import {TypeChecker} from "../../type-checker";
 
 /**
  * Returns the type of the object to which the given node belongs to or undefined
@@ -6,7 +7,7 @@ import * as ts from "typescript";
  * @param typeChecker the type checker
  * @returns the type of the object node or undefined
  */
-export function getTypeOfParentObject(node: ts.Node, typeChecker: ts.TypeChecker): ts.ObjectType | undefined {
+export function getTypeOfParentObject(node: ts.Node, typeChecker: TypeChecker): ts.ObjectType | undefined {
     if (node.kind === ts.SyntaxKind.PropertyAccessExpression || node.kind === ts.SyntaxKind.ElementAccessExpression) {
         const accessExpression = node as ts.PropertyAccessExpression | ts.ElementAccessExpression;
         return typeChecker.getTypeAtLocation(accessExpression.expression) as ts.ObjectType;

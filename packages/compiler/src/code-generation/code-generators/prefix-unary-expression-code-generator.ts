@@ -4,6 +4,7 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {Value} from "../value/value";
 import {CodeGenerationError} from "../code-generation-error";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {Primitive} from "../value/primitive";
 
 class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PrefixUnaryExpression, Value> {
     syntaxKind = ts.SyntaxKind.PrefixUnaryExpression;
@@ -16,13 +17,8 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
 
         switch (node.operator) {
             case ts.SyntaxKind.ExclamationToken:
-                if (type.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createNeg(leftValue);
-                } else if (type.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpNE(leftValue, llvm.ConstantInt.get(context.llvmContext, 0));
-                } else if (type.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpONE(leftValue, llvm.ConstantFP.get(context.llvmContext, 0));
-                }
+                const booleanValue = Primitive.toBoolean(leftValue, type, context);
+                result = context.builder.createNot(booleanValue);
 
                 break;
 
@@ -47,27 +43,15 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
             case ts.SyntaxKind.PlusPlusToken:
                 if (type.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createAdd(leftValue, llvm.ConstantInt.get(context.llvmContext, 1));
-                    context.assignValue(left, context.value(result, type));
                 } else if (type.flags & ts.TypeFlags.NumberLike) {
                     result = context.builder.createFAdd(leftValue, llvm.ConstantFP.get(context.llvmContext, 1.0));
-                    context.assignValue(left, context.value(result, type));
                 }
 
                 break;
 
             case ts.SyntaxKind.TildeToken:
-                let intValue: llvm.Value | undefined;
-                if (type.flags & ts.TypeFlags.IntLike) {
-                    intValue = leftValue;
-                } else if (type.flags & (ts.TypeFlags.BooleanLike)) {
-                    intValue = context.builder.createIntCast(leftValue, llvm.Type.getInt32Ty(context.llvmContext), true);
-                } else if (type.flags & ts.TypeFlags.NumberLike) {
-                    intValue = context.builder.createFPToSI(leftValue, llvm.Type.getInt32Ty(context.llvmContext));
-                }
-
-                if (intValue) {
-                    result = context.builder.createXor(intValue, llvm.Constant.getAllOnesValue(llvm.Type.getInt32Ty(context.llvmContext)));
-                }
+                let intValue = Primitive.toInt32(leftValue, type, context.typeChecker.getTypeAtLocation(node), context);
+                result = context.builder.createNot(intValue);
 
                 break;
         }
@@ -76,7 +60,12 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
             throw CodeGenerationError.unsupportedUnaryOperation(node, context.typeChecker.typeToString(type));
         }
 
-        return context.value(result, type);
+        const resultValue = context.value(result, type);
+
+        if (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken) {
+            context.assignValue(left, resultValue);
+        }
+        return resultValue;
     }
 }
 

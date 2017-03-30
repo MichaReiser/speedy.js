@@ -20,7 +20,7 @@ const TEST_CASES = {
 async function getJsFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = TEST_CASES[caseName].fnName || caseName;
-    const fn = require("./cases/" + caseName + ".ts")[fnName];
+    const fn = require("ts-loader!./cases/" + caseName + ".ts")[fnName];
 
     const wrapped = function () {
         return fn.apply(undefined, testCase.args);
@@ -37,7 +37,7 @@ async function getJsFunctionForTestCase(caseName) {
 async function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
-    const fn = require("./cases/" + caseName + ".js")[fnName];
+    const fn = require("speedyjs-loader!./cases/" + caseName + ".ts")[fnName];
 
     const wrapped = function () {
         return fn.apply(undefined, testCase.args);

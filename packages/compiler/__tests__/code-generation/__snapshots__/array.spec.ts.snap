@@ -124,7 +124,6 @@ entry:
   %items1 = getelementptr inbounds [3 x i32], [3 x i32]* %items, i32 0, i32 0
   %3 = call { i32, i32, i4* }* @ArrayIi_constructorPii(i32* %items1, i32 3)
   store { i32, i32, i4* }* %3, { i32, i32, i4* }** %array, align 4
-  store { i32, i32, i4* }* null, { i32, i32, i4* }** %other, align 4
   %array2 = load { i32, i32, i4* }*, { i32, i32, i4* }** %array, align 4
   store { i32, i32, i4* }* %array2, { i32, i32, i4* }** %other, align 4
   %other3 = load { i32, i32, i4* }*, { i32, i32, i4* }** %other, align 4

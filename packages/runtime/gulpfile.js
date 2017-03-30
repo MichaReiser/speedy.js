@@ -43,7 +43,8 @@ gulp.task("build:clean", function () {
 gulp.task("build:runtime", function (cb) {
     runSequence(
         "build:runtime:configure",
-        ["build:runtime:safe", "build:runtime:unsafe"],
+        "build:runtime:make",
+        "build:runtime:make", // We need to build the project twice. Otherwise the first artifact is missing on travis???
         cb
     );
 });
@@ -62,14 +63,10 @@ gulp.task("build:runtime:configure", function () {
     child_process.execSync(command, { env: env, stdio: "inherit" });
 });
 
-gulp.task("build:runtime:safe", function () {
-    const command = "cmake --build cmake-build-release --target speedyjs-runtime";
+gulp.task("build:runtime:make", function () {
+    const command = "cmake --build cmake-build-release";
     child_process.execSync(command, { env: process.env, stdio: "inherit" });
-});
-
-gulp.task("build:runtime:unsafe", function () {
-    const command = "cmake --build cmake-build-release --target speedyjs-runtime-unsafe";
-    child_process.execSync(command, { env: process.env, stdio: "inherit" });
+    child_process.execSync("ls cmake-build-release", { env: process.env, stdio: "inherit" });
 });
 
 /**
@@ -112,10 +109,7 @@ gulp.task("copy:libs", function () {
 });
 
 gulp.task("copy:release", function () {
-    return gulp.src([
-        "./cmake-build-release/libspeedyjs-runtime.bc",
-        "./cmake-build-release/libspeedyjs-runtime-unsafe.bc"
-    ]).pipe(gulp.dest("./bin"));
+    return gulp.src("./cmake-build-release/libspeedyjs-runtime*.bc").pipe(gulp.dest("./bin"));
 });
 
 gulp.task("test:clean", function () {

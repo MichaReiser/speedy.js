@@ -5,6 +5,7 @@ import {MODULE_LOADER_FACTORY_NAME, PerFileWasmLoaderEmitHelper} from "./per-fil
 import {PerFileSourceFileRewirter} from "./per-file-source-file-rewriter";
 import {WastMetaData} from "./wast-meta-data";
 import {SpeedyJSCompilerOptions} from "../../speedyjs-compiler-options";
+import {TypeChecker} from "../../type-checker";
 
 /**
  * Inserts a wasm module loader function, the wasm byte code and rewrites the entry functions to call the wasm module.
@@ -14,7 +15,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
     private wasmOutput: Buffer | undefined;
     private wastMetaData: Partial<WastMetaData> = {};
 
-    constructor(private typeChecker: ts.TypeChecker, private compilerOptions: SpeedyJSCompilerOptions) {}
+    constructor(private typeChecker: TypeChecker, private compilerOptions: SpeedyJSCompilerOptions) {}
 
     setWasmOutput(output: Buffer, wastMetaData: WastMetaData): void {
         this.wasmOutput = output;
@@ -48,8 +49,9 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const targetFunction = ts.createPropertyAccess(wasmExports, functionDeclaration.name!);
         const args = signature.parameters.map(parameter => ts.createIdentifier(parameter.name));
         const functionCall = ts.createCall(targetFunction, [], args);
+        const castedResult = this.castReturnValue(functionCall, (signature.getReturnType() as ts.TypeReference).typeArguments[0]);
 
-        bodyStatements.push(ts.createReturn(functionCall));
+        bodyStatements.push(ts.createReturn(castedResult));
         const body = ts.createBlock(bodyStatements);
 
         return ts.updateFunctionDeclaration(
@@ -97,5 +99,14 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         const uint8From = ts.createPropertyAccess(ts.createIdentifier("Uint8Array"), ts.createIdentifier("from"));
         return ts.createCall(uint8From, [], [ts.createArrayLiteral(elements)]);
+    }
+
+    private castReturnValue(returnValue: ts.Expression, type: ts.Type): ts.Expression {
+        // wasm code returns 1 for true and zero for false. Cast it to a boolean
+        if (type.flags & ts.TypeFlags.BooleanLike) {
+            return ts.createBinary(returnValue, ts.SyntaxKind.EqualsEqualsEqualsToken, ts.createNumericLiteral("1"));
+        }
+
+        return returnValue;
     }
 }

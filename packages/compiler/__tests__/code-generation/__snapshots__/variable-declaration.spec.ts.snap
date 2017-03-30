@@ -38,7 +38,6 @@ target triple = \\"wasm32-unknown-unknown\\"
 define void @uninitializedVariableDeclaration() {
 entry:
   %x = alloca double
-  store double 0.000000e+00, double* %x, align 8
   ret void
 }
 "

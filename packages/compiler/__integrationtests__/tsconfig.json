@@ -1,21 +1,17 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "pretty": true,
     "strictNullChecks": true,
-    "target": "es5",
-    "lib": ["es2015"],
+    "target": "es2015",
     "sourceMap": true,
-    "types": ["jest", "lodash", "debug", "node", "tmp"]
+    "types": ["jasmine", "node"]
   },
   "include": [
-    "cli.ts",
-    "index.ts",
-    "src/**/*"
+    "./**/*.spec.ts"
   ]
 }

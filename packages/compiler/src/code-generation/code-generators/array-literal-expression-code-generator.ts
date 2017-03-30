@@ -14,7 +14,7 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
         let type = context.typeChecker.getTypeAtLocation(arrayLiteral);
         const elementType = ArrayReference.getElementType(type);
 
-        if (elementType.flags & ts.TypeFlags.Undefined) {
+        if (elementType.flags & ts.TypeFlags.Never) {
             type = context.typeChecker.getContextualType(arrayLiteral);
         }
 

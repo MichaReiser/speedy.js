@@ -3,8 +3,10 @@
     "module": "commonjs",
     "pretty": true,
     "noImplicitAny": true,
+    "noImplicitReturns": true,
     "target": "es5",
-    "lib": ["es2015" ]
+    "lib": ["es6" ],
+    "types": []
   },
   "include": [
     "./**/*"

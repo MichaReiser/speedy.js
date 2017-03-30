@@ -1,4 +1,4 @@
-async function arrayUnshift() {
+async function arrayUnshift(): Promise<void> {
     "use speedyjs";
 
     const array = [1, 2];

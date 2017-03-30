@@ -1,4 +1,4 @@
-export async function nsieve(size: int): Promise<int> {
+export async function nsieve(size: int) {
     "use speedyjs";
 
     const isPrime = new Array<boolean>(size);

@@ -2,12 +2,14 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Primitive} from "../value/primitive";
 
 class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement, void> {
     syntaxKind = ts.SyntaxKind.IfStatement;
 
     generate(ifStatement: ts.IfStatement, context: CodeGenerationContext): void {
-        const condition = context.generateValue(ifStatement.expression).generateIR();
+        const conditionValue = context.generateValue(ifStatement.expression).generateIR();
+        const condition = Primitive.toBoolean(conditionValue, context.typeChecker.getTypeAtLocation(ifStatement.expression), context);
         const fun = context.scope.enclosingFunction.getLLVMFunction();
 
         let thenBlock = llvm.BasicBlock.create(context.llvmContext, "then", fun);

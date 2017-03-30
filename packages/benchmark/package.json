@@ -5,9 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "build:wasm": "cd ./cases && speedyjs",
-    "build:wasm-unsafe": "cd ./cases && speedyjs --unsafe",
-    "build:wasm-dualOpt": "cd cases && speedyjs --binaryen-opt",
     "benchmark": "karma start"
   },
   "repository": {
@@ -26,18 +23,20 @@
   "homepage": "https://github.com/MichaReiser/speedy.js#readme",
   "dependencies": {
     "benchmark": "git+https://github.com/MichaReiser/benchmark.js.git",
-    "karma": "^1.5.0",
     "karma-benchmark": "git+https://github.com/MichaReiser/karma-benchmark.git#peer-deps-published",
     "karma-benchmark-reporter": "^0.1.1",
-    "karma-chrome-launcher": "^2.0.0",
-    "karma-firefox-launcher": "^1.0.1",
     "karma-json-reporter": "git+https://github.com/MichaReiser/karma-json-reporter.git#correctly-output-result",
-    "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^2.0.3",
-    "speedyjs-compiler": "0.x.x",
+    "speedyjs-loader": "0.x.x",
     "ts-loader": "^2.0.2",
     "typescript": "MichaReiser/TypeScript#release",
-    "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.2"
+  },
+  "devDependencies": {
+    "karma": "^1.5.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^2.0.3",
+    "webpack": "^2.3.2"
   }
 }

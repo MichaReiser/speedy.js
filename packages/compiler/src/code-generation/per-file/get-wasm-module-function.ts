@@ -83,11 +83,6 @@ function __moduleLoader(bytes: Uint8Array, TOTAL_STACK: number, TOTAL_MEMORY: nu
         return WebAssembly.instantiate(bytes.buffer, {
             env: {
                 memory: memory,
-                imports: {
-                    "fmod": function frem(x: number, y: number) {
-                        return x % y;
-                    }
-                },
                 STACKTOP: STACK_TOP,
                 "__cxa_allocate_exception": function () {
                     console.log("__cxa_allocate_exception", arguments);
@@ -103,6 +98,15 @@ function __moduleLoader(bytes: Uint8Array, TOTAL_STACK: number, TOTAL_MEMORY: nu
                 },
                 "__resumeException": function () {
                     console.log("__resumeException", arguments);
+                },
+                "__powisf2": function __powisf2(x: number, y: number) {
+                    return Math.pow(x, y);
+                },
+                "fmod": function frem(x: number, y: number) {
+                    return x % y;
+                },
+                "pow": function __powisf2(x: number, y: number) {
+                    return Math.pow(x, y);
                 },
                 "abort": function (what: any) {
                     console.error("Abort WASM for reason: " + what);

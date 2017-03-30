@@ -17,9 +17,6 @@ function getInitializedCompilerOptions(options?: UninitializedSpeedyJSCompilerOp
     options.out = undefined;
     options.outFile = undefined;
 
-    // We are not doing a full typecheck, we are not resolving the whole context,
-    // so pass --noResolve to avoid reporting missing file errors.
-
     return initializeCompilerOptions(options);
 }
 
@@ -43,12 +40,51 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
     let sourceMapText: string | undefined;
 
     const compilerHost: ts.CompilerHost = {
+        directoryExists() {
+            return defaultHost.directoryExists!.apply(defaultHost, arguments);
+        },
+        fileExists(fileName: string): boolean {
+            return fileName === inputFileName || defaultHost.fileExists.apply(defaultHost, arguments);
+        },
+        getCanonicalFileName() {
+            return defaultHost.getCanonicalFileName.apply(defaultHost, arguments);
+        },
+        getCurrentDirectory() {
+            return defaultHost.getCurrentDirectory.apply(defaultHost, arguments);
+        },
+        getDefaultLibFileName() {
+            return defaultHost.getDefaultLibFileName.apply(defaultHost, arguments);
+        },
+        getDefaultLibLocation() {
+            return defaultHost.getDefaultLibLocation!.apply(defaultHost, arguments);
+        },
+        getDirectories() {
+            return defaultHost.getDirectories.apply(defaultHost, arguments);
+        },
+        getEnvironmentVariable() {
+            return defaultHost.getEnvironmentVariable!.apply(defaultHost, arguments);
+        },
+        getNewLine() {
+            return defaultHost.getNewLine.apply(defaultHost, arguments);
+        },
         getSourceFile(fileName: string, languageVersion: ts.ScriptTarget) {
             if (fileName === path.normalize(inputFileName)) {
                 return sourceFile = sourceFile || ts.createSourceFile(fileName, sourceCode, languageVersion);
             }
 
             return defaultHost.getSourceFile.apply(defaultHost, arguments);
+        },
+        readFile() {
+            return defaultHost.readFile.apply(defaultHost, arguments);
+        },
+        realpath() {
+            return defaultHost.realpath!.apply(defaultHost, arguments);
+        },
+        trace() {
+            return defaultHost.trace!.apply(defaultHost, arguments);
+        },
+        useCaseSensitiveFileNames() {
+            return defaultHost.useCaseSensitiveFileNames.apply(defaultHost, arguments);
         },
         writeFile(name: string, text: string){
             if (name.endsWith(".map")) {
@@ -59,33 +95,6 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
                 assert(outputText === undefined, `Unexpected multiple outputs for the file: '${name}'`);
                 outputText = text;
             }
-        },
-        getDefaultLibFileName() {
-            return defaultHost.getDefaultLibFileName.apply(defaultHost, arguments);
-        },
-        getDefaultLibLocation() {
-            return defaultHost.getDefaultLibLocation!.apply(defaultHost, arguments);
-        },
-        useCaseSensitiveFileNames() {
-            return defaultHost.useCaseSensitiveFileNames.apply(defaultHost, arguments);
-        },
-        getCanonicalFileName() {
-            return defaultHost.getCanonicalFileName.apply(defaultHost, arguments);
-        },
-        getCurrentDirectory() {
-            return defaultHost.getCurrentDirectory.apply(defaultHost, arguments);
-        },
-        getNewLine() {
-            return defaultHost.getNewLine.apply(defaultHost, arguments);
-        },
-        fileExists(fileName: string): boolean {
-            return fileName === inputFileName || defaultHost.fileExists.apply(defaultHost, arguments);
-        },
-        readFile() {
-            return defaultHost.readFile.apply(defaultHost, arguments);
-        },
-        getDirectories() {
-            return defaultHost.getDirectories.apply(defaultHost, arguments);
         }
     };
 

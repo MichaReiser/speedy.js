@@ -161,7 +161,8 @@ entry:
   %twoDouble2 = load double, double* %twoDouble, align 8
   %1 = fcmp ult double %twoDouble2, 4.000000e+00
   %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = icmp slt i1 %trueValue3, false
+  %2 = zext i1 %trueValue3 to i32
+  %3 = icmp slt i32 %2, 0
   ret void
 }
 "
@@ -193,7 +194,8 @@ entry:
   %twoDouble2 = load double, double* %twoDouble, align 8
   %1 = fcmp ult double %twoDouble2, 4.000000e+00
   %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = icmp slt i1 %trueValue3, false
+  %2 = zext i1 %trueValue3 to i32
+  %3 = icmp slt i32 %2, 0
   ret void
 }
 "
@@ -257,7 +259,8 @@ entry:
   %twoDouble2 = load double, double* %twoDouble, align 8
   %1 = fcmp ogt double %twoDouble2, 4.000000e+00
   %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = icmp sgt i1 %trueValue3, false
+  %2 = zext i1 %trueValue3 to i32
+  %3 = icmp sgt i32 %2, 0
   ret void
 }
 "
@@ -289,7 +292,8 @@ entry:
   %twoDouble2 = load double, double* %twoDouble, align 8
   %1 = fcmp oge double %twoDouble2, 4.000000e+00
   %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = icmp sge i1 %trueValue3, false
+  %2 = zext i1 %trueValue3 to i32
+  %3 = icmp sge i32 %2, 0
   ret void
 }
 "
@@ -317,10 +321,13 @@ entry:
   %six1 = load i32, i32* %six, align 4
   %0 = or i32 %six1, 8
   store i32 %0, i32* %six, align 4
-  store i32 3, i32* %intValue, align 4
+  %1 = call i32 @toInt32d(double 3.560000e+00)
+  store i32 %1, i32* %intValue, align 4
   store i32 3, i32* %intToInt, align 4
   ret void
 }
+
+declare i32 @toInt32d(double)
 "
 `;
 

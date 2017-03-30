@@ -11,6 +11,7 @@ import {BuiltInSymbols} from "./built-in-symbols";
 import {CompilationContext} from "./compilation-context";
 import {CodeGenerationError} from "./code-generation/code-generation-error";
 import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
+import {TypeScriptTypeChecker} from "./typescript-type-checker";
 
 const LOG = debug("compiler");
 
@@ -35,7 +36,7 @@ export class Compiler {
             compilerHost: this.compilerHost,
             compilerOptions: this.compilerOptions,
             llvmContext: context,
-            program,
+            typeChecker: new TypeScriptTypeChecker(program.getTypeChecker()),
             rootDir: (program as any).getCommonSourceDirectory()
         };
 

@@ -60,6 +60,7 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         compilerOptions[key] = typeof(compilerOptions[key]) === "undefined" ? (defaults as any)[key] : compilerOptions[key];
     }
 
+    compilerOptions.strictNullChecks = true;
     compilerOptions.noImplicitAny = true; // speedy js cannot handle any
     compilerOptions.noImplicitReturns = true;
 
