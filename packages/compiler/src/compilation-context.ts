@@ -9,5 +9,9 @@ export interface CompilationContext {
     readonly compilerOptions: SpeedyJSCompilerOptions;
     readonly llvmContext: llvm.LLVMContext;
     readonly program: ts.Program;
+
+    /**
+     * The root directory where the source files are located
+     */
     readonly rootDir: string;
 }

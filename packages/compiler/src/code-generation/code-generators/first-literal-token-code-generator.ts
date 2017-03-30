@@ -4,7 +4,7 @@ import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 
 class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralLikeNode, Primitive> {
     syntaxKind = ts.SyntaxKind.FirstLiteralToken;

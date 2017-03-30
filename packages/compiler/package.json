@@ -3,17 +3,21 @@
   "version": "0.0.1",
   "main": "index.js",
   "bin": {
-    "speedyjs": "./index.js"
+    "speedyjs": "./cli.js"
   },
   "author": "Micha Reiser <micha@famreiser.ch>",
   "license": "MIT",
   "repository": "https://github.com/MichaReiser/speedy.js.git",
   "devDependencies": {
+    "@types/jasmine": "^2.5.47",
     "@types/jest": "^18.1.1",
     "gulp": "^3.9.1",
     "jest": "^19.0.2",
+    "karma": "^1.5.0",
+    "karma-webpack": "^2.0.3",
     "merge-stream": "^1.0.1",
-    "ts-jest": "^19.0.1"
+    "ts-jest": "^19.0.1",
+    "webpack": "^2.3.2"
   },
   "dependencies": {
     "@types/commander": "^2.3.31",

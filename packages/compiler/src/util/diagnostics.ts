@@ -22,6 +22,10 @@ const defaultFormatDiagnosticHost: ts.FormatDiagnosticsHost = {
 
 export function reportDiagnostics(diagnostics: ts.Diagnostic[], compilerHost?: ts.CompilerHost): void {
     for (const diagnostic of diagnostics) {
-        ts.sys.write(ts.formatDiagnostics([diagnostic], compilerHost || defaultFormatDiagnosticHost));
+        ts.sys.write(formatDiagnostics([diagnostic]));
     }
+}
+
+export function formatDiagnostics(diagnostics: ts.Diagnostic[], compilerHost?: ts.CompilerHost): string {
+    return ts.formatDiagnostics(diagnostics, compilerHost || defaultFormatDiagnosticHost)
 }

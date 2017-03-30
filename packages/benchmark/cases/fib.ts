@@ -1,9 +1,10 @@
-export function fib(value: int): int {
+export async function fib(value: int): Promise<int> {
     "use speedyjs";
 
     if (value <= 2) {
         return 1;
     }
 
-    return fib(value - 2) + fib(value - 1);
+    return await fib(value - 2) + await fib(value - 1);
 }
+

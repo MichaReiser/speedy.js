@@ -1,6 +1,6 @@
 src/**/*.js
 test/**/*.js
-cases/**/*.js
+__tests__/code-generation/tmp
 *.map
 cases/fib.wasm
 tools

@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 
 export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
     if (type.flags & ts.TypeFlags.IntLike) {
@@ -24,7 +24,7 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         return llvm.Type.getVoidTy(context.llvmContext);
     }
 
-    if (type.flags & ts.TypeFlags.Object) {
+    if (type.flags & ts.TypeFlags.Object && context.scope.hasClass(type.getSymbol())) {
         const classReference = context.scope.getClass(type.getSymbol());
         if (classReference) {
             return classReference.getLLVMType(type as ts.ObjectType);

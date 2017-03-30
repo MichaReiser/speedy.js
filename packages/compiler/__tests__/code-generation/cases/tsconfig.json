@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "pretty": true,
+    "noImplicitAny": true,
+    "target": "es5",
+    "lib": ["es2015" ]
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": ["node_modules", "../src"]
+}

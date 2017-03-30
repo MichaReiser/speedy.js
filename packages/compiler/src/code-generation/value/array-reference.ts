@@ -12,6 +12,7 @@ import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {ObjectPropertyReferenceBuilder} from "./object-property-reference-builder";
 import {ObjectIndexReferenceBuilder} from "./object-index-reference-builder";
 import {ArrayClassReference} from "./array-class-reference";
+import {ObjectIndexReference} from "./object-index-reference";
 
 export class ArrayReference extends BuiltInObjectReference {
 
@@ -69,7 +70,7 @@ export class ArrayReference extends BuiltInObjectReference {
         }
     }
 
-    public getIndexer(elementAccessExpression: ts.ElementAccessExpression) {
+    public getIndexer(elementAccessExpression: ts.ElementAccessExpression): ObjectIndexReference {
         return ObjectIndexReferenceBuilder
             .forElement(elementAccessExpression, this.context)
             .fromRuntime()

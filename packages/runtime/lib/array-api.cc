@@ -7,12 +7,14 @@
 
 // see RuntimeSystemNameMangler for the naming schema used
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 //---------------------------------------------------------------------------------
 // new
 //---------------------------------------------------------------------------------
+
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructori(int32_t size) {
     return new Array<bool>(size);

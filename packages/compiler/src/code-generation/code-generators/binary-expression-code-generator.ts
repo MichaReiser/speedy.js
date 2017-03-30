@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import {Value} from "../value/value";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 import {MathObjectReference} from "../value/math-object-reference";
 
 function isAssignment(operatorToken: ts.BinaryOperatorToken) {

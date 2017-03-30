@@ -73,13 +73,13 @@ export interface CodeGenerationContext {
      * @param value the value to assign
      * @throws if the target cannot be assigned a value
      */
-    assignValue(target: Value, value: Value);
+    assignValue(target: Value, value: Value): void;
 
     /**
      * Adds the name of an entry function
      * @param name the name of the entry function
      */
-    addEntryFunction(name: string);
+    addEntryFunction(name: string): void;
 
     /**
      * Returns the names of all entry functions

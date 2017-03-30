@@ -19,7 +19,7 @@ export abstract class BaseNameMangler implements NameMangler {
     /**
      * Separator between module, object and function names
      */
-    protected abstract get separator();
+    protected abstract get separator(): string;
 
     mangleFunctionName(functionCall: FunctionCallDescription): string {
         const parts = [this.getModulePrefix(functionCall.sourceFile)];

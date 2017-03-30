@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Value} from "../value/value";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
 class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PrefixUnaryExpression, Value> {
