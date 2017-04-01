@@ -32,16 +32,12 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         this.builder = new llvm.IRBuilder(this.compilationContext.llvmContext);
     }
 
-    get program() {
-        return this.compilationContext.program;
-    }
-
     get llvmContext() {
         return this.compilationContext.llvmContext;
     }
 
     get typeChecker() {
-        return this.program.getTypeChecker();
+        return this.compilationContext.typeChecker;
     }
 
     generateValue(node: ts.Node): Value {
@@ -123,6 +119,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
         if (symbol.flags & ts.SymbolFlags.Function) {
             const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
+
             assert(signatures.length === 0, "Overloaded methods not yet supported");
             return this.functionReference(value as llvm.Function, signatures[0].getReturnType());
         }

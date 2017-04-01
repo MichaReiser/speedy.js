@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 import {FunctionReference} from "./function-reference";
 import {BuiltInObjectReference} from "./built-in-object-reference";
 import {toLLVMType} from "../util/type-mapping";

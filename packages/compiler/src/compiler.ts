@@ -2,24 +2,26 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as debug from "debug";
 import {DefaultCodeGenerationContextFactory} from "./code-generation/default-code-generation-context-factory";
-import {PerFileCodeGenerator} from "./code-generation/per-file-code-generator";
+import {PerFileCodeGenerator} from "./code-generation/per-file/per-file-code-generator";
 import {NotYetImplementedCodeGenerator} from "./code-generation/not-yet-implemented-code-generator";
 import {LogUnknownTransformVisitor} from "./transform/log-unknown-transform-visitor";
 import {SpeedyJSTransformVisitor} from "./transform/speedyjs-transform-visitor";
 import {createTransformVisitorFactory} from "./transform/transform-visitor";
 import {BuiltInSymbols} from "./built-in-symbols";
 import {CompilationContext} from "./compilation-context";
-import {CodeGenerationError} from "./code-generation/code-generation-exception";
+import {CodeGenerationError} from "./code-generation/code-generation-error";
+import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
+import {TypeScriptTypeChecker} from "./typescript-type-checker";
 
 const LOG = debug("compiler");
 
 export class Compiler {
-    constructor(private compilerOptions: ts.CompilerOptions, private compilerHost: ts.CompilerHost) {
-        this.compilerHost = ts.createCompilerHost(compilerOptions);
+    constructor(private compilerOptions: SpeedyJSCompilerOptions, private compilerHost: ts.CompilerHost) {
     }
 
     compile(rootFileNames: string[]): { exitStatus: ts.ExitStatus, diagnostics: ts.Diagnostic[] } {
         LOG("Start Compiling");
+        Compiler.initLLVM();
         const program: ts.Program = ts.createProgram(rootFileNames, this.compilerOptions, this.compilerHost);
         const diagnostics = [...program.getSyntacticDiagnostics(), ...program.getOptionsDiagnostics(), ...program.getGlobalDiagnostics(), ...program.getSemanticDiagnostics() ];
 
@@ -28,20 +30,32 @@ export class Compiler {
         }
 
         const context = new llvm.LLVMContext();
-        const llvmEmitter = new PerFileCodeGenerator(context, new DefaultCodeGenerationContextFactory(new NotYetImplementedCodeGenerator()));
-
-        const logUnknownVisitor = new LogUnknownTransformVisitor();
         const builtIns = BuiltInSymbols.create(program, this.compilerHost, this.compilerOptions);
         const compilationContext: CompilationContext = {
             builtIns,
             compilerHost: this.compilerHost,
             compilerOptions: this.compilerOptions,
             llvmContext: context,
-            program,
+            typeChecker: new TypeScriptTypeChecker(program.getTypeChecker()),
             rootDir: (program as any).getCommonSourceDirectory()
-    };
+        };
 
-        const speedyJSVisitor = new SpeedyJSTransformVisitor(compilationContext, llvmEmitter);
+        return Compiler.emit(program, compilationContext);
+    }
+
+    private static initLLVM() {
+        llvm.initializeAllTargets();
+        llvm.initializeAllTargetInfos();
+        llvm.initializeAllAsmPrinters();
+        llvm.initializeAllTargetMCs();
+        llvm.initializeAllAsmParsers();
+    }
+
+    private static emit(program: ts.Program, compilationContext: CompilationContext) {
+        const codeGenerator = new PerFileCodeGenerator(compilationContext.llvmContext, new DefaultCodeGenerationContextFactory(new NotYetImplementedCodeGenerator()));
+
+        const logUnknownVisitor = new LogUnknownTransformVisitor();
+        const speedyJSVisitor = new SpeedyJSTransformVisitor(compilationContext, codeGenerator);
 
         try {
             const emitResult = program.emit(undefined, undefined, undefined, undefined, { before: [
@@ -49,9 +63,14 @@ export class Compiler {
                 createTransformVisitorFactory(speedyJSVisitor)
             ]});
 
-            llvmEmitter.write();
+            let exitStatus;
+            if (emitResult.emitSkipped) {
+                exitStatus = ts.ExitStatus.DiagnosticsPresent_OutputsSkipped;
+            } else {
+                codeGenerator.completeCompilation();
+                exitStatus = ts.ExitStatus.Success;
+            }
 
-            const exitStatus = emitResult.emitSkipped ? ts.ExitStatus.DiagnosticsPresent_OutputsSkipped : ts.ExitStatus.Success;
             LOG("Program compiled");
 
             return { exitStatus, diagnostics: emitResult.diagnostics };

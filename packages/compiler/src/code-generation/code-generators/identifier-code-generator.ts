@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 import {FunctionReference} from "../value/function-reference";
 import {ClassReference} from "../value/class-reference";
 import {Allocation} from "../value/allocation";
@@ -22,6 +22,9 @@ class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Func
         }
 
         if (symbol.flags & ts.SymbolFlags.Type) {
+            if (!context.scope.hasClass(symbol)) {
+                throw CodeGenerationError.unsupportedClassReferencedBy(identifier)
+            }
             return context.scope.getClass(symbol);
         }
 

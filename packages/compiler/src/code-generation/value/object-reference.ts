@@ -40,5 +40,5 @@ export interface ObjectReference extends AssignableValue {
     /**
      * Destructs the object
      */
-    destruct();
+    destruct(): void;
 }

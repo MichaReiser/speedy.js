@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import * as assert from "assert";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../code-generation-exception";
+import {CodeGenerationError} from "../code-generation-error";
 import {ObjectReference} from "./object-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectPropertyReference} from "./object-property-reference";

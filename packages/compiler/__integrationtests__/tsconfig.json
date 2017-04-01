@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "pretty": true,
+    "strictNullChecks": true,
+    "target": "es2015",
+    "sourceMap": true,
+    "types": ["jasmine", "node"]
+  },
+  "include": [
+    "./**/*.spec.ts"
+  ]
+}

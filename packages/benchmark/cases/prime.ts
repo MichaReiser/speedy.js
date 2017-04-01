@@ -1,4 +1,4 @@
-export function isPrime(value: int): boolean {
+export async function isPrime(value: int) {
     "use speedyjs";
 
     if (value <= 1) {

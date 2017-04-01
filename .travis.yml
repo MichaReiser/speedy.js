@@ -1,5 +1,4 @@
 sudo: required
-
 language: node_js
 node_js:
 - node
@@ -18,14 +17,22 @@ addons:
     - libobjc-4.9-dev
     - libstdc++6
     - checkinstall
+  sauce_connect: true
 env:
-- LLVM=/usr/bin GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
+  global:
+  - LLVM=/usr/bin
+  - GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
 
 before_install:
-- wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
+- wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
+  && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
 - wget http://famreiser.ch/llvm/llvm-5.0-webassembly.tar.gz
 - mkdir llvm && tar -xzf llvm-5.0-webassembly.tar.gz -C llvm
-- cd llvm && sudo dpkg -i clang-5.0_5.0~svn298384-1~exp1_amd64.deb libclang1-5.0_5.0~svn298384-1~exp1_amd64.deb libclang-5.0-dev_5.0~svn298384-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn298384-1~exp1_amd64.deb libllvm5.0_5.0~svn298384-1~exp1_amd64.deb llvm-5.0_5.0~svn298384-1~exp1_amd64.deb llvm-5.0-runtime_5.0~svn298384-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn298384-1~exp1_amd64.deb && cd ..
+- cd llvm && sudo dpkg -i clang-5.0_5.0~svn298384-1~exp1_amd64.deb libclang1-5.0_5.0~svn298384-1~exp1_amd64.deb
+  libclang-5.0-dev_5.0~svn298384-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn298384-1~exp1_amd64.deb
+  libllvm5.0_5.0~svn298384-1~exp1_amd64.deb llvm-5.0_5.0~svn298384-1~exp1_amd64.deb
+  llvm-5.0-runtime_5.0~svn298384-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn298384-1~exp1_amd64.deb
+  && cd ..
 - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 50
 - sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang-5.0 50
 - sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-5.0 50

@@ -7,7 +7,7 @@
   "repository": "https://github.com/MichaReiser/speedy.js.git",
   "scripts": {
     "preinstall": "node ./scripts/install-dependencies.js",
-    "test": "gulp test",
+    "test": "ls ./bin && gulp test && ls ./bin",
     "prepublish": "tsc && gulp build"
   },
   "author": "Micha Reiser <micha@famreiser.ch>",

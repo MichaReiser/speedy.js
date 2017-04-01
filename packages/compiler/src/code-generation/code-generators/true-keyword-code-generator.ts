@@ -14,3 +14,4 @@ class TrueKeywordCodeGenerator implements SyntaxCodeGenerator<ts.BooleanLiteral,
 }
 
 export default TrueKeywordCodeGenerator;
+

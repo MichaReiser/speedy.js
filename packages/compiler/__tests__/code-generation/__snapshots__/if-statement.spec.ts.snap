@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IfStatement if-else-if-else 1`] = `
+"; ModuleID = 'if/if-else-if-else.ts'
+source_filename = \\"if/if-else-if-else.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define i32 @cmp(i32 %x1, i32 %y2) {
+entry:
+  %result = alloca i32
+  %return = alloca i32
+  %x = alloca i32
+  store i32 %x1, i32* %x, align 4
+  %y = alloca i32
+  store i32 %y2, i32* %y, align 4
+  %y3 = load i32, i32* %y, align 4
+  %x4 = load i32, i32* %x, align 4
+  %0 = icmp slt i32 %x4, %y3
+  br i1 %0, label %then, label %else
+
+then:                                             ; preds = %entry
+  store i32 -1, i32* %result, align 4
+  br label %if-successor
+
+else:                                             ; preds = %entry
+  %y5 = load i32, i32* %y, align 4
+  %x6 = load i32, i32* %x, align 4
+  %1 = icmp eq i32 %x6, %y5
+  br i1 %1, label %then7, label %else8
+
+then7:                                            ; preds = %else
+  store i32 0, i32* %result, align 4
+  br label %if-successor
+
+else8:                                            ; preds = %else
+  store i32 1, i32* %result, align 4
+  br label %if-successor
+
+if-successor:                                     ; preds = %then7, %else8, %then
+  %result9 = load i32, i32* %result, align 4
+  store i32 %result9, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if-successor
+  %return10 = load i32, i32* %return, align 4
+  ret i32 %return10
+}
+"
+`;
+
+exports[`IfStatement if-statement 1`] = `
+"; ModuleID = 'if/if-statement.ts'
+source_filename = \\"if/if-statement.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define double @max(double %x1, double %y2) {
+entry:
+  %return = alloca double
+  %x = alloca double
+  store double %x1, double* %x, align 8
+  %y = alloca double
+  store double %y2, double* %y, align 8
+  %y3 = load double, double* %y, align 8
+  %x4 = load double, double* %x, align 8
+  %0 = fcmp ult double %x4, %y3
+  br i1 %0, label %then, label %if-successor
+
+then:                                             ; preds = %entry
+  %y5 = load double, double* %y, align 8
+  store double %y5, double* %return, align 8
+  br label %returnBlock
+
+if-successor:                                     ; preds = %entry
+  %x6 = load double, double* %x, align 8
+  store double %x6, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if-successor, %then
+  %return7 = load double, double* %return, align 8
+  ret double %return7
+}
+"
+`;

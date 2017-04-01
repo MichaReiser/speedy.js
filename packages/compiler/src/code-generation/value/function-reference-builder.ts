@@ -78,7 +78,7 @@ abstract class BaseFunctionReferenceFactory {
             fn = llvm.Function.create(functionType, llvm.LinkageTypes.ExternalLinkage, mangledName, this.context.module);
         }
 
-        const getCallArgs = (args) => this.getCallArguments(args, functionCallDescription);
+        const getCallArgs = (args: llvm.Value[]) => this.getCallArguments(args, functionCallDescription);
         if (objectReference) {
             return new class extends MethodReference {
                 getCallArguments(args: llvm.Value[]) {

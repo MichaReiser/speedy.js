@@ -6,6 +6,7 @@ import {Value} from "./value/value";
 import {FunctionReference} from "./value/function-reference";
 import {ObjectReference} from "./value/object-reference";
 import {MethodReference} from "./value/method-reference";
+import {TypeChecker} from "../type-checker";
 
 /**
  * The stateful code generation context for a specific llvm module
@@ -18,14 +19,9 @@ export interface CodeGenerationContext {
     readonly compilationContext: CompilationContext;
 
     /**
-     * Reference to the type script program that is being compiled
-     */
-    readonly program: ts.Program;
-
-    /**
      * Reference to the type checker
      */
-    readonly typeChecker: ts.TypeChecker;
+    readonly typeChecker: TypeChecker;
 
     /**
      * The llvm context
@@ -73,13 +69,13 @@ export interface CodeGenerationContext {
      * @param value the value to assign
      * @throws if the target cannot be assigned a value
      */
-    assignValue(target: Value, value: Value);
+    assignValue(target: Value, value: Value): void;
 
     /**
      * Adds the name of an entry function
      * @param name the name of the entry function
      */
-    addEntryFunction(name: string);
+    addEntryFunction(name: string): void;
 
     /**
      * Returns the names of all entry functions

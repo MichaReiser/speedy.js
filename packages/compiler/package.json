@@ -3,17 +3,29 @@
   "version": "0.0.1",
   "main": "index.js",
   "bin": {
-    "speedyjs": "./index.js"
+    "speedyjs": "./cli.js"
   },
   "author": "Micha Reiser <micha@famreiser.ch>",
   "license": "MIT",
   "repository": "https://github.com/MichaReiser/speedy.js.git",
   "devDependencies": {
-    "@types/jest": "^18.1.1",
+    "@types/jasmine": "^2.5.47",
+    "@types/jest": "^19.2.2",
     "gulp": "^3.9.1",
+    "jasmine-core": "^2.5.2",
     "jest": "^19.0.2",
+    "karma": "^1.5.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-jasmine-html-reporter": "^0.2.2",
+    "karma-sauce-launcher": "^1.1.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^2.0.3",
     "merge-stream": "^1.0.1",
-    "ts-jest": "^19.0.1"
+    "speedyjs-loader": "0.x.x",
+    "ts-jest": "^19.0.6",
+    "webpack": "^2.3.2"
   },
   "dependencies": {
     "@types/commander": "^2.3.31",
@@ -33,8 +45,9 @@
     "preinstall": "node ./scripts/install-dependencies.js",
     "prepublish": "tsc",
     "start": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "jest && karma start karma.conf.js --single-run",
+    "test:watch": "jest --watch",
+    "test:integration:watch": "karma start karma.conf.js"
   },
   "jest": {
     "transform": {

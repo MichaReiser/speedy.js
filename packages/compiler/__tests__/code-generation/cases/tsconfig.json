@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "pretty": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "target": "es5",
+    "lib": ["es6" ],
+    "types": []
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": ["node_modules", "../src"]
+}

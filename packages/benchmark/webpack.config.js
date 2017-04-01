@@ -10,17 +10,6 @@ module.exports = {
     },
 
     module: {
-        rules: [
-            {
-                test: /\.wasm$/,
-                loader: require.resolve("./binary-loader")
-            },
-            {
-                test: /\.ts$/,
-                loader: "ts-loader",
-                include: path.resolve("./cases")
-            }
-        ],
         noParse: [
             /benchmark\/benchmark\.js/
         ]

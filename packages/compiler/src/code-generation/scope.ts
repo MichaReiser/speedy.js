@@ -147,4 +147,8 @@ export class Scope {
     hasFunction(symbol: ts.Symbol) {
         return this.functions.has(symbol);
     }
+
+    hasClass(symbol: ts.Symbol): boolean {
+        return this.classes.has(symbol) || (!!this.parent && this.parent.hasClass(symbol));
+    }
 }
