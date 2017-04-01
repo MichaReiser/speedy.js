@@ -1,6 +1,12 @@
 import * as llvm from "llvm-node";
 import {ObjectReference} from "./object-reference";
+import {CodeGenerationContext} from "../code-generation-context";
 
+/**
+ * A value
+ * Values should not have a reference to the code generation context as the code generation context is stateful. A reference
+ * to the compilation context is allowed.
+ */
 export interface Value {
     /**
      * Indicator if a value can be assigned to this.
@@ -17,12 +23,12 @@ export interface Value {
      * This might result in IR code being generated (e.g. Allocation.load)
      * Other values just return this.
      */
-    dereference(): Value;
+    dereference(context: CodeGenerationContext): Value;
 
     /**
      * Generates the IR Code for this value
      */
-    generateIR(): llvm.Value;
+    generateIR(context: CodeGenerationContext): llvm.Value;
 }
 
 /**
@@ -35,5 +41,5 @@ export interface AssignableValue extends Value {
      * @param value the value to assign
      * @throws if the value is not assignable {@link Value.isAssignable}
      */
-    generateAssignmentIR(value: Value): void;
+    generateAssignmentIR(value: Value, context: CodeGenerationContext): void;
 }

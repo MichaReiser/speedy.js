@@ -82,7 +82,7 @@ describe("PrefixUnaryExpression", () => {
             cb();
         });
 
-        // TODO should also return falsae for NaN
+        // TODO should also return false for NaN
         it("returns false for 0 and true otherwise", async (cb) => {
             expect(await notNumber(0.0)).toBe(!0.0);
             expect(await notNumber(0.1)).toBe(!0.1);

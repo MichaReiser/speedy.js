@@ -13,7 +13,7 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
         if (node.expression) {
             assert(returnAllocation, "No return allocation present but return statement with value present");
             const returnValue = context.generateValue(node.expression);
-            returnAllocation!.generateAssignmentIR(returnValue);
+            returnAllocation!.generateAssignmentIR(returnValue, context);
         }
 
         assert(returnBlock, "No return block present (not inside of a function?)");

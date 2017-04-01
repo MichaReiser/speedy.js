@@ -20,12 +20,23 @@ const defaultFormatDiagnosticHost: ts.FormatDiagnosticsHost = {
     getCanonicalFileName: createGetCanonicalFileName(ts.sys.useCaseSensitiveFileNames)
 };
 
+/**
+ * Prints the given diagnostic messages to the console
+ * @param diagnostics the diagnostics to report
+ * @param compilerHost the compiler host
+ */
 export function reportDiagnostics(diagnostics: ts.Diagnostic[], compilerHost?: ts.CompilerHost): void {
     for (const diagnostic of diagnostics) {
-        ts.sys.write(formatDiagnostics([diagnostic]));
+        ts.sys.write(formatDiagnostics([diagnostic], compilerHost));
     }
 }
 
+/**
+ * Formats the given diagnostics as a string
+ * @param diagnostics the diagnostics to format
+ * @param compilerHost the compiler hsot
+ * @return {string} the diagnostics as string
+ */
 export function formatDiagnostics(diagnostics: ts.Diagnostic[], compilerHost?: ts.CompilerHost): string {
     return ts.formatDiagnostics(diagnostics, compilerHost || defaultFormatDiagnosticHost)
 }

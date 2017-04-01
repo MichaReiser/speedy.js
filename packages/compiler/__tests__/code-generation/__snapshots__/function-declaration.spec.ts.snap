@@ -77,6 +77,65 @@ if-successor:                                     ; preds = %then, %else
 "
 `;
 
+exports[`FunctionDeclaration transitive-function 1`] = `
+"; ModuleID = 'function-declaration/transitive-function.ts'
+source_filename = \\"function-declaration/transitive-function.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define i32 @fib(i32 %value1) {
+entry:
+  %return = alloca i32
+  %value = alloca i32
+  store i32 %value1, i32* %value, align 4
+  %value2 = load i32, i32* %value, align 4
+  %fibSyncReturnValue = call i32 @\\"function-declaration/transitive-function.ts$7fibSynci\\"(i32 %value2)
+  store i32 %fibSyncReturnValue, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return3 = load i32, i32* %return, align 4
+  ret i32 %return3
+}
+
+define internal i32 @\\"function-declaration/transitive-function.ts$7fibSynci\\"(i32 %value1) {
+entry:
+  %return = alloca i32
+  %value = alloca i32
+  store i32 %value1, i32* %value, align 4
+  %value2 = load i32, i32* %value, align 4
+  %0 = icmp sle i32 %value2, 2
+  br i1 %0, label %then, label %if-successor
+
+then:                                             ; preds = %entry
+  store i32 1, i32* %return, align 4
+  br label %returnBlock
+
+if-successor:                                     ; preds = %entry
+  %value3 = load i32, i32* %value, align 4
+  %1 = sub i32 %value3, 2
+  %fibSyncReturnValue = call i32 @\\"function-declaration/transitive-function.ts$7fibSynci\\"(i32 %1)
+  %value4 = load i32, i32* %value, align 4
+  %2 = sub i32 %value4, 1
+  %fibSyncReturnValue5 = call i32 @\\"function-declaration/transitive-function.ts$7fibSynci\\"(i32 %2)
+  %3 = add i32 %fibSyncReturnValue, %fibSyncReturnValue5
+  store i32 %3, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if-successor, %then
+  %return6 = load i32, i32* %return, align 4
+  ret i32 %return6
+}
+"
+`;
+
 exports[`FunctionDeclaration void-function-with-return-statement 1`] = `
 "; ModuleID = 'function-declaration/void-function-with-return-statement.ts'
 source_filename = \\"function-declaration/void-function-with-return-statement.ts\\"

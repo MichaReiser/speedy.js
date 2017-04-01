@@ -1,4 +1,4 @@
-async function arrayElementAccesss() {
+async function arrayElementAccess() {
     "use speedyjs";
 
     const array = [1, 2, 3, 4, 5];

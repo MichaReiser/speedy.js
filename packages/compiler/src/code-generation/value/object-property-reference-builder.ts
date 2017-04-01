@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ObjectReference} from "./object-reference";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {toLLVMType} from "../util/type-mapping";
+import {toLLVMType} from "../util/types";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {DefaultNameMangler} from "../default-name-mangler";
 
@@ -30,7 +30,7 @@ export class ObjectPropertyReferenceBuilder {
         const getter = this.createGetter(thisLLVMType, propertyLLVMType);
         const setter = this.createSetter(thisLLVMType, propertyLLVMType);
 
-        return new ObjectPropertyReference(propertyType, objectReference, getter, setter, this.context);
+        return new ObjectPropertyReference(propertyType, objectReference, getter, setter);
     }
 
     private getNameMangler() {

@@ -27,7 +27,7 @@ async function getJsFunctionForTestCase(caseName) {
     };
 
     const jsResult = await wrapped();
-    if (jsResult != testCase.result) {
+    if (jsResult !== testCase.result) {
         console.error(`JS Result for Test Case ${caseName} returned ${jsResult} instead of ${testCase.result}`);
     }
 
@@ -44,7 +44,7 @@ async function getWasmFunctionForTestCase(caseName) {
     };
 
     const wasmResult = await wrapped();
-    if (wasmResult != testCase.result) {
+    if (wasmResult !== testCase.result) {
         console.error(`WASM Result for Test Case ${caseName} returned ${wasmResult} instead of ${testCase.result}`);
     }
 

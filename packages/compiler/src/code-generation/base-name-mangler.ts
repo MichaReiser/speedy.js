@@ -1,7 +1,6 @@
 import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
 import {NameMangler} from "./name-mangler";
-import {FunctionCallArgument, FunctionCallDescription} from "./function-call-description";
 import {getTypeOfParentObject} from "./util/object-helper";
 
 /**
@@ -9,7 +8,7 @@ import {getTypeOfParentObject} from "./util/object-helper";
  */
 export abstract class BaseNameMangler implements NameMangler {
 
-    constructor(private compilationContext: CompilationContext) {
+    constructor(protected compilationContext: CompilationContext) {
     }
 
     private get typeChecker() {
@@ -21,14 +20,21 @@ export abstract class BaseNameMangler implements NameMangler {
      */
     protected abstract get separator(): string;
 
-    mangleFunctionName(functionCall: FunctionCallDescription): string {
-        const parts = [this.getModulePrefix(functionCall.sourceFile)];
+    mangleFunctionName(name: string, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
+        const parts = [
+            this.getModulePrefix(sourceFile),
+            this.getFunctionName(name, argumentTypes)
+        ];
 
-        if (functionCall.classType) {
-            parts.push(this.getObjectName(functionCall.classType));
-        }
+        return parts.filter(part => !!part).join(this.separator);
+    }
 
-        parts.push(this.getFunctionName(functionCall));
+    mangleMethodName(clazz: ts.ObjectType, methodName: string, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
+        const parts = [
+            this.getModulePrefix(sourceFile),
+            this.getObjectName(clazz),
+            this.getFunctionName(methodName, argumentTypes)
+        ];
 
         return parts.filter(part => !!part).join(this.separator);
     }
@@ -42,12 +48,12 @@ export abstract class BaseNameMangler implements NameMangler {
     }
 
     /**
-     * Returns the type code for the given argument
-     * @param argument the argument to encode
-     * @return {string} by default, the type code of the argument type
+     * Returns the type code for the given parameter
+     * @param parameterType the parameter to encode
+     * @return {string} by default, the type code of the parameter type
      */
-    protected getArgumentTypeCode(argument: FunctionCallArgument): string {
-        return this.typeToCode(argument.type);
+    protected getParameterTypeCode(parameterType: ts.Type): string {
+        return this.typeToCode(parameterType);
     }
 
     /**
@@ -63,40 +69,23 @@ export abstract class BaseNameMangler implements NameMangler {
     protected abstract getModulePrefix(sourceFile?: ts.SourceFile): string;
 
     private mangleAccessor(name: string, node: ts.ElementAccessExpression | ts.PropertyAccessExpression, setter: boolean): string {
-        let args: FunctionCallArgument[] = [];
+        let argumentTypes: ts.Type[] = [];
 
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
-            args.push({
-                name: "index",
-                type: this.typeChecker.getTypeAtLocation(node.argumentExpression!),
-                optional: false,
-                variadic: false
-            });
+            argumentTypes.push(this.typeChecker.getTypeAtLocation(node.argumentExpression!));
         }
 
         if (setter) {
-            args.push({
-                name,
-                type: this.typeChecker.getTypeAtLocation(node),
-                optional: false,
-                variadic: false
-            });
+            argumentTypes.push(this.typeChecker.getTypeAtLocation(node));
         }
 
         const classType = getTypeOfParentObject(node, this.typeChecker)!;
-
-        return this.mangleFunctionName({
-            arguments: args,
-            classType,
-            functionName: name,
-            returnType: undefined as any,
-            sourceFile: classType.getSymbol().getDeclarations()[0].getSourceFile()
-        });
+        return this.mangleMethodName(classType, name, argumentTypes);
     }
 
-    private getFunctionName(functionCall: FunctionCallDescription) {
-        let parameterPostfix = functionCall.arguments.map(arg => this.getArgumentTypeCode(arg)).join("");
-        return this.encodeName(functionCall.functionName) + parameterPostfix;
+    private getFunctionName(name: string, argumentTypes: ts.Type[]) {
+        let parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
+        return this.encodeName(name) + parameterPostfix;
     }
 
     private getObjectName(objectType: ts.ObjectType) {

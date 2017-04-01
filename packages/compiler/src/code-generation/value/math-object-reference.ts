@@ -1,10 +1,10 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../code-generation-error";
-import {FunctionReference} from "./function-reference";
+import {CodeGenerationError} from "../../code-generation-error";
+import {toLLVMType} from "../util/types";
 import {BuiltInObjectReference} from "./built-in-object-reference";
-import {toLLVMType} from "../util/type-mapping";
+import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 
 /**
  * Wrapper for the built in Math object
@@ -13,45 +13,21 @@ export class MathObjectReference extends BuiltInObjectReference {
 
     typeName = "Math";
 
-    constructor(objAddr: llvm.Value, type: ts.ObjectType, context: CodeGenerationContext) {
-        super(objAddr, type, context);
+    constructor(objAddr: llvm.Value, type: ts.ObjectType) {
+        super(objAddr, type);
     }
 
-    protected createFunctionFor(symbol: ts.Symbol, callExpression: ts.CallLikeExpression) {
-        const signature = this.context.typeChecker.getResolvedSignature(callExpression);
+    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
         switch (symbol.name) {
             case "sqrt":
-                return this.sqrt(signature);
+                return UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type);
             default:
-                throw CodeGenerationError.builtInMethodNotSupported(callExpression, "Math", symbol.name);
+                throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
     }
 
     destruct() {
         // no need for free, is a static references
-    }
-
-    private sqrt(signature: ts.Signature): FunctionReference {
-        const fn = this.context.module.getOrInsertFunction(
-                "llvm.sqrt.f64",
-                llvm.FunctionType.get(llvm.Type.getDoubleTy(this.context.llvmContext), [llvm.Type.getDoubleTy(this.context.llvmContext)], false)
-            ) as llvm.Function;
-
-        class SqrtFunction extends FunctionReference {
-            constructor(context: CodeGenerationContext) {
-                super(fn, signature.getReturnType(), context);
-            }
-
-            getCallArguments(args: llvm.Value[]) {
-                if (args[0].type.isIntegerTy()) {
-                    return [this.context.builder.createSIToFP(args[0], llvm.Type.getDoubleTy(this.context.llvmContext))];
-                }
-
-                return args;
-            }
-        }
-
-        return new SqrtFunction(this.context);
     }
 
     /**
@@ -77,6 +53,8 @@ export class MathObjectReference extends BuiltInObjectReference {
     private static getPowFunction(type: ts.Type, context: CodeGenerationContext) {
         let intrinsicName: string;
         let lhsType: llvm.Type;
+
+
         if (type.flags & ts.TypeFlags.IntLike) {
             intrinsicName = "llvm.powi.f32";
             lhsType = llvm.Type.getFloatTy(context.llvmContext);

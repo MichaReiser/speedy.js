@@ -1,11 +1,28 @@
 import * as ts from "typescript";
 import {TypeChecker} from "./type-checker";
 
+/**
+ * Wrapper of the type script type checker.
+ * It mainly gets rid of all nullable types. If nullable types are supported, than the unwrapping
+ * of nullable types should be removed.
+ */
 export class TypeScriptTypeChecker implements TypeChecker {
     constructor(private tsTypeChecker: ts.TypeChecker) {}
 
+    getAliasedSymbol(symbol: ts.Symbol): ts.Symbol {
+        return this.tsTypeChecker.getAliasedSymbol(symbol);
+    }
+
+    getApparentType(type: ts.Type): ts.Type {
+        return toSupportedType(this.tsTypeChecker.getApparentType(type));
+    }
+
     getSignaturesOfType(type: ts.Type, kind: ts.SignatureKind): ts.Signature[] {
         return this.tsTypeChecker.getSignaturesOfType(type, kind);
+    }
+
+    getReturnTypeOfSignature(signature: ts.Signature): ts.Type {
+        return toSupportedType(this.tsTypeChecker.getReturnTypeOfSignature(signature));
     }
 
     getDeclaredTypeOfSymbol(symbol: ts.Symbol): ts.Type {
@@ -42,6 +59,10 @@ export class TypeScriptTypeChecker implements TypeChecker {
 
     getResolvedSignature(callLikeExpression: ts.CallLikeExpression): ts.Signature {
         return new SignatureWrapper(this.tsTypeChecker.getResolvedSignature(callLikeExpression));
+    }
+
+    isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean {
+        return this.tsTypeChecker.isImplementationOfOverload(fun);
     }
 }
 

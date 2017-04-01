@@ -42,10 +42,18 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
     globalBase: number;
 }
 
+/**
+ * Uninitialized speedy js compiler options (all values might be absent)
+ */
 export type UninitializedSpeedyJSCompilerOptions = {
     [P in keyof SpeedyJSCompilerOptions]?: SpeedyJSCompilerOptions[P] | undefined;
 };
 
+/**
+ * Initializes the compiler options with the default values
+ * @param compilerOptions the compiler options to initialize
+ * @return {SpeedyJSCompilerOptions} the initialized compiler options
+ */
 export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJSCompilerOptions): SpeedyJSCompilerOptions {
     const defaults = {
         unsafe: false,

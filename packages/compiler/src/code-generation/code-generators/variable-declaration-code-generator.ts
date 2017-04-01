@@ -15,12 +15,12 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         let initializer: llvm.Value | undefined;
 
         if (variableDeclaration.initializer) {
-            initializer = context.generateValue(variableDeclaration.initializer).generateIR();
+            initializer = context.generateValue(variableDeclaration.initializer).generateIR(context);
         }
         // otherwise no initialization is needed. Typescript complains if variable is accessed before assignment
 
         if (initializer) {
-            allocation.generateAssignmentIR(initializer);
+            allocation.generateAssignmentIR(initializer, context);
         }
 
         context.scope.addVariable(symbol, allocation);

@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as ts from "typescript";
-import * as llvm from "llvm-node";
 import * as tmp from "tmp";
+import * as ts from "typescript";
 import {Compiler} from "../../src/compiler";
 import {initializeCompilerOptions, SpeedyJSCompilerOptions} from "../../src/speedyjs-compiler-options";
+import {dir} from "tmp";
 
 const CASE_REGEX = /\.ts$/;
 const TEST_CASES_DIR = path.resolve(__dirname, "./cases");
@@ -63,7 +63,7 @@ export function runCases(name: string, directory: string) {
         }
 
         afterAll(() => {
-            const trash = fs.readdirSync(OUT_DIR).map(file => path.join(OUT_DIR, file));
+            const trash = fs.readdirSync(path.join(OUT_DIR, directory)).map(file => path.join(OUT_DIR, directory, file));
             trash.forEach(file => fs.unlinkSync(file));
             tmpDirectory.removeCallback();
         });

@@ -24,6 +24,13 @@ export function getConfiguration(): ToolsConfiguration {
     return JSON.parse(content) as ToolsConfiguration;
 }
 
+/**
+ * executes a llvm tool
+ * @param tool the name of the binary
+ * @param args the arguments to pass
+ * @param cwd optionally, the working directory where the command is to be executed
+ * @return {string} the result of executing this command
+ */
 export function execLLVM(tool: string, args: string, cwd?: string): string {
     const toolPath = path.join(getConfiguration().LLVM, tool);
 
@@ -39,6 +46,12 @@ export function execLLVM(tool: string, args: string, cwd?: string): string {
     return outputToString(output);
 }
 
+/**
+ * Executes a binaryen command
+ * @param tool the name of the binaryen executable
+ * @param args the arguments to pass
+ * @return {string} the output of the execution
+ */
 export function execBinaryen(tool: string, args: string): string {
     const toolPath = path.join(getConfiguration().BINARYEN, "bin", tool);
 

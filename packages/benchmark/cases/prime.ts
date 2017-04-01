@@ -1,6 +1,12 @@
 export async function isPrime(value: int) {
     "use speedyjs";
 
+    return isPrimeSync(value);
+}
+
+function isPrimeSync(value: int) {
+    "use speedyjs";
+
     if (value <= 1) {
         return false;
     }

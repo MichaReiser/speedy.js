@@ -1,14 +1,36 @@
 import {execLLVM} from "./tools";
 
+/**
+ * Object files of a single bc file
+ */
 export interface ObjectFileSymbols {
+    /**
+     * Symbols used but are not defined inside of this bc file (externally linked)
+     */
     readonly undefined: Set<string>;
+
+    /**
+     * Common functions
+     */
     readonly common: Set<string>;
+
+    /**
+     * Symbols defined inside of this bc file
+     */
     readonly defined: Set<string>
 }
 
+/**
+ * Identifies the symbols exported by an LLVM .bc File
+ */
 export class LLVMByteCodeSymbolsResolver {
     private cache = new Map<string, ObjectFileSymbols>();
 
+    /**
+     * Returns the symbols exported by the given file
+     * @param objectFile the path to the object file
+     * @return the symbols of this object files
+     */
     getSymbols(objectFile: string): ObjectFileSymbols {
         let result: ObjectFileSymbols;
         const cached = this.cache.get(objectFile);

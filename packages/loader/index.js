@@ -25,7 +25,7 @@ function speedyJSLoader(source) {
         const configFile = ts.findConfigFile(path.dirname(loader.resourcePath), ts.sys.fileExists);
         let compilerOptions;
         if (configFile) {
-            console.log(`speedyjs-loader uses ${configFile}`);
+            console.log(`speedyjs-loader uses ${configFile} to compile ${loader.resourcePath}`);
             const parseResult = parseConfigFile(configFile);
 
             if (parseResult.errors) {

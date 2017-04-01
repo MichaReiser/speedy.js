@@ -1,4 +1,4 @@
-export async function fib(value: int): Promise<int> {
+async function fib(value: int) {
     "use speedyjs";
 
     return fibSync(value);
@@ -12,8 +12,4 @@ function fibSync(value: int): int {
     }
 
     return fibSync(value - 2) + fibSync(value - 1);
-}
-
-async function main() {
-    const value = await fib(1000);
 }

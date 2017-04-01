@@ -7,10 +7,6 @@ const uint32_t TWO_TO_THE_POWER_OF_31 = 2147483648;
 
 extern "C" {
 
-DLL_PUBLIC ALWAYS_INLINE int32_t toInt32b(bool value) {
-    return static_cast<int32_t>(value);
-}
-
 /**
  * http://www.ecma-international.org/ecma-262/5.1/#sec-9.5
  * @param the value to convert

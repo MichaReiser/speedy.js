@@ -53,7 +53,7 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
         if (mathSymbol) {
             const mathClassReference = MathClassReference.create(mathSymbol, context);
             context.scope.addClass(mathClassReference);
-            context.scope.addVariable(mathSymbol, mathClassReference.createGlobalVariable(mathSymbol));
+            context.scope.addVariable(mathSymbol, mathClassReference.createGlobalVariable(mathSymbol, context));
         }
     }
 

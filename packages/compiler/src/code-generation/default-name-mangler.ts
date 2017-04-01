@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import * as path from "path";
 import {BaseNameMangler} from "./base-name-mangler";
 
 /**
@@ -22,6 +23,11 @@ export class DefaultNameMangler extends BaseNameMangler {
     }
 
     protected getModulePrefix(sourceFile?: ts.SourceFile): string {
-        return (sourceFile ? sourceFile.fileName.replace("$", "$$") : "");
+        if (sourceFile) {
+            const relativePath = path.relative(this.compilationContext.rootDir, sourceFile.fileName);
+            const normalized = path.normalize(relativePath);
+            return normalized.replace("$", "$$");
+        }
+        return "";
     }
 }

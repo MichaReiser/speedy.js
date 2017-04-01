@@ -8,9 +8,9 @@ class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement, vo
     syntaxKind = ts.SyntaxKind.IfStatement;
 
     generate(ifStatement: ts.IfStatement, context: CodeGenerationContext): void {
-        const conditionValue = context.generateValue(ifStatement.expression).generateIR();
+        const conditionValue = context.generateValue(ifStatement.expression).generateIR(context);
         const condition = Primitive.toBoolean(conditionValue, context.typeChecker.getTypeAtLocation(ifStatement.expression), context);
-        const fun = context.scope.enclosingFunction.getLLVMFunction();
+        const fun = context.scope.enclosingFunction;
 
         let thenBlock = llvm.BasicBlock.create(context.llvmContext, "then", fun);
         let elseBlock = llvm.BasicBlock.create(context.llvmContext, "else");

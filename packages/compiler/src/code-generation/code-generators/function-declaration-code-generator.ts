@@ -1,20 +1,25 @@
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {FunctionReference} from "../value/function-reference";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {FunctionBuilder} from "../util/function-builder";
+import {UnresolvedFunctionReference} from "../value/unresolved-function-reference";
 
-class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.FunctionDeclaration, FunctionReference> {
+/**
+ * Code Generator for a function declaration
+ */
+class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.FunctionDeclaration, void> {
     syntaxKind = ts.SyntaxKind.FunctionDeclaration;
 
-    generate(functionDeclaration: ts.FunctionDeclaration, context: CodeGenerationContext): FunctionReference {
-        const signature = context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
+    generate(functionDeclaration: ts.FunctionDeclaration, context: CodeGenerationContext): void {
+        const symbol = context.typeChecker.getSymbolAtLocation(functionDeclaration.name!);
 
-        return FunctionBuilder
-            .forSignature(signature, context)
-            .internalLinkage()
-            .generate(functionDeclaration);
+        const type = context.typeChecker.getTypeAtLocation(functionDeclaration);
+        const apparentType = context.typeChecker.getApparentType(type);
+        const callSignatures = context.typeChecker.getSignaturesOfType(apparentType, ts.SignatureKind.Call);
+
+
+        const functionReference = UnresolvedFunctionReference.createFunction(callSignatures, context);
+        context.scope.addFunction(symbol, functionReference);
     }
 }
 

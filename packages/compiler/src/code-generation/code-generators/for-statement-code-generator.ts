@@ -12,7 +12,7 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
         }
 
         let forEntry: llvm.BasicBlock;
-        const fun = context.scope.enclosingFunction.getLLVMFunction();
+        const fun = context.scope.enclosingFunction;
         const successor = llvm.BasicBlock.create(context.llvmContext, "for-successor");
         let body = llvm.BasicBlock.create(context.llvmContext, "for-body");
 
@@ -21,7 +21,7 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
             context.builder.createBr(forBlock);
             context.builder.setInsertionPoint(forBlock);
 
-            const condition = context.generateValue(forStatement.condition).generateIR();
+            const condition = context.generateValue(forStatement.condition).generateIR(context);
             context.builder.createCondBr(condition, body, successor);
 
             forEntry = forBlock;

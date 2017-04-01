@@ -3,18 +3,25 @@ import * as llvm from "llvm-node";
 import * as assert from "assert";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../code-generation-error";
 import {ObjectReference} from "./object-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {Value} from "./value";
+import {CodeGenerationError} from "../../code-generation-error";
 
+/**
+ * Object reference to a built in object (that is part of the runtime).
+ */
 export abstract class BuiltInObjectReference implements ObjectReference {
-    private functions = new Map<ts.Symbol, FunctionReference>();
-    private properties = new Map<ts.Symbol, ObjectPropertyReference>();
+    private properties = new Map<ts.Symbol, ObjectPropertyReference | FunctionReference>();
 
-    constructor(protected objectAddress: llvm.Value, public type: ts.ObjectType, protected context: CodeGenerationContext) {
+    /**
+     * Creates a new instance for an object that is stored at the specified object address and is of the given type
+     * @param objectAddress the address, where the object is stored
+     * @param type the type of the object
+     */
+    constructor(protected objectAddress: llvm.Value, public type: ts.ObjectType) {
         assert(objectAddress.type.isPointerTy(), `Object address needs to be a pointer type`);
     }
 
@@ -34,46 +41,39 @@ export abstract class BuiltInObjectReference implements ObjectReference {
         return this;
     }
 
-    generateAssignmentIR(value: Value) {
+    generateAssignmentIR(value: Value, context: CodeGenerationContext) {
         assert(value.isObject(), "Cannot assign non object to object reference");
-        this.objectAddress = value.generateIR();
+        this.objectAddress = value.generateIR(context);
     }
 
-    abstract destruct(): void;
+    abstract destruct(context: CodeGenerationContext): void;
 
-    getProperty(property: ts.PropertyAccessExpression): ObjectPropertyReference {
-        const symbol = this.context.typeChecker.getSymbolAtLocation(property);
+    getProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference | FunctionReference {
+        const symbol = context.typeChecker.getSymbolAtLocation(property);
         let propertyReference = this.properties.get(symbol);
 
-        if (!propertyReference) {
-            propertyReference = this.createPropertyReference(symbol, property);
-            this.properties.set(symbol, propertyReference);
+        if (propertyReference) {
+            return propertyReference;
         }
 
+        if (symbol.flags & ts.SymbolFlags.Method) {
+            const type = context.typeChecker.getTypeAtLocation(property);
+            const apparentType = context.typeChecker.getApparentType(type);
+            const signatures = context.typeChecker.getSignaturesOfType(apparentType, ts.SignatureKind.Call);
+
+            const fn = this.createFunctionFor(symbol, signatures, property, context);
+            this.properties.set(symbol, fn);
+            return fn;
+        }
+
+        propertyReference = this.createPropertyReference(symbol, property, context);
+        this.properties.set(symbol, propertyReference);
         return propertyReference;
     }
 
-    getIndexer(element: ts.ElementAccessExpression): ObjectIndexReference {
+    getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
         throw this.throwUnsupportedBuiltIn(element);
     }
-
-    getFunction(callExpression: ts.CallExpression): FunctionReference {
-        const signature = this.context.typeChecker.getResolvedSignature(callExpression);
-        const symbol = this.context.typeChecker.getSymbolAtLocation((signature.declaration as ts.MethodDeclaration).name);
-
-        let fn = this.functions.get(symbol);
-        if (!fn) {
-            fn = this.createFunctionFor(symbol, callExpression);
-            this.functions.set(symbol, fn);
-        }
-
-        return fn;
-    }
-
-    /**
-     * Throws an exception for an unsupported call expression
-     */
-    protected throwUnsupportedBuiltIn(node: ts.CallExpression, symbol: ts.Symbol): never;
 
     /**
      * Throws an exception for a unsupported element access
@@ -103,22 +103,25 @@ export abstract class BuiltInObjectReference implements ObjectReference {
     /**
      * Creates the function for the given symbol and call
      * @param symbol the symbol of the called function
-     * @param callExpression the call to the function
+     * @param signatures the signatures of the method
+     * @param propertyAccessExpression the property access
+     * @param context the code generation context
      * @return the method to invoke
      * @throws if the built in method is not supported
      */
-    protected createFunctionFor(symbol: ts.Symbol, callExpression: ts.CallExpression): FunctionReference {
-        return this.throwUnsupportedBuiltIn(callExpression, symbol);
+    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext): FunctionReference {
+        return this.throwUnsupportedBuiltIn(propertyAccessExpression);
     }
 
     /**
      * Creates a property reference for the property defined by the given symbol
      * @param symbol the symbol of the property
      * @param propertyAccess the property access
+     * @param context the code generation context
      * @return a property reference for accessing this property
      * @throws if the property is not supported
      */
-    protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression): ObjectPropertyReference {
+    protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference {
         return this.throwUnsupportedBuiltIn(propertyAccess);
     }
 }

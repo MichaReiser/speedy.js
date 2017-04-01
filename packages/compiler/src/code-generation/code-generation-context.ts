@@ -3,9 +3,6 @@ import * as llvm from "llvm-node";
 import {Scope} from "./scope";
 import {CompilationContext} from "../compilation-context";
 import {Value} from "./value/value";
-import {FunctionReference} from "./value/function-reference";
-import {ObjectReference} from "./value/object-reference";
-import {MethodReference} from "./value/method-reference";
 import {TypeChecker} from "../type-checker";
 
 /**
@@ -42,6 +39,11 @@ export interface CodeGenerationContext {
      * The current scope
      */
     readonly scope: Scope;
+
+    /**
+     * Creates a new child context with it's own builder and with a detached scope (but shared global scope)
+     */
+    createChildContext(): CodeGenerationContext;
 
     /**
      * Generates the llvm code for all children of the given node
@@ -86,7 +88,7 @@ export interface CodeGenerationContext {
      * Enters a new child scope
      * @param fn the function to which this scope belongs
      */
-    enterChildScope(fn?: FunctionReference): Scope;
+    enterChildScope(fn?: llvm.Function): Scope;
 
     /**
      * Leaves the current child scope
@@ -103,18 +105,12 @@ export interface CodeGenerationContext {
     value(value: llvm.Value, type: ts.Type): Value;
 
     /**
-     * Creates a function reference to the given llvm function
-     * @param fn the llvm function
+     * Calls the given llvm function with the given arguments
+     * @param fn the llvm function to call
+     * @param args the arguments to pass to the function call
      * @param returnType the return type of the function
-     * @returns the function reference
+     * @param name the name of the return value
+     * @returns the result of the function call or void if the called function is void (return type is void)
      */
-    functionReference(fn: llvm.Function, returnType: ts.Type): FunctionReference;
-
-    /**
-     * Creates a method reference for the given object and llvm function
-     * @param object the object to which the method belongs
-     * @param method the function implementing the method
-     * @param returnType the return type of the method
-     */
-    methodReference(object: ObjectReference, method: llvm.Function, returnType: ts.Type): MethodReference;
+    call(fn: llvm.Function, args: Value[] | llvm.Value[], returnType: ts.Type, name?: string): Value | void;
 }

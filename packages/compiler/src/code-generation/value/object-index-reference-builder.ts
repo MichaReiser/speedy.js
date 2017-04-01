@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ObjectReference} from "./object-reference";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {toLLVMType} from "../util//type-mapping";
+import {toLLVMType} from "../util/types";
 import {ObjectIndexReference} from "./object-index-reference";
 import {DefaultNameMangler} from "../default-name-mangler";
 
@@ -36,7 +36,7 @@ export class ObjectIndexReferenceBuilder {
 
         const index = this.context.generateValue(this.element.argumentExpression!);
 
-        return new ObjectIndexReference(elementType, objectReference, index, getter, setter, this.context);
+        return new ObjectIndexReference(elementType, objectReference, index, getter, setter);
     }
 
     private getNameMangler() {

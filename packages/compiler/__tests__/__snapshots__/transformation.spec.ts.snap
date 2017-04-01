@@ -142,13 +142,33 @@ exports[`Transformation does not rewrite source files without any speedyjs funct
     if (value <= 2) {
         return false;
     }
-    for (let i = 2; i < (Math.sqrt(value) | 0); ++i) {
+    for (let i = 2; i <= (Math.sqrt(value) | 0); ++i) {
         if (value % i === 0) {
             return false;
         }
     }
     return true;
 }
+"
+`;
+
+exports[`Transformation emits a diagnostic if a non entry speedyjs function is referenced from normal JavaScriptCode 1`] = `
+"test.ts(8,20): error TS100010: SpeedyJS functions referenced from 'normal' JavaScript code needs to be async (the async modifier is missing on the declaration of 'nonEntryFunction').
+"
+`;
+
+exports[`Transformation emits a diagnostic if the entry function has optional parameters 1`] = `
+"test.ts(2,51): error TS100011: Optional parameters or variadic parameters are not supported for SpeedyJS entry functions
+"
+`;
+
+exports[`Transformation emits a diagnostic if the entry function is generic 1`] = `
+"test.ts(1,1): error TS100012: Generic SpeedyJS entry functions are not supported
+"
+`;
+
+exports[`Transformation emits a diagnostic if the entry function is overloaded 1`] = `
+"test.ts(3,67): error TS100013: SpeedyJS entry function cannot be overloaded
 "
 `;
 
