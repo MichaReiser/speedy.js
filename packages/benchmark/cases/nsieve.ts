@@ -1,7 +1,13 @@
 export async function nsieve(size: int) {
     "use speedyjs";
 
-    const isPrime = new Array<boolean>(size);
+    return nsieveSync(size);
+}
+
+function nsieveSync(s: int) {
+    "use speedyjs";
+
+    const isPrime = new Array<boolean>(s);
     isPrime.fill(true);
 
     let count = 0;

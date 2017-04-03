@@ -21,10 +21,7 @@ function getInitializedCompilerOptions(options?: UninitializedSpeedyJSCompilerOp
 }
 
 /**
- * This function compiles the given source code inline and returns the result as object.
- * Similar to ts.transpileModule
- *
- * source code mostly taken from TypeScript
+ * This function compiles the given source code in memory and returns the result as object instead of writing the result to disk.
  *
  * @param sourceCode the source code of the file to transpile
  * @param inputFileName the name of the file

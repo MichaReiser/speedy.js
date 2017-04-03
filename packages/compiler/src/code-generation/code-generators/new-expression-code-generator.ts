@@ -12,11 +12,9 @@ class NewExpressionCodeGenerator implements SyntaxCodeGenerator<ts.NewExpression
 
     generate(newExpression: ts.NewExpression, context: CodeGenerationContext): ObjectReference {
         const classReference = context.generateValue(newExpression.expression) as ClassReference;
-        const constructor = classReference.getConstructor(newExpression);
+        const constructor = classReference.getConstructor(newExpression, context);
 
-        const args = newExpression.arguments ? newExpression.arguments.map(arg => context.generateValue(arg)) : [];
-
-        return constructor.invoke(args) as ObjectReference;
+        return constructor.invoke(newExpression, context) as ObjectReference;
     }
 }
 

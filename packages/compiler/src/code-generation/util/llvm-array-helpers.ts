@@ -33,7 +33,7 @@ export function llvmArrayValue(elements: llvm.Value[] | ts.Node[], elementType: 
     if (elements[0] instanceof llvm.Value) {
         values = elements as llvm.Value[];
     } else {
-        values = (elements as ts.Node[]).map(element => context.generateValue(element).generateIR());
+        values = (elements as ts.Node[]).map(element => context.generateValue(element).generateIR(context));
     }
 
     const allocation = allocateLlvmArrayWith(values, elementType, context, name);

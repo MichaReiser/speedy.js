@@ -49,22 +49,20 @@ export class PerFileCodeGenerator implements CodeGenerator {
         });
     }
 
-    generateEntryFunction(fn: ts.FunctionDeclaration): ts.FunctionDeclaration {
-        const state = this.getSourceFileState(fn);
+    generateEntryFunction(functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
+        const state = this.getSourceFileState(functionDeclaration);
         const context = state.context;
 
         // function is async, therefore, return type is a promise of T. We compile it down to a function just returning T
-        const signature = context.typeChecker.getSignatureFromDeclaration(fn);
-        const returnedValueType = (signature.getReturnType() as ts.TypeReference).typeArguments[0];
+        const signature = context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
+        const symbol = context.typeChecker.getSymbolAtLocation(functionDeclaration.name!);
 
-        FunctionBuilder
-            .create(signature.declaration, returnedValueType, context)
-            .externalLinkage()
-            .generate(fn);
+        const builder = FunctionBuilder.create(signature, context).externalLinkage();
 
-        context.addEntryFunction(fn.name!.text);
+        builder.define(functionDeclaration);
+        context.addEntryFunction(symbol.name);
 
-        return state.sourceFileRewriter.rewriteEntryFunction(fn, state.requestEmitHelper);
+        return state.sourceFileRewriter.rewriteEntryFunction(functionDeclaration, state.requestEmitHelper);
     }
 
     completeSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
@@ -155,7 +153,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         }
     }
 
-    getSourceFileState(node: ts.Node): SourceFileState {
+    private getSourceFileState(node: ts.Node): SourceFileState {
         const sourceFile = node.getSourceFile();
         const state = this.sourceFileStates.get(sourceFile.fileName);
 

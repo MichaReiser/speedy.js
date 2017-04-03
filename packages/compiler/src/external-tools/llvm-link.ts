@@ -11,6 +11,11 @@ import {LLVMByteCodeSymbolsResolver} from "./llvm-nm";
 const EXECUTABLE_NAME = "llvm-link";
 const LOG = debug("external-tools/llvm-link");
 
+/**
+ * Linker to link multiple llvm files into a single output file.
+ * The implementation determines automatically which files are to be included by the
+ * yet unresolved symbols
+ */
 export class LLVMLink {
 
     private byteCodeFiles: string[] = [];
@@ -124,6 +129,10 @@ export class LLVMLink {
 }
 
 
+/**
+ * Helper function that tests if the two sets intersect (there is no such function in the API!!!!)
+ * Is O(n) :/
+ */
 function  intersects<T>(setA: Set<T>, setB: Set<T>): boolean {
     const smaller = setA.size < setB.size ? setA : setB;
     const larger = setA === smaller ? setB : setA;

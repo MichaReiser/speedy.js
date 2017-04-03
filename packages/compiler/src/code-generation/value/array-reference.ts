@@ -1,67 +1,59 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import * as assert from "assert";
+import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {toLLVMType} from "../util/type-mapping";
-import {BuiltInObjectReference} from "./built-in-object-reference";
-import {MethodReference} from "./method-reference";
-import {ObjectPropertyReference} from "./object-property-reference";
-import {FunctionReferenceBuilder} from "./function-reference-builder";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {ObjectPropertyReferenceBuilder} from "./object-property-reference-builder";
-import {ObjectIndexReferenceBuilder} from "./object-index-reference-builder";
+import {getArrayElementType} from "../util/types";
 import {ArrayClassReference} from "./array-class-reference";
+import {BuiltInObjectReference} from "./built-in-object-reference";
+import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
+import {ObjectIndexReferenceBuilder} from "./object-index-reference-builder";
+import {ObjectPropertyReference} from "./object-property-reference";
+import {ObjectPropertyReferenceBuilder} from "./object-property-reference-builder";
+import {UnresolvedMethodReference} from "./unresolved-method-reference";
 
+/**
+ * Reference to an Array<T> Object
+ */
 export class ArrayReference extends BuiltInObjectReference {
 
-    private llvmArrayType: llvm.Type;
     private elementType: ts.Type;
-    private llvmElementType: llvm.Type;
-    private sizeType: llvm.Type;
 
-    static getElementType(type: ts.Type): ts.Type {
-        const genericType = type as ts.GenericType;
-        assert(genericType.typeArguments.length === 1, "An array type needs to have one type argument, the type of the array elements");
+    /**
+     * Creates a new instance
+     * @param objectAddress the address of the array object
+     * @param type the array type (instantiated)
+     */
+    constructor(objectAddress: llvm.Value, type: ts.ObjectType) {
+        super(objectAddress, type);
 
-        return genericType.typeArguments[0]!;
+        this.elementType = getArrayElementType(type);
     }
 
-    constructor(objectAddress: llvm.Value, type: ts.ObjectType, context: CodeGenerationContext) {
-        super(objectAddress, type, context);
-
-        this.elementType = ArrayReference.getElementType(type);
-        this.llvmArrayType = ArrayClassReference.getArrayType(context);
-        this.llvmElementType = toLLVMType(this.elementType, context);
-        this.sizeType = llvm.Type.getInt32Ty(context.llvmContext);
-    }
 
     protected get typeName(): string {
         return "Array";
     }
 
-    protected createFunctionFor(symbol: ts.Symbol, callExpression: ts.CallExpression): MethodReference {
+    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccess: ts.PropertyAccessExpression, context: CodeGenerationContext): FunctionReference {
         switch (symbol.name) {
             case "fill":
             case "unshift":
             case "push":
             case "pop":
             case "shift":
-                return FunctionReferenceBuilder
-                    .forCall(callExpression, this.context)
-                    .fromRuntime()
-                    .methodReference(this);
+                return UnresolvedMethodReference.createRuntimeMethod(this, signatures, context);
             default:
-                return this.throwUnsupportedBuiltIn(callExpression, symbol);
+                return this.throwUnsupportedBuiltIn(propertyAccess);
         }
     }
 
-    protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression): ObjectPropertyReference {
+    protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference {
         switch (symbol.name) {
             case "length":
                 return ObjectPropertyReferenceBuilder
-                    .forProperty(propertyAccess, this.context)
+                    .forProperty(propertyAccess, context)
                     .fromRuntime()
                     .build(this);
 
@@ -70,9 +62,9 @@ export class ArrayReference extends BuiltInObjectReference {
         }
     }
 
-    public getIndexer(elementAccessExpression: ts.ElementAccessExpression): ObjectIndexReference {
+    public getIndexer(elementAccessExpression: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
         return ObjectIndexReferenceBuilder
-            .forElement(elementAccessExpression, this.context)
+            .forElement(elementAccessExpression, context)
             .fromRuntime()
             .build(this);
     }
@@ -80,20 +72,15 @@ export class ArrayReference extends BuiltInObjectReference {
     /**
      * Inserts the instruction that releases the memory allocated by the array
      */
-    destruct() {
-        const nameMangler = new RuntimeSystemNameMangler(this.context.compilationContext);
-        const fnName = nameMangler.mangleFunctionName({
-            classType: this.type,
-            functionName: "free",
-            returnType: undefined as any,
-            arguments: []
-        });
+    destruct(context: CodeGenerationContext) {
+        const nameMangler = new RuntimeSystemNameMangler(context.compilationContext);
+        const fnName = nameMangler.mangleMethodName(this.type, "free", []);
 
-        const deleteFunction = this.context.module.getOrInsertFunction(
+        const deleteFunction = context.module.getOrInsertFunction(
             fnName,
-            llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [this.llvmArrayType], false)
+            llvm.FunctionType.get(llvm.Type.getVoidTy(context.llvmContext), [ArrayClassReference.getArrayType(context)], false)
         );
 
-        this.context.builder.createCall(deleteFunction, [this.generateIR()]);
+        context.builder.createCall(deleteFunction, [this.generateIR()]);
     }
 }

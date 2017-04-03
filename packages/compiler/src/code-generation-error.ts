@@ -2,6 +2,10 @@ import * as ts from "typescript";
 import * as util from "util";
 import * as assert from "assert";
 
+/**
+ * Error thrown if the code generation fails. Stores the node to show the node that  caused the error
+ * in the users code.
+ */
 export class CodeGenerationError extends Error {
     constructor(public node: ts.Node, public code: number, message: string) {
         super(message);
@@ -24,8 +28,8 @@ export class CodeGenerationError extends Error {
         }
     }
 
-    static builtInMethodNotSupported(callExpression: ts.CallLikeExpression, objectName: string, methodName: string) {
-        return CodeGenerationError.createException(callExpression, diagnostics.BuiltInMethodNotSupported, methodName, objectName)
+    static builtInMethodNotSupported(propertyAccessExpression: ts.PropertyAccessExpression, objectName: string, methodName: string) {
+        return CodeGenerationError.createException(propertyAccessExpression, diagnostics.BuiltInMethodNotSupported, methodName, objectName)
     }
 
     static builtInPropertyNotSupported(property: ts.PropertyAccessExpression, objectName: string) {
@@ -65,10 +69,6 @@ export class CodeGenerationError extends Error {
         return CodeGenerationError.createException(fun, diagnostics.AnonymousEntryFunctionsUnsupported);
     }
 
-    static entryFunctionNotAsync(fun: ts.FunctionDeclaration) {
-        return CodeGenerationError.createException(fun, diagnostics.EntryFunctionNotAsync);
-    }
-
     static optionalParametersInEntryFunctionNotSupported(optionalParameter: ts.ParameterDeclaration) {
         return CodeGenerationError.createException(optionalParameter, diagnostics.OptionalParametersNotSupportedForEntryFunction);
     }
@@ -79,6 +79,14 @@ export class CodeGenerationError extends Error {
 
     static unsupportedClassReferencedBy(identifier: ts.Identifier) {
         return CodeGenerationError.createException(identifier, diagnostics.UnsupportedBuiltInClass);
+    }
+
+    static referenceToNonSpeedyJSEntryFunctionFromJS(identifier: ts.Identifier, speedyJSFunctionSymbol: ts.Symbol) {
+        return CodeGenerationError.createException(identifier, diagnostics.ReferenceToNonEntrySpeedyJSFunctionFromJS, speedyJSFunctionSymbol.name);
+    }
+
+    static overloadedEntryFunctionNotSupported(fun: ts.FunctionDeclaration) {
+        return CodeGenerationError.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
     }
 }
 
@@ -123,8 +131,8 @@ const diagnostics = {
         message: "SpeedyJS entry functions need to have a name",
         code: 100009
     },
-    EntryFunctionNotAsync: {
-        message: "SpeedyJS entry function is not declared async",
+    ReferenceToNonEntrySpeedyJSFunctionFromJS: {
+        message: "SpeedyJS functions referenced from 'normal' JavaScript code needs to be async (the async modifier is missing on the declaration of '%s').",
         code: 100010
     },
     OptionalParametersNotSupportedForEntryFunction: {
@@ -134,5 +142,9 @@ const diagnostics = {
     GenericEntryFunctionNotSuppoorted: {
         message: "Generic SpeedyJS entry functions are not supported",
         code: 100012
+    },
+    OverloadedEntryFunctionNotSupported: {
+        message: "SpeedyJS entry function cannot be overloaded",
+        code: 100013
     }
 };

@@ -1,6 +1,5 @@
 import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
-import {FunctionCallArgument} from "./function-call-description";
 import {BaseNameMangler} from "./base-name-mangler";
 
 /**
@@ -49,13 +48,13 @@ export class RuntimeSystemNameMangler extends BaseNameMangler {
         return "";
     }
 
-    protected getArgumentTypeCode(argument: FunctionCallArgument) {
-        if (argument.type.getSymbol() === this.arraySymbol) {
-            const elementType = (argument.type as ts.GenericType).typeArguments[0];
+    protected getParameterTypeCode(parameter: ts.Type) {
+        if (parameter.getSymbol() === this.arraySymbol) {
+            const elementType = (parameter as ts.GenericType).typeArguments[0];
             return `P${this.typeToCode(elementType)}i`;
         }
 
-        return super.getArgumentTypeCode(argument);
+        return super.getParameterTypeCode(parameter);
     }
 
     protected encodeName(name: string): string {

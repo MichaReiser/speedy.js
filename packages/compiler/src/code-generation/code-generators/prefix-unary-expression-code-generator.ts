@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Value} from "../value/value";
-import {CodeGenerationError} from "../code-generation-error";
+import {CodeGenerationError} from "../../code-generation-error";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
 
@@ -11,7 +11,7 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
 
     generate(node: ts.PrefixUnaryExpression, context: CodeGenerationContext): Value {
         const left = context.generateValue(node.operand);
-        const leftValue = left.generateIR();
+        const leftValue = left.generateIR(context);
         const type = context.typeChecker.getTypeAtLocation(node.operand);
         let result: llvm.Value | undefined;
 

@@ -1,18 +1,16 @@
-import * as ts from "typescript";
-import * as llvm from "llvm-node";
 import * as assert from "assert";
 import * as debug from "debug";
-
-import {SyntaxCodeGenerator} from "./syntax-code-generator";
+import * as llvm from "llvm-node";
+import * as ts from "typescript";
+import {CompilationContext} from "../compilation-context";
 import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {Scope} from "./scope";
-import {CompilationContext} from "../compilation-context";
-import {Value} from "./value/value";
-import {FunctionReference} from "./value/function-reference";
-import {ObjectReference} from "./value/object-reference";
-import {MethodReference} from "./value/method-reference";
+
+import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {Primitive} from "./value/primitive";
+import {ResolvedFunctionReference} from "./value/resolved-function-reference";
+import {Value} from "./value/value";
 
 const log = debug("code-generation/default-code-generation-context");
 
@@ -20,16 +18,16 @@ const log = debug("code-generation/default-code-generation-context");
  * Default implementation of the code generation context
  */
 export class DefaultCodeGenerationContext implements CodeGenerationContext {
-    private fallbackCodeGenerator?: FallbackCodeGenerator;
-    private entryFunctions = new Set<string>();
-
     builder: llvm.IRBuilder;
-    scope = new Scope();
+    public scope: Scope;
 
-    private codeGenerators = new Map<ts.SyntaxKind, SyntaxCodeGenerator<ts.Node, Value | void>>();
-
-    constructor(public compilationContext: CompilationContext, public module: llvm.Module) {
+    constructor(public compilationContext: CompilationContext, public module: llvm.Module,
+                private rootScope = new Scope(),
+                private codeGenerators = new Map<ts.SyntaxKind, SyntaxCodeGenerator<ts.Node, Value | void>>(),
+                private entryFunctions = new Set<string>(),
+                private fallbackCodeGenerator?: FallbackCodeGenerator) {
         this.builder = new llvm.IRBuilder(this.compilationContext.llvmContext);
+        this.scope = rootScope;
     }
 
     get llvmContext() {
@@ -38,6 +36,10 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
     get typeChecker() {
         return this.compilationContext.typeChecker;
+    }
+
+    createChildContext(): CodeGenerationContext {
+        return new DefaultCodeGenerationContext(this.compilationContext, this.module, this.rootScope, this.codeGenerators, this.entryFunctions, this.fallbackCodeGenerator);
     }
 
     generateValue(node: ts.Node): Value {
@@ -61,7 +63,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
     assignValue(target: Value, value: Value) {
         if (target.isAssignable()) {
-            target.generateAssignmentIR(value);
+            target.generateAssignmentIR(value, this);
         } else {
             throw new Error(`Assignment to readonly value ${target}`);
         }
@@ -91,7 +93,7 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         return Array.from(this.entryFunctions.values());
     }
 
-    enterChildScope(fn?: FunctionReference): Scope {
+    enterChildScope(fn?: llvm.Function): Scope {
         this.scope = this.scope.enterChild(fn);
         return this.scope;
     }
@@ -100,14 +102,6 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         const child = this.scope;
         this.scope = this.scope.exitChild();
         return child;
-    }
-
-    functionReference(fn: llvm.Function, returnType: ts.Type): FunctionReference {
-        return new FunctionReference(fn, returnType, this);
-    }
-
-    methodReference(object: ObjectReference, method: llvm.Function, returnType: ts.Type): MethodReference {
-        return new MethodReference(object, method, returnType, this);
     }
 
     value(value: llvm.Value, type: ts.Type): Value {
@@ -119,9 +113,9 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
         if (symbol.flags & ts.SymbolFlags.Function) {
             const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
+            assert(signatures.length === 1, "No function type found or function is overloaded und should therefore not be dereferenced");
 
-            assert(signatures.length === 0, "Overloaded methods not yet supported");
-            return this.functionReference(value as llvm.Function, signatures[0].getReturnType());
+            return ResolvedFunctionReference.createForSignature(value as llvm.Function, signatures[0], this);
         }
 
         if (symbol.flags & ts.SymbolFlags.Method) {
@@ -133,10 +127,21 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
         if (type.flags & ts.TypeFlags.Object) {
             const classReference = this.scope.getClass(symbol);
-            return classReference.objectFor(value, type as ts.ObjectType);
+            return classReference.objectFor(value, type as ts.ObjectType, this);
         }
 
         throw Error(`Unable to convert llvm value of type ${this.typeChecker.typeToString(type)} to Value object.`);
+    }
+
+    call(fn: llvm.Function, args: Value[] | llvm.Value[], returnType: ts.Type, name?: string): Value | void {
+        const llvmArgs = args.length === 0 || args[0] instanceof llvm.Value ? (args as llvm.Value[]) : (args as Value[]).map(arg => arg.generateIR(this));
+        const returnValue = this.builder.createCall(fn, llvmArgs, name);
+
+        if (returnType.flags & ts.TypeFlags.Void) {
+            return (void 0);
+        }
+
+        return this.value(returnValue, returnType);
     }
 
     private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node, Value | void> | FallbackCodeGenerator {

@@ -7,7 +7,7 @@ import {FallbackCodeGenerator} from "./fallback-code-generator";
 const log = debug("code-generation/not-yet-implemented-generator");
 
 /**
- * code Generator implementation that logs a message to the console.
+ * Code Generator implementation that logs a message to the console.
  * Useful for cases where the syntax is not yet implemented.
  */
 export class NotYetImplementedCodeGenerator implements FallbackCodeGenerator {

@@ -3,15 +3,24 @@ import debug = require("debug");
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 import {CodeGenerator} from "../code-generation/code-generator";
 import {CompilationContext} from "../compilation-context";
-import {CodeGenerationError} from "../code-generation/code-generation-error";
+import {CodeGenerationError} from "../code-generation-error";
 import {TypeChecker} from "../type-checker";
 
 const LOG = debug("transform/speedyjs-transform-visitor");
 
+/**
+ * SpeedyJS transformer that invokes the WebAssembly Code generator when ever a SpeedyJS Entry function is declared in the
+ * source code (an entry function is marked async and with the "use speedyjs" directive.
+ */
 export class SpeedyJSTransformVisitor implements TransformVisitor {
+
+    private inSpeedyJSFunction = false;
 
     constructor(private compilationContext: CompilationContext, private codeGenerator: CodeGenerator) {}
 
+    /**
+     * Rewrites the source file in case any speedy js functions have been declared in this source file
+     */
     visitSourceFile(sourceFile: ts.SourceFile, context: TransformVisitorContext) {
         this.codeGenerator.beginSourceFile(sourceFile, this.compilationContext, (emitHelper => context.requestEmitHelper(emitHelper)));
 
@@ -20,25 +29,66 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
         return this.codeGenerator.completeSourceFile(sourceFile);
     }
 
+    /**
+     * Tests if a 'normal' JavaScript function refers to a non entry SpeedyJS function.
+     * If this is the case, an error is emitted.
+     */
+    visitIdentifier(identifier: ts.Identifier, context: TransformVisitorContext) {
+        if (this.inSpeedyJSFunction) {
+            return identifier;
+        }
+
+        const symbol = this.compilationContext.typeChecker.getSymbolAtLocation(identifier);
+
+        if (symbol.flags & ts.SymbolFlags.Function) {
+            for (const declaration of symbol.getDeclarations() as ts.FunctionLikeDeclaration[]) {
+                if (isSpeedyJSFunction(declaration) && !isSpeedyJSEntryFunction(declaration)) {
+                    throw CodeGenerationError.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
+                }
+            }
+        }
+
+        return identifier;
+    }
+
+    /**
+     * Tests if the given function is a speedy js entry function and in this case, triggers the web assembly code
+     * generation for the given declaration.
+     */
     visitFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration, context: TransformVisitorContext) {
-        if (!isSpeedyJSFunction(functionDeclaration)) {
+        const speedyJSFunction = isSpeedyJSFunction(functionDeclaration);
+
+        if (!speedyJSFunction) {
             return context.visitEachChild(functionDeclaration);
         }
 
-        const name = getName(functionDeclaration, this.compilationContext.typeChecker);
+        const entryFunction = isSpeedyJSEntryFunction(functionDeclaration);
+        this.inSpeedyJSFunction = true;
 
-        LOG(`Found SpeedyJS Function ${name}`);
-        validateSpeedyJSFunction(functionDeclaration);
-        return this.codeGenerator.generateEntryFunction(functionDeclaration);
+        try {
+            if (entryFunction) {
+                const name = getName(functionDeclaration, this.compilationContext.typeChecker);
+                LOG(`Found SpeedyJS entry function ${name}`);
+                validateSpeedyJSFunction(functionDeclaration, this.compilationContext.typeChecker);
+                return this.codeGenerator.generateEntryFunction(functionDeclaration);
+            } else {
+                return context.visitEachChild(functionDeclaration);
+            }
+        } finally {
+            this.inSpeedyJSFunction = false;
+        }
     }
 
     fallback<T extends ts.Node>(node: T, context: TransformVisitorContext): T {
-        // TODO change to throw
-        LOG(`Node of kind ${ts.SyntaxKind[node.kind]} is not (yet) supported by SpeedyJS.`);
         return context.visitEachChild(node);
     }
 }
 
+/**
+ * tests if the passed function is a speedy js function
+ * @param fun the function to test
+ * @return {boolean} true if the function is a speedy js function
+ */
 function isSpeedyJSFunction(fun: ts.FunctionLikeDeclaration) {
     if (!fun.body || !isBlock(fun.body)) {
         return false;
@@ -56,14 +106,29 @@ function isSpeedyJSFunction(fun: ts.FunctionLikeDeclaration) {
     return false;
 }
 
-function validateSpeedyJSFunction(fun: ts.FunctionDeclaration) {
+/**
+ * A speedy js function has the async modifier and contains "use speedyjs" directive
+ * @param fun the function to test
+ * @return {boolean} true if it is a speedy js entry function
+ */
+function isSpeedyJSEntryFunction(fun: ts.FunctionLikeDeclaration) {
+    return isSpeedyJSFunction(fun) && !!fun.modifiers && !!fun.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+}
+
+/**
+ * Tests if the given function is a valid speedy js function.
+ * A function is a valid SpeedyJS function if
+ * * it has a name
+ * * it has no optional arguments (is not overloaded)
+ * * is not overloaded
+ * * is not generic
+ * @param fun the function to test
+ * @param typeChecker the type checker
+ * @throws if the function is not valid
+ */
+function validateSpeedyJSFunction(fun: ts.FunctionDeclaration, typeChecker: TypeChecker) {
     if (!fun.name) {
         throw CodeGenerationError.anonymousEntryFunctionsNotSupported(fun);
-    }
-
-    const async = !!fun.modifiers && !!fun.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
-    if (!async) {
-        throw CodeGenerationError.entryFunctionNotAsync(fun);
     }
 
     const optional = fun.parameters.find(parameter => !!parameter.questionToken || !!parameter.dotDotDotToken);
@@ -73,6 +138,10 @@ function validateSpeedyJSFunction(fun: ts.FunctionDeclaration) {
 
     if (fun.typeParameters && fun.typeParameters.length > 0) {
         throw CodeGenerationError.genericEntryFunctionNotSupported(fun);
+    }
+
+    if (typeChecker.isImplementationOfOverload(fun)) {
+        throw CodeGenerationError.overloadedEntryFunctionNotSupported(fun);
     }
 }
 

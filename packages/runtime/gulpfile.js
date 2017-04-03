@@ -66,7 +66,6 @@ gulp.task("build:runtime:configure", function () {
 gulp.task("build:runtime:make", function () {
     const command = "cmake --build cmake-build-release";
     child_process.execSync(command, { env: process.env, stdio: "inherit" });
-    child_process.execSync("ls cmake-build-release", { env: process.env, stdio: "inherit" });
 });
 
 /**

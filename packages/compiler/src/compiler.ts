@@ -9,16 +9,31 @@ import {SpeedyJSTransformVisitor} from "./transform/speedyjs-transform-visitor";
 import {createTransformVisitorFactory} from "./transform/transform-visitor";
 import {BuiltInSymbols} from "./built-in-symbols";
 import {CompilationContext} from "./compilation-context";
-import {CodeGenerationError} from "./code-generation/code-generation-error";
+import {CodeGenerationError} from "./code-generation-error";
 import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
 import {TypeScriptTypeChecker} from "./typescript-type-checker";
 
 const LOG = debug("compiler");
 
+/**
+ * The main Interface for compiling a SpeedyJS Program.
+ * The compiler creates compiles all with "use speedyjs" marked functions and rewrites the original source file
+ * to invoke the web assembly function instead of executing the function body in the JS runtime.
+ */
 export class Compiler {
+    /**
+     * Creates a new instance that uses the given compilation options and compiler host
+     * @param compilerOptions the compilation options
+     * @param compilerHost the compiler host
+     */
     constructor(private compilerOptions: SpeedyJSCompilerOptions, private compilerHost: ts.CompilerHost) {
     }
 
+    /**
+     * Compiles the source files with the given names
+     * @param rootFileNames the file names of the source files to compile
+     * @return the result of the compilation.
+     */
     compile(rootFileNames: string[]): { exitStatus: ts.ExitStatus, diagnostics: ts.Diagnostic[] } {
         LOG("Start Compiling");
         Compiler.initLLVM();
@@ -30,7 +45,7 @@ export class Compiler {
         }
 
         const context = new llvm.LLVMContext();
-        const builtIns = BuiltInSymbols.create(program, this.compilerHost, this.compilerOptions);
+        const builtIns = BuiltInSymbols.create(program, this.compilerHost);
         const compilationContext: CompilationContext = {
             builtIns,
             compilerHost: this.compilerHost,

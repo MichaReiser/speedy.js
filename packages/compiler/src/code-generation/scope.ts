@@ -1,10 +1,13 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as assert from "assert";
-import {FunctionReference} from "./value/function-reference";
 import {Allocation} from "./value/allocation";
 import {ClassReference} from "./value/class-reference";
+import {FunctionReference} from "./value/function-reference";
 
+/**
+ * The lexical scope
+ */
 export class Scope {
     private variables = new Map<ts.Symbol, Allocation>();
     private functions = new Map<ts.Symbol, FunctionReference>();
@@ -13,7 +16,7 @@ export class Scope {
     private retBlock: llvm.BasicBlock | undefined;
     private children: Scope[] = [];
 
-    constructor(private parent?: Scope, private fn?: FunctionReference) {}
+    constructor(private parent?: Scope, private fn?: llvm.Function) {}
 
     /**
      * Stores the function result. Only present in a function that is non void
@@ -40,9 +43,9 @@ export class Scope {
 
     /**
      * Returns a reference to the function in which this scope is defined
-     * @return {FunctionReference} the function
+     * @return the function
      */
-    get enclosingFunction(): FunctionReference {
+    get enclosingFunction(): llvm.Function {
         const result = this.fn || (this.parent ? this.parent.enclosingFunction : undefined);
         assert(result, "Code generation always needs to be inside of a function");
 
@@ -116,7 +119,7 @@ export class Scope {
 
     addClass(classReference: ClassReference) {
         assert(classReference, "class reference is undefined");
-        assert(!this.classes.has(classReference.symbol), `class ${classReference.name} is already defined`)
+        assert(!this.classes.has(classReference.symbol), `class ${classReference.name} is already defined`);
 
         this.classes.set(classReference.symbol, classReference);
     }
@@ -133,7 +136,7 @@ export class Scope {
         return cls!;
     }
 
-    enterChild(fn?: FunctionReference): Scope {
+    enterChild(fn?: llvm.Function): Scope {
         const child = new Scope(this, fn);
         this.children.push(child);
         return child;
@@ -144,8 +147,8 @@ export class Scope {
         return this.parent!;
     }
 
-    hasFunction(symbol: ts.Symbol) {
-        return this.functions.has(symbol);
+    hasFunction(symbol: ts.Symbol): boolean {
+        return this.functions.has(symbol) || (!!this.parent && this.parent.hasFunction(symbol));
     }
 
     hasClass(symbol: ts.Symbol): boolean {

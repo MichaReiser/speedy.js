@@ -1,9 +1,9 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {Value} from "./value";
-import {ObjectReference} from "./object-reference";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {FunctionReferenceBuilder} from "./function-reference-builder";
+import {FunctionDeclarationBuilder} from "../util/function-declaration-builder";
+import {ObjectReference} from "./object-reference";
+import {Value} from "./value";
 
 /**
  * Represents a primitive, stack allocated value.
@@ -22,22 +22,13 @@ export class Primitive implements Value {
             return value;
         }
 
-        if (type.flags & (ts.TypeFlags.NumberLike | ts.TypeFlags.BooleanLike)) {
-            return FunctionReferenceBuilder
-                .forFunctionCallDescriptor({
-                    functionName: "toInt32",
-                    returnType: int32Type,
-                    arguments: [{
-                        name: "value",
-                        type: type,
-                        optional: false,
-                        variadic: false
-                    }]
-                }, context)
-                .fromRuntime()
-                .functionReference()
-                .invoke([value])!
-                .generateIR();
+        if (type.flags & ts.TypeFlags.BooleanLike) {
+            return context.builder.createZExt(value, llvm.Type.getInt32Ty(context.llvmContext), `${value.name}AsInt32`);
+        }
+
+        if (type.flags & (ts.TypeFlags.NumberLike)) {
+            const fn = FunctionDeclarationBuilder.create("toInt32d", [ { name: "value", type: type }], int32Type, context).externalLinkage().declareIfNotExisting();
+            return context.builder.createCall(fn, [value], `${value.name}AsInt32`);
         }
 
         throw new Error(`Unsupported conversion of ${context.typeChecker.typeToString(type)} to int32`);
@@ -56,11 +47,11 @@ export class Primitive implements Value {
         }
 
         if (type.flags & ts.TypeFlags.IntLike) {
-            return context.builder.createICmpNE(value, llvm.ConstantInt.get(context.llvmContext, 0));
+            return context.builder.createICmpNE(value, llvm.ConstantInt.get(context.llvmContext, 0), `${value.name}AsBool`);
         }
 
         if (type.flags & ts.TypeFlags.NumberLike) {
-            return context.builder.createFCmpONE(value, llvm.ConstantFP.get(context.llvmContext, 0));
+            return context.builder.createFCmpONE(value, llvm.ConstantFP.get(context.llvmContext, 0), `${value.name}AsBool`);
         }
 
         throw new Error(`value of type ${context.typeChecker.typeToString(type)} cannot be converted to bool`);

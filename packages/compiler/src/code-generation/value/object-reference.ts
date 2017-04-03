@@ -3,6 +3,7 @@ import {AssignableValue} from "./value";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {FunctionReference} from "./function-reference";
+import {CodeGenerationContext} from "../code-generation-context";
 
 /**
  * Represents an object that is stored at a specific address.
@@ -14,31 +15,24 @@ export interface ObjectReference extends AssignableValue {
     /**
      * The type of the object, e.g. Array
      */
-    type: ts.Type;
-
-    /**
-     * Returns the function for the given call expression
-     * @param callExpression the function call
-     * @returns called function of the call expression
-     */
-    getFunction(callExpression: ts.CallExpression): FunctionReference;
+    type: ts.ObjectType;
 
     /**
      * Returns the given property
      * @param property the property
      * @returns reference to the defined property
      */
-    getProperty(property: ts.PropertyAccessExpression): ObjectPropertyReference;
+    getProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference | FunctionReference;
 
     /**
      * Returns the value of an element
      * @param element the element
      * @returns the value of the element
      */
-    getIndexer(element: ts.ElementAccessExpression): ObjectIndexReference;
+    getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference;
 
     /**
      * Destructs the object
      */
-    destruct(): void;
+    destruct(context: CodeGenerationContext): void;
 }
