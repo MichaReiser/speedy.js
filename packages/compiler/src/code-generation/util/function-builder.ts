@@ -4,7 +4,7 @@ import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {FunctionReference} from "../value/function-reference";
-import {createResolvedFunctionFromSignature, ResolvedFunction} from "../value/resolved-function";
+import {ResolvedFunction} from "../value/resolved-function";
 import {ResolvedFunctionReference} from "../value/resolved-function-reference";
 import {FunctionDeclarationBuilder} from "./function-declaration-builder";
 import {FunctionDefinitionBuilder} from "./function-definition-builder";
@@ -14,32 +14,20 @@ import {FunctionDefinitionBuilder} from "./function-definition-builder";
  */
 export class FunctionBuilder {
     private declarationBuilder: FunctionDeclarationBuilder;
+    private _name: string;
     private constructor(private resolvedFunction: ResolvedFunction, private context: CodeGenerationContext) {
         this.declarationBuilder = FunctionDeclarationBuilder.forResolvedFunction(resolvedFunction, context);
+        this._name = resolvedFunction.functionName;
     }
 
     /**
-     * Creates a builder for the given signature
-     * @param signature the signature of the function
-     * @param context the code generation context
-     * @return {FunctionDeclarationBuilder} the created builder instance to declare a function with the given signature
-     */
-    static forSignature(signature: ts.Signature, context: CodeGenerationContext) {
-        return this.create(signature, context);
-    }
-
-    /**
-     * Creates a builder for declaring a function with the given parameters and return type
-     * @param signature the declaration with the function parameters (and name)
+     * Creates a builder for declaring the given resolved function
+     * @param resolvedFunction the resolved function to declare
      * @param context the code generation context
      * @return {FunctionDeclarationBuilder} the builder instance
      */
-    static create(signature: ts.Signature, context: CodeGenerationContext) {
-        if (!signature.declaration.name) {
-            throw new Error(`Cannot transform function declaration without name`);
-        }
-
-        return new FunctionBuilder(createResolvedFunctionFromSignature(signature, context.compilationContext), context);
+    static create(resolvedFunction: ResolvedFunction, context: CodeGenerationContext) {
+        return new FunctionBuilder(resolvedFunction, context);
     }
 
     /**
@@ -69,13 +57,24 @@ export class FunctionBuilder {
     }
 
     /**
+     * Changes the name of the function
+     * @param name the name of the function
+     * @return {FunctionBuilder} this for a fluent api
+     */
+    name(name: string) {
+        this._name = name;
+        return this;
+    }
+
+    /**
      * Builds / Generates the llvm.Function for the given function declaration
      * @param declaration the function declaration
      * @return {FunctionReference} the reference for the generated function
      */
     define(declaration: ts.FunctionLikeDeclaration): FunctionReference {
         assert(declaration.body, `Cannot transform function declaration without a body`);
-        const fun = this.declarationBuilder.declare();
+
+        const fun = this.declarationBuilder.name(this._name).declare();
         const functionReference = ResolvedFunctionReference.create(fun, this.resolvedFunction);
 
         if (this.resolvedFunction.symbol) {

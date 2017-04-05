@@ -1,9 +1,29 @@
 "use strict";
 
 const TEST_CASES = {
+    "pow": {
+        args: [19800.3, 2],
+        result: 392051880.09
+    },
+    "powInt": {
+        args: [3500, 2],
+        result: 12250000
+    },
+    "sqrt": {
+        args: [392051880.09],
+        result: 19800.3
+    },
+    "sqrtInt": {
+        args: [12250000],
+        result: 3500
+    },
     "tspArray": {
         args: [],
         result: 137801.8213098867
+    },
+    "tspArrayLarge": {
+        args: [],
+        result: 334425.4299374184
     },
     "fib": {
         fnName: "fib",
@@ -47,7 +67,7 @@ async function getWasmFunctionForTestCase(caseName) {
         options.speedyJS.totalMemory = testCase.totalMemory;
     }
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: false, totalMemory: 134217728, exportGc: true, disableNukeHeapOnExit: true}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableNukeHeapOnExit: true}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 

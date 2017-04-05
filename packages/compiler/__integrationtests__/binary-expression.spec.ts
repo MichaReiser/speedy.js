@@ -141,6 +141,21 @@ async function numbersEqual(x: number, y: number) {
     return x === y;
 }
 
+async function boolsNotEqual(x: boolean, y: boolean) {
+    "use speedyjs";
+    return x !== y;
+}
+
+async function intsNotEqual(x: int, y: int) {
+    "use speedyjs";
+    return x !== y;
+}
+
+async function numbersNotEqual(x: number, y: number) {
+    "use speedyjs";
+    return x !== y;
+}
+
 async function boolGreaterThan(x: boolean, y: boolean) {
     "use speedyjs";
     return x > y;
@@ -422,6 +437,26 @@ describe("BinaryExpression", () => {
         it("returns true for equal number values and false otherwise", async (cb) => {
             expect(await numbersEqual(3.12, 3.12)).toBe(3.12 === 3.12);
             expect(await numbersEqual(3.99, 3.98)).toBe(3.99 === 3.98 as any);
+            cb();
+        });
+    });
+
+    describe("!==", () => {
+        it("returns false for equal boolean values and true otherwise", async (cb) => {
+            expect(await boolsNotEqual(true, true)).toBe(true !== true);
+            expect(await boolsNotEqual(true, false)).toBe(true !== false as any);
+            cb();
+        });
+
+        it("returns false for equal int values and true otherwise", async (cb) => {
+            expect(await intsNotEqual(3, 3)).toBe(3 !== 3);
+            expect(await intsNotEqual(4, 5)).toBe(4 !== 5 as any);
+            cb();
+        });
+
+        it("returns false for equal number values and true otherwise", async (cb) => {
+            expect(await numbersNotEqual(3.12, 3.12)).toBe(3.12 !== 3.12);
+            expect(await numbersNotEqual(3.99, 3.98)).toBe(3.99 !== 3.98 as any);
             cb();
         });
     });

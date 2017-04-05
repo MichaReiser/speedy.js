@@ -13,7 +13,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @simpleWhile(i32 %arg1) {
+define void @_simpleWhile(i32 %arg1) {
 entry:
   %arg = alloca i32
   store i32 %arg1, i32* %arg, align 4
@@ -49,7 +49,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define i32 @whileWithReturnAsLastStatement(i32 %arg1) {
+define i32 @_whileWithReturnAsLastStatement(i32 %arg1) {
 entry:
   %return = alloca i32
   %arg = alloca i32

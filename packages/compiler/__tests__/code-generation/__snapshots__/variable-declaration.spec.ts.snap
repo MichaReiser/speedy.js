@@ -13,7 +13,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @initializedVariableDeclaration() {
+define void @_initializedVariableDeclaration() {
 entry:
   %x = alloca i32
   store i32 10, i32* %x, align 4
@@ -35,7 +35,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @uninitializedVariableDeclaration() {
+define void @_uninitializedVariableDeclaration() {
 entry:
   %x = alloca double
   ret void

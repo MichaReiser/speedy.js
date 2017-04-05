@@ -146,7 +146,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 140, 128, 128, 128, 0, 1, 8, 105, 115, 84, 114, 117, 116, 104, 121, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 139, 128, 128, 128, 0, 1, 133, 128, 128, 128, 0, 0, 32, 0, 69, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 141, 128, 128, 128, 0, 1, 9, 95, 105, 115, 84, 114, 117, 116, 104, 121, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 139, 128, 128, 128, 0, 1, 133, 128, 128, 128, 0, 0, 32, 0, 69, 11]), {
     totalStack: 532480,
     totalMemory: 16777216,
     globalBase: 1024,
@@ -154,7 +154,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
     exposeGc: false
 });
 function isTruthy(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.isTruthy(value) === 1; loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._isTruthy(value) === 1; loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -340,7 +340,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
     totalMemory: 16777216,
     globalBase: 1024,
@@ -349,7 +349,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
 });
 export const speedyJsGc = loadWasmModule_1.gc;
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -500,7 +500,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
     totalMemory: 16777216,
     globalBase: 1024,
@@ -509,7 +509,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
 });
 const speedyJsGc = loadWasmModule_1.gc;
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -660,7 +660,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
     totalMemory: 16777216,
     globalBase: 4000,
@@ -668,7 +668,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
     exposeGc: false
 });
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -819,7 +819,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 160, 1, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 160, 1, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
     totalMemory: 10485760,
     globalBase: 1024,
@@ -827,7 +827,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
     exposeGc: false
 });
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -978,7 +978,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 1048576,
     totalMemory: 16777216,
     globalBase: 1024,
@@ -986,7 +986,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
     exposeGc: false
 });
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -1137,7 +1137,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
     totalMemory: 16777216,
     globalBase: 1024,
@@ -1145,7 +1145,7 @@ const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 
     exposeGc: false
 });
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;

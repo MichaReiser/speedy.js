@@ -14,14 +14,15 @@ export interface PerFileSourceFileRewirter {
 
     /**
      * Rewrites a SpeedyJS entry function
+     * @param name the name of the function in the compilation
      * @param functionDeclaration the entry function to rewrite
      * @param requestEmitHelper function that allows to request type script emit helpers
      */
-    rewriteEntryFunction(functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.FunctionDeclaration;
+    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.FunctionDeclaration;
 
     /**
      * Rewrites the statements of the source file
-     * @param statements the statements of the source file
+     * @param sourceFile the source file to rewrite
      * @param requestEmitHelper function that allows to request type script emit helpers
      */
     rewriteSourceFile(sourceFile: ts.SourceFile, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.SourceFile;

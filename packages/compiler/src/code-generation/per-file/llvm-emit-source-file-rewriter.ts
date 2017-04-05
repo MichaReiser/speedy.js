@@ -9,7 +9,7 @@ export class LLVMEmitSourceFileRewriter implements PerFileSourceFileRewirter {
         // noopp
     }
 
-    rewriteEntryFunction(functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.FunctionDeclaration {
+    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.FunctionDeclaration {
         return functionDeclaration;
     }
 
