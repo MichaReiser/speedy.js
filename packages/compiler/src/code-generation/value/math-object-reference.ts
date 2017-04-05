@@ -1,10 +1,13 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationContext} from "../code-generation-context";
 import {CodeGenerationError} from "../../code-generation-error";
-import {toLLVMType} from "../util/types";
+import {CodeGenerationContext} from "../code-generation-context";
 import {BuiltInObjectReference} from "./built-in-object-reference";
+import {Primitive} from "./primitive";
+import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
+import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
+import {Value} from "./value";
 
 /**
  * Wrapper for the built in Math object
@@ -19,6 +22,7 @@ export class MathObjectReference extends BuiltInObjectReference {
 
     protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
         switch (symbol.name) {
+            case "pow":
             case "sqrt":
                 return UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type);
             default:
@@ -34,46 +38,20 @@ export class MathObjectReference extends BuiltInObjectReference {
      * Calls the pow function
      * @param lhs the left hand side value (base)
      * @param rhs the right hand side value (exponent)
-     * @param type the type of the left and right hand side
+     * @param numberType the type of the pow result
      * @param context the context
      * @return the result of the pow operation
      */
-    static pow(lhs: llvm.Value, rhs: llvm.Value, type: ts.Type, context: CodeGenerationContext) {
-        const powFn = this.getPowFunction(type, context);
-        const powArgs = this.getPowCallArguments(lhs, rhs, type, context);
-        const result = context.builder.createCall(powFn, powArgs);
+    static pow(lhs: Value, rhs: Value, numberType: ts.Type, context: CodeGenerationContext) {
+        const mathSymbol = context.compilationContext.builtIns.get("Math");
+        const mathObject = context.scope.getVariable(mathSymbol!);
+        const mathType = mathObject.type as ts.ObjectType;
 
-        if (type.flags & ts.TypeFlags.IntLike) {
-            return context.builder.createFPToSI(result, toLLVMType(type, context));
-        }
+        const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
+        const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);
+        const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context);
 
-        return result;
-    }
-
-    private static getPowFunction(type: ts.Type, context: CodeGenerationContext) {
-        let intrinsicName: string;
-        let lhsType: llvm.Type;
-
-
-        if (type.flags & ts.TypeFlags.IntLike) {
-            intrinsicName = "llvm.powi.f32";
-            lhsType = llvm.Type.getFloatTy(context.llvmContext);
-        } else {
-            intrinsicName = "llvm.pow.f64";
-            lhsType = llvm.Type.getDoubleTy(context.llvmContext);
-        }
-
-        return context.module.getOrInsertFunction(
-            intrinsicName,
-            llvm.FunctionType.get(lhsType, [lhsType, toLLVMType(type, context)], false)
-        );
-    }
-
-    private static getPowCallArguments(lhs: llvm.Value, rhs: llvm.Value, type: ts.Type, context: CodeGenerationContext) {
-        if (type.flags & ts.TypeFlags.IntLike) {
-            lhs = context.builder.createSIToFP(lhs, llvm.Type.getFloatTy(context.llvmContext));
-        }
-
-        return [lhs, rhs];
+        const args = [Primitive.toNumber(lhs, numberType, context), Primitive.toNumber(rhs, numberType, context)];
+        return powFunction.invokeWith(args, context) as Primitive;
     }
 }

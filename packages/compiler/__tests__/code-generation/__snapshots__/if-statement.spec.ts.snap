@@ -21,9 +21,9 @@ entry:
   store i32 %x1, i32* %x, align 4
   %y = alloca i32
   store i32 %y2, i32* %y, align 4
-  %y3 = load i32, i32* %y, align 4
-  %x4 = load i32, i32* %x, align 4
-  %0 = icmp slt i32 %x4, %y3
+  %x3 = load i32, i32* %x, align 4
+  %y4 = load i32, i32* %y, align 4
+  %0 = icmp slt i32 %x3, %y4
   br i1 %0, label %then, label %else
 
 then:                                             ; preds = %entry
@@ -31,12 +31,12 @@ then:                                             ; preds = %entry
   br label %if-successor
 
 else:                                             ; preds = %entry
-  %y5 = load i32, i32* %y, align 4
   %x6 = load i32, i32* %x, align 4
-  %1 = icmp eq i32 %x6, %y5
-  br i1 %1, label %then7, label %else8
+  %y7 = load i32, i32* %y, align 4
+  %1 = icmp eq i32 %x6, %y7
+  br i1 %1, label %then5, label %else8
 
-then7:                                            ; preds = %else
+then5:                                            ; preds = %else
   store i32 0, i32* %result, align 4
   br label %if-successor
 
@@ -44,7 +44,7 @@ else8:                                            ; preds = %else
   store i32 1, i32* %result, align 4
   br label %if-successor
 
-if-successor:                                     ; preds = %then7, %else8, %then
+if-successor:                                     ; preds = %then5, %else8, %then
   %result9 = load i32, i32* %result, align 4
   store i32 %result9, i32* %return, align 4
   br label %returnBlock
@@ -76,9 +76,9 @@ entry:
   store double %x1, double* %x, align 8
   %y = alloca double
   store double %y2, double* %y, align 8
-  %y3 = load double, double* %y, align 8
-  %x4 = load double, double* %x, align 8
-  %0 = fcmp ult double %x4, %y3
+  %x3 = load double, double* %x, align 8
+  %y4 = load double, double* %y, align 8
+  %0 = fcmp ult double %x3, %y4
   br i1 %0, label %then, label %if-successor
 
 then:                                             ; preds = %entry

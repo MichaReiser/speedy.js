@@ -129,13 +129,13 @@ for-header:                                       ; preds = %if-successor8, %if-
   br i1 %1, label %for-body, label %for-successor
 
 for-body:                                         ; preds = %for-header
-  %i5 = load i32, i32* %i, align 4
   %x6 = load i32, i32* %x, align 4
-  %2 = srem i32 %x6, %i5
+  %i7 = load i32, i32* %i, align 4
+  %2 = srem i32 %x6, %i7
   %3 = icmp eq i32 %2, 0
-  br i1 %3, label %then7, label %if-successor8
+  br i1 %3, label %then5, label %if-successor8
 
-then7:                                            ; preds = %for-body
+then5:                                            ; preds = %for-body
   store i1 false, i1* %return, align 1
   br label %returnBlock
 
@@ -149,7 +149,7 @@ for-successor:                                    ; preds = %for-header
   store i1 true, i1* %return, align 1
   br label %returnBlock
 
-returnBlock:                                      ; preds = %for-successor, %then7, %then
+returnBlock:                                      ; preds = %for-successor, %then5, %then
   %return10 = load i1, i1* %return, align 1
   ret i1 %return10
 }

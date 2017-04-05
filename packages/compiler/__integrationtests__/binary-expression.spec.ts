@@ -104,12 +104,6 @@ async function powNumbers(base: number, exponent: number) {
     return base ** exponent;
 }
 
-async function powEqualsInts(base: int, exponent: int) {
-    "use speedyjs";
-    base **= exponent;
-    return base;
-}
-
 async function powEqualsNumbers(base: number, exponent: number) {
     "use speedyjs";
     base **= exponent;
@@ -379,11 +373,6 @@ describe("BinaryExpression", () => {
     });
 
     describe("**=", () => {
-        it("computes the int power of the assignee and the assigned value", async function (cb) {
-            expect(await powEqualsInts(5, 3)).toBe(5 ** 3);
-            cb();
-        });
-
         it("computes the number power of the assignee and the assigned value", async function (cb) {
             expect(await powEqualsNumbers(1.3, 3.4)).toBe(1.3 ** 3.4);
             cb();

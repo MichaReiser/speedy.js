@@ -74,30 +74,21 @@ target triple = \\"wasm32-unknown-unknown\\"
 define void @asteriskAsterisk() {
 entry:
   %doubleProduct = alloca double
-  %intProduct = alloca i32
-  %0 = call float @llvm.powi.f32(float 3.000000e+00, i32 4)
-  %1 = fptosi float %0 to i32
-  store i32 %1, i32* %intProduct, align 4
-  %intProduct1 = load i32, i32* %intProduct, align 4
-  %2 = sitofp i32 %intProduct1 to float
-  %3 = call float @llvm.powi.f32(float %2, i32 2)
-  %4 = fptosi float %3 to i32
-  store i32 %4, i32* %intProduct, align 4
-  %5 = call double @llvm.pow.f64(double 3.000000e+00, double 4.000000e+00)
-  store double %5, double* %doubleProduct, align 8
-  %doubleProduct2 = load double, double* %doubleProduct, align 8
-  %6 = call double @llvm.pow.f64(double %doubleProduct2, double 1.500000e+00)
-  store double %6, double* %doubleProduct, align 8
+  %intProduct = alloca double
+  %powReturnValue = call double @Math_powdd(double 3.000000e+00, double 4.000000e+00)
+  store double %powReturnValue, double* %intProduct, align 8
+  %intProduct1 = load double, double* %intProduct, align 8
+  %powReturnValue2 = call double @Math_powdd(double %intProduct1, double 2.000000e+00)
+  store double %powReturnValue2, double* %intProduct, align 8
+  %powReturnValue3 = call double @Math_powdd(double 3.000000e+00, double 4.000000e+00)
+  store double %powReturnValue3, double* %doubleProduct, align 8
+  %doubleProduct4 = load double, double* %doubleProduct, align 8
+  %powReturnValue5 = call double @Math_powdd(double %doubleProduct4, double 1.500000e+00)
+  store double %powReturnValue5, double* %doubleProduct, align 8
   ret void
 }
 
-; Function Attrs: nounwind readnone
-declare float @llvm.powi.f32(float, i32) #0
-
-; Function Attrs: nounwind readnone
-declare double @llvm.pow.f64(double, double) #0
-
-attributes #0 = { nounwind readnone }
+declare double @Math_powdd(double, double)
 "
 `;
 
