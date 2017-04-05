@@ -21,8 +21,8 @@ function parseConfigFile(configFileName) {
 function speedyJSLoader(source) {
     const loader = this;
 
-    function getCompilerOptions(configFileName) {
-        const configFile = ts.findConfigFile(path.dirname(loader.resourcePath), ts.sys.fileExists);
+    function getCompilerOptions(options) {
+        const configFile = options.configFileName || ts.findConfigFile(path.dirname(loader.resourcePath), ts.sys.fileExists);
         let compilerOptions;
         if (configFile) {
             console.log(`speedyjs-loader uses ${configFile} to compile ${loader.resourcePath}`);
@@ -36,13 +36,17 @@ function speedyJSLoader(source) {
             compilerOptions = ts.getDefaultCompilerOptions();
         }
 
+        for (const key of Object.keys(options.speedyJS || {})) {
+            compilerOptions[key] = options.speedyJS[key];
+        }
+
         return { compilerOptions: compilerOptions };
     }
 
     this.cacheable && this.cacheable();
 
     const options = loaderUtils.getOptions(this) || {};
-    const compilerOptionsResult = getCompilerOptions(options.tsconfig);
+    const compilerOptionsResult = getCompilerOptions(options);
     let errors = compilerOptionsResult.errors;
     let result;
 
