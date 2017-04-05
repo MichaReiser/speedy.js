@@ -419,6 +419,123 @@ TEST_F(ArrayTests, shift_throws_if_the_array_is_empty) {
 }
 
 // -----------------------------------------
+// splice
+// -----------------------------------------
+TEST_F(ArrayTests, splice_removes_the_number_of_elements) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* deleted = array->splice(2, 2);
+    delete deleted;
+
+    // assert
+    EXPECT_EQ(3, array->size());
+    EXPECT_EQ(array->get(0), 1);
+    EXPECT_EQ(array->get(1), 2);
+    EXPECT_EQ(array->get(2), 5);
+}
+
+TEST_F(ArrayTests, splice_returns_an_array_containing_the_deleted_elements) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* deleted = array->splice(2, 2);
+
+    // assert
+    EXPECT_EQ(2, deleted->size());
+    EXPECT_EQ(deleted->get(0), 3);
+    EXPECT_EQ(deleted->get(1), 4);
+
+    delete deleted;
+}
+
+TEST_F(ArrayTests, splice_removes_the_elements_and_inserts_the_new_ones) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    double toInsert[1] = { 2.5 };
+
+    // act
+    Array<double>* deleted = array->splice(2, 2, toInsert, 1);
+    delete deleted;
+
+    // assert
+    EXPECT_EQ(4, array->size());
+    EXPECT_EQ(array->get(0), 1);
+    EXPECT_EQ(array->get(1), 2);
+    EXPECT_EQ(array->get(2), 2.5);
+    EXPECT_EQ(array->get(3), 5);
+}
+
+TEST_F(ArrayTests, splice_shifts_the_new_elements_to_the_back_if_more_elements_are_inserted_than_removed) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    double toInsert[3] = { 2.25, 2.5, 2.75 };
+
+    // act
+    Array<double>* deleted = array->splice(2, 2, toInsert, 3);
+    delete deleted;
+
+    // assert
+    EXPECT_EQ(6, array->size());
+    EXPECT_EQ(array->get(0), 1);
+    EXPECT_EQ(array->get(1), 2);
+    EXPECT_EQ(array->get(2), 2.25);
+    EXPECT_EQ(array->get(3), 2.50);
+    EXPECT_EQ(array->get(4), 2.75);
+    EXPECT_EQ(array->get(5), 5);
+}
+
+TEST_F(ArrayTests, splice_removes_all_elements_from_the_index_if_deleteCount_is_larger_than_the_length) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* deleted = array->splice(2, 10);
+    delete deleted;
+
+    // assert
+    EXPECT_EQ(2, array->size());
+    EXPECT_EQ(array->get(0), 1);
+    EXPECT_EQ(array->get(1), 2);
+}
+
+TEST_F(ArrayTests, splices_inserts_from_the_back_if_the_index_is_negative) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* deleted = array->splice(-3, 2);
+    delete deleted;
+
+    // assert
+    EXPECT_EQ(3, array->size());
+    EXPECT_EQ(array->get(0), 1);
+    EXPECT_EQ(array->get(1), 2);
+    EXPECT_EQ(array->get(2), 5);
+}
+
+TEST_F(ArrayTests, splice_throws_if_delete_count_is_negative) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    EXPECT_THROW(array->splice(2, -3), std::out_of_range);
+}
+
+TEST_F(ArrayTests, splice_throws_if_index_is_out_of_range) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    EXPECT_THROW(array->splice(10, 2), std::out_of_range);
+}
+
+
+// -----------------------------------------
 // size
 // -----------------------------------------
 TEST_F(ArrayTests, size_returns_the_size_of_the_array) {
