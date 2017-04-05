@@ -11,17 +11,18 @@ import {Allocation} from "../value/allocation";
  * @param name the optional name of the allocation
  * @return the allocation
  */
-export function allocateLlvmArrayWith(elements: llvm.Value[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.AllocaInst {
+function allocateLlvmArrayWith(elements: llvm.Value[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.Value {
     const ZERO = llvm.ConstantInt.get(context.llvmContext, 0);
-    const allocation = Allocation.createAllocaInstInEntryBlock(llvm.ArrayType.get(elementType, elements.length), context.scope, name);
+    const arrayType = llvm.ArrayType.get(elementType, elements.length);
+    const allocation = Allocation.createAllocaInstInEntryBlock(arrayType, context.scope, name);
+    const array = context.builder.createInBoundsGEP(allocation, [ZERO, ZERO], name);
 
-    // TODO use memcopy if all elements are constant
     for (let i = 0; i < elements.length; ++i) {
         const ptr = context.builder.createInBoundsGEP(allocation, [ZERO, llvm.ConstantInt.get(context.llvmContext, i)]);
         context.builder.createAlignedStore(elements[i], ptr, context.module.dataLayout.getPrefTypeAlignment(elementType));
     }
 
-    return allocation;
+    return array;
 }
 
 export function llvmArrayValue(elements: llvm.Value[] | ts.Node[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.Value {
@@ -36,8 +37,6 @@ export function llvmArrayValue(elements: llvm.Value[] | ts.Node[], elementType: 
         values = (elements as ts.Node[]).map(element => context.generateValue(element).generateIR(context));
     }
 
-    const allocation = allocateLlvmArrayWith(values, elementType, context, name);
-    const ZERO = llvm.ConstantInt.get(context.llvmContext, 0);
+    return allocateLlvmArrayWith(values, elementType, context, name);
 
-    return context.builder.createInBoundsGEP(allocation, [ZERO, ZERO], name);
 }

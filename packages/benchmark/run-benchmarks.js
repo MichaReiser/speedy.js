@@ -1,6 +1,10 @@
 "use strict";
 
 const TEST_CASES = {
+    "tspArray": {
+        args: [],
+        result: 137801.8213098867
+    },
     "fib": {
         fnName: "fib",
         args: [40],
