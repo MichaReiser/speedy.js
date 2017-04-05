@@ -21,6 +21,9 @@ function parseCommandLine() {
         .option("--unsafe", "Use the unsafe runtime system")
         .option("--emit-llvm", "Emit LLVM Assembly Code instead of WASM files")
         .option("--binaryen-opt", "Optimize using Binaryen opt")
+        .option("--expose-gc", "Exposes the speedy js garbage collector in the module as speedyJsGc")
+        .option("--export-gc", "Exposes and exports the speedy js garbage collector as the symbol speedyJsGc")
+        .option("--disable-heap-nuke-on-exit", "Disables nuking of the heap prior to the exit of the entry function (its your responsible to call the gc in this case!)")
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);
     return program;
@@ -57,6 +60,9 @@ function getCompilerOptions(commandLine, tsConfigFileName) {
     compilerOptions.globalBase = commandLine.settings.GLOBAL_BASE;
     compilerOptions.totalMemory = commandLine.settings.TOTAL_MEMORY;
     compilerOptions.totalStack = commandLine.settings.TOTAL_STACK;
+    compilerOptions.exposeGc = commandLine.exposeGc;
+    compilerOptions.exportGc = commandLine.exportGc;
+    compilerOptions.disableHeapNukeOnExit = commandLine.disableHeapNukeOnExit;
     return { rootFileNames: rootFileNames, compilerOptions: speedyjs_compiler_options_1.initializeCompilerOptions(compilerOptions) };
 }
 function run() {

@@ -16,6 +16,9 @@ interface CommandLineArguments extends IExportedCommand {
     unsafe?: boolean;
     emitLlvm?: boolean;
     binaryenOpt?: boolean;
+    disableHeapNukeOnExit?: boolean;
+    exposeGc?: boolean;
+    exportGc?: boolean;
     settings: {
         TOTAL_MEMORY?: number;
         TOTAL_STACK?: number;
@@ -37,6 +40,9 @@ function parseCommandLine(): CommandLineArguments {
         .option("--unsafe", "Use the unsafe runtime system")
         .option("--emit-llvm", "Emit LLVM Assembly Code instead of WASM files")
         .option("--binaryen-opt", "Optimize using Binaryen opt")
+        .option("--expose-gc", "Exposes the speedy js garbage collector in the module as speedyJsGc")
+        .option("--export-gc", "Exposes and exports the speedy js garbage collector as the symbol speedyJsGc")
+        .option("--disable-heap-nuke-on-exit", "Disables nuking of the heap prior to the exit of the entry function (its your responsible to call the gc in this case!)")
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);
 
@@ -79,6 +85,9 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
     compilerOptions.globalBase = commandLine.settings.GLOBAL_BASE;
     compilerOptions.totalMemory = commandLine.settings.TOTAL_MEMORY;
     compilerOptions.totalStack = commandLine.settings.TOTAL_STACK;
+    compilerOptions.exposeGc = commandLine.exposeGc;
+    compilerOptions.exportGc = commandLine.exportGc;
+    compilerOptions.disableHeapNukeOnExit = commandLine.disableHeapNukeOnExit;
 
     return { rootFileNames, compilerOptions: initializeCompilerOptions(compilerOptions) };
 }

@@ -37,7 +37,11 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BUMP) {
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
@@ -80,6 +84,7 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             env: {
                 memory: memory,
                 STACKTOP: STACK_TOP,
+                __dso_handle: 0,
                 \\"__cxa_allocate_exception\\": function () {
                     console.log(\\"__cxa_allocate_exception\\", arguments);
                 },
@@ -95,14 +100,14 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
                 \\"__resumeException\\": function () {
                     console.log(\\"__resumeException\\", arguments);
                 },
-                \\"__powisf2\\": function __powisf2(x, y) {
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
                     return Math.pow(x, y);
                 },
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
-                },
-                \\"pow\\": function __powisf2(x, y) {
-                    return Math.pow(x, y);
                 },
                 \\"abort\\": function (what) {
                     console.error(\\"Abort WASM for reason: \\" + what);
@@ -120,19 +125,36 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             }
         }).then(function (result) { return instance = result.instance; });
     }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
     var loaded = undefined;
-    return function () {
+    var loader = function loader() {
         if (loaded) {
             return loaded;
         }
-        loaded = loadInstance();
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
         return loaded;
     };
+    loader.gc = gc;
+    return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 140, 128, 128, 128, 0, 1, 8, 105, 115, 84, 114, 117, 116, 104, 121, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 139, 128, 128, 128, 0, 1, 133, 128, 128, 128, 0, 0, 32, 0, 69, 11]), 532480, 16777216, 1024, 8);
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 140, 128, 128, 128, 0, 1, 8, 105, 115, 84, 114, 117, 116, 104, 121, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 139, 128, 128, 128, 0, 1, 133, 128, 128, 128, 0, 0, 32, 0, 69, 11]), {
+    totalStack: 532480,
+    totalMemory: 16777216,
+    globalBase: 1024,
+    staticBump: 8,
+    exposeGc: false
+});
 function isTruthy(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); return instance.exports.isTruthy(value) === 1; });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.isTruthy(value) === 1; loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -169,6 +191,326 @@ exports[`Transformation emits a diagnostic if the entry function is generic 1`] 
 
 exports[`Transformation emits a diagnostic if the entry function is overloaded 1`] = `
 "test.ts(3,67): error TS100013: SpeedyJS entry function cannot be overloaded
+"
+`;
+
+exports[`Transformation exports the gc function if exportGc is set 1`] = `
+"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+/**
+ * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
+ * speedyjs-transformer to generate the code to load the wasm module.
+ * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
+ */
+var Allocation;
+(function (Allocation) {
+    /**
+     * Tries to use _malloc()
+     */
+    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
+    /**
+     * Lives for the duration of the current function call
+     */
+    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
+    /**
+     * Cannot be freed
+     */
+    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
+    /**
+     * Cannot be freed except through sbrk
+     */
+    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
+    /**
+     * Do not allocate
+     */
+    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
+})(Allocation || (Allocation = {}));
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
+    var WASM_PAGE_SIZE = 64 * 1024;
+    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var HEAP32 = new Int32Array(memory.buffer);
+    var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
+    var STACK_BASE = alignMemory(STATIC_TOP);
+    var STACK_TOP = STACK_BASE + TOTAL_STACK;
+    var STACK_MAX = STACK_BASE + TOTAL_STACK;
+    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
+    // where does the dynamic heap memory start
+    var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    var DYNAMIC_TOP_PTR = STATIC_TOP;
+    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function sbrk(increment) {
+        // console.log(\\"sbrk\\");
+        increment = increment | 0;
+        var oldDynamicTop = 0;
+        var newDynamicTop = 0;
+        var totalMemory = 0;
+        increment = ((increment + 15) & -16) | 0;
+        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        newDynamicTop = oldDynamicTop + increment | 0;
+        if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
+            || (newDynamicTop | 0) < 0) {
+            console.error(\\"Cannot grow memory\\");
+            return -1;
+        }
+        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        totalMemory = TOTAL_MEMORY | 0;
+        if ((newDynamicTop | 0) > (totalMemory | 0)) {
+            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+        }
+        return oldDynamicTop | 0;
+    }
+    function alignMemory(size, quantum) {
+        return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function loadInstance() {
+        var instance;
+        return WebAssembly.instantiate(bytes.buffer, {
+            env: {
+                memory: memory,
+                STACKTOP: STACK_TOP,
+                __dso_handle: 0,
+                \\"__cxa_allocate_exception\\": function () {
+                    console.log(\\"__cxa_allocate_exception\\", arguments);
+                },
+                \\"__cxa_throw\\": function () {
+                    console.log(\\"__cxa_throw\\", arguments);
+                },
+                \\"__cxa_find_matching_catch_2\\": function () {
+                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                },
+                \\"__cxa_free_exception\\": function () {
+                    console.log(\\"__cxa_free_exception\\", arguments);
+                },
+                \\"__resumeException\\": function () {
+                    console.log(\\"__resumeException\\", arguments);
+                },
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
+                    return Math.pow(x, y);
+                },
+                \\"fmod\\": function frem(x, y) {
+                    return x % y;
+                },
+                \\"abort\\": function (what) {
+                    console.error(\\"Abort WASM for reason: \\" + what);
+                },
+                \\"invoke_ii\\": function (index, a1) {
+                    return instance.exports.dynCall_ii(index, a1);
+                },
+                \\"invoke_iii\\": function (index, a1, a2) {
+                    return instance.exports.dynCall_iii(index, a1, a2);
+                },
+                \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_viii(index, a1, a2, a3);
+                },
+                \\"sbrk\\": sbrk
+            }
+        }).then(function (result) { return instance = result.instance; });
+    }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
+    var loaded = undefined;
+    var loader = function loader() {
+        if (loaded) {
+            return loaded;
+        }
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
+        return loaded;
+    };
+    loader.gc = gc;
+    return loader;
+}
+//# sourceMappingURL=get-wasm-module-function.js.map
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+    totalStack: 532480,
+    totalMemory: 16777216,
+    globalBase: 1024,
+    staticBump: 8,
+    exposeGc: true
+});
+export const speedyJsGc = loadWasmModule_1.gc;
+function fib(value) {
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+}
+"
+`;
+
+exports[`Transformation exposes the gc function if exposeGc is set 1`] = `
+"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+/**
+ * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
+ * speedyjs-transformer to generate the code to load the wasm module.
+ * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
+ */
+var Allocation;
+(function (Allocation) {
+    /**
+     * Tries to use _malloc()
+     */
+    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
+    /**
+     * Lives for the duration of the current function call
+     */
+    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
+    /**
+     * Cannot be freed
+     */
+    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
+    /**
+     * Cannot be freed except through sbrk
+     */
+    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
+    /**
+     * Do not allocate
+     */
+    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
+})(Allocation || (Allocation = {}));
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
+    var WASM_PAGE_SIZE = 64 * 1024;
+    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var HEAP32 = new Int32Array(memory.buffer);
+    var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
+    var STACK_BASE = alignMemory(STATIC_TOP);
+    var STACK_TOP = STACK_BASE + TOTAL_STACK;
+    var STACK_MAX = STACK_BASE + TOTAL_STACK;
+    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
+    // where does the dynamic heap memory start
+    var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    var DYNAMIC_TOP_PTR = STATIC_TOP;
+    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function sbrk(increment) {
+        // console.log(\\"sbrk\\");
+        increment = increment | 0;
+        var oldDynamicTop = 0;
+        var newDynamicTop = 0;
+        var totalMemory = 0;
+        increment = ((increment + 15) & -16) | 0;
+        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        newDynamicTop = oldDynamicTop + increment | 0;
+        if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
+            || (newDynamicTop | 0) < 0) {
+            console.error(\\"Cannot grow memory\\");
+            return -1;
+        }
+        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        totalMemory = TOTAL_MEMORY | 0;
+        if ((newDynamicTop | 0) > (totalMemory | 0)) {
+            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+        }
+        return oldDynamicTop | 0;
+    }
+    function alignMemory(size, quantum) {
+        return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function loadInstance() {
+        var instance;
+        return WebAssembly.instantiate(bytes.buffer, {
+            env: {
+                memory: memory,
+                STACKTOP: STACK_TOP,
+                __dso_handle: 0,
+                \\"__cxa_allocate_exception\\": function () {
+                    console.log(\\"__cxa_allocate_exception\\", arguments);
+                },
+                \\"__cxa_throw\\": function () {
+                    console.log(\\"__cxa_throw\\", arguments);
+                },
+                \\"__cxa_find_matching_catch_2\\": function () {
+                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                },
+                \\"__cxa_free_exception\\": function () {
+                    console.log(\\"__cxa_free_exception\\", arguments);
+                },
+                \\"__resumeException\\": function () {
+                    console.log(\\"__resumeException\\", arguments);
+                },
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
+                    return Math.pow(x, y);
+                },
+                \\"fmod\\": function frem(x, y) {
+                    return x % y;
+                },
+                \\"abort\\": function (what) {
+                    console.error(\\"Abort WASM for reason: \\" + what);
+                },
+                \\"invoke_ii\\": function (index, a1) {
+                    return instance.exports.dynCall_ii(index, a1);
+                },
+                \\"invoke_iii\\": function (index, a1, a2) {
+                    return instance.exports.dynCall_iii(index, a1, a2);
+                },
+                \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_viii(index, a1, a2, a3);
+                },
+                \\"sbrk\\": sbrk
+            }
+        }).then(function (result) { return instance = result.instance; });
+    }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
+    var loaded = undefined;
+    var loader = function loader() {
+        if (loaded) {
+            return loaded;
+        }
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
+        return loaded;
+    };
+    loader.gc = gc;
+    return loader;
+}
+//# sourceMappingURL=get-wasm-module-function.js.map
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+    totalStack: 532480,
+    totalMemory: 16777216,
+    globalBase: 1024,
+    staticBump: 8,
+    exposeGc: true
+});
+const speedyJsGc = loadWasmModule_1.gc;
+function fib(value) {
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
+}
 "
 `;
 
@@ -209,7 +551,11 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BUMP) {
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
@@ -252,6 +598,7 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             env: {
                 memory: memory,
                 STACKTOP: STACK_TOP,
+                __dso_handle: 0,
                 \\"__cxa_allocate_exception\\": function () {
                     console.log(\\"__cxa_allocate_exception\\", arguments);
                 },
@@ -267,14 +614,14 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
                 \\"__resumeException\\": function () {
                     console.log(\\"__resumeException\\", arguments);
                 },
-                \\"__powisf2\\": function __powisf2(x, y) {
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
                     return Math.pow(x, y);
                 },
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
-                },
-                \\"pow\\": function __powisf2(x, y) {
-                    return Math.pow(x, y);
                 },
                 \\"abort\\": function (what) {
                     console.error(\\"Abort WASM for reason: \\" + what);
@@ -292,19 +639,36 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             }
         }).then(function (result) { return instance = result.instance; });
     }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
     var loaded = undefined;
-    return function () {
+    var loader = function loader() {
         if (loaded) {
             return loaded;
         }
-        loaded = loadInstance();
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
         return loaded;
     };
+    loader.gc = gc;
+    return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), 532480, 16777216, 4000, 8);
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+    totalStack: 532480,
+    totalMemory: 16777216,
+    globalBase: 4000,
+    staticBump: 8,
+    exposeGc: false
+});
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); return instance.exports.fib(value); });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -346,7 +710,11 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BUMP) {
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
@@ -389,6 +757,7 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             env: {
                 memory: memory,
                 STACKTOP: STACK_TOP,
+                __dso_handle: 0,
                 \\"__cxa_allocate_exception\\": function () {
                     console.log(\\"__cxa_allocate_exception\\", arguments);
                 },
@@ -404,14 +773,14 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
                 \\"__resumeException\\": function () {
                     console.log(\\"__resumeException\\", arguments);
                 },
-                \\"__powisf2\\": function __powisf2(x, y) {
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
                     return Math.pow(x, y);
                 },
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
-                },
-                \\"pow\\": function __powisf2(x, y) {
-                    return Math.pow(x, y);
                 },
                 \\"abort\\": function (what) {
                     console.error(\\"Abort WASM for reason: \\" + what);
@@ -429,19 +798,36 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             }
         }).then(function (result) { return instance = result.instance; });
     }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
     var loaded = undefined;
-    return function () {
+    var loader = function loader() {
         if (loaded) {
             return loaded;
         }
-        loaded = loadInstance();
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
         return loaded;
     };
+    loader.gc = gc;
+    return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 160, 1, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), 532480, 10485760, 1024, 8);
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 160, 1, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+    totalStack: 532480,
+    totalMemory: 10485760,
+    globalBase: 1024,
+    staticBump: 8,
+    exposeGc: false
+});
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); return instance.exports.fib(value); });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -483,7 +869,11 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BUMP) {
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
@@ -526,6 +916,7 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             env: {
                 memory: memory,
                 STACKTOP: STACK_TOP,
+                __dso_handle: 0,
                 \\"__cxa_allocate_exception\\": function () {
                     console.log(\\"__cxa_allocate_exception\\", arguments);
                 },
@@ -541,14 +932,14 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
                 \\"__resumeException\\": function () {
                     console.log(\\"__resumeException\\", arguments);
                 },
-                \\"__powisf2\\": function __powisf2(x, y) {
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
                     return Math.pow(x, y);
                 },
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
-                },
-                \\"pow\\": function __powisf2(x, y) {
-                    return Math.pow(x, y);
                 },
                 \\"abort\\": function (what) {
                     console.error(\\"Abort WASM for reason: \\" + what);
@@ -566,19 +957,36 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             }
         }).then(function (result) { return instance = result.instance; });
     }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
     var loaded = undefined;
-    return function () {
+    var loader = function loader() {
         if (loaded) {
             return loaded;
         }
-        loaded = loadInstance();
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
         return loaded;
     };
+    loader.gc = gc;
+    return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), 1048576, 16777216, 1024, 8);
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+    totalStack: 1048576,
+    totalMemory: 16777216,
+    globalBase: 1024,
+    staticBump: 8,
+    exposeGc: false
+});
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); return instance.exports.fib(value); });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;
@@ -620,7 +1028,11 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BUMP) {
+function __moduleLoader(bytes, options) {
+    var TOTAL_STACK = options.totalStack;
+    var TOTAL_MEMORY = options.totalMemory;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
@@ -663,6 +1075,7 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             env: {
                 memory: memory,
                 STACKTOP: STACK_TOP,
+                __dso_handle: 0,
                 \\"__cxa_allocate_exception\\": function () {
                     console.log(\\"__cxa_allocate_exception\\", arguments);
                 },
@@ -678,14 +1091,14 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
                 \\"__resumeException\\": function () {
                     console.log(\\"__resumeException\\", arguments);
                 },
-                \\"__powisf2\\": function __powisf2(x, y) {
+                \\"__cxa_atexit\\": function () {
+                    console.log(\\"__cxa_atexit\\", arguments);
+                },
+                \\"pow\\": function pow(x, y) {
                     return Math.pow(x, y);
                 },
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
-                },
-                \\"pow\\": function __powisf2(x, y) {
-                    return Math.pow(x, y);
                 },
                 \\"abort\\": function (what) {
                     console.error(\\"Abort WASM for reason: \\" + what);
@@ -703,19 +1116,36 @@ function __moduleLoader(bytes, TOTAL_STACK, TOTAL_MEMORY, GLOBAL_BASE, STATIC_BU
             }
         }).then(function (result) { return instance = result.instance; });
     }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
     var loaded = undefined;
-    return function () {
+    var loader = function loader() {
         if (loaded) {
             return loaded;
         }
-        loaded = loadInstance();
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
         return loaded;
     };
+    loader.gc = gc;
+    return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), 532480, 16777216, 1024, 8);
+const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 135, 128, 128, 128, 0, 1, 3, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+    totalStack: 532480,
+    totalMemory: 16777216,
+    globalBase: 1024,
+    staticBump: 8,
+    exposeGc: false
+});
 function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); return instance.exports.fib(value); });
+    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports.fib(value); loadWasmModule_1.gc(); return result; });
 }
 "
 `;

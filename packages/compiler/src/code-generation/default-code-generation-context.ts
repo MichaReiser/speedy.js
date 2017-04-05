@@ -19,7 +19,8 @@ const log = debug("code-generation/default-code-generation-context");
  */
 export class DefaultCodeGenerationContext implements CodeGenerationContext {
     builder: llvm.IRBuilder;
-    public scope: Scope;
+    scope: Scope;
+    requiresGc = false;
 
     constructor(public compilationContext: CompilationContext, public module: llvm.Module,
                 private rootScope = new Scope(),

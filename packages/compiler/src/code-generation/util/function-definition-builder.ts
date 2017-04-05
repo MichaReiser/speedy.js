@@ -3,7 +3,6 @@ import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {Allocation} from "../value/allocation";
-import {ObjectReference} from "../value/object-reference";
 import {ResolvedFunction} from "../value/resolved-function";
 
 export class FunctionDefinitionBuilder {
@@ -35,25 +34,12 @@ export class FunctionDefinitionBuilder {
 
         this.setBuilderToReturnBlock(returnBlock);
 
-        this.cleanUpHeap();
-
         // Add Return Statement
         this.generateReturnStatement();
 
         this.context.leaveChildScope();
 
         llvm.verifyFunction(this.fn);
-    }
-
-    private cleanUpHeap() {
-        for (const variable of this.context.scope.getAllVariables()) {
-            const variableAllocation = this.context.scope.getNested(variable);
-            // TODO Property members, anonymous arrays are not identified by this approach, aliased members are released multiple times
-            if (variableAllocation!.type.flags & ts.TypeFlags.Object) {
-                const object = variableAllocation!.dereference(this.context) as ObjectReference;
-                object.destruct(this.context);
-            }
-        }
     }
 
     private generateReturnStatement() {

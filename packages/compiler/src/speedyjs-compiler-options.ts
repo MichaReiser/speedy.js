@@ -40,6 +40,24 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
      * @default 1024
      */
     globalBase: number;
+
+    /**
+     * Indicator if the heap should not be nuked (everything allocated on the heap is freed) prior of the exit of an entry function
+     * @default true
+     */
+    disableHeapNukeOnExit: boolean;
+
+    /**
+     * Indicator if the gc should be exposed inside a module using speedy js functions using the speedyJsGc variable.
+     * @default false
+     */
+    exposeGc: boolean;
+
+    /**
+     * Indicator if the gc symbol should be exposed and exported
+     * @default false
+     */
+    exportGc: boolean;
 }
 
 /**
@@ -61,7 +79,10 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         binaryenOpt: false,
         totalMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,
-        globalBase: 1024
+        globalBase: 1024,
+        disableHeapNukeOnExit: false,
+        exposeGc: false,
+        exportGc: false
     };
 
     for (const key of Object.keys(defaults)) {
