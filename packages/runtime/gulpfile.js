@@ -75,7 +75,7 @@ gulp.task("build:runtime:make", function () {
  * The output is generated in ./.emscripten_cache/wasm
  */
 gulp.task("build:libs", function() {
-    if (fs.existsSync(EMSCRIPTEN_CACHE_DIR)) {
+    if (!fs.existsSync(EMSCRIPTEN_CACHE_DIR)) {
         fs.mkdirSync(EMSCRIPTEN_CACHE_DIR);
     }
 
@@ -90,10 +90,12 @@ gulp.task("build:libs", function() {
     );
 
     const outputTmpFile = tmp.fileSync({ postfix: ".js" });
+    const env = Object.create(process.env);
+    env.EMCC_CFLAGS = (env.EMCC_CFLAGS || "") + " -DMALLOC_INSPECT_ALL"; // expose the malloc_inspect_all function
 
     child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s --em-config %s", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR, path.resolve("./.emscripten")),
         {
-            env: process.env,
+            env: env,
             stdio: "inherit"
         });
     sourceTmpFile.removeCallback();

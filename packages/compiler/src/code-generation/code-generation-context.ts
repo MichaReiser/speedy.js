@@ -41,6 +41,12 @@ export interface CodeGenerationContext {
     readonly scope: Scope;
 
     /**
+     * Indicator if this compilation unit requires the inclusion of the garbage collector
+     * @default false
+     */
+    requiresGc: boolean;
+
+    /**
      * Creates a new child context with it's own builder and with a detached scope (but shared global scope)
      */
     createChildContext(): CodeGenerationContext;

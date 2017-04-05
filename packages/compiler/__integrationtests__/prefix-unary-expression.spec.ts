@@ -144,8 +144,8 @@ describe("PrefixUnaryExpression", () => {
 
         it("returns the bitwise complement for an int value", async (cb) => {
             expect(await tildeInt(0)).toBe(~0);
-            expect(await tildeInt(2**31 - 1)).toBe(~(2**31 - 1));
-            expect(await tildeInt(-(2**31 - 1))).toBe(~-(2**31 - 1));
+            expect(await tildeInt(2147483647)).toBe(~(2147483647));
+            expect(await tildeInt(-(2147483647))).toBe(~-(2147483647));
             cb();
         });
 

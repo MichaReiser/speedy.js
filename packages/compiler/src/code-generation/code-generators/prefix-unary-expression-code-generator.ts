@@ -11,56 +11,56 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
 
     generate(node: ts.PrefixUnaryExpression, context: CodeGenerationContext): Value {
         const left = context.generateValue(node.operand);
-        const leftValue = left.generateIR(context);
-        const type = context.typeChecker.getTypeAtLocation(node.operand);
+        const operandType = context.typeChecker.getTypeAtLocation(node.operand);
+        const resultType = context.typeChecker.getTypeAtLocation(node);
         let result: llvm.Value | undefined;
 
         switch (node.operator) {
             case ts.SyntaxKind.ExclamationToken:
-                const booleanValue = Primitive.toBoolean(leftValue, type, context);
+                const booleanValue = Primitive.toBoolean(left, operandType, context);
                 result = context.builder.createNot(booleanValue);
 
                 break;
 
             case ts.SyntaxKind.MinusToken:
-                if (type.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createNeg(leftValue);
-                } else if (type.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFNeg(leftValue);
+                if (operandType.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createNeg(left.generateIR(context));
+                } else if (operandType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFNeg(left.generateIR(context));
                 }
 
                 break;
 
             case ts.SyntaxKind.MinusMinusToken:
-                if (type.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSub(leftValue, llvm.ConstantInt.get(context.llvmContext, 1));
-                } else if (type.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFSub(leftValue, llvm.ConstantFP.get(context.llvmContext, 1.0));
+                if (operandType.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createSub(left.generateIR(context), llvm.ConstantInt.get(context.llvmContext, 1));
+                } else if (operandType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFSub(left.generateIR(context), llvm.ConstantFP.get(context.llvmContext, 1.0));
                 }
 
                 break;
 
             case ts.SyntaxKind.PlusPlusToken:
-                if (type.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createAdd(leftValue, llvm.ConstantInt.get(context.llvmContext, 1));
-                } else if (type.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFAdd(leftValue, llvm.ConstantFP.get(context.llvmContext, 1.0));
+                if (operandType.flags & ts.TypeFlags.IntLike) {
+                    result = context.builder.createAdd(left.generateIR(context), llvm.ConstantInt.get(context.llvmContext, 1));
+                } else if (operandType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFAdd(left.generateIR(context), llvm.ConstantFP.get(context.llvmContext, 1.0));
                 }
 
                 break;
 
             case ts.SyntaxKind.TildeToken:
-                let intValue = Primitive.toInt32(leftValue, type, context.typeChecker.getTypeAtLocation(node), context);
+                let intValue = Primitive.toInt32(left, operandType, resultType, context).generateIR();
                 result = context.builder.createNot(intValue);
 
                 break;
         }
 
         if (!result) {
-            throw CodeGenerationError.unsupportedUnaryOperation(node, context.typeChecker.typeToString(type));
+            throw CodeGenerationError.unsupportedUnaryOperation(node, context.typeChecker.typeToString(operandType));
         }
 
-        const resultValue = context.value(result, type);
+        const resultValue = context.value(result, resultType);
 
         if (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken) {
             context.assignValue(left, resultValue);

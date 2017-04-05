@@ -31,7 +31,18 @@ enum Allocation {
     NONE
 }
 
-function __moduleLoader(bytes: Uint8Array, TOTAL_STACK: number, TOTAL_MEMORY: number, GLOBAL_BASE: number, STATIC_BUMP: number): () => Promise<WebAssemblyInstance> {
+interface ModuleLoader {
+    (): Promise<WebAssemblyInstance>;
+    gc(): void;
+}
+
+
+function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: number, totalMemory: number, globalBase: number, staticBump: number }): ModuleLoader {
+    const TOTAL_STACK = options.totalStack;
+    const TOTAL_MEMORY = options.totalMemory;
+    const GLOBAL_BASE = options.globalBase;
+    const STATIC_BUMP = options.staticBump;
+
     const WASM_PAGE_SIZE = 64 * 1024;
     const memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
     const HEAP32 = new Int32Array(memory.buffer);
@@ -84,6 +95,7 @@ function __moduleLoader(bytes: Uint8Array, TOTAL_STACK: number, TOTAL_MEMORY: nu
             env: {
                 memory: memory,
                 STACKTOP: STACK_TOP,
+                __dso_handle: 0,
                 "__cxa_allocate_exception": function () {
                     console.log("__cxa_allocate_exception", arguments);
                 },
@@ -99,14 +111,14 @@ function __moduleLoader(bytes: Uint8Array, TOTAL_STACK: number, TOTAL_MEMORY: nu
                 "__resumeException": function () {
                     console.log("__resumeException", arguments);
                 },
-                "__powisf2": function __powisf2(x: number, y: number) {
+                "__cxa_atexit": function () {
+                    console.log("__cxa_atexit", arguments);
+                },
+                "pow": function pow(x: number, y: number) {
                     return Math.pow(x, y);
                 },
                 "fmod": function frem(x: number, y: number) {
                     return x % y;
-                },
-                "pow": function __powisf2(x: number, y: number) {
-                    return Math.pow(x, y);
                 },
                 "abort": function (what: any) {
                     console.error("Abort WASM for reason: " + what);
@@ -125,13 +137,27 @@ function __moduleLoader(bytes: Uint8Array, TOTAL_STACK: number, TOTAL_MEMORY: nu
         }).then(result => instance = result.instance);
     }
 
+    let speedyJsGc: () => void | undefined;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
+
     let loaded: Promise<WebAssemblyInstance> | undefined = undefined;
-    return function (): Promise<WebAssemblyInstance> {
+    const loader = function loader () {
         if (loaded) {
             return loaded;
         }
 
-        loaded = loadInstance();
+        loaded = loadInstance().then(instance => {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
         return loaded;
-    }
+    } as ModuleLoader;
+
+    loader.gc = gc;
+
+    return loader;
 }

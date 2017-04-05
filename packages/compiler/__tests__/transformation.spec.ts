@@ -49,6 +49,14 @@ describe("Transformation", () => {
         expectCompiledJSOutputMatchesSnapshot(fibSourceCode, "transform/fib.ts", { globalBase: 4000 });
     });
 
+    it("exposes the gc function if exposeGc is set", () => {
+        expectCompiledJSOutputMatchesSnapshot(fibSourceCode, "transform/fib.ts", { exposeGc: true });
+    });
+
+    it("exports the gc function if exportGc is set", () => {
+        expectCompiledJSOutputMatchesSnapshot(fibSourceCode, "transform/fib.ts", { exportGc: true });
+    });
+
     it("casts the return value for boolean functions to a bool value", () => {
         expectCompiledJSOutputMatchesSnapshot(`
         async function isTruthy(value: int) {

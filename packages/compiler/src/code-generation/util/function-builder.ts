@@ -82,7 +82,8 @@ export class FunctionBuilder {
             this.context.scope.addFunction(this.resolvedFunction.symbol, functionReference);
         }
 
-        FunctionDefinitionBuilder.create(fun, this.resolvedFunction, this.context).define(declaration);
+        FunctionDefinitionBuilder.create(fun, this.resolvedFunction, this.context)
+            .define(declaration);
 
         return functionReference;
     }

@@ -88,6 +88,10 @@ export class CodeGenerationError extends Error {
     static overloadedEntryFunctionNotSupported(fun: ts.FunctionDeclaration) {
         return CodeGenerationError.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
     }
+
+    static unsupportedSyntaxKind(node: ts.Node) {
+        return CodeGenerationError.createException(node, diagnostics.UnsupportedSyntaxKind, ts.SyntaxKind[node.kind]);
+    }
 }
 
 const diagnostics = {
@@ -146,5 +150,9 @@ const diagnostics = {
     OverloadedEntryFunctionNotSupported: {
         message: "SpeedyJS entry function cannot be overloaded",
         code: 100013
+    },
+    UnsupportedSyntaxKind: {
+        message: "The syntax kind '%s' is not yet supported.",
+        code: 100014
     }
 };

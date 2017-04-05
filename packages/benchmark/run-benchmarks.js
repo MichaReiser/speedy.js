@@ -1,6 +1,10 @@
 "use strict";
 
 const TEST_CASES = {
+    "tspArray": {
+        args: [],
+        result: 137801.8213098867
+    },
     "fib": {
         fnName: "fib",
         args: [40],
@@ -37,24 +41,35 @@ async function getJsFunctionForTestCase(caseName) {
 async function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
-    const fn = require("speedyjs-loader!./cases/" + caseName + ".ts")[fnName];
+
+    const options = { speedyJS: { unsafe: false } };
+    if (testCase.totalMemory) {
+        options.speedyJS.totalMemory = testCase.totalMemory;
+    }
+
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: false, totalMemory: 134217728, exportGc: true, disableNukeHeapOnExit: true}}!./cases/" + caseName + ".ts");
+    const fn = wasmModule[fnName];
+    const gc = wasmModule["speedyJsGc"];
 
     const wrapped = function () {
         return fn.apply(undefined, testCase.args);
     };
 
     const wasmResult = await wrapped();
+    gc();
+
     if (wasmResult !== testCase.result) {
         console.error(`WASM Result for Test Case ${caseName} returned ${wasmResult} instead of ${testCase.result}`);
     }
 
-    return wrapped;
+    return { fn: wrapped, gc: gc };
 }
 
 function runBenchmarks() {
     for (const testCase of Object.keys(TEST_CASES)) {
         suite(testCase, function () {
             let wasmFn = undefined;
+            let speedyJsGc = undefined;
             let jsFn = undefined;
 
             benchmark("js", function (deferred) {
@@ -80,10 +95,14 @@ function runBenchmarks() {
                 defer: true,
                 setup: function (deferred) {
                     getWasmFunctionForTestCase(testCase)
-                        .then(function (loadedWasmFn) {
-                            wasmFn = loadedWasmFn;
+                        .then(function (result) {
+                            wasmFn = result.fn;
+                            speedyJsGc = result.gc;
                             deferred.suResolve();
                         });
+                },
+                onCycle: function () { // Is not called after each loop, but after some execution, so might need a little bit more memory
+                    speedyJsGc();
                 }
             });
         });

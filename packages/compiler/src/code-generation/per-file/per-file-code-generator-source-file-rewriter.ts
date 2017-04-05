@@ -44,14 +44,21 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const instanceDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(instanceIdentifier, undefined, instanceLoaded)], ts.NodeFlags.Const);
         bodyStatements.push(ts.createVariableStatement([], instanceDeclaration));
 
-        // return instance.exports.fn(args)
+        // const result = instance.exports.fn(args)
         const wasmExports = ts.createPropertyAccess(instanceIdentifier,"exports");
         const targetFunction = ts.createPropertyAccess(wasmExports, functionDeclaration.name!);
         const args = signature.parameters.map(parameter => ts.createIdentifier(parameter.name));
         const functionCall = ts.createCall(targetFunction, [], args);
         const castedResult = this.castReturnValue(functionCall, (signature.getReturnType() as ts.TypeReference).typeArguments[0]);
+        const resultVariable = ts.createVariableDeclaration("result", undefined, castedResult);
+        bodyStatements.push(ts.createVariableStatement(undefined, [resultVariable]));
 
-        bodyStatements.push(ts.createReturn(castedResult));
+        if (!this.compilerOptions.disableHeapNukeOnExit) {
+            // speedyJsGc();
+            bodyStatements.push(ts.createStatement(ts.createCall(ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"), [], [])));
+        }
+
+        bodyStatements.push(ts.createReturn(ts.createIdentifier("result")));
         const body = ts.createBlock(bodyStatements);
 
         return ts.updateFunctionDeclaration(
@@ -73,18 +80,36 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         }
 
         requestEmitHelper(new PerFileWasmLoaderEmitHelper());
+
+        const options = ts.createObjectLiteral([
+            ts.createPropertyAssignment("totalStack", ts.createLiteral(this.compilerOptions.totalStack)),
+            ts.createPropertyAssignment("totalMemory", ts.createLiteral(this.compilerOptions.totalMemory)),
+            ts.createPropertyAssignment("globalBase", ts.createLiteral(this.compilerOptions.globalBase)),
+            ts.createPropertyAssignment("staticBump", ts.createLiteral(this.wastMetaData.staticBump || 0)),
+            ts.createPropertyAssignment("exposeGc", ts.createLiteral(this.compilerOptions.exportGc || this.compilerOptions.exposeGc))
+        ], true);
+
         const initializer = ts.createCall(ts.createIdentifier(MODULE_LOADER_FACTORY_NAME), [], [
             this.getWasmBinary(),
-            ts.createNumericLiteral(this.compilerOptions.totalStack + ""),
-            ts.createNumericLiteral(this.compilerOptions.totalMemory + ""),
-            ts.createNumericLiteral(this.compilerOptions.globalBase + ""),
-            ts.createNumericLiteral((this.wastMetaData.staticBump || 0) + "")
+            options
         ]);
-        const declaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(this.loadWasmFunctionIdentifier, undefined, initializer)], ts.NodeFlags.Const);
+
+        const statementsToInsert: ts.Statement[] = [];
+
+        // loadWasmModule = __moduleLoader(Uint8Array.from...., options }
+        const loaderDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(this.loadWasmFunctionIdentifier, undefined, initializer)], ts.NodeFlags.Const);
+        statementsToInsert.push(ts.createVariableStatement([], loaderDeclaration));
+
+        // export let speedyJsGc = loadWasmModule_1.gc; or without export if only expose
+        if (this.compilerOptions.exposeGc || this.compilerOptions.exportGc) {
+            const speedyJsGcDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"))], ts.NodeFlags.Const);
+            const modifiers = this.compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
+
+            statementsToInsert.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
+        }
 
         const statements = sourceFile.statements;
-        statements.unshift(ts.createVariableStatement([], declaration));
-
+        statements.unshift(...statementsToInsert);
         return ts.updateSourceFileNode(sourceFile, statements);
     }
 

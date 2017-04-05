@@ -205,6 +205,39 @@ public:
         return element;
     }
 
+    inline Array<T>* splice(int32_t index, int32_t deleteCount, T* elements = nullptr, int32_t elementsCount = 0) {
+        if (index < 0) {
+            index = this->length + index;
+        }
+
+#ifdef SAFE
+        if (this->length < index) {
+            throw std::out_of_range { "Delete index out of range" };
+        }
+
+        if (deleteCount < 0) {
+            throw std::out_of_range { "Delete count needs to be a positive number" };
+        }
+
+        deleteCount = std::min(this->length - index, deleteCount);
+#endif
+
+        if (deleteCount < elementsCount) {
+            // Make place for the new items
+            this->ensureCapacity(this->length + elementsCount - deleteCount);
+        }
+
+        T deletedElements[deleteCount];
+        std::copy(this->elements + index, this->elements + index + deleteCount, deletedElements); // safe the deleted elements
+        Array<T>* deleted = new Array<T>(deleteCount, deletedElements);
+
+        std::copy(this->elements + index + deleteCount, this->elements + this->length, this->elements + index + elementsCount); // Move the following elements in the right place
+        std::copy(elements, elements + elementsCount, this->elements + index); // insert the new elements
+        this->length += elementsCount - deleteCount;
+
+        return deleted;
+    }
+
     /**
      * Returns the size of the array
      * @return the size

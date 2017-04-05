@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WhileStatement simple-while 1`] = `
+"; ModuleID = 'while-statement/simple-while.ts'
+source_filename = \\"while-statement/simple-while.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @simpleWhile(i32 %arg1) {
+entry:
+  %arg = alloca i32
+  store i32 %arg1, i32* %arg, align 4
+  br label %whileCondition
+
+whileCondition:                                   ; preds = %whileBody, %entry
+  %arg2 = load i32, i32* %arg, align 4
+  %arg2AsBool = icmp ne i32 %arg2, 0
+  br i1 %arg2AsBool, label %whileBody, label %whileSuccessor
+
+whileBody:                                        ; preds = %whileCondition
+  %arg3 = load i32, i32* %arg, align 4
+  %0 = sub i32 %arg3, 1
+  store i32 %0, i32* %arg, align 4
+  br label %whileCondition
+
+whileSuccessor:                                   ; preds = %whileCondition
+  ret void
+}
+"
+`;
+
+exports[`WhileStatement while-with-return-as-last-statement 1`] = `
+"; ModuleID = 'while-statement/while-with-return-as-last-statement.ts'
+source_filename = \\"while-statement/while-with-return-as-last-statement.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define i32 @whileWithReturnAsLastStatement(i32 %arg1) {
+entry:
+  %return = alloca i32
+  %arg = alloca i32
+  store i32 %arg1, i32* %arg, align 4
+  br label %whileCondition
+
+whileCondition:                                   ; preds = %entry
+  %arg2 = load i32, i32* %arg, align 4
+  %arg2AsBool = icmp ne i32 %arg2, 0
+  br i1 %arg2AsBool, label %whileBody, label %whileSuccessor
+
+whileBody:                                        ; preds = %whileCondition
+  store i32 10, i32* %return, align 4
+  br label %returnBlock
+
+whileSuccessor:                                   ; preds = %whileCondition
+  store i32 0, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %whileSuccessor, %whileBody
+  %return3 = load i32, i32* %return, align 4
+  ret i32 %return3
+}
+"
+`;

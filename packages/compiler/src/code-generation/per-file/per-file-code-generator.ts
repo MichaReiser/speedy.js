@@ -57,7 +57,8 @@ export class PerFileCodeGenerator implements CodeGenerator {
         const signature = context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
         const symbol = context.typeChecker.getSymbolAtLocation(functionDeclaration.name!);
 
-        const builder = FunctionBuilder.create(signature, context).externalLinkage();
+        const builder = FunctionBuilder.create(signature, context)
+            .externalLinkage();
 
         builder.define(functionDeclaration);
         context.addEntryFunction(symbol.name);
@@ -71,6 +72,10 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
         if (context.module.empty) {
             return sourceFile;
+        }
+
+        if (context.requiresGc) {
+            context.module.getOrInsertFunction("speedyJsGc", llvm.FunctionType.get(llvm.Type.getVoidTy(context.llvmContext), [], false));
         }
 
         LOG(`Emit module for source file ${sourceFile.fileName}.`);

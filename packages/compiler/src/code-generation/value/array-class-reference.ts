@@ -35,6 +35,8 @@ export class ArrayClassReference extends ClassReference {
         const parameters = [ createResolvedParameter("items", type, false, undefined, true) ];
         const resolvedConstructor = createResolvedFunction("constructor", [], parameters, type, type.getSymbol().getDeclarations()[0].getSourceFile(), type);
         const constructorFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedConstructor, context);
+        context.requiresGc = true;
+
         return constructorFunction.invokeWith(elements, context) as ArrayReference;
     }
 
@@ -56,6 +58,8 @@ export class ArrayClassReference extends ClassReference {
 
     getConstructor(newExpression: ts.NewExpression, context: CodeGenerationContext): FunctionReference {
         const constructorSignature = context.typeChecker.getResolvedSignature(newExpression);
+        context.requiresGc = true;
+
         return UnresolvedFunctionReference.createRuntimeFunction([constructorSignature], context);
     }
 

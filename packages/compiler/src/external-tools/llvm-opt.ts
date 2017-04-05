@@ -4,7 +4,7 @@ import {execLLVM} from "./tools";
 const LOG = debug("external-tools/llvm-opt");
 const EXECUTABLE_NAME = "opt";
 const OPTIMIZATIONS = "-strip-debug -disable-verify -internalize -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false -O3";
-const DEFAULT_PUBLIC = "malloc,free,__errno_location,memcpy,memmove,memset,__cxa_can_catch,__cxa_is_pointer_type";
+const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,__errno_location,memcpy,memmove,memset,__cxa_can_catch,__cxa_is_pointer_type";
 
 /**
  * Executes the LLVM Optimizer on the given input file

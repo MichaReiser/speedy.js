@@ -17,39 +17,35 @@ extern "C" {
 //---------------------------------------------------------------------------------
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructori(int32_t size) {
-    return new Array<bool>(size);
+    return new Array<bool> { size, nullptr };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructorPbi(bool* elements, int32_t size) {
-    return new Array<bool>(size, elements);
+    return new Array<bool> { size, elements };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructori(int32_t size) {
-    return new Array<int32_t>(size);
+    return new Array<int32_t> { size, nullptr };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructorPii(int32_t* elements, int32_t size) {
-    return new Array<int32_t>(size, elements);
+    return new Array<int32_t> { size, elements };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructori(int32_t size) {
-    return new Array<double>(size);
+    return new Array<double> { size, nullptr };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructorPdi(double* elements, int32_t size) {
-    return new Array<double>(size, elements);
-}
-
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructor() {
-    return new Array<void*>();
+    return new Array<double> { size, elements };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructori(int32_t size) {
-    return new Array<void*>(size);
+    return new Array<void*> { size, nullptr };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPvi(void** elements, int32_t size) {
-    return new Array<void*>(size, elements);
+    return new Array<void*> { size, elements };
 }
 
 //---------------------------------------------------------------------------------
@@ -222,6 +218,58 @@ DLL_PUBLIC ALWAYS_INLINE double ArrayId_shift(Array<double>* array) {
 
 DLL_PUBLIC ALWAYS_INLINE void* ArrayIPv_shift(Array<void*>* array) {
     return array->shift();
+}
+
+//---------------------------------------------------------------------------------
+// splice
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_splicei(Array<bool>* array, int32_t index) {
+    return array->splice(index, array->size());
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceii(Array<bool>* array, int32_t index, int32_t deleteCount) {
+    return array->splice(index, deleteCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceiiPbi(Array<bool>* array, int32_t index, int32_t deleteCount, bool* elements, int32_t elementsCount) {
+    return array->splice(index, deleteCount, elements, elementsCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_splicei(Array<int32_t>* array, int32_t index) {
+    return array->splice(index, array->size());
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceii(Array<int32_t>* array, int32_t index, int32_t deleteCount) {
+    return array->splice(index, deleteCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceiiPii(Array<int32_t>* array, int32_t index, int32_t deleteCount, int32_t* elements, int32_t elementsCount) {
+    return array->splice(index, deleteCount, elements, elementsCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_splicei(Array<double>* array, int32_t index) {
+    return array->splice(index, array->size());
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceii(Array<double>* array, int32_t index, int32_t deleteCount) {
+    return array->splice(index, deleteCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceiiPdi(Array<double>* array, int32_t index, int32_t deleteCount, double* elements, int32_t elementsCount) {
+    return array->splice(index, deleteCount, elements, elementsCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_splicei(Array<void*>* array, int32_t index) {
+    return array->splice(index, array->size());
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceii(Array<void*>* array, int32_t index, int32_t deleteCount) {
+    return array->splice(index, deleteCount);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceiiPvi(Array<void*>* array, int32_t index, int32_t deleteCount, void** elements, int32_t elementsCount) {
+    return array->splice(index, deleteCount, elements, elementsCount);
 }
 
 //---------------------------------------------------------------------------------

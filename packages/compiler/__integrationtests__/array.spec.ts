@@ -46,7 +46,7 @@ async function arrayFill(size: int, value: number) {
     return array[0] + array[array.length - 1];
 }
 
-async function arrayFilFromStart(size: int, value: int, start: int) {
+async function arrayFillFromStart(size: int, value: int, start: int) {
     "use speedyjs";
 
     const array = new Array<int>(size);
@@ -113,6 +113,40 @@ async function arrayShift() {
     return array.length - array.shift()!;
 }
 
+async function arraySplice() {
+    "use speedyjs";
+    
+    const array = [1, 2, 3, 4, 5];
+    array.splice(2);
+    
+    return array.length;
+}
+
+async function arraySpliceWithDeleteCount() {
+    "use speedyjs";
+
+    const array = [1, 2, 3, 4, 5];
+    array.splice(2, 2);
+
+    return array.length;
+}
+
+async function arraySpliceInsertingNewElements() {
+    "use speedyjs";
+
+    const array = [1, 2, 3, 4, 5];
+    array.splice(2, 2, 10, 11, 12, 13, 14);
+
+    return array.length;
+}
+
+async function arraySpliceReturnedArray() {
+    "use speedyjs";
+
+    const array = [1, 2, 3, 4, 5];
+    return array.splice(2).length;
+}
+
 describe("Array", () => {
     describe("[]", () => {
         it("creates an empty array", async (cb) => {
@@ -161,7 +195,7 @@ describe("Array", () => {
         });
 
         it("fills the array with the specified value from the specified start to the end", async (cb) => {
-            expect(await arrayFilFromStart(100, 10, 30)).toBe(0 + 0 + 10 + 10);
+            expect(await arrayFillFromStart(100, 10, 30)).toBe(0 + 0 + 10 + 10);
             cb();
         });
 
@@ -205,6 +239,28 @@ describe("Array", () => {
     describe("shift", () => {
         it("removes and returns the first element", async (cb) => {
             expect(await arrayShift()).toBe(2);
+            cb();
+        });
+    });
+    
+    describe("splice", () => {
+        it("removes all elements from the given start index if delete count is not defined", async (cb) => {
+            expect(await arraySplice()).toBe(2);
+            cb();
+        });
+
+        it("removes deleteCount num elements from the specified start index", async (cb) => {
+            expect(await arraySpliceWithDeleteCount()).toBe(3);
+            cb();
+        });
+
+        it("inserts the new elements", async (cb) => {
+            expect(await arraySpliceInsertingNewElements()).toBe(8);
+            cb();
+        });
+
+        it("returns an array containing the removed elements", async (cb) => {
+            expect(await arraySpliceReturnedArray()).toBe(3);
             cb();
         });
     });
