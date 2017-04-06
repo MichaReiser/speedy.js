@@ -58,6 +58,12 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
      * @default false
      */
     exportGc: boolean;
+
+    /**
+     * The optimization level passed to llvm
+     * @default "3"
+     */
+    optimizationLevel: string;
 }
 
 /**
@@ -82,7 +88,8 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         globalBase: 1024,
         disableHeapNukeOnExit: false,
         exposeGc: false,
-        exportGc: false
+        exportGc: false,
+        optimizationLevel: "3"
     };
 
     for (const key of Object.keys(defaults)) {

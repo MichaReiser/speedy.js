@@ -1,6 +1,14 @@
 "use strict";
 
 const TEST_CASES = {
+    "arrayElementAccess": {
+        args: [],
+        result: 4.790411013875255
+    },
+    "mergeSort": {
+         args: [],
+         result: 1658.0910554176508
+    },
     "pow": {
         args: [19800.3, 2],
         result: 392051880.09
@@ -67,7 +75,7 @@ async function getWasmFunctionForTestCase(caseName) {
         options.speedyJS.totalMemory = testCase.totalMemory;
     }
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableNukeHeapOnExit: true}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 

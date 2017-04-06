@@ -43,8 +43,8 @@ export class Primitive implements Value {
      * @param context the context
      * @return a boolean value
      */
-    static toBoolean(value: Value, valueType: ts.Type, context: CodeGenerationContext) {
-        const llvmValue = value.generateIR(context);
+    static toBoolean(value: Value | llvm.Value, valueType: ts.Type, context: CodeGenerationContext) {
+        const llvmValue = value instanceof llvm.Value ? value : value.generateIR(context);
         if (valueType.flags & ts.TypeFlags.BooleanLike) {
             return llvmValue;
         }

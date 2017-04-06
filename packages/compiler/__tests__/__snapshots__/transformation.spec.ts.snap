@@ -118,6 +118,12 @@ function __moduleLoader(bytes, options) {
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
                 },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
                 },
@@ -312,6 +318,12 @@ function __moduleLoader(bytes, options) {
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
                 },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
                 },
@@ -471,6 +483,12 @@ function __moduleLoader(bytes, options) {
                 },
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
+                },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                 },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
@@ -632,6 +650,12 @@ function __moduleLoader(bytes, options) {
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
                 },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
                 },
@@ -790,6 +814,12 @@ function __moduleLoader(bytes, options) {
                 },
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
+                },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                 },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
@@ -950,6 +980,12 @@ function __moduleLoader(bytes, options) {
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
                 },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
                 },
@@ -1108,6 +1144,12 @@ function __moduleLoader(bytes, options) {
                 },
                 \\"invoke_iii\\": function (index, a1, a2) {
                     return instance.exports.dynCall_iii(index, a1, a2);
+                },
+                \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                 },
                 \\"invoke_viii\\": function (index, a1, a2, a3) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);

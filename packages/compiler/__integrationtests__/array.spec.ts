@@ -147,6 +147,27 @@ async function arraySpliceReturnedArray() {
     return array.splice(2).length;
 }
 
+async function arraySliceCompleteArray() {
+    "use speedyjs";
+
+    const array = [1, 2, 3, 4, 5];
+    return array.slice().length;
+}
+
+async function arraySliceFrom(start: int) {
+    "use speedyjs";
+
+    const array = [1, 2, 3, 4, 5];
+    return array.slice(start).length;
+}
+
+async function arraySliceInBetween(start: int, end: int) {
+    "use speedyjs";
+
+    const array = [1, 2, 3, 4, 5];
+    return array.slice(start, end).length;
+}
+
 describe("Array", () => {
     describe("[]", () => {
         it("creates an empty array", async (cb) => {
@@ -261,6 +282,27 @@ describe("Array", () => {
 
         it("returns an array containing the removed elements", async (cb) => {
             expect(await arraySpliceReturnedArray()).toBe(3);
+            cb();
+        });
+    });
+
+    describe("slice", () => {
+        it("returns an array containing all elements if called without any arguments", async (cb) => {
+            expect(await arraySliceCompleteArray()).toBe(5);
+            cb();
+        });
+
+        it("returns a subset of the array containing the elements from the specified start", async (cb) => {
+            expect(await arraySliceFrom(2)).toBe(3);
+            expect(await arraySliceFrom(-2)).toBe(2);
+            expect(await arraySliceFrom(5)).toBe(0);
+            cb();
+        });
+
+        it("returns the elements in between the specified start and end", async (cb) => {
+            expect(await arraySliceInBetween(2, 4)).toBe(2);
+            expect(await arraySliceInBetween(2, -1)).toBe(2);
+            expect(await arraySliceInBetween(5, 1)).toBe(0);
             cb();
         });
     });

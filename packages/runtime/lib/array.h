@@ -49,18 +49,22 @@ public:
      * @param elements the elements contained in the array with the length equal to size. If absent, the elements are default
      * initialized.
      */
-    Array(int32_t size=0, const T* elements = nullptr) {
+    Array(int32_t size=0, const T* elements = nullptr, bool initialize = true) {
+        if (size < 0) {
+            throw std::out_of_range("Size needs to be a positive number");
+        }
+
         if (size == 0) {
             this->elements = nullptr;
         } else {
-            this->elements = Array<T>::allocateElements(size);
+            this->elements = Array<T>::allocateElements(static_cast<size_t>(size));
 
-            if (elements == nullptr) {
+            if (elements == nullptr && initialize) {
 #ifdef SAFE
                 // This is quite expensive, if there is a GC that guarantees zeroed memory, this is no longer needed
                 std::fill_n(this->elements, size, T {});
 #endif
-            } else {
+            } else if (elements != nullptr) {
                 std::copy(elements, elements + size, this->elements);
             }
         }
@@ -116,8 +120,8 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill
      */
     inline void fill(const T value, int32_t start, int32_t end) {
-        int32_t startIndex = start < 0 ? this->length + start : start;
-        int32_t endIndex = end < 0 ? this->length + end : end;
+        const int32_t startIndex = start < 0 ? this->length + start : start;
+        const int32_t endIndex = end < 0 ? this->length + end : end;
 
  #ifdef SAFE
         if (startIndex < 0 || startIndex >= this->length) {
@@ -205,12 +209,52 @@ public:
         return element;
     }
 
+    inline Array<T>* slice(int32_t start = 0) const {
+        return this->slice(start, this->length);
+    }
+
+    /**
+     * Returns a copy of the array containing the elements from start to end
+     * @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
+     */
+    inline Array<T>* slice(int32_t start, int32_t end) const {
+#ifdef SAFE
+        if (start < 0) {
+            start = this->length + start;
+        }
+
+        if (end < 0) {
+            end = this->length + end;
+        }
+
+        if (end < start) {
+            start = end;
+        }
+
+        const int32_t elementsCount = this->length < start ? 0 : end - start;
+#else
+        const int32_t elementsCount = end - start;
+#endif
+
+        Array<T>* result = new Array<T>(elementsCount, nullptr, false);
+
+#ifdef SAFE
+        if (elementsCount > 0) {
+#endif
+            std::copy(this->elements + start, this->elements + end, result->elements);
+#ifdef SAFE
+        }
+#endif
+
+        return result;
+    }
+
     inline Array<T>* splice(int32_t index, int32_t deleteCount, T* elements = nullptr, int32_t elementsCount = 0) {
+#ifdef SAFE
         if (index < 0) {
             index = this->length + index;
         }
 
-#ifdef SAFE
         if (this->length < index) {
             throw std::out_of_range { "Delete index out of range" };
         }
@@ -227,9 +271,8 @@ public:
             this->ensureCapacity(this->length + elementsCount - deleteCount);
         }
 
-        T deletedElements[deleteCount];
-        std::copy(this->elements + index, this->elements + index + deleteCount, deletedElements); // safe the deleted elements
-        Array<T>* deleted = new Array<T>(deleteCount, deletedElements);
+        Array<T>* deleted = new Array<T>(deleteCount, nullptr, false);
+        std::copy(this->elements + index, this->elements + index + deleteCount, deleted->elements); // safe the deleted elements
 
         std::copy(this->elements + index + deleteCount, this->elements + this->length, this->elements + index + elementsCount); // Move the following elements in the right place
         std::copy(elements, elements + elementsCount, this->elements + index); // insert the new elements
@@ -279,14 +322,10 @@ private:
             return;
         }
 
-        if (min > INT32_MAX) {
-            throw std::out_of_range { "Array size exceeded max limit"};
-        }
-
-        int32_t newCapacity = capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR;
+        size_t newCapacity = static_cast<size_t>(capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR);
 
         if (newCapacity < min) {
-            newCapacity = min;
+            newCapacity = static_cast<size_t>(min);
         }
 
         if (newCapacity > INT32_MAX) {
@@ -294,7 +333,7 @@ private:
         }
 
         this->elements = Array<T>::allocateElements(newCapacity, this->elements);
-        this->capacity = newCapacity;
+        this->capacity = static_cast<int32_t>(newCapacity);
     }
 
     /**
@@ -303,16 +342,12 @@ private:
      * @param elements existing pointer to the elements array, in this case, a reallocate is performed
      * @returns the pointer to the allocated array
      */
-    static inline T* allocateElements(int32_t capacity, T* elements = nullptr) {
+    static inline T* allocateElements(size_t capacity, T* elements = nullptr) {
 #ifdef SAFE
-        if (capacity < 0) {
-            throw std::out_of_range("Size needs to be a positive number");
-        }
-#endif
-
         if (capacity > INT32_MAX) {
             throw std::out_of_range { "Array size exceeded max limit"};
         }
+#endif
 
         auto* allocation = std::realloc(elements, capacity * sizeof(T));
 

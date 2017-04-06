@@ -129,6 +129,12 @@ function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: num
                 "invoke_iii": function (index: number, a1: number, a2: number) {
                     return instance.exports.dynCall_iii(index, a1, a2);
                 },
+                "invoke_iiii": function (index: number, a1: number, a2: number, a3: number) {
+                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                },
+                "invoke_iiiii": function (index: number, a1: number, a2: number, a3: number, a4: number) {
+                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                },
                 "invoke_viii": function (index: void, a1: number, a2: number, a3: number) {
                     return instance.exports.dynCall_viii(index, a1, a2, a3);
                 },
