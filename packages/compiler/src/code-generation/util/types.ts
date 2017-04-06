@@ -38,8 +38,11 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         }
     }
 
-    const declaration = type.getSymbol().getDeclarations()[0];
-    throw CodeGenerationError.unsupportedType(declaration, context.typeChecker.typeToString(type));
+    if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
+        throw CodeGenerationError.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
+    }
+
+    throw new Error(`Unsupported type with symbol ${context.typeChecker.typeToString(type)}`);
 }
 
 export function getArrayElementType(arrayType: ts.Type): ts.Type {

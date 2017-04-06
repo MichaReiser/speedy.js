@@ -26,13 +26,18 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
      * Generates a new function declaration with an equal signature but replaced body. The body looks like
      * @code
      * const instance = await loadWasmModule();
-     * return instance.exports.fn.apply(undefined, arguments);
+     * const result = instance.exports.fn.apply(undefined, arguments);
      *
-     * fn is replaced with the name of the function declaration
+     * speedyJsGc(); // only if not disableHeapNukeOnExit is set
+     *
+     * return result;
+     *
+     * fn is replaced with the passed in name
+     * @param name the name of the function in the compilation
      * @param functionDeclaration the function declaration to transform
      * @return the new function declaration that acts as proxy / facade for a wasm function
      */
-    rewriteEntryFunction(functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
+    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
         this.loadWasmFunctionIdentifier = this.loadWasmFunctionIdentifier || ts.createUniqueName("loadWasmModule");
         const signature = this.typeChecker.getSignatureFromDeclaration(functionDeclaration);
 
@@ -46,7 +51,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         // const result = instance.exports.fn(args)
         const wasmExports = ts.createPropertyAccess(instanceIdentifier,"exports");
-        const targetFunction = ts.createPropertyAccess(wasmExports, functionDeclaration.name!);
+        const targetFunction = ts.createPropertyAccess(wasmExports, name);
         const args = signature.parameters.map(parameter => ts.createIdentifier(parameter.name));
         const functionCall = ts.createCall(targetFunction, [], args);
         const castedResult = this.castReturnValue(functionCall, (signature.getReturnType() as ts.TypeReference).typeArguments[0]);

@@ -52,7 +52,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.AsteriskAsteriskToken:
             case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.NumberLike)) {
-                    result = MathObjectReference.pow(left, right, resultType, context).generateIR();
+                    result = MathObjectReference.pow(left, right, resultType, context).generateIR(context);
                 }
 
                 break;
@@ -71,6 +71,15 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                     result = context.builder.createICmpEQ(left.generateIR(context), right.generateIR(context));
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
                     result = context.builder.createFCmpOEQ(left.generateIR(context), right.generateIR(context));
+                }
+
+                break;
+
+            case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                    result = context.builder.createICmpNE(left.generateIR(context), right.generateIR(context));
+                } else if (leftType.flags & ts.TypeFlags.NumberLike) {
+                    result = context.builder.createFCmpONE(left.generateIR(context), right.generateIR(context));
                 }
 
                 break;

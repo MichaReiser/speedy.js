@@ -17,6 +17,7 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {CodeGenerator} from "../code-generator";
 import {DefaultCodeGenerationContextFactory} from "../default-code-generation-context-factory";
 import {FunctionBuilder} from "../util/function-builder";
+import {createResolvedFunctionFromSignature} from "../value/resolved-function";
 import {LLVMEmitSourceFileRewriter} from "./llvm-emit-source-file-rewriter";
 import {PerFileCodeGeneratorSourceFileRewriter} from "./per-file-code-generator-source-file-rewriter";
 import {PerFileSourceFileRewirter} from "./per-file-source-file-rewriter";
@@ -55,15 +56,16 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
         // function is async, therefore, return type is a promise of T. We compile it down to a function just returning T
         const signature = context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
-        const symbol = context.typeChecker.getSymbolAtLocation(functionDeclaration.name!);
-
-        const builder = FunctionBuilder.create(signature, context)
+        const resolvedFunction = createResolvedFunctionFromSignature(signature, context.compilationContext);
+        const mangledName = `_${resolvedFunction.functionName}`;
+        const builder = FunctionBuilder.create(resolvedFunction, context)
+            .name(mangledName)
             .externalLinkage();
 
         builder.define(functionDeclaration);
-        context.addEntryFunction(symbol.name);
+        context.addEntryFunction(mangledName);
 
-        return state.sourceFileRewriter.rewriteEntryFunction(functionDeclaration, state.requestEmitHelper);
+        return state.sourceFileRewriter.rewriteEntryFunction(mangledName, functionDeclaration, state.requestEmitHelper);
     }
 
     completeSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {

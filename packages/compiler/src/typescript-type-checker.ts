@@ -67,6 +67,11 @@ export class TypeScriptTypeChecker implements TypeChecker {
 }
 
 function toSupportedType(type: ts.Type) {
+    // getNonNullableType returns never for void?
+    if (type.flags === ts.TypeFlags.Void) {
+        return type;
+    }
+
     return type.getNonNullableType();
 }
 

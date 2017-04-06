@@ -13,7 +13,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @mathSqrt() {
+define void @_mathSqrt() {
 entry:
   %intValue = alloca i32
   %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4

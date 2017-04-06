@@ -1,4 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
+!/scripts/*.js
+!cli.js
+!karma.conf.js
 *.map
 node_modules
 .idea

@@ -13,7 +13,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @forEmpty() {
+define void @_forEmpty() {
 entry:
   br label %for-body
 
@@ -39,7 +39,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @forWithCondition() {
+define void @_forWithCondition() {
 entry:
   %i = alloca i32
   store i32 0, i32* %i, align 4
@@ -72,7 +72,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @forWithInitializer() {
+define void @_forWithInitializer() {
 entry:
   %i = alloca i32
   store i32 0, i32* %i, align 4
@@ -100,7 +100,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define i1 @isPrime(i32 %x1) {
+define i1 @_isPrime(i32 %x1) {
 entry:
   %i = alloca i32
   %return = alloca i1
@@ -173,7 +173,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @forWithUpdater() {
+define void @_forWithUpdater() {
 entry:
   %i = alloca i32
   %x = alloca i32

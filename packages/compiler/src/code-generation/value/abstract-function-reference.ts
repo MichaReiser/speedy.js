@@ -32,6 +32,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     /**
      * Returns the llvm function for the given resolved function and passed arguments
      * @param resolvedFunction the resolved function
+     * @param context the context
      * @param passedArguments the arguments passed
      */
     protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function;
@@ -48,7 +49,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         return this.invokeResolvedFunction(this.getResolvedFunction(callerContext), args, callerContext);
     }
 
-    private getCoercedCallArguments(args: ts.Node[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {
+    protected getCoercedCallArguments(args: ts.Node[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {
         let values: Value[] = [];
         for (let i = 0; i < Math.min(args.length, resolvedFunction.parameters.length); ++i) {
             const parameter = resolvedFunction.parameters[i];
