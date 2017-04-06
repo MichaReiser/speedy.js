@@ -110,20 +110,35 @@ async function powEqualsNumbers(base: number, exponent: number) {
     return base;
 }
 
-async function orInts(x:  int, y: int) {
+async function binOrInts(x:  int, y: int) {
     "use speedyjs";
     return x | y;
+}
+
+async function binOrNumbers(x:  number, y: number) {
+    "use speedyjs";
+    return x | y;
+}
+
+async function binOrEqualsInts(x:  int, y: int) {
+    "use speedyjs";
+    x |= y;
+    return x;
+}
+
+async function orBooleans(x:  boolean, y: boolean) {
+    "use speedyjs";
+    return x || y;
+}
+
+async function orInts(x:  int, y: int) {
+    "use speedyjs";
+    return x || y;
 }
 
 async function orNumbers(x:  number, y: number) {
     "use speedyjs";
-    return x | y;
-}
-
-async function orEqualsInts(x:  int, y: int) {
-    "use speedyjs";
-    x |= y;
-    return x;
+    return x ||  y;
 }
 
 async function boolsEqual(x: boolean, y: boolean) {
@@ -394,23 +409,46 @@ describe("BinaryExpression", () => {
         });
     });
 
+    describe("||", () => {
+        it("returns the first int value that is truthy", async (cb) => {
+            expect(await orInts(0, 10)).toBe(0 || 10);
+            expect(await orInts(5, 10)).toBe(5 || 10);
+            expect(await orInts(0, 0)).toBe(0 || 0);
+            cb();
+        });
+
+        it("returns the first number value that is truthy", async (cb) => {
+            expect(await orNumbers(0, 3.19)).toBe(0 || 3.19);
+            expect(await orNumbers(0.1, 3.19)).toBe(0.1 || 3.19);
+            expect(await orNumbers(0.0, 0.0)).toBe(0.0 || 0.0);
+            cb();
+        });
+
+        it("returns the first boolean value that is true", async (cb) => {
+            expect(await orBooleans(false, true)).toBe(false || true);
+            expect(await orBooleans(true, true)).toBe(true || true);
+            expect(await orBooleans(false, false)).toBe(false || false);
+            cb();
+        });
+    });
+
     describe("|", () => {
         it("performs a binary or on an int", async (cb) => {
-            const result = await orInts(10, 16);
+            const result = await binOrInts(10, 16);
             expect(result).toBe(10 | 16);
             cb();
         });
 
         it("number | 0 converts a number to an int", async (cb) => {
-            expect(await orNumbers(3.495, 0)).toBe(3.495 | 0);
-            expect(await orNumbers(Number.MAX_SAFE_INTEGER, 0)).toBe(Number.MAX_SAFE_INTEGER | 0);
+            expect(await binOrNumbers(3.495, 0)).toBe(3.495 | 0);
+            expect(await binOrNumbers(Number.MAX_SAFE_INTEGER, 0)).toBe(Number.MAX_SAFE_INTEGER | 0);
             cb();
         });
     });
 
     describe("|=", () => {
         it("performs a binary or and assigns the result to the variable", async (cb) => {
-            expect(await orEqualsInts(10, 16)).toBe(10 | 16);
+            expect(await binOrEqualsInts(10, 16)).toBe(10 | 16);
             cb();
         });
 

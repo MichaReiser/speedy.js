@@ -6,6 +6,7 @@ import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationError} from "../../code-generation-error";
 import {MathObjectReference} from "../value/math-object-reference";
 import {Primitive} from "../value/primitive";
+import {Allocation} from "../value/allocation";
 
 function isAssignment(operatorToken: ts.BinaryOperatorToken) {
     return operatorToken.kind === ts.SyntaxKind.EqualsToken ||
@@ -64,6 +65,29 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const rhsIntValue = Primitive.toInt32(right, rightType, intType, context).generateIR();
                 result = context.builder.createOr(lhsIntValue, rhsIntValue);
 
+                break;
+
+            case ts.SyntaxKind.BarBarToken:
+                const orResult = Allocation.createInEntryBlock(resultType, context, "orResult");
+                const leftValue = left.generateIR(context);
+                orResult.generateAssignmentIR(leftValue, context);
+
+                const falseBlock = llvm.BasicBlock.create(context.llvmContext, "orCase");
+                const successorBlock = llvm.BasicBlock.create(context.llvmContext, "orSuccessor");
+                const firstTrue = Primitive.toBoolean(leftValue, leftType, context);
+
+                context.builder.createCondBr(firstTrue, successorBlock, falseBlock);
+
+                context.scope.enclosingFunction.addBasicBlock(falseBlock);
+                context.builder.setInsertionPoint(falseBlock);
+
+                orResult.generateAssignmentIR(right, context);
+                context.builder.createBr(successorBlock);
+
+                context.scope.enclosingFunction.addBasicBlock(successorBlock);
+                context.builder.setInsertionPoint(successorBlock);
+
+                result = orResult.generateIR(context);
                 break;
 
             case ts.SyntaxKind.EqualsEqualsEqualsToken:
