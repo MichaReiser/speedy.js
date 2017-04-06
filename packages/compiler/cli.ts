@@ -19,6 +19,7 @@ interface CommandLineArguments extends IExportedCommand {
     disableHeapNukeOnExit?: boolean;
     exposeGc?: boolean;
     exportGc?: boolean;
+    optimization?: boolean;
     settings: {
         TOTAL_MEMORY?: number;
         TOTAL_STACK?: number;
@@ -43,6 +44,7 @@ function parseCommandLine(): CommandLineArguments {
         .option("--expose-gc", "Exposes the speedy js garbage collector in the module as speedyJsGc")
         .option("--export-gc", "Exposes and exports the speedy js garbage collector as the symbol speedyJsGc")
         .option("--disable-heap-nuke-on-exit", "Disables nuking of the heap prior to the exit of the entry function (its your responsible to call the gc in this case!)")
+        .option("--no-optimization")
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);
 
@@ -88,6 +90,7 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
     compilerOptions.exposeGc = commandLine.exposeGc;
     compilerOptions.exportGc = commandLine.exportGc;
     compilerOptions.disableHeapNukeOnExit = commandLine.disableHeapNukeOnExit;
+    compilerOptions.optimizationLevel = !commandLine.optimization ? "0" : undefined;
 
     return { rootFileNames, compilerOptions: initializeCompilerOptions(compilerOptions) };
 }

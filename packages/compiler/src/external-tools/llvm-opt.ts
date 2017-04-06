@@ -3,7 +3,7 @@ import {execLLVM} from "./tools";
 
 const LOG = debug("external-tools/llvm-opt");
 const EXECUTABLE_NAME = "opt";
-const OPTIMIZATIONS = "-strip-debug -disable-verify -internalize -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false -O3";
+const OPTIMIZATIONS = "-strip-debug -disable-verify -internalize -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false";
 const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,__errno_location,memcpy,memmove,memset,__cxa_can_catch,__cxa_is_pointer_type";
 
 /**
@@ -13,12 +13,12 @@ const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,__errno_location,memcpy,memmove,m
  * @param optimizedFileName the name of the target file
  * @returns the name of the optimized file
  */
-export function optimize(filename: string, publicFunctions: string[], optimizedFileName: string) {
+export function optimize(filename: string, publicFunctions: string[], optimizedFileName: string, level: string) {
     const publicApi = publicFunctions.concat(DEFAULT_PUBLIC).join(",");
 
     LOG(`Optimizing file ${filename}`);
     // child_process.execSync(`opt ${bcFileName} -o ${bcFileName} `);
-    execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}" -internalize-public-api-list="${publicApi}" ${OPTIMIZATIONS}`);
+    execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}" -internalize-public-api-list="${publicApi}" ${OPTIMIZATIONS} -O${level}`);
 
     return optimizedFileName;
 }

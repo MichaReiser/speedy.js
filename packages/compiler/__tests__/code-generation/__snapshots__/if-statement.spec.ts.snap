@@ -78,7 +78,7 @@ entry:
   store double %y2, double* %y, align 8
   %x3 = load double, double* %x, align 8
   %y4 = load double, double* %y, align 8
-  %0 = fcmp ult double %x3, %y4
+  %0 = fcmp olt double %x3, %y4
   br i1 %0, label %then, label %if-successor
 
 then:                                             ; preds = %entry
