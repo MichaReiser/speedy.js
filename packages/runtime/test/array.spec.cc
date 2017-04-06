@@ -419,6 +419,114 @@ TEST_F(ArrayTests, shift_throws_if_the_array_is_empty) {
 }
 
 // -----------------------------------------
+// slice
+// -----------------------------------------
+TEST_F(ArrayTests, slice_returns_a_copy_of_the_array) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice();
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 5);
+    EXPECT_EQ(copy->get(0), 1);
+    EXPECT_EQ(copy->get(1), 2);
+    EXPECT_EQ(copy->get(2), 3);
+    EXPECT_EQ(copy->get(3), 4);
+    EXPECT_EQ(copy->get(4), 5);
+
+    delete copy;
+}
+
+TEST_F(ArrayTests, slice_returns_a_subset_starting_from_the_specified_start) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice(2);
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 3);
+    EXPECT_EQ(copy->get(0), 3);
+    EXPECT_EQ(copy->get(1), 4);
+    EXPECT_EQ(copy->get(2), 5);
+
+    delete copy;
+}
+
+TEST_F(ArrayTests, slice_returns_the_subset_in_between_start_and_end) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice(1, 3);
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 2);
+    EXPECT_EQ(copy->get(0), 2);
+    EXPECT_EQ(copy->get(1), 3);
+
+    delete copy;
+}
+
+TEST_F(ArrayTests, slice_with_a_start_larger_than_the_array_returns_an_empty_array) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice(10, 15);
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 0);
+
+    delete copy;
+}
+
+TEST_F(ArrayTests, slice_with_a_negative_start_computes_the_start_from_the_end) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice(-2);
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 2);
+    EXPECT_EQ(copy->get(0), 4);
+    EXPECT_EQ(copy->get(1), 5);
+
+    delete copy;
+}
+
+TEST_F(ArrayTests, slice_with_a_negative_end_computes_the_end_from_the_end) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice(2, -1);
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 2);
+    EXPECT_EQ(copy->get(0), 3);
+    EXPECT_EQ(copy->get(1), 4);
+
+    delete copy;
+}
+
+TEST_F(ArrayTests, slice_returns_an_empty_array_if_start_is_larger_than_the_end) {
+    double elements[5] = {1, 2, 3, 4, 5};
+    array = new Array<double>(5, elements);
+
+    // act
+    Array<double>* copy = array->slice(3, 1);
+
+    EXPECT_NE(&copy, &array);
+    EXPECT_EQ(copy->size(), 0);
+
+    delete copy;
+}
+
+// -----------------------------------------
 // splice
 // -----------------------------------------
 TEST_F(ArrayTests, splice_removes_the_number_of_elements) {

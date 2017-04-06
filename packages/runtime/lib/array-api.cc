@@ -221,6 +221,57 @@ DLL_PUBLIC ALWAYS_INLINE void* ArrayIPv_shift(Array<void*>* array) {
 }
 
 //---------------------------------------------------------------------------------
+// slice
+//---------------------------------------------------------------------------------
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_slice(Array<bool>* array) {
+    return array->slice();
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_slicei(Array<bool>* array, int32_t start) {
+    return array->slice(start);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_sliceii(Array<bool>* array, int32_t start, int32_t end) {
+    return array->slice(start, end);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_slice(Array<int32_t>* array) {
+    return array->slice();
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_slicei(Array<int32_t>* array, int32_t start) {
+    return array->slice(start);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_sliceii(Array<int32_t>* array, int32_t start, int32_t end) {
+    return array->slice(start, end);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_slice(Array<double>* array) {
+    return array->slice();
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_slicei(Array<double>* array, int32_t start) {
+    return array->slice(start);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_sliceii(Array<double>* array, int32_t start, int32_t end) {
+    return array->slice(start, end);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_slice(Array<void*>* array) {
+    return array->slice();
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_slicei(Array<void*>* array, int32_t start) {
+    return array->slice(start);
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sliceii(Array<void*>* array, int32_t start, int32_t end) {
+    return array->slice(start, end);
+}
+
+//---------------------------------------------------------------------------------
 // splice
 //---------------------------------------------------------------------------------
 

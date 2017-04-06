@@ -205,6 +205,33 @@ public:
         return element;
     }
 
+    inline Array<T>* slice(int32_t start = 0) {
+        return this->slice(start, this->length);
+    }
+
+    /**
+     * Returns a copy of the array containing the elements from start to end
+     * @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
+     */
+    inline Array<T>* slice(int32_t start, int32_t end) {
+        if (start < 0) {
+            start = this->length + start;
+        }
+
+        if (end < 0) {
+            end = this->length + end;
+        }
+
+        if (end < start) {
+            start = end;
+        }
+
+        int32_t elementsCount = this->length < start ? 0 : end - start;
+        T elements[elementsCount];
+        std::copy(this->elements + start, this->elements + end, elements);
+        return new Array<T>(elementsCount, elements);
+    }
+
     inline Array<T>* splice(int32_t index, int32_t deleteCount, T* elements = nullptr, int32_t elementsCount = 0) {
         if (index < 0) {
             index = this->length + index;

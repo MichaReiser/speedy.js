@@ -43,6 +43,7 @@ export class ArrayReference extends BuiltInObjectReference {
             case "push":
             case "pop":
             case "shift":
+            case "slice":
             case "splice":
                 return UnresolvedMethodReference.createRuntimeMethod(this, signatures, context);
             default:
