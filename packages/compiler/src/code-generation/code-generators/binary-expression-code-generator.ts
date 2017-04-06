@@ -40,6 +40,29 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         let result: llvm.Value | undefined;
 
         switch (binaryExpression.operatorToken.kind) {
+            case ts.SyntaxKind.AmpersandAmpersandToken: {
+                const andResult = Allocation.createInEntryBlock(resultType, context, "andResult");
+                const leftValue = left.generateIR(context);
+                andResult.generateAssignmentIR(leftValue, context);
+
+                const firstCondition = Primitive.toBoolean(leftValue, leftType, context);
+                const trueBlock = llvm.BasicBlock.create(context.llvmContext, "trueBranch");
+                const successor = llvm.BasicBlock.create(context.llvmContext, "andSuccessor");
+                context.builder.createCondBr(firstCondition, trueBlock, successor);
+
+                context.scope.enclosingFunction.addBasicBlock(trueBlock);
+                context.builder.setInsertionPoint(trueBlock);
+                andResult.generateAssignmentIR(right, context);
+
+                context.builder.createBr(successor);
+                context.scope.enclosingFunction.addBasicBlock(successor);
+                context.builder.setInsertionPoint(successor);
+
+                result = andResult.generateIR(context);
+
+                break;
+            }
+
             case ts.SyntaxKind.AsteriskToken:
             case ts.SyntaxKind.AsteriskEqualsToken:
                 if (leftType.flags & ts.TypeFlags.IntLike) {

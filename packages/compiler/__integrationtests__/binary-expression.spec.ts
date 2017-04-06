@@ -141,6 +141,21 @@ async function orNumbers(x:  number, y: number) {
     return x ||  y;
 }
 
+async function andBooleans(x:  boolean, y: boolean, z: boolean) {
+    "use speedyjs";
+    return x && y && z;
+}
+
+async function andInts(x:  int, y: int, z: int) {
+    "use speedyjs";
+    return x && y && z;
+}
+
+async function andNumbers(x:  number, y: number, z: number) {
+    "use speedyjs";
+    return x &&  y && z;
+}
+
 async function boolsEqual(x: boolean, y: boolean) {
     "use speedyjs";
     return x === y;
@@ -428,6 +443,32 @@ describe("BinaryExpression", () => {
             expect(await orBooleans(false, true)).toBe(false || true);
             expect(await orBooleans(true, true)).toBe(true || true);
             expect(await orBooleans(false, false)).toBe(false || false);
+            cb();
+        });
+    });
+
+    describe("&&", () => {
+        it("returns the first not truthy value for int values or the last if all values are truthy", async (cb) => {
+            expect(await andInts(0, 1, 2)).toBe(0 && 1 && 2);
+            expect(await andInts(1, 0, 2)).toBe(1 && 0 && 2);
+            expect(await andInts(1, 2, 0)).toBe(1 && 2 && 0);
+            expect(await andInts(1, 2, 3)).toBe(1 && 2 && 3);
+            cb();
+        });
+
+        it("returns the first not truthy number value or the last if all values are truthy", async (cb) => {
+            expect(await andNumbers(0, 0.1, 0.2)).toBe(0 && 0.1 && 0.2);
+            expect(await andNumbers(0.1, 0, 0.2)).toBe(0.1 && 0 && 0.2);
+            expect(await andNumbers(0.1, 0.2, 0)).toBe(0.1 && 0.2 && 0);
+            expect(await andNumbers(0.1, 0.2, 0.3)).toBe(0.1 && 0.2 && 0.3);
+            cb();
+        });
+
+        it("returns false if any value is false or true if all values are true", async (cb) => {
+            expect(await andBooleans(false, true, true)).toBe(false && true && true);
+            expect(await andBooleans(true, false, true)).toBe(true && false && true);
+            expect(await andBooleans(true, true, false)).toBe(true && true && false);
+            expect(await andBooleans(true, true, true)).toBe(true && true && true);
             cb();
         });
     });

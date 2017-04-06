@@ -60,6 +60,69 @@ entry:
 "
 `;
 
+exports[`BinaryExpression && 1`] = `
+"; ModuleID = 'binary-expression/&&.ts'
+source_filename = \\"binary-expression/&&.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @_ampersandAmpersand() {
+entry:
+  %andResult10 = alloca i32
+  %andResult6 = alloca i32
+  %andResult2 = alloca i1
+  %andResult = alloca i1
+  %six = alloca i32
+  store i32 6, i32* %six, align 4
+  store i1 true, i1* %andResult, align 1
+  br i1 true, label %trueBranch, label %andSuccessor
+
+trueBranch:                                       ; preds = %entry
+  store i1 true, i1* %andResult, align 1
+  br label %andSuccessor
+
+andSuccessor:                                     ; preds = %trueBranch, %entry
+  %andResult1 = load i1, i1* %andResult, align 1
+  store i1 %andResult1, i1* %andResult2, align 1
+  br i1 %andResult1, label %trueBranch3, label %andSuccessor4
+
+trueBranch3:                                      ; preds = %andSuccessor
+  store i1 false, i1* %andResult2, align 1
+  br label %andSuccessor4
+
+andSuccessor4:                                    ; preds = %trueBranch3, %andSuccessor
+  %andResult5 = load i1, i1* %andResult2, align 1
+  store i32 10, i32* %andResult6, align 4
+  br i1 true, label %trueBranch7, label %andSuccessor8
+
+trueBranch7:                                      ; preds = %andSuccessor4
+  store i32 3, i32* %andResult6, align 4
+  br label %andSuccessor8
+
+andSuccessor8:                                    ; preds = %trueBranch7, %andSuccessor4
+  %andResult9 = load i32, i32* %andResult6, align 4
+  store i32 %andResult9, i32* %andResult10, align 4
+  %andResult9AsBool = icmp ne i32 %andResult9, 0
+  br i1 %andResult9AsBool, label %trueBranch11, label %andSuccessor12
+
+trueBranch11:                                     ; preds = %andSuccessor8
+  store i32 1, i32* %andResult10, align 4
+  br label %andSuccessor12
+
+andSuccessor12:                                   ; preds = %trueBranch11, %andSuccessor8
+  %andResult13 = load i32, i32* %andResult10, align 4
+  ret void
+}
+"
+`;
+
 exports[`BinaryExpression * 1`] = `
 "; ModuleID = 'binary-expression/*.ts'
 source_filename = \\"binary-expression/*.ts\\"
