@@ -80,13 +80,13 @@ module.exports = function (config) {
             sl_chrome_dev: {
                 base: 'SauceLabs',
                 browserName: 'chrome',
-                platform: 'Windows 10',
+                platform: 'Windows 8.1',
                 version: 'dev'
             },
             sl_firefox: {
                 base: 'SauceLabs',
                 browserName: 'firefox',
-                version: "beta" // latest stable is v51 that has no web assembly support
+                version: "52"
             }
         };
 
