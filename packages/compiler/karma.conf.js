@@ -30,7 +30,7 @@ module.exports = function (config) {
             "__integrationtests__/index.js": ["webpack", "sourcemap"]
         },
 
-        captureTimeout: 60000,
+        captureTimeout: 120000,
         browserNoActivityTimeout: 120000,
 
         webpack: {
@@ -77,16 +77,16 @@ module.exports = function (config) {
 
     if (travis) {
         const customLaunchers = {
-            sl_chrome_dev: {
-                base: 'SauceLabs',
-                browserName: 'chrome',
-                platform: 'Windows 10',
-                version: 'dev'
-            },
+            // sl_chrome_dev: {
+            //     base: 'SauceLabs',
+            //     browserName: 'chrome',
+            //     platform: 'Windows 8.1',
+            //     version: 'dev'
+            // },
             sl_firefox: {
                 base: 'SauceLabs',
                 browserName: 'firefox',
-                version: "beta" // latest stable is v51 that has no web assembly support
+                version: "52"
             }
         };
 
