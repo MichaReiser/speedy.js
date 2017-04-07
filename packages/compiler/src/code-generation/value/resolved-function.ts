@@ -171,7 +171,7 @@ function isInstanceMethod(signature: ts.Signature) {
 }
 
 function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeChecker: TypeChecker) {
-    if (declaration.kind === ts.SyntaxKind.ConstructSignature) {
+    if (declaration.kind === ts.SyntaxKind.ConstructSignature || declaration.kind === ts.SyntaxKind.Constructor) {
         return "constructor";
     } else {
         assert(declaration.name, "Anonymous functions are not supported");

@@ -23,12 +23,12 @@ entry:
   store { { [24 x i8]* }*, double, double }* %constructorReturnValue, { { [24 x i8]* }*, double, double }** %instance, align 4
   %instance1 = load { { [24 x i8]* }*, double, double }*, { { [24 x i8]* }*, double, double }** %instance, align 4
   %instance2 = load { { [24 x i8]* }*, double, double }*, { { [24 x i8]* }*, double, double }** %instance, align 4
-  %0 = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance1, i32 0, i32 1
-  %x = load double, double* %0, align 8
-  %1 = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance2, i32 0, i32 2
-  %y = load double, double* %1, align 8
-  %2 = fadd double %x, %y
-  store double %2, double* %return, align 8
+  %\\"&x\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance1, i32 0, i32 1
+  %x = load double, double* %\\"&x\\", align 8
+  %\\"&y\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance2, i32 0, i32 2
+  %y = load double, double* %\\"&y\\", align 8
+  %0 = fadd double %x, %y
+  store double %0, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
@@ -38,13 +38,74 @@ returnBlock:                                      ; preds = %entry
 
 define internal { { [24 x i8]* }*, double, double }* @\\"ClassOnlyWithAttributes$11constructor\\"() {
 entry:
-  %this = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %object = bitcast i4* %this to { { [24 x i8]* }*, double, double }*
-  %x = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %object, i32 0, i32 1
-  store double 0.000000e+00, double* %x
-  %y = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %object, i32 0, i32 2
-  store double 0.000000e+00, double* %y
-  ret { { [24 x i8]* }*, double, double }* %object
+  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
+  %this = bitcast i4* %\\"thisVoid*\\" to { { [24 x i8]* }*, double, double }*
+  %\\"&x\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %this, i32 0, i32 1
+  store double 0.000000e+00, double* %\\"&x\\"
+  %\\"&y\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %this, i32 0, i32 2
+  store double 0.000000e+00, double* %\\"&y\\"
+  ret { { [24 x i8]* }*, double, double }* %this
+}
+
+declare i4* @malloc(i32)
+"
+`;
+
+exports[`Classes class-with-constructor 1`] = `
+"; ModuleID = 'classes/class-with-constructor.ts'
+source_filename = \\"classes/class-with-constructor.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@ClassWithConstructor_name = private unnamed_addr constant [21 x i8] c\\"ClassWithConstructor\\\\00\\"
+@ClassWithConstructor_type_descriptor = private constant { [21 x i8]* } { [21 x i8]* @ClassWithConstructor_name }
+
+define double @_classWithConstructor() {
+entry:
+  %instance = alloca { { [21 x i8]* }*, double, double }*
+  %return = alloca double
+  %constructorReturnValue = call { { [21 x i8]* }*, double, double }* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double 1.000000e+01, double 2.000000e+01)
+  store { { [21 x i8]* }*, double, double }* %constructorReturnValue, { { [21 x i8]* }*, double, double }** %instance, align 4
+  %instance1 = load { { [21 x i8]* }*, double, double }*, { { [21 x i8]* }*, double, double }** %instance, align 4
+  %instance2 = load { { [21 x i8]* }*, double, double }*, { { [21 x i8]* }*, double, double }** %instance, align 4
+  %\\"&x\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %instance1, i32 0, i32 1
+  %x = load double, double* %\\"&x\\", align 8
+  %\\"&y\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %instance2, i32 0, i32 2
+  %y = load double, double* %\\"&y\\", align 8
+  %0 = fadd double %x, %y
+  store double %0, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return3 = load double, double* %return, align 8
+  ret double %return3
+}
+
+define internal { { [21 x i8]* }*, double, double }* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double %x1, double %y2) {
+entry:
+  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
+  %this = bitcast i4* %\\"thisVoid*\\" to { { [21 x i8]* }*, double, double }*
+  %\\"&x\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %this, i32 0, i32 1
+  store double 0.000000e+00, double* %\\"&x\\"
+  %\\"&y\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %this, i32 0, i32 2
+  store double 0.000000e+00, double* %\\"&y\\"
+  %x = alloca double
+  store double %x1, double* %x, align 8
+  %y = alloca double
+  store double %y2, double* %y, align 8
+  %x3 = load double, double* %x, align 8
+  %\\"&x4\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %this, i32 0, i32 1
+  store double %x3, double* %\\"&x4\\", align 8
+  %y5 = load double, double* %y, align 8
+  %\\"&y6\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %this, i32 0, i32 2
+  store double %y5, double* %\\"&y6\\", align 8
+  ret { { [21 x i8]* }*, double, double }* %this
 }
 
 declare i4* @malloc(i32)

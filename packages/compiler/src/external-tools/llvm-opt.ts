@@ -18,7 +18,6 @@ export function optimize(filename: string, publicFunctions: string[], optimizedF
     const publicApi = publicFunctions.concat(DEFAULT_PUBLIC).join(",");
 
     LOG(`Optimizing file ${filename}`);
-    // child_process.execSync(`opt ${bcFileName} -o ${bcFileName} `);
     execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}" -internalize-public-api-list="${publicApi}" ${OPTIMIZATIONS} -O${level}`);
 
     return optimizedFileName;

@@ -8,13 +8,15 @@ import {FunctionDefinitionBuilder} from "../util/function-definition-builder";
 import {sizeof, toLLVMType} from "../util/types";
 
 import {AbstractFunctionReference} from "./abstract-function-reference";
-import {ClassReference} from "./class-reference";
+import {ObjectReference} from "./object-reference";
 import {createResolvedFunction, createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
+import {SpeedyJSClassReference} from "./speedy-js-class-reference";
+import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
 import {Value} from "./value";
 
 export class SpeedyJSConstructorFunctionReference extends AbstractFunctionReference {
 
-    static create(signature: ts.Signature, classReference: ClassReference, context: CodeGenerationContext) {
+    static create(signature: ts.Signature, classReference: SpeedyJSClassReference, context: CodeGenerationContext) {
         let resolvedFunction: ResolvedFunction;
 
         if (signature.declaration) {
@@ -51,7 +53,7 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
 class ConstructorFunctionBuilder {
     private _name: string;
 
-    constructor(private resolvedFunction: ResolvedFunction, private classReference: ClassReference, private context: CodeGenerationContext) {
+    constructor(private resolvedFunction: ResolvedFunction, private classReference: SpeedyJSClassReference, private context: CodeGenerationContext) {
         this._name = resolvedFunction.functionName;
     }
 
@@ -80,11 +82,16 @@ class ConstructorFunctionBuilder {
         this.context.builder.setInsertionPoint(entryBlock);
 
         const objectType = this.classReference.getLLVMType(this.classReference.type, this.context);
-        const allocation = this.allocateObjectOnHeap(objectType);
-        // TODO add this this.context.scope.addVariable(this)
-        this.initializeFields(allocation, objectType);
-        this.callUserConstructorFn(declaration);
-        this.context.builder.createRet(allocation);
+        const objectAddress = this.allocateObjectOnHeap(objectType);
+        const objectReference = new SpeedyJSObjectReference(objectAddress, this.classReference.type, this.classReference);
+
+        this.context.enterChildScope();
+        this.context.scope.addVariable(this.classReference.symbol, objectReference);
+
+        this.initializeFields(objectAddress);
+        this.callUserConstructorFn(declaration, objectReference);
+
+        this.context.leaveChildScope();
 
         return declaration;
     }
@@ -93,11 +100,11 @@ class ConstructorFunctionBuilder {
         const pointerType = llvm.Type.getIntNTy(this.context.llvmContext, this.context.module.dataLayout.getPointerSize(0)).getPointerTo();
         const malloc = this.context.module.getOrInsertFunction("malloc", llvm.FunctionType.get(pointerType, [llvm.Type.getInt32Ty(this.context.llvmContext)], false));
 
-        const result = this.context.builder.createCall(malloc, [sizeof(objectType, this.context)], "this");
-        return this.context.builder.createBitCast(result, objectType, "object");
+        const result = this.context.builder.createCall(malloc, [sizeof(objectType, this.context)], "thisVoid*");
+        return this.context.builder.createBitCast(result, objectType, "this");
     }
 
-    private initializeFields(objectAddress: llvm.Value, objectType: llvm.Type) {
+    private initializeFields(objectAddress: llvm.Value) {
         const fields = this.classReference.type.getApparentProperties().filter(property => property.flags & ts.SymbolFlags.Property);
         for (let i = 0; i < fields.length; ++i) {
             const field = fields[i];
@@ -111,18 +118,20 @@ class ConstructorFunctionBuilder {
             }
 
             const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this.classReference.getFieldsOffset() + i);
-            const fieldPointer = this.context.builder.createInBoundsGEP(objectAddress, [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset], field.name);
+            const fieldPointer = this.context.builder.createInBoundsGEP(objectAddress, [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset], `&${field.name}`);
             this.context.builder.createStore(value, fieldPointer, false);
         }
     }
 
-    private callUserConstructorFn(fn: llvm.Function) {
+    private callUserConstructorFn(fn: llvm.Function, objectReference: ObjectReference) {
         if (!this.resolvedFunction.declaration) {
+            this.context.builder.createRet(objectReference.generateIR(this.context));
             return;
         }
 
+
         FunctionDefinitionBuilder.create(fn, this.resolvedFunction, this.context)
-            .omitEntryBlock()
+            .returnValue(objectReference)
             .define(this.resolvedFunction.declaration as ts.MethodDeclaration);
     }
 }

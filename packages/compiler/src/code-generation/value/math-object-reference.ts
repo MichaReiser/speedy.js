@@ -9,6 +9,7 @@ import {createResolvedFunction, createResolvedParameter} from "./resolved-functi
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
+import {Address} from "./address";
 
 /**
  * Wrapper for the built in Math object
@@ -59,7 +60,7 @@ export class MathObjectReference extends BuiltInObjectReference {
     static pow(lhs: Value, rhs: Value, numberType: ts.Type, context: CodeGenerationContext) {
         const mathSymbol = context.compilationContext.builtIns.get("Math");
         const mathObject = context.scope.getVariable(mathSymbol!);
-        const mathType = mathObject.type as ts.ObjectType;
+        const mathType = (mathObject as Address).type as ts.ObjectType;
 
         const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
         const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);

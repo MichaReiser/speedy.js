@@ -1,17 +1,15 @@
 import * as ts from "typescript";
+import {CodeGenerationError} from "../../code-generation-error";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../../code-generation-error";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {Allocation} from "../value/allocation";
-import {ClassReference} from "../value/class-reference";
-import {FunctionReference} from "../value/function-reference";
 import {UnresolvedFunctionReference} from "../value/unresolved-function-reference";
+import {Value} from "../value/value";
 
-class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, FunctionReference | Allocation | ClassReference> {
+class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Value> {
     syntaxKind = ts.SyntaxKind.Identifier;
 
-    generate(identifier: ts.Identifier, context: CodeGenerationContext): FunctionReference | Allocation | ClassReference {
+    generate(identifier: ts.Identifier, context: CodeGenerationContext): Value {
         const symbol = context.typeChecker.getSymbolAtLocation(identifier);
 
         if (symbol.flags & ts.SymbolFlags.Function) {

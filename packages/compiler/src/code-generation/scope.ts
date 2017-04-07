@@ -1,18 +1,19 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as assert from "assert";
-import {Allocation} from "./value/allocation";
+import {Address} from "./value/address";
 import {ClassReference} from "./value/class-reference";
 import {FunctionReference} from "./value/function-reference";
+import {Value} from "./value/value";
 
 /**
  * The lexical scope
  */
 export class Scope {
-    private variables = new Map<ts.Symbol, Allocation>();
+    private variables = new Map<ts.Symbol, Value>();
     private functions = new Map<ts.Symbol, FunctionReference>();
     private classes = new Map<ts.Symbol, ClassReference>();
-    private returnAlloca: Allocation | undefined;
+    private returnAlloca: Address | undefined;
     private retBlock: llvm.BasicBlock | undefined;
     private children: Scope[] = [];
 
@@ -21,11 +22,11 @@ export class Scope {
     /**
      * Stores the function result. Only present in a function that is non void
      */
-    get returnAllocation(): Allocation | undefined {
+    get returnAllocation(): Address | undefined {
         return this.returnAlloca || (this.parent ? this.parent.returnAllocation : undefined);
     }
 
-    set returnAllocation(allocation: Allocation | undefined) {
+    set returnAllocation(allocation: Address | undefined) {
         this.returnAlloca = allocation;
     }
 
@@ -52,7 +53,7 @@ export class Scope {
         return result!;
     }
 
-    addVariable(symbol: ts.Symbol, value: Allocation): void {
+    addVariable(symbol: ts.Symbol, value: Value): void {
         assert(symbol, "symbol is undefined");
         assert(value, "value is undefined");
         assert(!this.variables.has(symbol), `Variable ${symbol.name} is already defined in scope`);
@@ -60,7 +61,7 @@ export class Scope {
         this.variables.set(symbol, value);
     }
 
-    getVariable(symbol: ts.Symbol): Allocation {
+    getVariable(symbol: ts.Symbol): Value {
         assert(symbol, "symbol is undefined");
 
         const variable = this.variables.get(symbol);
@@ -70,18 +71,6 @@ export class Scope {
 
         assert(variable, `variable ${symbol.name} is not defined in scope`);
         return variable!;
-    }
-
-    getNested(symbol: ts.Symbol): Allocation | undefined {
-        if (this.hasVariable(symbol)) {
-            return this.getVariable(symbol);
-        }
-
-        for (const scope of this.children) {
-            return scope.getNested(symbol);
-        }
-
-        return undefined;
     }
 
     getVariables(): ts.Symbol[] {

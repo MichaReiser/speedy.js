@@ -6,7 +6,7 @@ import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationError} from "../../code-generation-error";
 import {MathObjectReference} from "../value/math-object-reference";
 import {Primitive} from "../value/primitive";
-import {Allocation} from "../value/allocation";
+import {Address} from "../value/address";
 
 function isAssignment(operatorToken: ts.BinaryOperatorToken) {
     return operatorToken.kind === ts.SyntaxKind.EqualsToken ||
@@ -40,7 +40,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
 
         switch (binaryExpression.operatorToken.kind) {
             case ts.SyntaxKind.AmpersandAmpersandToken: {
-                const andResult = Allocation.createInEntryBlock(resultType, context, "andResult");
+                const andResult = Address.createAllocationInEntryBlock(resultType, context, "andResult");
                 const leftValue = left.generateIR(context);
                 andResult.generateAssignmentIR(leftValue, context);
 
@@ -97,7 +97,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             }
 
             case ts.SyntaxKind.BarBarToken: {
-                const orResult = Allocation.createInEntryBlock(resultType, context, "orResult");
+                const orResult = Address.createAllocationInEntryBlock(resultType, context, "orResult");
                 const leftValue = left.generateIR(context);
                 orResult.generateAssignmentIR(leftValue, context);
 

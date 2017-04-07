@@ -2,12 +2,12 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {Allocation} from "../value/allocation";
+import {Address} from "../value/address";
 import {ResolvedFunction} from "../value/resolved-function";
+import {Value} from "../value/value";
 
 export class FunctionDefinitionBuilder {
-    private emitReturnStatement = true;
-
+    private _returnValue: Value | undefined = undefined;
 
     private constructor(private fn: llvm.Function, private resolvedFunction: ResolvedFunction, private context: CodeGenerationContext) {
     }
@@ -17,11 +17,11 @@ export class FunctionDefinitionBuilder {
     }
 
     /**
-     * Tells the builder to not emit the return statement
+     * Sets the value to return at the end of the function
      * @return {FunctionDefinitionBuilder} this for a fluent api
      */
-    omitEntryBlock() {
-        this.emitReturnStatement = false;
+    returnValue(returnValue: Value) {
+        this._returnValue = returnValue;
         return this;
     }
 
@@ -37,19 +37,15 @@ export class FunctionDefinitionBuilder {
         this.context.builder.setInsertionPoint(entryBlock);
         this.context.scope.returnBlock = returnBlock;
 
-        if (!(this.resolvedFunction.returnType.flags & ts.TypeFlags.Void)) {
-            this.context.scope.returnAllocation = Allocation.create(this.resolvedFunction.returnType, this.context, "return");
+        if (!(this.resolvedFunction.returnType.flags & ts.TypeFlags.Void) && !this._returnValue) {
+            this.context.scope.returnAllocation = Address.create(this.resolvedFunction.returnType, this.context, "return");
         }
 
         this.allocateArguments();
         this.context.generate(declaration.body!);
 
         this.setBuilderToReturnBlock(returnBlock);
-
-        if (this.emitReturnStatement) {
-            // Add Return Statement
-            this.generateReturnStatement();
-        }
+        this.generateReturnStatement();
 
         this.context.leaveChildScope();
 
@@ -59,6 +55,8 @@ export class FunctionDefinitionBuilder {
     private generateReturnStatement() {
         if (this.context.scope.returnAllocation) {
             this.context.builder.createRet(this.context.scope.returnAllocation.generateIR(this.context));
+        } else if (this._returnValue) {
+            this.context.builder.createRet(this._returnValue.generateIR(this.context));
         } else {
             this.context.builder.createRetVoid();
         }
@@ -85,7 +83,7 @@ export class FunctionDefinitionBuilder {
         const args = this.fn.getArguments();
         for (let i = 0; i < this.resolvedFunction.parameters.length; ++i) {
             const parameter = this.resolvedFunction.parameters[i];
-            const allocation = Allocation.create(parameter.type, this.context, parameter.name);
+            const allocation = Address.create(parameter.type, this.context, parameter.name);
 
             // TODO wrap varargs
             allocation.generateAssignmentIR(args[i], this.context);

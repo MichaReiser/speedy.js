@@ -37,6 +37,13 @@ async function createInstanceAndAssignValuesToAttributes(x: number, y: number) {
     return instance.x + instance.y;
 }
 
+async function callsInstanceConstructor(x: number, y: number) {
+    "use speedyjs";
+
+    const instance = new ClassWithConstructor(x, y);
+    return instance.x + instance.y;
+}
+
 describe("Classes", () => {
     describe("new", () => {
         it("creates a new instance using the default constructor", async (cb) => {
@@ -46,6 +53,11 @@ describe("Classes", () => {
 
         it("the fields are default initialized", async (cb) => {
             expect(await createInstanceOfClassWithDefaultInitializedFields()).toEqual(0);
+            cb();
+        });
+
+        it("calls the constructor of the instance", async (cb) => {
+            expect(await callsInstanceConstructor(10, 20)).toBe(30);
             cb();
         });
     });

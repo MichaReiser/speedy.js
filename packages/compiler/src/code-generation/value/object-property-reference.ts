@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import {Value, AssignableValue} from "./value";
 import {ObjectReference} from "./object-reference";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Allocation} from "./allocation";
+import {Address} from "./address";
 
 /**
  * Reference to an object property (x.name)
@@ -97,13 +97,13 @@ class ObjectFieldPropertyReference extends ObjectPropertyReference {
     }
 
     protected getValue(context: CodeGenerationContext): Value {
-        const alignment = Allocation.getPreferredAlignment(this.propertyType, context);
+        const alignment = Address.getPreferredAlignment(this.propertyType, context);
         const value = context.builder.createAlignedLoad(this.getFieldAddress(context), alignment, this.property.name);
         return context.value(value, this.propertyType);
     }
 
     protected setValue(value: Value, context: CodeGenerationContext): void {
-        const alignment = Allocation.getPreferredAlignment(this.propertyType, context);
+        const alignment = Address.getPreferredAlignment(this.propertyType, context);
         context.builder.createAlignedStore(value.generateIR(context), this.getFieldAddress(context), alignment);
     }
 
@@ -113,6 +113,6 @@ class ObjectFieldPropertyReference extends ObjectPropertyReference {
 
     private getFieldAddress(context: CodeGenerationContext) {
         const fieldIndex = llvm.ConstantInt.get(context.llvmContext, this.object.clazz.getFieldsOffset() + this.fieldIndex);
-        return context.builder.createInBoundsGEP(this.object.generateIR(context), [ llvm.ConstantInt.get(context.llvmContext, 0), fieldIndex ]);
+        return context.builder.createInBoundsGEP(this.object.generateIR(context), [ llvm.ConstantInt.get(context.llvmContext, 0), fieldIndex ], `&${this.property.name}`);
     }
 }
