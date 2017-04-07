@@ -162,7 +162,7 @@ function isInstanceMethod(signature: ts.Signature) {
         return false;
     }
 
-    if (signature.getDeclaration().kind === ts.SyntaxKind.MethodSignature) {
+    if (signature.getDeclaration().kind === ts.SyntaxKind.MethodSignature || signature.getDeclaration().kind === ts.SyntaxKind.MethodDeclaration) {
         const modifiers = signature.declaration.modifiers || [] as ts.Modifier[];
         return !modifiers.find(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword);
     }

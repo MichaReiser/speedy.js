@@ -1,11 +1,11 @@
 import * as ts from "typescript";
+import {CompilationContext} from "../../compilation-context";
+import {CodeGenerationContext} from "../code-generation-context";
+import {toLLVMType} from "../util/types";
 
 import {ClassReference} from "./class-reference";
-import {ObjectReference} from "./object-reference";
-import {CodeGenerationContext} from "../code-generation-context";
 import {FunctionReference} from "./function-reference";
-import {CompilationContext} from "../../compilation-context";
-import {toLLVMType} from "../util/types";
+import {ObjectReference} from "./object-reference";
 import {SpeedyJSConstructorFunctionReference} from "./speedyjs-constructor-function-reference";
 import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
 

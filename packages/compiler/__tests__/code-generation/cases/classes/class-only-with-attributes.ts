@@ -1,10 +1,6 @@
 class ClassOnlyWithAttributes {
     x: number;
     y: number;
-
-    distance() {
-        return 2;
-    }
 }
 
 // declare class Test {

@@ -127,7 +127,8 @@ export abstract class BaseNameMangler implements NameMangler {
             let typeArgumentsPostfix = "";
             if (objectType.objectFlags & ts.ObjectFlags.Reference) {
                 const typeArguments = (type as ts.TypeReference).typeArguments;
-                typeArgumentsPostfix = "I" + typeArguments.map(arg => this.typeToCode(arg));
+
+                typeArgumentsPostfix = "I" + (typeArguments || []).map(arg => this.typeToCode(arg));
             }
 
             return `${objectName}${typeArgumentsPostfix}`;

@@ -22,7 +22,8 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
         if (signature.declaration) {
             resolvedFunction = createResolvedFunctionFromSignature(signature, context.compilationContext, classReference.type);
         } else {
-            resolvedFunction = createResolvedFunction("constructor", [], [], signature.getReturnType(), undefined, classReference.type); // TODO find source file?
+            const sourceFile = classReference.type.getSymbol().declarations![0].getSourceFile();
+            resolvedFunction = createResolvedFunction("constructor", [], [], signature.getReturnType(), sourceFile, classReference.type); // TODO find source file?
         }
 
         const declarationContext = context.createChildContext();
@@ -110,9 +111,11 @@ class ConstructorFunctionBuilder {
             const field = fields[i];
             const declaration = field.valueDeclaration as ts.PropertyDeclaration;
 
-            let value;
+            let value: llvm.Value;
             if (declaration.initializer) {
                 value = this.context.generateValue(declaration.initializer).generateIR(this.context);
+            } else if (this.context.compilationContext.compilerOptions.unsafe) {
+                return;
             } else {
                 value = llvm.Constant.getNullValue(toLLVMType(this.context.typeChecker.getTypeAtLocation(declaration), this.context));
             }
@@ -128,7 +131,6 @@ class ConstructorFunctionBuilder {
             this.context.builder.createRet(objectReference.generateIR(this.context));
             return;
         }
-
 
         FunctionDefinitionBuilder.create(fn, this.resolvedFunction, this.context)
             .returnValue(objectReference)

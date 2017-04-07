@@ -92,6 +92,14 @@ export class CodeGenerationError extends Error {
     static unsupportedSyntaxKind(node: ts.Node) {
         return CodeGenerationError.createException(node, diagnostics.UnsupportedSyntaxKind, ts.SyntaxKind[node.kind]);
     }
+
+    static unsupportedProperty(propertyExpression: ts.PropertyAccessExpression) {
+        return CodeGenerationError.createException(propertyExpression, diagnostics.UnsupportedProperty);
+    }
+
+    static unsupportedIndexer(node: ts.ElementAccessExpression) {
+        return CodeGenerationError.createException(node, diagnostics.UnsupportedIndexer);
+    }
 }
 
 const diagnostics = {
@@ -154,5 +162,13 @@ const diagnostics = {
     UnsupportedSyntaxKind: {
         message: "The syntax kind '%s' is not yet supported.",
         code: 100014
+    },
+    UnsupportedProperty: {
+        message: "The kind of property is not yet supported",
+        code: 1000015
+    },
+    UnsupportedIndexer: {
+        message: "The kind of indexer is not yet supported",
+        code: 1000016
     }
 };

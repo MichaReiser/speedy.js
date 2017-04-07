@@ -164,11 +164,20 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     }
 
     private isClassDefined(type: ts.ObjectType) {
-        return type.getProperties().every(property => !!(property.flags & ts.SymbolFlags.Property) ||
-            property.getDeclarations() &&
-            property.getDeclarations().length > 0 &&
-            !!(property.getDeclarations()[0] as ts.MethodDeclaration).body
-        );
+        return type.getProperties().every(property => {
+            if (property.flags & ts.SymbolFlags.Property) {
+                // simple property / field
+                return true;
+            }
+
+            const declarations = property.getDeclarations() || [];
+            if (declarations.length === 0) {
+                return false;
+            }
+
+            const declaration = declarations[0];
+            return declaration.kind === ts.SyntaxKind.MethodDeclaration || (declaration.kind === ts.SyntaxKind.Constructor && !!(declaration as ts.ConstructorDeclaration).body);
+        });
     }
 
     private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node, Value | void> | FallbackCodeGenerator {

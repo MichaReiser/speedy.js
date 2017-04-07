@@ -7,6 +7,7 @@ import {FunctionDefinitionBuilder} from "../util/function-definition-builder";
 import {FunctionFactory} from "./function-factory";
 import {ResolvedFunction} from "./resolved-function";
 import {CodeGenerationContext} from "../code-generation-context";
+import {ObjectReference} from "./object-reference";
 
 /**
  * Function factory for functions marked with "speedyjs"
@@ -25,15 +26,17 @@ export class SpeedyJSFunctionFactory extends FunctionFactory {
         return super.mangleFunctionName(resolvedFunction, typesOfUsedParameters);
     }
 
-    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage: llvm.LinkageTypes, objectType?: ts.ObjectType) {
+    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage: llvm.LinkageTypes, objectReference?: ObjectReference) {
         const declaration = resolvedFunction.declaration as ts.FunctionDeclaration;
         assert(declaration, "Cannot define a function without a declaration");
         assert(declaration.body, "Cannot define a function without a body");
 
-        const fn = super.createFunction(mangledName, resolvedFunction, numberOfArguments, context, linkage, objectType);
+        const fn = super.createFunction(mangledName, resolvedFunction, numberOfArguments, context, linkage, objectReference);
 
         const childContext = context.createChildContext();
-        FunctionDefinitionBuilder.create(fn, resolvedFunction, childContext).define(declaration);
+        FunctionDefinitionBuilder.create(fn, resolvedFunction, childContext)
+            .object(objectReference)
+            .define(declaration);
 
         return fn;
     }

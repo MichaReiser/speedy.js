@@ -13,10 +13,25 @@ class ClassWithConstructor {
     }
 }
 
-async function createInstanceOfClassWithoutConstructor(): Promise<void> {
+class ClassWithMethod {
+    x: number;
+    y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    distanceTo(other: ClassWithMethod) {
+        return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+    }
+}
+
+async function createInstanceOfClassWithoutConstructor() {
     "use speedyjs";
 
-    new DefaultInitializeClassWithAttributesOnly();
+    const instance = new DefaultInitializeClassWithAttributesOnly();
+    return instance.x + instance.y;
 }
 
 async function createInstanceOfClassWithDefaultInitializedFields() {
@@ -44,6 +59,13 @@ async function callsInstanceConstructor(x: number, y: number) {
     return instance.x + instance.y;
 }
 
+async function callsInstanceMethod(x: number, y: number) {
+    const center = new ClassWithMethod(0, 0);
+    const other = new ClassWithMethod(x, y);
+
+    return center.distanceTo(other);
+}
+
 describe("Classes", () => {
     describe("new", () => {
         it("creates a new instance using the default constructor", async (cb) => {
@@ -59,6 +81,13 @@ describe("Classes", () => {
         it("calls the constructor of the instance", async (cb) => {
             expect(await callsInstanceConstructor(10, 20)).toBe(30);
             cb();
+        });
+    });
+
+    describe("methods", () => {
+        it("calls the method with the this argument", async (cb) => {
+             expect(await callsInstanceMethod(3, 4)).toBe(5);
+             cb();
         });
     });
 

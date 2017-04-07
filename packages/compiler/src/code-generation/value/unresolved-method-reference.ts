@@ -45,7 +45,7 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
     getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {
         const numberOfArguments = passedArguments ? passedArguments.length : resolvedFunction.parameters.length;
 
-        return this.llvmFunctionFactory.getOrCreateInstanceMethod(resolvedFunction, numberOfArguments, context, this.linkage);
+        return this.llvmFunctionFactory.getOrCreateInstanceMethod(this.object, resolvedFunction, numberOfArguments, context, this.linkage);
     }
 
     protected getCallArguments(resolvedFunction: ResolvedFunction, passedArguments: Value[], callerContext: CodeGenerationContext): llvm.Value[] {
