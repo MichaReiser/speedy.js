@@ -30,7 +30,7 @@ module.exports = function (config) {
             "__integrationtests__/index.js": ["webpack", "sourcemap"]
         },
 
-        captureTimeout: 60000,
+        captureTimeout: 120000,
         browserNoActivityTimeout: 120000,
 
         webpack: {
