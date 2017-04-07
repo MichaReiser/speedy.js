@@ -117,11 +117,12 @@ export class Scope {
         return fun!;
     }
 
-    addClass(classReference: ClassReference) {
+    addClass(symbol: ts.Symbol, classReference: ClassReference) {
+        assert(symbol, "symbol is undefined");
         assert(classReference, "class reference is undefined");
-        assert(!this.classes.has(classReference.symbol), `class ${classReference.name} is already defined`);
+        assert(!this.classes.has(symbol), `class ${symbol.name} is already defined`);
 
-        this.classes.set(classReference.symbol, classReference);
+        this.classes.set(symbol, classReference);
     }
 
     getClass(symbol: ts.Symbol): ClassReference {

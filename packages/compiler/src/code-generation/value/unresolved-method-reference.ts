@@ -7,6 +7,7 @@ import {ObjectReference} from "./object-reference";
 import {ResolvedFunction} from "./resolved-function";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
+import {SpeedyJSFunctionFactory} from "./speedyjs-function-factory";
 
 /**
  * Reference to a possibly overloaded instance method
@@ -24,6 +25,17 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
         const reference = new UnresolvedMethodReference(object, signatures, new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext)));
         reference.linkage = llvm.LinkageTypes.ExternalLinkage;
         return reference;
+    }
+
+    /**
+     * Creates a reference to a method that has the specified overloads
+     * @param object the object to which the method belongs
+     * @param signatures the signatures of the method
+     * @param context the context
+     * @return the reference to the method
+     */
+    static createMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext) {
+        return new UnresolvedMethodReference(object, signatures, new SpeedyJSFunctionFactory(context.compilationContext));
     }
 
     protected constructor(private object: ObjectReference, signatures: ts.Signature[], llvmFunctionFactory: FunctionFactory) {

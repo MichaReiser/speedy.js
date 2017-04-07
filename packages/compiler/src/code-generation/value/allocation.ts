@@ -29,8 +29,10 @@ export class Allocation implements AssignableValue {
 
     static createAllocaInstInEntryBlock(type: llvm.Type, scope: Scope, name?: string) {
         const fn = scope.enclosingFunction;
-        const entryBlockBuilder = new llvm.IRBuilder(fn.getEntryBlock());
+        const entryBlock = fn.getEntryBlock();
+        assert(entryBlock, "The function requires an entry block");
 
+        const entryBlockBuilder = new llvm.IRBuilder(fn.getEntryBlock()!);
         return entryBlockBuilder.createAlloca(type, undefined, name);
     }
 
@@ -44,7 +46,7 @@ export class Allocation implements AssignableValue {
         return context.builder.createAlignedLoad(address, alignment, name);
     }
 
-    private static getPreferredAlignment(type: ts.Type, context: CodeGenerationContext) {
+    static getPreferredAlignment(type: ts.Type, context: CodeGenerationContext) {
         return context.module.dataLayout.getPrefTypeAlignment(toLLVMType(type, context));
     }
 

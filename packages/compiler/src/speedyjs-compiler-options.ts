@@ -63,7 +63,7 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
      * The optimization level passed to llvm
      * @default "3"
      */
-    optimizationLevel: string;
+    optimizationLevel: "0" | "1" | "2" | "3" | "z" | "s";
 }
 
 /**

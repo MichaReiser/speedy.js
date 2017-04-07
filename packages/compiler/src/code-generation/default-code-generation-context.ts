@@ -11,6 +11,8 @@ import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {Primitive} from "./value/primitive";
 import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {Value} from "./value/value";
+import {SpeedyJSClassReference} from "./value/speedy-js-class-reference";
+import {ClassReference} from "./value/class-reference";
 
 const log = debug("code-generation/default-code-generation-context");
 
@@ -127,8 +129,10 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         }
 
         if (type.flags & ts.TypeFlags.Object) {
-            const classReference = this.scope.getClass(symbol);
-            return classReference.objectFor(value, type as ts.ObjectType, this);
+            const classReference = this.resolveClass(type as ts.ObjectType);
+            if (classReference) {
+                return classReference.objectFor(value, type as ts.ObjectType, this);
+            }
         }
 
         throw Error(`Unable to convert llvm value of type ${this.typeChecker.typeToString(type)} to Value object.`);
@@ -143,6 +147,28 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
         }
 
         return this.value(returnValue, returnType);
+    }
+
+    resolveClass(type: ts.ObjectType, symbol = type.getSymbol()): ClassReference | undefined {
+        if (this.scope.hasClass(symbol)) {
+            return this.scope.getClass(symbol);
+        }
+
+        if (symbol.flags & ts.SymbolFlags.Class && this.isClassDefined(type)) {
+            const reference = SpeedyJSClassReference.create(type as ts.ObjectType, this);
+            this.scope.addClass(symbol, reference);
+            return reference;
+        }
+
+        return undefined;
+    }
+
+    private isClassDefined(type: ts.ObjectType) {
+        return type.getProperties().every(property => !!(property.flags & ts.SymbolFlags.Property) ||
+            property.getDeclarations() &&
+            property.getDeclarations().length > 0 &&
+            !!(property.getDeclarations()[0] as ts.MethodDeclaration).body
+        );
     }
 
     private getCodeGenerator(node: ts.Node): SyntaxCodeGenerator<ts.Node, Value | void> | FallbackCodeGenerator {

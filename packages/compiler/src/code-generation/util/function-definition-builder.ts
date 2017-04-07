@@ -6,11 +6,23 @@ import {Allocation} from "../value/allocation";
 import {ResolvedFunction} from "../value/resolved-function";
 
 export class FunctionDefinitionBuilder {
+    private emitReturnStatement = true;
+
+
     private constructor(private fn: llvm.Function, private resolvedFunction: ResolvedFunction, private context: CodeGenerationContext) {
     }
 
     static create(fn: llvm.Function, resolvedFunction: ResolvedFunction, context: CodeGenerationContext) {
         return new FunctionDefinitionBuilder(fn, resolvedFunction, context);
+    }
+
+    /**
+     * Tells the builder to not emit the return statement
+     * @return {FunctionDefinitionBuilder} this for a fluent api
+     */
+    omitEntryBlock() {
+        this.emitReturnStatement = false;
+        return this;
     }
 
     /**
@@ -20,7 +32,7 @@ export class FunctionDefinitionBuilder {
     define(declaration: ts.FunctionLikeDeclaration): void {
         this.context.enterChildScope(this.fn);
 
-        const entryBlock = llvm.BasicBlock.create(this.context.llvmContext, "entry", this.fn);
+        let entryBlock = this.fn.getEntryBlock() || llvm.BasicBlock.create(this.context.llvmContext, "entry", this.fn);
         const returnBlock = llvm.BasicBlock.create(this.context.llvmContext, "returnBlock");
         this.context.builder.setInsertionPoint(entryBlock);
         this.context.scope.returnBlock = returnBlock;
@@ -34,8 +46,10 @@ export class FunctionDefinitionBuilder {
 
         this.setBuilderToReturnBlock(returnBlock);
 
-        // Add Return Statement
-        this.generateReturnStatement();
+        if (this.emitReturnStatement) {
+            // Add Return Statement
+            this.generateReturnStatement();
+        }
 
         this.context.leaveChildScope();
 

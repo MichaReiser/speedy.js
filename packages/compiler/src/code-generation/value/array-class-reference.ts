@@ -49,7 +49,7 @@ export class ArrayClassReference extends ClassReference {
     }
 
     objectFor(pointer: llvm.Value, type: ts.ObjectType) {
-        return new ArrayReference(pointer, type)
+        return new ArrayReference(pointer, type, this)
     }
 
     getFields() {

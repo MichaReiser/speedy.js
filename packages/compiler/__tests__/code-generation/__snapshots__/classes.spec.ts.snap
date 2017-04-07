@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Classes class-only-with-attributes 1`] = `
+"; ModuleID = 'classes/class-only-with-attributes.ts'
+source_filename = \\"classes/class-only-with-attributes.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@ClassOnlyWithAttributes_name = private unnamed_addr constant [24 x i8] c\\"ClassOnlyWithAttributes\\\\00\\"
+@ClassOnlyWithAttributes_type_descriptor = private constant { [24 x i8]* } { [24 x i8]* @ClassOnlyWithAttributes_name }
+
+define double @_classOnlyWithAttributes() {
+entry:
+  %instance = alloca { { [24 x i8]* }*, double, double }*
+  %return = alloca double
+  %constructorReturnValue = call { { [24 x i8]* }*, double, double }* @\\"ClassOnlyWithAttributes$11constructor\\"()
+  store { { [24 x i8]* }*, double, double }* %constructorReturnValue, { { [24 x i8]* }*, double, double }** %instance, align 4
+  %instance1 = load { { [24 x i8]* }*, double, double }*, { { [24 x i8]* }*, double, double }** %instance, align 4
+  %instance2 = load { { [24 x i8]* }*, double, double }*, { { [24 x i8]* }*, double, double }** %instance, align 4
+  %0 = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance1, i32 0, i32 1
+  %x = load double, double* %0, align 8
+  %1 = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance2, i32 0, i32 2
+  %y = load double, double* %1, align 8
+  %2 = fadd double %x, %y
+  store double %2, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return3 = load double, double* %return, align 8
+  ret double %return3
+}
+
+define internal { { [24 x i8]* }*, double, double }* @\\"ClassOnlyWithAttributes$11constructor\\"() {
+entry:
+  %this = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
+  %object = bitcast i4* %this to { { [24 x i8]* }*, double, double }*
+  %x = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %object, i32 0, i32 1
+  store double 0.000000e+00, double* %x
+  %y = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %object, i32 0, i32 2
+  store double 0.000000e+00, double* %y
+  ret { { [24 x i8]* }*, double, double }* %object
+}
+
+declare i4* @malloc(i32)
+"
+`;

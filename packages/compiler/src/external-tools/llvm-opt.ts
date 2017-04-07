@@ -11,9 +11,10 @@ const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,__errno_location,memcpy,memmove,m
  * @param filename the input file (absolute path)
  * @param publicFunctions name of the public functions
  * @param optimizedFileName the name of the target file
+ * @param level the optimization level
  * @returns the name of the optimized file
  */
-export function optimize(filename: string, publicFunctions: string[], optimizedFileName: string, level: string) {
+export function optimize(filename: string, publicFunctions: string[], optimizedFileName: string, level: "0" | "1" | "2" | "3" | "z" | "s") {
     const publicApi = publicFunctions.concat(DEFAULT_PUBLIC).join(",");
 
     LOG(`Optimizing file ${filename}`);

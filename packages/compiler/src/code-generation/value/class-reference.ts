@@ -25,25 +25,32 @@ export abstract class ClassReference implements Value {
      * Creates a new type descriptor for the given symbol
      * @param symbol the symbol
      * @param context the context
-     * @return {llvm.GlobalVariable} a global variable that stores the type descriptor
+     * @return a global variable that stores the type descriptor
      */
     protected static createTypeDescriptor(symbol: ts.Symbol, context: CodeGenerationContext) {
-        const name = llvm.ConstantDataArray.getString(context.llvmContext, symbol.name);
-        const nameVariable = new llvm.GlobalVariable(context.module, name.type, true, llvm.LinkageTypes.PrivateLinkage, name, `${symbol.name}_name`);
+        const name = `${symbol.name}_type_descriptor`; // TODO guarantee uniqueness
+
+        const existing = context.module.getGlobalVariable(name, true);
+        if (existing) {
+            return existing;
+        }
+
+        const nameConstant = llvm.ConstantDataArray.getString(context.llvmContext, symbol.name);
+        const nameVariable = new llvm.GlobalVariable(context.module, nameConstant.type, true, llvm.LinkageTypes.PrivateLinkage, nameConstant, `${symbol.name}_name`);
         nameVariable.setUnnamedAddr(llvm.UnnamedAddr.Global);
 
-        const structType = llvm.StructType.get(context.llvmContext, [ name.type.getPointerTo() ], false);
+        const structType = llvm.StructType.get(context.llvmContext, [ nameConstant.type.getPointerTo() ], false);
         const struct = llvm.ConstantStruct.get(structType, [nameVariable]);
 
-        return new llvm.GlobalVariable(context.module, struct.type, true, llvm.LinkageTypes.PrivateLinkage, struct, `${symbol.name}_type_descriptor`);
+        return new llvm.GlobalVariable(context.module, struct.type, true, llvm.LinkageTypes.PrivateLinkage, struct, name);
     }
 
     get name() {
         return this.symbol.name;
     }
 
-    get type(): ts.Type  {
-        return this.compilationContext.typeChecker.getDeclaredTypeOfSymbol(this.symbol);
+    get type(): ts.ObjectType  {
+        return this.compilationContext.typeChecker.getDeclaredTypeOfSymbol(this.symbol) as ts.ObjectType;
     }
 
     generateIR(): llvm.Value {
@@ -63,15 +70,25 @@ export abstract class ClassReference implements Value {
     }
 
     getLLVMType(type: ts.ObjectType, context: CodeGenerationContext): llvm.Type {
-        return this.getObjectType(type).getPointerTo();
+        return this.getObjectType(type, context).getPointerTo();
+    }
+
+    getFieldsOffset(): number {
+        return 1;
+    }
+
+    getFieldIndex(property: ts.Symbol) {
+        const fields = this.type.getApparentProperties().filter(property => property.flags & ts.SymbolFlags.Property);
+        return fields.indexOf(property);
     }
 
     /**
      * Returns the fields of the class instances
      * @param type the specific instantiated type of the class
+     * @param context the code generation context
      * @returns the type of the object fields
      */
-    protected abstract getFields(type: ts.Type): llvm.Type[];
+    protected abstract getFields(type: ts.ObjectType, context: CodeGenerationContext): llvm.Type[];
 
     /**
      * Returns the reference to the constructor function
@@ -91,12 +108,13 @@ export abstract class ClassReference implements Value {
     /**
      * Creates the type of the object
      * @param type the type
+     * @param context the code generation context
      * @return {StructType} the llvm type of the object
      */
-    protected getObjectType(type: ts.ObjectType) {
+    protected getObjectType(type: ts.ObjectType, context: CodeGenerationContext) {
         return llvm.StructType.get(this.compilationContext.llvmContext, [
             this.typeInformation.type,
-            ...this.getFields(type)
+            ...this.getFields(type, context)
         ]);
     }
 }

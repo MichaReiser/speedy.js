@@ -3,6 +3,7 @@ import * as ts from "typescript";
 import {CodeGenerationError} from "../../code-generation-error";
 import {CodeGenerationContext} from "../code-generation-context";
 import {BuiltInObjectReference} from "./built-in-object-reference";
+import {MathClassReference} from "./math-class-reference";
 import {Primitive} from "./primitive";
 import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
@@ -16,8 +17,8 @@ export class MathObjectReference extends BuiltInObjectReference {
 
     typeName = "Math";
 
-    constructor(objAddr: llvm.Value, type: ts.ObjectType) {
-        super(objAddr, type);
+    constructor(objAddr: llvm.Value, mathType: ts.ObjectType, mathClass: MathClassReference) {
+        super(objAddr, mathType, mathClass);
     }
 
     /**
@@ -45,10 +46,6 @@ export class MathObjectReference extends BuiltInObjectReference {
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
-    }
-
-    destruct() {
-        // no need for free, is a static references
     }
 
     /**

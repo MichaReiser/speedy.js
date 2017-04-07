@@ -9,6 +9,7 @@ import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {Value} from "./value";
 import {CodeGenerationError} from "../../code-generation-error";
+import {ClassReference} from "./class-reference";
 
 /**
  * Object reference to a built in object (that is part of the runtime).
@@ -20,8 +21,9 @@ export abstract class BuiltInObjectReference implements ObjectReference {
      * Creates a new instance for an object that is stored at the specified object address and is of the given type
      * @param objectAddress the address, where the object is stored
      * @param type the type of the object
+     * @param clazz the class of the object
      */
-    constructor(protected objectAddress: llvm.Value, public type: ts.ObjectType) {
+    constructor(protected objectAddress: llvm.Value, public type: ts.ObjectType, public clazz: ClassReference) {
         assert(objectAddress.type.isPointerTy(), `Object address needs to be a pointer type`);
     }
 
@@ -45,8 +47,6 @@ export abstract class BuiltInObjectReference implements ObjectReference {
         assert(value.isObject(), "Cannot assign non object to object reference");
         this.objectAddress = value.generateIR(context);
     }
-
-    abstract destruct(context: CodeGenerationContext): void;
 
     getProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference | FunctionReference {
         const symbol = context.typeChecker.getSymbolAtLocation(property);

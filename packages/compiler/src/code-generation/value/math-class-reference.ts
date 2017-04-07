@@ -27,7 +27,7 @@ export class MathClassReference extends ClassReference {
      */
     createGlobalVariable(symbol: ts.Symbol, context: CodeGenerationContext) {
         const mathType = context.typeChecker.getDeclaredTypeOfSymbol(symbol) as ts.ObjectType;
-        const structType = this.getObjectType(mathType);
+        const structType = this.getObjectType(mathType, context);
         const struct = llvm.ConstantStruct.get(structType, [this.typeInformation]);
 
         const storage = new llvm.GlobalVariable(context.module, structType, true, llvm.LinkageTypes.PrivateLinkage, struct, "Math_object");
@@ -45,6 +45,6 @@ export class MathClassReference extends ClassReference {
     }
 
     objectFor(pointer: llvm.Value, type: ts.ObjectType): ObjectReference {
-        return new MathObjectReference(pointer, type);
+        return new MathObjectReference(pointer, type, this);
     }
 }

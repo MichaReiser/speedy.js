@@ -4,6 +4,7 @@ import {Scope} from "./scope";
 import {CompilationContext} from "../compilation-context";
 import {Value} from "./value/value";
 import {TypeChecker} from "../type-checker";
+import {ClassReference} from "./value/class-reference";
 
 /**
  * The stateful code generation context for a specific llvm module
@@ -119,4 +120,11 @@ export interface CodeGenerationContext {
      * @returns the result of the function call or void if the called function is void (return type is void)
      */
     call(fn: llvm.Function, args: Value[] | llvm.Value[], returnType: ts.Type, name?: string): Value | void;
+
+    /**
+     * Resolves the class belonging to the given type if supported or returns undefined if not
+     * @param type the class type
+     * @returns the reference to this class
+     */
+    resolveClass(type: ts.Type, symbol?: ts.Symbol): ClassReference | undefined;
 }

@@ -15,7 +15,7 @@ class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Func
         const symbol = context.typeChecker.getSymbolAtLocation(identifier);
 
         if (symbol.flags & ts.SymbolFlags.Function) {
-            return this.getFunction(symbol, identifier, context);
+            return IdentifierCodeGenerator.getFunction(symbol, identifier, context);
         }
 
         if (symbol.flags & ts.SymbolFlags.Variable && context.scope.hasVariable(symbol)) {
@@ -23,16 +23,17 @@ class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Func
         }
 
         if (symbol.flags & ts.SymbolFlags.Type) {
-            if (!context.scope.hasClass(symbol)) {
-                throw CodeGenerationError.unsupportedClassReferencedBy(identifier)
+            const classType = context.typeChecker.getDeclaredTypeOfSymbol(symbol);
+            const classReference = context.resolveClass(classType, symbol);
+            if (classReference) {
+                return classReference;
             }
-            return context.scope.getClass(symbol);
         }
 
         throw CodeGenerationError.unsupportedIdentifier(identifier);
     }
 
-    private getFunction(symbol: ts.Symbol, identifier: ts.Identifier, context: CodeGenerationContext) {
+    private static getFunction(symbol: ts.Symbol, identifier: ts.Identifier, context: CodeGenerationContext) {
         if (context.scope.hasFunction(symbol)) {
             return context.scope.getFunction(symbol);
         }
