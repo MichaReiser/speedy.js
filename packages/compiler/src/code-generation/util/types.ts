@@ -34,7 +34,7 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     if (type.flags & ts.TypeFlags.Object) {
         const classReference = context.resolveClass(type);
         if (classReference) {
-            return classReference.getLLVMType(type as ts.ObjectType, context);
+            return classReference.getLLVMType(type as ts.ObjectType, context).getPointerTo();
         }
     }
 
@@ -60,8 +60,8 @@ export function getArrayElementType(arrayType: ts.Type): ts.Type {
  * @return {Value} the value containing the size of the type
  */
 export function sizeof(type: llvm.Type, context: CodeGenerationContext) {
-    const size = context.builder.createInBoundsGEP(type, llvm.ConstantPointerNull.get(type.getPointerTo()), [llvm.ConstantInt.get(context.llvmContext, 1)]);
-    return context.builder.createPtrToInt(size, llvm.Type.getInt32Ty(context.llvmContext));
+    const size = context.module.dataLayout.getTypeStoreSize(type);
+    return llvm.ConstantInt.get(context.llvmContext, size);
 }
 
 /**

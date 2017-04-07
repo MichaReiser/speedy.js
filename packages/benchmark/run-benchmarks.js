@@ -1,37 +1,45 @@
 "use strict";
 
 const TEST_CASES = {
-    "arrayElementAccess": {
+    "tsp": {
         args: [],
-        result: 4.790411013875255
-    },
-    "mergeSort": {
-         args: [],
-         result: 1658.0910554176508
-    },
-    "pow": {
-        args: [19800.3, 2],
-        result: 392051880.09
-    },
-    "powInt": {
-        args: [3500, 2],
-        result: 12250000
-    },
-    "sqrt": {
-        args: [392051880.09],
-        result: 19800.3
-    },
-    "sqrtInt": {
-        args: [12250000],
-        result: 3500
+        result: 135751.77804825202
     },
     "tspArray": {
         args: [],
-        result: 137801.8213098867
+        result: 135751.77804825202
+    },
+    "tspLarge": {
+        args: [],
+        result: 14212.721606057083
     },
     "tspArrayLarge": {
         args: [],
-        result: 334425.4299374184
+        result: 14212.721606057083
+    },
+    "arrayElementAccess": {
+        args: [],
+        result: 487.65628197917226
+    },
+    "mergeSort": {
+         args: [],
+         result: 1659.0906736166776
+    },
+    "pow": {
+        args: [],
+        result: 333325
+    },
+    "powInt": {
+        args: [],
+        result: 328350
+    },
+    "sqrt": {
+        args: [1000.0],
+        result: 21081.91129744694
+    },
+    "sqrtInt": {
+        args: [1000],
+        result: 21065.833110879048
     },
     "fib": {
         fnName: "fib",
@@ -75,7 +83,7 @@ async function getWasmFunctionForTestCase(caseName) {
         options.speedyJS.totalMemory = testCase.totalMemory;
     }
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true}}!./cases/"+ caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 

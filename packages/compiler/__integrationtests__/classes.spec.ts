@@ -27,6 +27,10 @@ class ClassWithMethod {
     }
 }
 
+class ClassWithFieldsDeclaredInConstructor {
+    constructor(public x: number, public y: number) {}
+}
+
 async function createInstanceOfClassWithoutConstructor() {
     "use speedyjs";
 
@@ -66,6 +70,13 @@ async function callsInstanceMethod(x: number, y: number) {
     return center.distanceTo(other);
 }
 
+async function createInstanceOfClassWithFieldsDeclaredInConstructor(x: number, y: number) {
+    "use speedyjs";
+
+    const instance = new ClassWithFieldsDeclaredInConstructor(x, y);
+    return instance.x + instance.y;
+}
+
 describe("Classes", () => {
     describe("new", () => {
         it("creates a new instance using the default constructor", async (cb) => {
@@ -80,6 +91,11 @@ describe("Classes", () => {
 
         it("calls the constructor of the instance", async (cb) => {
             expect(await callsInstanceConstructor(10, 20)).toBe(30);
+            cb();
+        });
+
+        it("initializes the field with the argument values for fields declared in the constructor", async (cb) => {
+            expect(await createInstanceOfClassWithFieldsDeclaredInConstructor(10, 20)).toBe(30);
             cb();
         });
     });

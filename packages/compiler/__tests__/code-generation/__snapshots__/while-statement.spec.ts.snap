@@ -26,8 +26,8 @@ whileCondition:                                   ; preds = %whileBody, %entry
 
 whileBody:                                        ; preds = %whileCondition
   %arg3 = load i32, i32* %arg, align 4
-  %0 = sub i32 %arg3, 1
-  store i32 %0, i32* %arg, align 4
+  %sub = sub i32 %arg3, 1
+  store i32 %sub, i32* %arg, align 4
   br label %whileCondition
 
 whileSuccessor:                                   ; preds = %whileCondition

@@ -32,7 +32,7 @@ export class ObjectIndexReference implements AssignableValue {
         return false;
     }
 
-    dereference() {
-        return this;
+    dereference(context: CodeGenerationContext) {
+        return this.getValue(context);
     }
 }

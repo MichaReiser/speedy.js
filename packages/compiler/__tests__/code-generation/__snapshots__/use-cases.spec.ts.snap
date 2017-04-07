@@ -1,0 +1,649 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UseCases tsp 1`] = `
+"; ModuleID = 'use-cases/tsp.ts'
+source_filename = \\"use-cases/tsp.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Point_name = private unnamed_addr constant [6 x i8] c\\"Point\\\\00\\"
+@Point_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Point_name }
+
+define double @_tsp() {
+entry:
+  %items = alloca [127 x { { [6 x i8]* }*, i32, i32 }*]
+  %points = alloca { i32, i32, i8** }*
+  %return = alloca double
+  %constructorReturnValue = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8700, i32 14036)
+  %constructorReturnValue1 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 10324)
+  %constructorReturnValue2 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 13340)
+  %constructorReturnValue3 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12644, i32 10556)
+  %constructorReturnValue4 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12412, i32 14964)
+  %constructorReturnValue5 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 7540)
+  %constructorReturnValue6 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10440, i32 14732)
+  %constructorReturnValue7 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 13340)
+  %constructorReturnValue8 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7772, i32 11020)
+  %constructorReturnValue9 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15660, i32 10788)
+  %constructorReturnValue10 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8004, i32 11020)
+  %constructorReturnValue11 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7888, i32 16936)
+  %constructorReturnValue12 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1020, i32 13456)
+  %constructorReturnValue13 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15312, i32 6612)
+  %constructorReturnValue14 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13688)
+  %constructorReturnValue15 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10092, i32 14964)
+  %constructorReturnValue16 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11368, i32 12296)
+  %constructorReturnValue17 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16240, i32 8352)
+  %constructorReturnValue18 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13340)
+  %constructorReturnValue19 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 15196)
+  %constructorReturnValue20 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 9744)
+  %constructorReturnValue21 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7308, i32 14848)
+  %constructorReturnValue22 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 12412)
+  %constructorReturnValue23 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12296, i32 12760)
+  %constructorReturnValue24 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 15080)
+  %constructorReturnValue25 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 812, i32 6264)
+  %constructorReturnValue26 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15660, i32 11368)
+  %constructorReturnValue27 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 16240)
+  %constructorReturnValue28 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5104, i32 14616)
+  %constructorReturnValue29 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 14152)
+  %constructorReturnValue30 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 10672)
+  %constructorReturnValue31 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 15776)
+  %constructorReturnValue32 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 10208)
+  %constructorReturnValue33 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10324, i32 17516)
+  %constructorReturnValue34 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 12876)
+  %constructorReturnValue35 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 15428)
+  %constructorReturnValue36 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 13224)
+  %constructorReturnValue37 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 11136)
+  %constructorReturnValue38 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 13804)
+  %constructorReturnValue39 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5336, i32 18908)
+  %constructorReturnValue40 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10208, i32 14384)
+  %constructorReturnValue41 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 12528)
+  %constructorReturnValue42 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 11020)
+  %constructorReturnValue43 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 13572)
+  %constructorReturnValue44 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11716, i32 16008)
+  %constructorReturnValue45 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 17052, i32 12064)
+  %constructorReturnValue46 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9628, i32 14036)
+  %constructorReturnValue47 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 17516)
+  %constructorReturnValue48 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8932, i32 12064)
+  %constructorReturnValue49 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16472, i32 16472)
+  %constructorReturnValue50 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9860, i32 13108)
+  %constructorReturnValue51 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11832, i32 17516)
+  %constructorReturnValue52 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7424, i32 17516)
+  %constructorReturnValue53 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5684, i32 11948)
+  %constructorReturnValue54 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7540, i32 16820)
+  %constructorReturnValue55 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 7424)
+  %constructorReturnValue56 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8700, i32 15312)
+  %constructorReturnValue57 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16936, i32 12180)
+  %constructorReturnValue58 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 512, i32 15776)
+  %constructorReturnValue59 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12528, i32 15196)
+  %constructorReturnValue60 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7656, i32 17052)
+  %constructorReturnValue61 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 13340)
+  %constructorReturnValue62 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 12644)
+  %constructorReturnValue63 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 12876)
+  %constructorReturnValue64 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12876, i32 12180)
+  %constructorReturnValue65 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1600, i32 13456)
+  %constructorReturnValue66 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10556, i32 13688)
+  %constructorReturnValue67 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 6264, i32 19140)
+  %constructorReturnValue68 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 15544)
+  %constructorReturnValue69 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10324, i32 11716)
+  %constructorReturnValue70 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1160, i32 18560)
+  %constructorReturnValue71 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13108)
+  %constructorReturnValue72 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 17052)
+  %constructorReturnValue73 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10556, i32 11948)
+  %constructorReturnValue74 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 3132)
+  %constructorReturnValue75 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 14964)
+  %constructorReturnValue76 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12180, i32 15544)
+  %constructorReturnValue77 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 3248, i32 14152)
+  %constructorReturnValue78 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 14152, i32 18908)
+  %constructorReturnValue79 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11832, i32 11252)
+  %constructorReturnValue80 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 9512)
+  %constructorReturnValue81 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12064, i32 12528)
+  %constructorReturnValue82 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10788, i32 13572)
+  %constructorReturnValue83 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 11716)
+  %constructorReturnValue84 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7888, i32 17168)
+  %constructorReturnValue85 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7540, i32 15080)
+  %constructorReturnValue86 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12064, i32 14964)
+  %constructorReturnValue87 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8932, i32 13688)
+  %constructorReturnValue88 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7772, i32 14732)
+  %constructorReturnValue89 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10904, i32 13108)
+  %constructorReturnValue90 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 12296)
+  %constructorReturnValue91 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10440, i32 14036)
+  %constructorReturnValue92 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8584, i32 13108)
+  %constructorReturnValue93 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 13572)
+  %constructorReturnValue94 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12296, i32 15312)
+  %constructorReturnValue95 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5684, i32 13224)
+  %constructorReturnValue96 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11716, i32 16124)
+  %constructorReturnValue97 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11600, i32 19720)
+  %constructorReturnValue98 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 11020)
+  %constructorReturnValue99 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12992, i32 14964)
+  %constructorReturnValue100 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 8468)
+  %constructorReturnValue101 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15544, i32 12760)
+  %constructorReturnValue102 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 13340)
+  %constructorReturnValue103 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 396, i32 14616)
+  %constructorReturnValue104 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9048, i32 13804)
+  %constructorReturnValue105 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5336, i32 10324)
+  %constructorReturnValue106 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 14152)
+  %constructorReturnValue107 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 17400)
+  %constructorReturnValue108 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12412, i32 13340)
+  %constructorReturnValue109 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12180, i32 14848)
+  %constructorReturnValue110 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10208, i32 15196)
+  %constructorReturnValue111 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 860, i32 14152)
+  %constructorReturnValue112 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 16008)
+  %constructorReturnValue113 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10904, i32 3480)
+  %constructorReturnValue114 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 16472)
+  %constructorReturnValue115 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1252, i32 14036)
+  %constructorReturnValue116 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 17052, i32 11600)
+  %constructorReturnValue117 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8004, i32 12760)
+  %constructorReturnValue118 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16936, i32 11832)
+  %constructorReturnValue119 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 6496, i32 17168)
+  %constructorReturnValue120 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 12528)
+  %constructorReturnValue121 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1252, i32 14848)
+  %constructorReturnValue122 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10788, i32 13804)
+  %constructorReturnValue123 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 10904)
+  %constructorReturnValue124 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11368, i32 12644)
+  %constructorReturnValue125 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13804, i32 18792)
+  %constructorReturnValue126 = call { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 14384, i32 20184)
+  %items127 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 0
+  %0 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 0
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue, { { [6 x i8]* }*, i32, i32 }** %0, align 4
+  %1 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 1
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue1, { { [6 x i8]* }*, i32, i32 }** %1, align 4
+  %2 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 2
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue2, { { [6 x i8]* }*, i32, i32 }** %2, align 4
+  %3 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 3
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue3, { { [6 x i8]* }*, i32, i32 }** %3, align 4
+  %4 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 4
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue4, { { [6 x i8]* }*, i32, i32 }** %4, align 4
+  %5 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 5
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue5, { { [6 x i8]* }*, i32, i32 }** %5, align 4
+  %6 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 6
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue6, { { [6 x i8]* }*, i32, i32 }** %6, align 4
+  %7 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 7
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue7, { { [6 x i8]* }*, i32, i32 }** %7, align 4
+  %8 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 8
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue8, { { [6 x i8]* }*, i32, i32 }** %8, align 4
+  %9 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 9
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue9, { { [6 x i8]* }*, i32, i32 }** %9, align 4
+  %10 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 10
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue10, { { [6 x i8]* }*, i32, i32 }** %10, align 4
+  %11 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 11
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue11, { { [6 x i8]* }*, i32, i32 }** %11, align 4
+  %12 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 12
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue12, { { [6 x i8]* }*, i32, i32 }** %12, align 4
+  %13 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 13
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue13, { { [6 x i8]* }*, i32, i32 }** %13, align 4
+  %14 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 14
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue14, { { [6 x i8]* }*, i32, i32 }** %14, align 4
+  %15 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 15
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue15, { { [6 x i8]* }*, i32, i32 }** %15, align 4
+  %16 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 16
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue16, { { [6 x i8]* }*, i32, i32 }** %16, align 4
+  %17 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 17
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue17, { { [6 x i8]* }*, i32, i32 }** %17, align 4
+  %18 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 18
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue18, { { [6 x i8]* }*, i32, i32 }** %18, align 4
+  %19 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 19
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue19, { { [6 x i8]* }*, i32, i32 }** %19, align 4
+  %20 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 20
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue20, { { [6 x i8]* }*, i32, i32 }** %20, align 4
+  %21 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 21
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue21, { { [6 x i8]* }*, i32, i32 }** %21, align 4
+  %22 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 22
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue22, { { [6 x i8]* }*, i32, i32 }** %22, align 4
+  %23 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 23
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue23, { { [6 x i8]* }*, i32, i32 }** %23, align 4
+  %24 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 24
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue24, { { [6 x i8]* }*, i32, i32 }** %24, align 4
+  %25 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 25
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue25, { { [6 x i8]* }*, i32, i32 }** %25, align 4
+  %26 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 26
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue26, { { [6 x i8]* }*, i32, i32 }** %26, align 4
+  %27 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 27
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue27, { { [6 x i8]* }*, i32, i32 }** %27, align 4
+  %28 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 28
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue28, { { [6 x i8]* }*, i32, i32 }** %28, align 4
+  %29 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 29
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue29, { { [6 x i8]* }*, i32, i32 }** %29, align 4
+  %30 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 30
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue30, { { [6 x i8]* }*, i32, i32 }** %30, align 4
+  %31 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 31
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue31, { { [6 x i8]* }*, i32, i32 }** %31, align 4
+  %32 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 32
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue32, { { [6 x i8]* }*, i32, i32 }** %32, align 4
+  %33 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 33
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue33, { { [6 x i8]* }*, i32, i32 }** %33, align 4
+  %34 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 34
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue34, { { [6 x i8]* }*, i32, i32 }** %34, align 4
+  %35 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 35
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue35, { { [6 x i8]* }*, i32, i32 }** %35, align 4
+  %36 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 36
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue36, { { [6 x i8]* }*, i32, i32 }** %36, align 4
+  %37 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 37
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue37, { { [6 x i8]* }*, i32, i32 }** %37, align 4
+  %38 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 38
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue38, { { [6 x i8]* }*, i32, i32 }** %38, align 4
+  %39 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 39
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue39, { { [6 x i8]* }*, i32, i32 }** %39, align 4
+  %40 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 40
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue40, { { [6 x i8]* }*, i32, i32 }** %40, align 4
+  %41 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 41
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue41, { { [6 x i8]* }*, i32, i32 }** %41, align 4
+  %42 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 42
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue42, { { [6 x i8]* }*, i32, i32 }** %42, align 4
+  %43 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 43
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue43, { { [6 x i8]* }*, i32, i32 }** %43, align 4
+  %44 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 44
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue44, { { [6 x i8]* }*, i32, i32 }** %44, align 4
+  %45 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 45
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue45, { { [6 x i8]* }*, i32, i32 }** %45, align 4
+  %46 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 46
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue46, { { [6 x i8]* }*, i32, i32 }** %46, align 4
+  %47 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 47
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue47, { { [6 x i8]* }*, i32, i32 }** %47, align 4
+  %48 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 48
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue48, { { [6 x i8]* }*, i32, i32 }** %48, align 4
+  %49 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 49
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue49, { { [6 x i8]* }*, i32, i32 }** %49, align 4
+  %50 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 50
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue50, { { [6 x i8]* }*, i32, i32 }** %50, align 4
+  %51 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 51
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue51, { { [6 x i8]* }*, i32, i32 }** %51, align 4
+  %52 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 52
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue52, { { [6 x i8]* }*, i32, i32 }** %52, align 4
+  %53 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 53
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue53, { { [6 x i8]* }*, i32, i32 }** %53, align 4
+  %54 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 54
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue54, { { [6 x i8]* }*, i32, i32 }** %54, align 4
+  %55 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 55
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue55, { { [6 x i8]* }*, i32, i32 }** %55, align 4
+  %56 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 56
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue56, { { [6 x i8]* }*, i32, i32 }** %56, align 4
+  %57 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 57
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue57, { { [6 x i8]* }*, i32, i32 }** %57, align 4
+  %58 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 58
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue58, { { [6 x i8]* }*, i32, i32 }** %58, align 4
+  %59 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 59
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue59, { { [6 x i8]* }*, i32, i32 }** %59, align 4
+  %60 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 60
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue60, { { [6 x i8]* }*, i32, i32 }** %60, align 4
+  %61 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 61
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue61, { { [6 x i8]* }*, i32, i32 }** %61, align 4
+  %62 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 62
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue62, { { [6 x i8]* }*, i32, i32 }** %62, align 4
+  %63 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 63
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue63, { { [6 x i8]* }*, i32, i32 }** %63, align 4
+  %64 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 64
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue64, { { [6 x i8]* }*, i32, i32 }** %64, align 4
+  %65 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 65
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue65, { { [6 x i8]* }*, i32, i32 }** %65, align 4
+  %66 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 66
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue66, { { [6 x i8]* }*, i32, i32 }** %66, align 4
+  %67 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 67
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue67, { { [6 x i8]* }*, i32, i32 }** %67, align 4
+  %68 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 68
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue68, { { [6 x i8]* }*, i32, i32 }** %68, align 4
+  %69 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 69
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue69, { { [6 x i8]* }*, i32, i32 }** %69, align 4
+  %70 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 70
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue70, { { [6 x i8]* }*, i32, i32 }** %70, align 4
+  %71 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 71
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue71, { { [6 x i8]* }*, i32, i32 }** %71, align 4
+  %72 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 72
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue72, { { [6 x i8]* }*, i32, i32 }** %72, align 4
+  %73 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 73
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue73, { { [6 x i8]* }*, i32, i32 }** %73, align 4
+  %74 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 74
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue74, { { [6 x i8]* }*, i32, i32 }** %74, align 4
+  %75 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 75
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue75, { { [6 x i8]* }*, i32, i32 }** %75, align 4
+  %76 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 76
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue76, { { [6 x i8]* }*, i32, i32 }** %76, align 4
+  %77 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 77
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue77, { { [6 x i8]* }*, i32, i32 }** %77, align 4
+  %78 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 78
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue78, { { [6 x i8]* }*, i32, i32 }** %78, align 4
+  %79 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 79
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue79, { { [6 x i8]* }*, i32, i32 }** %79, align 4
+  %80 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 80
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue80, { { [6 x i8]* }*, i32, i32 }** %80, align 4
+  %81 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 81
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue81, { { [6 x i8]* }*, i32, i32 }** %81, align 4
+  %82 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 82
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue82, { { [6 x i8]* }*, i32, i32 }** %82, align 4
+  %83 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 83
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue83, { { [6 x i8]* }*, i32, i32 }** %83, align 4
+  %84 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 84
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue84, { { [6 x i8]* }*, i32, i32 }** %84, align 4
+  %85 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 85
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue85, { { [6 x i8]* }*, i32, i32 }** %85, align 4
+  %86 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 86
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue86, { { [6 x i8]* }*, i32, i32 }** %86, align 4
+  %87 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 87
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue87, { { [6 x i8]* }*, i32, i32 }** %87, align 4
+  %88 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 88
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue88, { { [6 x i8]* }*, i32, i32 }** %88, align 4
+  %89 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 89
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue89, { { [6 x i8]* }*, i32, i32 }** %89, align 4
+  %90 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 90
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue90, { { [6 x i8]* }*, i32, i32 }** %90, align 4
+  %91 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 91
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue91, { { [6 x i8]* }*, i32, i32 }** %91, align 4
+  %92 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 92
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue92, { { [6 x i8]* }*, i32, i32 }** %92, align 4
+  %93 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 93
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue93, { { [6 x i8]* }*, i32, i32 }** %93, align 4
+  %94 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 94
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue94, { { [6 x i8]* }*, i32, i32 }** %94, align 4
+  %95 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 95
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue95, { { [6 x i8]* }*, i32, i32 }** %95, align 4
+  %96 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 96
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue96, { { [6 x i8]* }*, i32, i32 }** %96, align 4
+  %97 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 97
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue97, { { [6 x i8]* }*, i32, i32 }** %97, align 4
+  %98 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 98
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue98, { { [6 x i8]* }*, i32, i32 }** %98, align 4
+  %99 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 99
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue99, { { [6 x i8]* }*, i32, i32 }** %99, align 4
+  %100 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 100
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue100, { { [6 x i8]* }*, i32, i32 }** %100, align 4
+  %101 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 101
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue101, { { [6 x i8]* }*, i32, i32 }** %101, align 4
+  %102 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 102
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue102, { { [6 x i8]* }*, i32, i32 }** %102, align 4
+  %103 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 103
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue103, { { [6 x i8]* }*, i32, i32 }** %103, align 4
+  %104 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 104
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue104, { { [6 x i8]* }*, i32, i32 }** %104, align 4
+  %105 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 105
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue105, { { [6 x i8]* }*, i32, i32 }** %105, align 4
+  %106 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 106
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue106, { { [6 x i8]* }*, i32, i32 }** %106, align 4
+  %107 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 107
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue107, { { [6 x i8]* }*, i32, i32 }** %107, align 4
+  %108 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 108
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue108, { { [6 x i8]* }*, i32, i32 }** %108, align 4
+  %109 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 109
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue109, { { [6 x i8]* }*, i32, i32 }** %109, align 4
+  %110 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 110
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue110, { { [6 x i8]* }*, i32, i32 }** %110, align 4
+  %111 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 111
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue111, { { [6 x i8]* }*, i32, i32 }** %111, align 4
+  %112 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 112
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue112, { { [6 x i8]* }*, i32, i32 }** %112, align 4
+  %113 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 113
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue113, { { [6 x i8]* }*, i32, i32 }** %113, align 4
+  %114 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 114
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue114, { { [6 x i8]* }*, i32, i32 }** %114, align 4
+  %115 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 115
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue115, { { [6 x i8]* }*, i32, i32 }** %115, align 4
+  %116 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 116
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue116, { { [6 x i8]* }*, i32, i32 }** %116, align 4
+  %117 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 117
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue117, { { [6 x i8]* }*, i32, i32 }** %117, align 4
+  %118 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 118
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue118, { { [6 x i8]* }*, i32, i32 }** %118, align 4
+  %119 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 119
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue119, { { [6 x i8]* }*, i32, i32 }** %119, align 4
+  %120 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 120
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue120, { { [6 x i8]* }*, i32, i32 }** %120, align 4
+  %121 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 121
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue121, { { [6 x i8]* }*, i32, i32 }** %121, align 4
+  %122 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 122
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue122, { { [6 x i8]* }*, i32, i32 }** %122, align 4
+  %123 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 123
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue123, { { [6 x i8]* }*, i32, i32 }** %123, align 4
+  %124 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 124
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue124, { { [6 x i8]* }*, i32, i32 }** %124, align 4
+  %125 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 125
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue125, { { [6 x i8]* }*, i32, i32 }** %125, align 4
+  %126 = getelementptr inbounds [127 x { { [6 x i8]* }*, i32, i32 }*], [127 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 126
+  store { { [6 x i8]* }*, i32, i32 }* %constructorReturnValue126, { { [6 x i8]* }*, i32, i32 }** %126, align 4
+  %constructorReturnValue128 = call { i32, i32, i8** }* @ArrayIPv_constructorPPvi({ { [6 x i8]* }*, i32, i32 }** %items127, i32 127)
+  store { i32, i32, i8** }* %constructorReturnValue128, { i32, i32, i8** }** %points, align 4
+  %points129 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %tspSyncReturnValue = call double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"({ i32, i32, i8** }* %points129)
+  store double %tspSyncReturnValue, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return130 = load double, double* %return, align 8
+  ret double %return130
+}
+
+define internal { { [6 x i8]* }*, i32, i32 }* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 %x1, i32 %y3) {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 12)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [6 x i8]* }*, i32, i32 }*
+  %\\"&x\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %this, i32 0, i32 1
+  store i32 0, i32* %\\"&x\\"
+  %\\"&y\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %this, i32 0, i32 2
+  store i32 0, i32* %\\"&y\\"
+  %x = alloca i32
+  store i32 %x1, i32* %x, align 4
+  %\\"&x2\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %this, i32 0, i32 1
+  store i32 %x1, i32* %\\"&x2\\", align 4
+  %y = alloca i32
+  store i32 %y3, i32* %y, align 4
+  %\\"&y4\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %this, i32 0, i32 2
+  store i32 %y3, i32* %\\"&y4\\", align 4
+  ret { { [6 x i8]* }*, i32, i32 }* %this
+}
+
+declare i8* @malloc(i32)
+
+declare { i32, i32, i8** }* @ArrayIPv_constructorPPvi({ { [6 x i8]* }*, i32, i32 }**, i32)
+
+define internal double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"({ i32, i32, i8** }* %points1) {
+entry:
+  %items27 = alloca [1 x { { [6 x i8]* }*, i32, i32 }*]
+  %items21 = alloca [1 x { { [6 x i8]* }*, i32, i32 }*]
+  %distance = alloca double
+  %i = alloca i32
+  %nearestIndex = alloca i32
+  %shortestDistance = alloca double
+  %items = alloca [1 x { { [6 x i8]* }*, i32, i32 }*]
+  %solution = alloca { i32, i32, i8** }*
+  %current = alloca { { [6 x i8]* }*, i32, i32 }*
+  %return = alloca double
+  %points = alloca { i32, i32, i8** }*
+  store { i32, i32, i8** }* %points1, { i32, i32, i8** }** %points, align 4
+  %points2 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %shiftReturnValue = call { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_shift({ i32, i32, i8** }* %points2)
+  store { { [6 x i8]* }*, i32, i32 }* %shiftReturnValue, { { [6 x i8]* }*, i32, i32 }** %current, align 4
+  %current3 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %current, align 4
+  %items4 = getelementptr inbounds [1 x { { [6 x i8]* }*, i32, i32 }*], [1 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 0
+  %0 = getelementptr inbounds [1 x { { [6 x i8]* }*, i32, i32 }*], [1 x { { [6 x i8]* }*, i32, i32 }*]* %items, i32 0, i32 0
+  store { { [6 x i8]* }*, i32, i32 }* %current3, { { [6 x i8]* }*, i32, i32 }** %0, align 4
+  %constructorReturnValue = call { i32, i32, i8** }* @ArrayIPv_constructorPPvi({ { [6 x i8]* }*, i32, i32 }** %items4, i32 1)
+  store { i32, i32, i8** }* %constructorReturnValue, { i32, i32, i8** }** %solution, align 4
+  br label %whileCondition
+
+whileCondition:                                   ; preds = %for-successor, %entry
+  %points5 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %1 = call i32 @ArrayIPv_length({ i32, i32, i8** }* %points5)
+  %AsBool = icmp ne i32 %1, 0
+  br i1 %AsBool, label %whileBody, label %whileSuccessor
+
+whileBody:                                        ; preds = %whileCondition
+  %powReturnValue = call double @Math_powdd(double 2.000000e+00, double 3.100000e+01)
+  %fsub = fsub double %powReturnValue, 1.000000e+00
+  store double %fsub, double* %shortestDistance, align 8
+  store i32 0, i32* %nearestIndex, align 4
+  store i32 0, i32* %i, align 4
+  br label %for-header
+
+for-header:                                       ; preds = %if-successor, %whileBody
+  %points6 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %i7 = load i32, i32* %i, align 4
+  %2 = call i32 @ArrayIPv_length({ i32, i32, i8** }* %points6)
+  %cmpLT = icmp slt i32 %i7, %2
+  br i1 %cmpLT, label %for-body, label %for-successor
+
+for-body:                                         ; preds = %for-header
+  %current8 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %current, align 4
+  %points9 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %i10 = load i32, i32* %i, align 4
+  %3 = call { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_geti({ i32, i32, i8** }* %points9, i32 %i10)
+  %distanceToReturnValue = call double @\\"use-cases/tsp.ts$Point$10distanceTo5PointI\\"({ { [6 x i8]* }*, i32, i32 }* %current8, { { [6 x i8]* }*, i32, i32 }* %3)
+  store double %distanceToReturnValue, double* %distance, align 8
+  %distance11 = load double, double* %distance, align 8
+  %shortestDistance12 = load double, double* %shortestDistance, align 8
+  %cmpLT13 = fcmp olt double %distance11, %shortestDistance12
+  br i1 %cmpLT13, label %then, label %if-successor
+
+then:                                             ; preds = %for-body
+  %distance14 = load double, double* %distance, align 8
+  store double %distance14, double* %shortestDistance, align 8
+  %i15 = load i32, i32* %i, align 4
+  store i32 %i15, i32* %nearestIndex, align 4
+  br label %if-successor
+
+if-successor:                                     ; preds = %for-body, %then
+  %i16 = load i32, i32* %i, align 4
+  %add = add i32 %i16, 1
+  store i32 %add, i32* %i, align 4
+  br label %for-header
+
+for-successor:                                    ; preds = %for-header
+  %points17 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %nearestIndex18 = load i32, i32* %nearestIndex, align 4
+  %4 = call { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_geti({ i32, i32, i8** }* %points17, i32 %nearestIndex18)
+  store { { [6 x i8]* }*, i32, i32 }* %4, { { [6 x i8]* }*, i32, i32 }** %current, align 4
+  %solution19 = load { i32, i32, i8** }*, { i32, i32, i8** }** %solution, align 4
+  %current20 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %current, align 4
+  %items22 = getelementptr inbounds [1 x { { [6 x i8]* }*, i32, i32 }*], [1 x { { [6 x i8]* }*, i32, i32 }*]* %items21, i32 0, i32 0
+  %5 = getelementptr inbounds [1 x { { [6 x i8]* }*, i32, i32 }*], [1 x { { [6 x i8]* }*, i32, i32 }*]* %items21, i32 0, i32 0
+  store { { [6 x i8]* }*, i32, i32 }* %current20, { { [6 x i8]* }*, i32, i32 }** %5, align 4
+  %pushReturnValue = call i32 @ArrayIPv_pushPPvi({ i32, i32, i8** }* %solution19, { { [6 x i8]* }*, i32, i32 }** %items22, i32 1)
+  %points23 = load { i32, i32, i8** }*, { i32, i32, i8** }** %points, align 4
+  %nearestIndex24 = load i32, i32* %nearestIndex, align 4
+  %spliceReturnValue = call { i32, i32, i8** }* @ArrayIPv_spliceii({ i32, i32, i8** }* %points23, i32 %nearestIndex24, i32 1)
+  br label %whileCondition
+
+whileSuccessor:                                   ; preds = %whileCondition
+  %solution25 = load { i32, i32, i8** }*, { i32, i32, i8** }** %solution, align 4
+  %solution26 = load { i32, i32, i8** }*, { i32, i32, i8** }** %solution, align 4
+  %6 = call { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_geti({ i32, i32, i8** }* %solution26, i32 0)
+  %items28 = getelementptr inbounds [1 x { { [6 x i8]* }*, i32, i32 }*], [1 x { { [6 x i8]* }*, i32, i32 }*]* %items27, i32 0, i32 0
+  %7 = getelementptr inbounds [1 x { { [6 x i8]* }*, i32, i32 }*], [1 x { { [6 x i8]* }*, i32, i32 }*]* %items27, i32 0, i32 0
+  store { { [6 x i8]* }*, i32, i32 }* %6, { { [6 x i8]* }*, i32, i32 }** %7, align 4
+  %pushReturnValue29 = call i32 @ArrayIPv_pushPPvi({ i32, i32, i8** }* %solution25, { { [6 x i8]* }*, i32, i32 }** %items28, i32 1)
+  %solution30 = load { i32, i32, i8** }*, { i32, i32, i8** }** %solution, align 4
+  %computeCostReturnValue = call double @\\"use-cases/tsp.ts$11computeCost5ArrayI5PointI\\"({ i32, i32, i8** }* %solution30)
+  store double %computeCostReturnValue, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %whileSuccessor
+  %return31 = load double, double* %return, align 8
+  ret double %return31
+}
+
+declare { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_shift({ i32, i32, i8** }*)
+
+declare i32 @ArrayIPv_length({ i32, i32, i8** }*)
+
+declare void @ArrayIPv_lengthi({ i32, i32, i8** }*, i32)
+
+declare double @Math_powdd(double, double)
+
+declare { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_geti({ i32, i32, i8** }*, i32)
+
+declare void @ArrayIPv_setiPv({ i32, i32, i8** }*, i32, { { [6 x i8]* }*, i32, i32 }*)
+
+define internal double @\\"use-cases/tsp.ts$Point$10distanceTo5PointI\\"({ { [6 x i8]* }*, i32, i32 }* %this1, { { [6 x i8]* }*, i32, i32 }* %other2) {
+entry:
+  %return = alloca double
+  %this = alloca { { [6 x i8]* }*, i32, i32 }*
+  store { { [6 x i8]* }*, i32, i32 }* %this1, { { [6 x i8]* }*, i32, i32 }** %this, align 4
+  %other = alloca { { [6 x i8]* }*, i32, i32 }*
+  store { { [6 x i8]* }*, i32, i32 }* %other2, { { [6 x i8]* }*, i32, i32 }** %other, align 4
+  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
+  %mathPtr3 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
+  %this4 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %this, align 4
+  %other5 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %other, align 4
+  %\\"&x\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %this4, i32 0, i32 1
+  %x = load i32, i32* %\\"&x\\", align 4
+  %\\"&x6\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %other5, i32 0, i32 1
+  %x7 = load i32, i32* %\\"&x6\\", align 4
+  %sub = sub i32 %x, %x7
+  %subAsDouble = sitofp i32 %sub to double
+  %powReturnValue = call double @Math_powdd(double %subAsDouble, double 2.000000e+00)
+  %mathPtr8 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
+  %this9 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %this, align 4
+  %other10 = load { { [6 x i8]* }*, i32, i32 }*, { { [6 x i8]* }*, i32, i32 }** %other, align 4
+  %\\"&y\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %this9, i32 0, i32 2
+  %y = load i32, i32* %\\"&y\\", align 4
+  %\\"&y11\\" = getelementptr inbounds { { [6 x i8]* }*, i32, i32 }, { { [6 x i8]* }*, i32, i32 }* %other10, i32 0, i32 2
+  %y12 = load i32, i32* %\\"&y11\\", align 4
+  %sub13 = sub i32 %y, %y12
+  %sub13AsDouble = sitofp i32 %sub13 to double
+  %powReturnValue14 = call double @Math_powdd(double %sub13AsDouble, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue14
+  %sqrtReturnValue = call double @Math_sqrtd(double %fadd)
+  store double %sqrtReturnValue, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return15 = load double, double* %return, align 8
+  ret double %return15
+}
+
+declare double @Math_sqrtd(double)
+
+declare i32 @ArrayIPv_pushPPvi({ i32, i32, i8** }*, { { [6 x i8]* }*, i32, i32 }**, i32)
+
+declare { i32, i32, i8** }* @ArrayIPv_spliceii({ i32, i32, i8** }*, i32, i32)
+
+define internal double @\\"use-cases/tsp.ts$11computeCost5ArrayI5PointI\\"({ i32, i32, i8** }* %tour1) {
+entry:
+  %i = alloca i32
+  %total = alloca double
+  %return = alloca double
+  %tour = alloca { i32, i32, i8** }*
+  store { i32, i32, i8** }* %tour1, { i32, i32, i8** }** %tour, align 4
+  store double 0.000000e+00, double* %total, align 8
+  store i32 0, i32* %i, align 4
+  br label %for-header
+
+for-header:                                       ; preds = %for-body, %entry
+  %tour2 = load { i32, i32, i8** }*, { i32, i32, i8** }** %tour, align 4
+  %0 = call i32 @ArrayIPv_length({ i32, i32, i8** }* %tour2)
+  %sub = sub i32 %0, 1
+  %i3 = load i32, i32* %i, align 4
+  %cmpLT = icmp slt i32 %i3, %sub
+  br i1 %cmpLT, label %for-body, label %for-successor
+
+for-body:                                         ; preds = %for-header
+  %tour4 = load { i32, i32, i8** }*, { i32, i32, i8** }** %tour, align 4
+  %i5 = load i32, i32* %i, align 4
+  %1 = call { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_geti({ i32, i32, i8** }* %tour4, i32 %i5)
+  %tour6 = load { i32, i32, i8** }*, { i32, i32, i8** }** %tour, align 4
+  %i7 = load i32, i32* %i, align 4
+  %add = add i32 %i7, 1
+  %2 = call { { [6 x i8]* }*, i32, i32 }* @ArrayIPv_geti({ i32, i32, i8** }* %tour6, i32 %add)
+  %distanceToReturnValue = call double @\\"use-cases/tsp.ts$Point$10distanceTo5PointI\\"({ { [6 x i8]* }*, i32, i32 }* %1, { { [6 x i8]* }*, i32, i32 }* %2)
+  %total8 = load double, double* %total, align 8
+  %fadd = fadd double %total8, %distanceToReturnValue
+  store double %fadd, double* %total, align 8
+  %i9 = load i32, i32* %i, align 4
+  %add10 = add i32 %i9, 1
+  store i32 %add10, i32* %i, align 4
+  br label %for-header
+
+for-successor:                                    ; preds = %for-header
+  %total11 = load double, double* %total, align 8
+  store double %total11, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %for-successor
+  %return12 = load double, double* %return, align 8
+  ret double %return12
+}
+
+declare void @speedyJsGc()
+"
+`;

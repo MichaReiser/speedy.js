@@ -23,9 +23,7 @@ export abstract class ObjectPropertyReference implements AssignableValue {
     }
 
     static createFieldProperty(propertyType: ts.Type, object: ObjectReference, property: ts.Symbol) {
-        const fieldIndex = object.clazz.getFieldIndex(property);
-
-        return new ObjectFieldPropertyReference(propertyType, object, property, fieldIndex);
+        return new ObjectFieldPropertyReference(propertyType, object, property);
     }
 
     protected constructor(public propertyType: ts.Type, protected object: ObjectReference) {
@@ -61,8 +59,8 @@ export abstract class ObjectPropertyReference implements AssignableValue {
         return false;
     }
 
-    dereference() {
-        return this;
+    dereference(context: CodeGenerationContext) {
+        return this.getValue(context);
     }
 }
 
@@ -92,7 +90,7 @@ class ComputedObjectPropertyReference extends ObjectPropertyReference {
  */
 class ObjectFieldPropertyReference extends ObjectPropertyReference {
 
-    constructor(propertyType: ts.Type, object: ObjectReference, private property: ts.Symbol, private fieldIndex: number) {
+    constructor(propertyType: ts.Type, object: ObjectReference, private property: ts.Symbol) {
         super(propertyType, object);
     }
 
@@ -112,7 +110,7 @@ class ObjectFieldPropertyReference extends ObjectPropertyReference {
     }
 
     private getFieldAddress(context: CodeGenerationContext) {
-        const fieldIndex = llvm.ConstantInt.get(context.llvmContext, this.object.clazz.getFieldsOffset() + this.fieldIndex);
+        const fieldIndex = llvm.ConstantInt.get(context.llvmContext, this.object.clazz.getFieldOffset(this.property));
         return context.builder.createInBoundsGEP(this.object.generateIR(context), [ llvm.ConstantInt.get(context.llvmContext, 0), fieldIndex ], `&${this.property.name}`);
     }
 }

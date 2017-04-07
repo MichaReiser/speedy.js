@@ -1,11 +1,12 @@
-import * as ts from "typescript"
+import * as assert from "assert";
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
+import {CompilationContext} from "../../compilation-context";
+import {CodeGenerationContext} from "../code-generation-context";
+import {FunctionReference} from "./function-reference";
+import {ObjectReference} from "./object-reference";
 
 import {Value} from "./value";
-import {CodeGenerationContext} from "../code-generation-context";
-import {ObjectReference} from "./object-reference";
-import {FunctionReference} from "./function-reference";
-import {CompilationContext} from "../../compilation-context";
 
 /**
  * Reference to a class (or in JS, to the constructor function)
@@ -70,16 +71,21 @@ export abstract class ClassReference implements Value {
     }
 
     getLLVMType(type: ts.ObjectType, context: CodeGenerationContext): llvm.Type {
-        return this.getObjectType(type, context).getPointerTo();
+        return this.getObjectType(type, context);
     }
 
     getFieldsOffset(): number {
         return 1;
     }
 
-    getFieldIndex(property: ts.Symbol) {
-        const fields = this.type.getApparentProperties().filter(property => property.flags & ts.SymbolFlags.Property);
-        return fields.indexOf(property);
+    getFieldOffset(property: ts.Symbol) {
+        const field = this.type.getProperty(property.getName()); // in case the passed in property is transient or this class type is transient
+        assert(field.flags & ts.SymbolFlags.Property, `The property ${property.name} is not a property (e.g. a method instead)`);
+
+        const index = this.type.getProperties().indexOf(field);
+        assert(index >= 0, `The property ${property.name} could not be found in class ${this.type.getSymbol().name}`);
+
+        return this.getFieldsOffset() + index;
     }
 
     /**

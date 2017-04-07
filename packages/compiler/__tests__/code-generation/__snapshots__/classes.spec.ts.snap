@@ -1,5 +1,82 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Classes array-with-objects-literal 1`] = `
+"; ModuleID = 'classes/array-with-objects-literal.ts'
+source_filename = \\"classes/array-with-objects-literal.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Point_name = private unnamed_addr constant [6 x i8] c\\"Point\\\\00\\"
+@Point_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Point_name }
+
+define double @_arrayWithObjectLiterals() {
+entry:
+  %items = alloca [3 x { { [6 x i8]* }*, double, double }*]
+  %array = alloca { i32, i32, i8** }*
+  %return = alloca double
+  %constructorReturnValue = call { { [6 x i8]* }*, double, double }* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 1.000000e+00, double 2.000000e+00)
+  %constructorReturnValue1 = call { { [6 x i8]* }*, double, double }* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 3.000000e+00, double 4.000000e+00)
+  %constructorReturnValue2 = call { { [6 x i8]* }*, double, double }* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 5.000000e+00, double 6.000000e+00)
+  %items3 = getelementptr inbounds [3 x { { [6 x i8]* }*, double, double }*], [3 x { { [6 x i8]* }*, double, double }*]* %items, i32 0, i32 0
+  %0 = getelementptr inbounds [3 x { { [6 x i8]* }*, double, double }*], [3 x { { [6 x i8]* }*, double, double }*]* %items, i32 0, i32 0
+  store { { [6 x i8]* }*, double, double }* %constructorReturnValue, { { [6 x i8]* }*, double, double }** %0, align 4
+  %1 = getelementptr inbounds [3 x { { [6 x i8]* }*, double, double }*], [3 x { { [6 x i8]* }*, double, double }*]* %items, i32 0, i32 1
+  store { { [6 x i8]* }*, double, double }* %constructorReturnValue1, { { [6 x i8]* }*, double, double }** %1, align 4
+  %2 = getelementptr inbounds [3 x { { [6 x i8]* }*, double, double }*], [3 x { { [6 x i8]* }*, double, double }*]* %items, i32 0, i32 2
+  store { { [6 x i8]* }*, double, double }* %constructorReturnValue2, { { [6 x i8]* }*, double, double }** %2, align 4
+  %constructorReturnValue4 = call { i32, i32, i8** }* @ArrayIPv_constructorPPvi({ { [6 x i8]* }*, double, double }** %items3, i32 3)
+  store { i32, i32, i8** }* %constructorReturnValue4, { i32, i32, i8** }** %array, align 4
+  %array5 = load { i32, i32, i8** }*, { i32, i32, i8** }** %array, align 4
+  %3 = call { { [6 x i8]* }*, double, double }* @ArrayIPv_geti({ i32, i32, i8** }* %array5, i32 0)
+  %\\"&x\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %3, i32 0, i32 1
+  %x = load double, double* %\\"&x\\", align 8
+  store double %x, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return6 = load double, double* %return, align 8
+  ret double %return6
+}
+
+define internal { { [6 x i8]* }*, double, double }* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double %x1, double %y2) {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [6 x i8]* }*, double, double }*
+  %\\"&x\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %this, i32 0, i32 1
+  store double 0.000000e+00, double* %\\"&x\\"
+  %\\"&y\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %this, i32 0, i32 2
+  store double 0.000000e+00, double* %\\"&y\\"
+  %x = alloca double
+  store double %x1, double* %x, align 8
+  %y = alloca double
+  store double %y2, double* %y, align 8
+  %x3 = load double, double* %x, align 8
+  %\\"&x4\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %this, i32 0, i32 1
+  store double %x3, double* %\\"&x4\\", align 8
+  %y5 = load double, double* %y, align 8
+  %\\"&y6\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %this, i32 0, i32 2
+  store double %y5, double* %\\"&y6\\", align 8
+  ret { { [6 x i8]* }*, double, double }* %this
+}
+
+declare i8* @malloc(i32)
+
+declare { i32, i32, i8** }* @ArrayIPv_constructorPPvi({ { [6 x i8]* }*, double, double }**, i32)
+
+declare { { [6 x i8]* }*, double, double }* @ArrayIPv_geti({ i32, i32, i8** }*, i32)
+
+declare void @ArrayIPv_setiPv({ i32, i32, i8** }*, i32, { { [6 x i8]* }*, double, double }*)
+
+declare void @speedyJsGc()
+"
+`;
+
 exports[`Classes class-only-with-attributes 1`] = `
 "; ModuleID = 'classes/class-only-with-attributes.ts'
 source_filename = \\"classes/class-only-with-attributes.ts\\"
@@ -27,8 +104,8 @@ entry:
   %x = load double, double* %\\"&x\\", align 8
   %\\"&y\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %instance2, i32 0, i32 2
   %y = load double, double* %\\"&y\\", align 8
-  %0 = fadd double %x, %y
-  store double %0, double* %return, align 8
+  %fadd = fadd double %x, %y
+  store double %fadd, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
@@ -38,8 +115,8 @@ returnBlock:                                      ; preds = %entry
 
 define internal { { [24 x i8]* }*, double, double }* @\\"classes/class-only-with-attributes.ts$ClassOnlyWithAttributes$11constructor\\"() {
 entry:
-  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %this = bitcast i4* %\\"thisVoid*\\" to { { [24 x i8]* }*, double, double }*
+  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [24 x i8]* }*, double, double }*
   %\\"&x\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&x\\"
   %\\"&y\\" = getelementptr inbounds { { [24 x i8]* }*, double, double }, { { [24 x i8]* }*, double, double }* %this, i32 0, i32 2
@@ -47,7 +124,9 @@ entry:
   ret { { [24 x i8]* }*, double, double }* %this
 }
 
-declare i4* @malloc(i32)
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;
 
@@ -78,8 +157,8 @@ entry:
   %x = load double, double* %\\"&x\\", align 8
   %\\"&y\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %instance2, i32 0, i32 2
   %y = load double, double* %\\"&y\\", align 8
-  %0 = fadd double %x, %y
-  store double %0, double* %return, align 8
+  %fadd = fadd double %x, %y
+  store double %fadd, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
@@ -87,22 +166,28 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define internal { { [30 x i8]* }*, double, double }* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x1, double %y2) {
+define internal { { [30 x i8]* }*, double, double }* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x1, double %y3) {
 entry:
-  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %this = bitcast i4* %\\"thisVoid*\\" to { { [30 x i8]* }*, double, double }*
+  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [30 x i8]* }*, double, double }*
   %\\"&x\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&x\\"
   %\\"&y\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %this, i32 0, i32 2
   store double 0.000000e+00, double* %\\"&y\\"
   %x = alloca double
   store double %x1, double* %x, align 8
+  %\\"&x2\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %this, i32 0, i32 1
+  store double %x1, double* %\\"&x2\\", align 8
   %y = alloca double
-  store double %y2, double* %y, align 8
+  store double %y3, double* %y, align 8
+  %\\"&y4\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %this, i32 0, i32 2
+  store double %y3, double* %\\"&y4\\", align 8
   ret { { [30 x i8]* }*, double, double }* %this
 }
 
-declare i4* @malloc(i32)
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;
 
@@ -133,8 +218,8 @@ entry:
   %x = load double, double* %\\"&x\\", align 8
   %\\"&y\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %instance2, i32 0, i32 2
   %y = load double, double* %\\"&y\\", align 8
-  %0 = fadd double %x, %y
-  store double %0, double* %return, align 8
+  %fadd = fadd double %x, %y
+  store double %fadd, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
@@ -144,8 +229,8 @@ returnBlock:                                      ; preds = %entry
 
 define internal { { [30 x i8]* }*, double, double }* @\\"classes/class-with-attribute-initializer.ts$ClassWithAttributeInitializer$11constructor\\"() {
 entry:
-  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %this = bitcast i4* %\\"thisVoid*\\" to { { [30 x i8]* }*, double, double }*
+  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [30 x i8]* }*, double, double }*
   %\\"&x\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %this, i32 0, i32 1
   store double 1.000000e+01, double* %\\"&x\\"
   %\\"&y\\" = getelementptr inbounds { { [30 x i8]* }*, double, double }, { { [30 x i8]* }*, double, double }* %this, i32 0, i32 2
@@ -153,7 +238,9 @@ entry:
   ret { { [30 x i8]* }*, double, double }* %this
 }
 
-declare i4* @malloc(i32)
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;
 
@@ -184,8 +271,8 @@ entry:
   %x = load double, double* %\\"&x\\", align 8
   %\\"&y\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %instance2, i32 0, i32 2
   %y = load double, double* %\\"&y\\", align 8
-  %0 = fadd double %x, %y
-  store double %0, double* %return, align 8
+  %fadd = fadd double %x, %y
+  store double %fadd, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
@@ -195,8 +282,8 @@ returnBlock:                                      ; preds = %entry
 
 define internal { { [21 x i8]* }*, double, double }* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double %x1, double %y2) {
 entry:
-  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %this = bitcast i4* %\\"thisVoid*\\" to { { [21 x i8]* }*, double, double }*
+  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [21 x i8]* }*, double, double }*
   %\\"&x\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&x\\"
   %\\"&y\\" = getelementptr inbounds { { [21 x i8]* }*, double, double }, { { [21 x i8]* }*, double, double }* %this, i32 0, i32 2
@@ -214,7 +301,9 @@ entry:
   ret { { [21 x i8]* }*, double, double }* %this
 }
 
-declare i4* @malloc(i32)
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;
 
@@ -255,8 +344,8 @@ entry:
 
 define internal { { [6 x i8]* }*, double, double }* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double %x1, double %y2) {
 entry:
-  %\\"thisVoid*\\" = call i4* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %this = bitcast i4* %\\"thisVoid*\\" to { { [6 x i8]* }*, double, double }*
+  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %this = bitcast i8* %\\"thisVoid*\\" to { { [6 x i8]* }*, double, double }*
   %\\"&x\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&x\\"
   %\\"&y\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %this, i32 0, i32 2
@@ -274,7 +363,7 @@ entry:
   ret { { [6 x i8]* }*, double, double }* %this
 }
 
-declare i4* @malloc(i32)
+declare i8* @malloc(i32)
 
 define internal double @\\"classes/class-with-methods.ts$Point$10distanceTo5PointI\\"({ { [6 x i8]* }*, double, double }* %this1, { { [6 x i8]* }*, double, double }* %to2) {
 entry:
@@ -291,8 +380,8 @@ entry:
   %x = load double, double* %\\"&x\\", align 8
   %\\"&x6\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %to5, i32 0, i32 1
   %x7 = load double, double* %\\"&x6\\", align 8
-  %0 = fsub double %x, %x7
-  %powReturnValue = call double @Math_powdd(double %0, double 2.000000e+00)
+  %fsub = fsub double %x, %x7
+  %powReturnValue = call double @Math_powdd(double %fsub, double 2.000000e+00)
   %mathPtr8 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
   %this9 = load { { [6 x i8]* }*, double, double }*, { { [6 x i8]* }*, double, double }** %this, align 4
   %to10 = load { { [6 x i8]* }*, double, double }*, { { [6 x i8]* }*, double, double }** %to, align 4
@@ -300,20 +389,22 @@ entry:
   %y = load double, double* %\\"&y\\", align 8
   %\\"&y11\\" = getelementptr inbounds { { [6 x i8]* }*, double, double }, { { [6 x i8]* }*, double, double }* %to10, i32 0, i32 2
   %y12 = load double, double* %\\"&y11\\", align 8
-  %1 = fsub double %y, %y12
-  %powReturnValue13 = call double @Math_powdd(double %1, double 2.000000e+00)
-  %2 = fadd double %powReturnValue, %powReturnValue13
-  %sqrtReturnValue = call double @Math_sqrtd(double %2)
+  %fsub13 = fsub double %y, %y12
+  %powReturnValue14 = call double @Math_powdd(double %fsub13, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue14
+  %sqrtReturnValue = call double @Math_sqrtd(double %fadd)
   store double %sqrtReturnValue, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
-  %return14 = load double, double* %return, align 8
-  ret double %return14
+  %return15 = load double, double* %return, align 8
+  ret double %return15
 }
 
 declare double @Math_powdd(double, double)
 
 declare double @Math_sqrtd(double)
+
+declare void @speedyJsGc()
 "
 `;

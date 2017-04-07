@@ -117,9 +117,9 @@ entry:
   store i32 6, i32* %six, align 4
   store double 6.000000e+00, double* %sixDouble, align 8
   %six1 = load i32, i32* %six, align 4
-  %0 = srem i32 8, %six1
+  %srem = srem i32 8, %six1
   %sixDouble2 = load double, double* %sixDouble, align 8
-  %1 = frem double 8.000000e+00, %sixDouble2
+  %frem = frem double 8.000000e+00, %sixDouble2
   ret void
 }
 "
@@ -144,12 +144,12 @@ entry:
   %intProduct = alloca i32
   store i32 1, i32* %intProduct, align 4
   %intProduct1 = load i32, i32* %intProduct, align 4
-  %0 = sdiv i32 %intProduct1, 2
-  store i32 %0, i32* %intProduct, align 4
+  %sdiv = sdiv i32 %intProduct1, 2
+  store i32 %sdiv, i32* %intProduct, align 4
   store double 0x3FF5555555555555, double* %doubleProduct, align 8
   %doubleProduct2 = load double, double* %doubleProduct, align 8
-  %1 = fdiv double %doubleProduct2, 1.500000e+00
-  store double %1, double* %doubleProduct, align 8
+  %div = fdiv double %doubleProduct2, 1.500000e+00
+  store double %div, double* %doubleProduct, align 8
   ret void
 }
 "

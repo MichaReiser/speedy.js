@@ -35,6 +35,7 @@ export class SpeedyJSClassReference extends ClassReference {
 
     getConstructor(newExpression: ts.NewExpression, context: CodeGenerationContext): FunctionReference {
         const signature = context.typeChecker.getResolvedSignature(newExpression);
+        context.requiresGc = true;
         return SpeedyJSConstructorFunctionReference.create(signature, this, context);
     }
 

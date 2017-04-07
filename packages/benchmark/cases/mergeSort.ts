@@ -10019,7 +10019,7 @@ function computeCheckSum(array: number[]) {
     "use speedyjs";
 
     let result = 0.0;
-    for (let i = 0; i < array.length - 2; i+=2) {
+    for (let i = 0; i < array.length - 1; i+=2) {
         result += array[i] * array[i + 1];
     }
 

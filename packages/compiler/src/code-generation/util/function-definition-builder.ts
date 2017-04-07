@@ -10,7 +10,7 @@ import {ObjectReference} from "../value/object-reference";
 
 export class FunctionDefinitionBuilder {
     private _returnValue: Value | undefined = undefined;
-    private _objectReference: ObjectReference | undefined;
+    private _this: ObjectReference | undefined;
 
     private constructor(private fn: llvm.Function, private resolvedFunction: ResolvedFunction, private context: CodeGenerationContext) {
     }
@@ -29,12 +29,12 @@ export class FunctionDefinitionBuilder {
     }
 
     /**
-     * Sets the object to which this function belongs (method)
-     * @param object the object
+     * Sets the address of the this object in case it is not passed as argument
+     * @param thisObject the address of the this object
      * @return {FunctionDefinitionBuilder}
      */
-    object(object?: ObjectReference) {
-        this._objectReference = object;
+    self(thisObject?: ObjectReference) {
+        this._this = thisObject;
         return this;
     }
 
@@ -96,26 +96,34 @@ export class FunctionDefinitionBuilder {
         const args = this.fn.getArguments().slice();
 
         // The this object is passed as first argument
-        if (this._objectReference) {
+        if (this.resolvedFunction.classType && this.resolvedFunction.instanceMethod) {
             assert(args.length - 1 === this.resolvedFunction.parameters.length, "The function declaration has no additional argument for the this object");
 
-            const thisAllocation = Address.create(this._objectReference.type, this.context, "this");
+            const thisAllocation = Address.create(this.resolvedFunction.classType!, this.context, "this");
             const thisArg = args.shift()!;
             thisAllocation.generateAssignmentIR(thisArg, this.context);
             thisArg.name = "this";
-            this.context.scope.addVariable(this._objectReference.type.getSymbol(), thisAllocation);
+            this.context.scope.addVariable(this.resolvedFunction.classType.getSymbol(), thisAllocation);
         }
 
         for (let i = 0; i < this.resolvedFunction.parameters.length; ++i) {
             const parameter = this.resolvedFunction.parameters[i];
+            const parameterDeclaration = declaration.parameters[i];
+            const parameterSymbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
             const allocation = Address.create(parameter.type, this.context, parameter.name);
 
             assert(!parameter.variadic, "Variadic arguments are only supported for runtime functions but not speedyJS functions");
             allocation.generateAssignmentIR(args[i], this.context);
 
-            const declaredSymbol = this.context.typeChecker.getSymbolAtLocation(declaration.parameters[i].name);
-            this.context.scope.addVariable(declaredSymbol, allocation);
+            this.context.scope.addVariable(parameterSymbol, allocation);
             args[i].name = parameter.name;
+
+            // a field in a constructor that is marked with private, protected or public. Set the argument value on the field.
+            if (this._this && parameterSymbol.flags & ts.SymbolFlags.Property) {
+                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._this!.clazz.getFieldOffset(parameterSymbol));
+                const fieldAddress = this.context.builder.createInBoundsGEP(this._this.generateIR(this.context), [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset ], `&${parameterSymbol.name}`);
+                this.context.builder.createAlignedStore(args[i], fieldAddress, Address.getPreferredAlignment(parameter.type, this.context));
+            }
         }
     }
 }

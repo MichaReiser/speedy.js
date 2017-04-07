@@ -1,11 +1,16 @@
-export async function powInt(base: int, exp: int) {
+export async function powInt() {
     "use speedyjs";
 
-    return powIntSync(base, exp);
+    return powIntSync();
 }
 
-function powIntSync(base: int, exp: int) {
+function powIntSync() {
     "use speedyjs";
 
-    return Math.pow(base, exp);
+    let sum = 0.0;
+    for (let i = 0; i < 100; ++i) {
+        sum += Math.pow(i, 2);
+    }
+
+    return sum;
 }

@@ -3,13 +3,6 @@ class ClassOnlyWithAttributes {
     y: number;
 }
 
-// declare class Test {
-//     x: number;
-//     y: number;
-//
-//     distance(): number;
-// }
-
 export async function classOnlyWithAttributes() {
     "use speedyjs";
 

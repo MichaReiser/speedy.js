@@ -11,7 +11,10 @@ import {IExportedCommand} from "commander";
 import {initializeCompilerOptions, UninitializedSpeedyJSCompilerOptions} from "./src/speedyjs-compiler-options";
 
 interface CommandLineArguments extends IExportedCommand {
-    files: string[],
+    /**
+     * The name of the files to process
+     */
+    args: string[],
     config?: string,
     unsafe?: boolean;
     emitLlvm?: boolean;
@@ -74,10 +77,10 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
 
     if (tsConfigFileName) {
         const configuration = parseConfigFile(tsConfigFileName);
-        rootFileNames = configuration.fileNames;
+        rootFileNames = commandLine.args || configuration.fileNames;
         compilerOptions = configuration.options;
     } else {
-        rootFileNames = commandLine.files;
+        rootFileNames = commandLine.args;
         compilerOptions = ts.getDefaultCompilerOptions();
     }
 

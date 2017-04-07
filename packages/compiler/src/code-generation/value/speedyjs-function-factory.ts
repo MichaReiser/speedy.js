@@ -35,7 +35,6 @@ export class SpeedyJSFunctionFactory extends FunctionFactory {
 
         const childContext = context.createChildContext();
         FunctionDefinitionBuilder.create(fn, resolvedFunction, childContext)
-            .object(objectReference)
             .define(declaration);
 
         return fn;

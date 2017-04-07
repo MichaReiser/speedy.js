@@ -98,11 +98,12 @@ class ConstructorFunctionBuilder {
     }
 
     private allocateObjectOnHeap(objectType: llvm.Type) {
-        const pointerType = llvm.Type.getIntNTy(this.context.llvmContext, this.context.module.dataLayout.getPointerSize(0)).getPointerTo();
+        const pointerType = llvm.Type.getInt8PtrTy(this.context.llvmContext);
         const malloc = this.context.module.getOrInsertFunction("malloc", llvm.FunctionType.get(pointerType, [llvm.Type.getInt32Ty(this.context.llvmContext)], false));
+        const size = sizeof(objectType, this.context);
 
-        const result = this.context.builder.createCall(malloc, [sizeof(objectType, this.context)], "thisVoid*");
-        return this.context.builder.createBitCast(result, objectType, "this");
+        const result = this.context.builder.createCall(malloc, [size], "thisVoid*");
+        return this.context.builder.createBitCast(result, objectType.getPointerTo(), "this");
     }
 
     private initializeFields(objectAddress: llvm.Value) {
@@ -120,7 +121,7 @@ class ConstructorFunctionBuilder {
                 value = llvm.Constant.getNullValue(toLLVMType(this.context.typeChecker.getTypeAtLocation(declaration), this.context));
             }
 
-            const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this.classReference.getFieldsOffset() + i);
+            const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this.classReference.getFieldOffset(field));
             const fieldPointer = this.context.builder.createInBoundsGEP(objectAddress, [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset], `&${field.name}`);
             this.context.builder.createStore(value, fieldPointer, false);
         }
@@ -134,6 +135,7 @@ class ConstructorFunctionBuilder {
 
         FunctionDefinitionBuilder.create(fn, this.resolvedFunction, this.context)
             .returnValue(objectReference)
+            .self(objectReference)
             .define(this.resolvedFunction.declaration as ts.MethodDeclaration);
     }
 }
