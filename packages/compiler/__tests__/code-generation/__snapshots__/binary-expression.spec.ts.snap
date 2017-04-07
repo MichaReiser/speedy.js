@@ -1,68 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`BinaryExpression !== 1`] = `
-"; ModuleID = 'binary-expression/!==.ts'
-source_filename = \\"binary-expression/!==.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_exclamationEqualsEqualsToken() {
-entry:
-  %trueValue = alloca i1
-  %threePointFour = alloca double
-  %four = alloca i32
-  store i32 4, i32* %four, align 4
-  store double 3.400000e+00, double* %threePointFour, align 8
-  store i1 true, i1* %trueValue, align 1
-  %four1 = load i32, i32* %four, align 4
-  %0 = icmp ne i32 %four1, 4
-  %threePointFour2 = load double, double* %threePointFour, align 8
-  %1 = fcmp one double %threePointFour2, 3.400000e+00
-  %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = icmp ne i1 %trueValue3, true
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression % 1`] = `
-"; ModuleID = 'binary-expression/%.ts'
-source_filename = \\"binary-expression/%.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_percent() {
-entry:
-  %sixDouble = alloca double
-  %six = alloca i32
-  store i32 6, i32* %six, align 4
-  store double 6.000000e+00, double* %sixDouble, align 8
-  %six1 = load i32, i32* %six, align 4
-  %0 = srem i32 8, %six1
-  %sixDouble2 = load double, double* %sixDouble, align 8
-  %1 = frem double 8.000000e+00, %sixDouble2
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression && 1`] = `
-"; ModuleID = 'binary-expression/&&.ts'
-source_filename = \\"binary-expression/&&.ts\\"
+exports[`BinaryExpression ampersandAmpersand 1`] = `
+"; ModuleID = 'binary-expression/ampersandAmpersand.ts'
+source_filename = \\"binary-expression/ampersandAmpersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -123,39 +63,9 @@ andSuccessor12:                                   ; preds = %trueBranch11, %andS
 "
 `;
 
-exports[`BinaryExpression * 1`] = `
-"; ModuleID = 'binary-expression/*.ts'
-source_filename = \\"binary-expression/*.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_asterisk() {
-entry:
-  %doubleProduct = alloca double
-  %intProduct = alloca i32
-  store i32 12, i32* %intProduct, align 4
-  %intProduct1 = load i32, i32* %intProduct, align 4
-  %0 = mul i32 %intProduct1, 2
-  store i32 %0, i32* %intProduct, align 4
-  store double 1.200000e+01, double* %doubleProduct, align 8
-  %doubleProduct2 = load double, double* %doubleProduct, align 8
-  %1 = fmul double %doubleProduct2, 1.500000e+00
-  store double %1, double* %doubleProduct, align 8
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression ** 1`] = `
-"; ModuleID = 'binary-expression/**.ts'
-source_filename = \\"binary-expression/**.ts\\"
+exports[`BinaryExpression asteriskAsterisk 1`] = `
+"; ModuleID = 'binary-expression/asteriskAsterisk.ts'
+source_filename = \\"binary-expression/asteriskAsterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -187,9 +97,9 @@ declare double @Math_powdd(double, double)
 "
 `;
 
-exports[`BinaryExpression + 1`] = `
-"; ModuleID = 'binary-expression/+.ts'
-source_filename = \\"binary-expression/+.ts\\"
+exports[`BinaryExpression percent 1`] = `
+"; ModuleID = 'binary-expression/percent.ts'
+source_filename = \\"binary-expression/percent.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -200,319 +110,16 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
 @Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
 
-define void @_plus() {
+define void @_percent() {
 entry:
-  %twoDouble = alloca double
-  %two = alloca i32
-  store i32 2, i32* %two, align 4
-  store double 2.000000e+00, double* %twoDouble, align 8
-  %two1 = load i32, i32* %two, align 4
-  %0 = add i32 4, %two1
-  %twoDouble2 = load double, double* %twoDouble, align 8
-  %1 = fadd double 4.000000e+00, %twoDouble2
-  %two3 = load i32, i32* %two, align 4
-  %2 = add i32 %two3, 2
-  store i32 %2, i32* %two, align 4
-  %twoDouble4 = load double, double* %twoDouble, align 8
-  %3 = fadd double %twoDouble4, 2.000000e+00
-  store double %3, double* %twoDouble, align 8
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression < 1`] = `
-"; ModuleID = 'binary-expression/<.ts'
-source_filename = \\"binary-expression/<.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_lessThan() {
-entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
-  store i32 2, i32* %two, align 4
-  store double 2.000000e+00, double* %twoDouble, align 8
-  store i1 true, i1* %trueValue, align 1
-  %two1 = load i32, i32* %two, align 4
-  %0 = icmp slt i32 %two1, 4
-  %twoDouble2 = load double, double* %twoDouble, align 8
-  %1 = fcmp olt double %twoDouble2, 4.000000e+00
-  %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = zext i1 %trueValue3 to i32
-  %3 = icmp slt i32 %2, 0
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression <= 1`] = `
-"; ModuleID = 'binary-expression/<=.ts'
-source_filename = \\"binary-expression/<=.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_lessThanEquals() {
-entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
-  store i32 2, i32* %two, align 4
-  store double 2.000000e+00, double* %twoDouble, align 8
-  store i1 true, i1* %trueValue, align 1
-  %two1 = load i32, i32* %two, align 4
-  %0 = icmp slt i32 %two1, 4
-  %twoDouble2 = load double, double* %twoDouble, align 8
-  %1 = fcmp olt double %twoDouble2, 4.000000e+00
-  %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = zext i1 %trueValue3 to i32
-  %3 = icmp slt i32 %2, 0
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression === 1`] = `
-"; ModuleID = 'binary-expression/===.ts'
-source_filename = \\"binary-expression/===.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_equalsEqualsEqualsToken() {
-entry:
-  %trueValue = alloca i1
-  %threePointFour = alloca double
-  %four = alloca i32
-  store i32 4, i32* %four, align 4
-  store double 3.400000e+00, double* %threePointFour, align 8
-  store i1 true, i1* %trueValue, align 1
-  %four1 = load i32, i32* %four, align 4
-  %0 = icmp eq i32 %four1, 4
-  %threePointFour2 = load double, double* %threePointFour, align 8
-  %1 = fcmp oeq double %threePointFour2, 3.400000e+00
-  %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = icmp eq i1 %trueValue3, true
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression > 1`] = `
-"; ModuleID = 'binary-expression/>.ts'
-source_filename = \\"binary-expression/>.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_greaterThan() {
-entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
-  store i32 2, i32* %two, align 4
-  store double 2.000000e+00, double* %twoDouble, align 8
-  store i1 true, i1* %trueValue, align 1
-  %two1 = load i32, i32* %two, align 4
-  %0 = icmp sgt i32 %two1, 4
-  %twoDouble2 = load double, double* %twoDouble, align 8
-  %1 = fcmp ogt double %twoDouble2, 4.000000e+00
-  %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = zext i1 %trueValue3 to i32
-  %3 = icmp sgt i32 %2, 0
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression >= 1`] = `
-"; ModuleID = 'binary-expression/>=.ts'
-source_filename = \\"binary-expression/>=.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_greaterThanEquals() {
-entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
-  store i32 2, i32* %two, align 4
-  store double 2.000000e+00, double* %twoDouble, align 8
-  store i1 true, i1* %trueValue, align 1
-  %two1 = load i32, i32* %two, align 4
-  %0 = icmp sge i32 %two1, 4
-  %twoDouble2 = load double, double* %twoDouble, align 8
-  %1 = fcmp oge double %twoDouble2, 4.000000e+00
-  %trueValue3 = load i1, i1* %trueValue, align 1
-  %2 = zext i1 %trueValue3 to i32
-  %3 = icmp sge i32 %2, 0
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression | 1`] = `
-"; ModuleID = 'binary-expression/|.ts'
-source_filename = \\"binary-expression/|.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_bar() {
-entry:
-  %intToInt = alloca i32
-  %intValue = alloca i32
+  %sixDouble = alloca double
   %six = alloca i32
   store i32 6, i32* %six, align 4
+  store double 6.000000e+00, double* %sixDouble, align 8
   %six1 = load i32, i32* %six, align 4
-  %0 = or i32 %six1, 8
-  store i32 %0, i32* %six, align 4
-  %AsInt32 = call i32 @toInt32d(double 3.560000e+00)
-  store i32 %AsInt32, i32* %intValue, align 4
-  store i32 3, i32* %intToInt, align 4
-  ret void
-}
-
-declare i32 @toInt32d(double)
-"
-`;
-
-exports[`BinaryExpression || 1`] = `
-"; ModuleID = 'binary-expression/||.ts'
-source_filename = \\"binary-expression/||.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_barBar() {
-entry:
-  %orResult11 = alloca i32
-  %orResult7 = alloca i32
-  %orResult3 = alloca i1
-  %orResult = alloca i1
-  %six = alloca i32
-  store i32 6, i32* %six, align 4
-  %six1 = load i32, i32* %six, align 4
-  %six1AsBool = icmp ne i32 %six1, 0
-  %0 = xor i1 %six1AsBool, true
-  %1 = xor i1 %0, true
-  store i1 %1, i1* %orResult, align 1
-  br i1 %1, label %orSuccessor, label %orCase
-
-orCase:                                           ; preds = %entry
-  store i1 true, i1* %orResult, align 1
-  br label %orSuccessor
-
-orSuccessor:                                      ; preds = %orCase, %entry
-  %orResult2 = load i1, i1* %orResult, align 1
-  store i1 %orResult2, i1* %orResult3, align 1
-  br i1 %orResult2, label %orSuccessor5, label %orCase4
-
-orCase4:                                          ; preds = %orSuccessor
-  store i1 false, i1* %orResult3, align 1
-  br label %orSuccessor5
-
-orSuccessor5:                                     ; preds = %orCase4, %orSuccessor
-  %orResult6 = load i1, i1* %orResult3, align 1
-  store i32 10, i32* %orResult7, align 4
-  br i1 true, label %orSuccessor9, label %orCase8
-
-orCase8:                                          ; preds = %orSuccessor5
-  store i32 3, i32* %orResult7, align 4
-  br label %orSuccessor9
-
-orSuccessor9:                                     ; preds = %orCase8, %orSuccessor5
-  %orResult10 = load i32, i32* %orResult7, align 4
-  store i32 %orResult10, i32* %orResult11, align 4
-  %orResult10AsBool = icmp ne i32 %orResult10, 0
-  br i1 %orResult10AsBool, label %orSuccessor13, label %orCase12
-
-orCase12:                                         ; preds = %orSuccessor9
-  store i32 1, i32* %orResult11, align 4
-  br label %orSuccessor13
-
-orSuccessor13:                                    ; preds = %orCase12, %orSuccessor9
-  %orResult14 = load i32, i32* %orResult11, align 4
-  ret void
-}
-"
-`;
-
-exports[`BinaryExpression - 1`] = `
-"; ModuleID = 'binary-expression/-.ts'
-source_filename = \\"binary-expression/-.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-
-define void @_minus() {
-entry:
-  %twoDouble = alloca double
-  %two = alloca i32
-  store i32 2, i32* %two, align 4
-  store double 2.000000e+00, double* %twoDouble, align 8
-  %two1 = load i32, i32* %two, align 4
-  %0 = sub i32 4, %two1
-  %twoDouble2 = load double, double* %twoDouble, align 8
-  %1 = fsub double 4.000000e+00, %twoDouble2
-  %two3 = load i32, i32* %two, align 4
-  %2 = sub i32 %two3, 2
-  store i32 %2, i32* %two, align 4
-  %twoDouble4 = load double, double* %twoDouble, align 8
-  %3 = fsub double %twoDouble4, 2.000000e+00
-  store double %3, double* %twoDouble, align 8
+  %0 = srem i32 8, %six1
+  %sixDouble2 = load double, double* %sixDouble, align 8
+  %1 = frem double 8.000000e+00, %sixDouble2
   ret void
 }
 "

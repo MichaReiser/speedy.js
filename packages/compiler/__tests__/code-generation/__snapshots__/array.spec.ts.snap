@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Array [1, 2, 3] 1`] = `
-"; ModuleID = 'array/[1, 2, 3].ts'
-source_filename = \\"array/[1, 2, 3].ts\\"
+exports[`Array arrayLiteral 1`] = `
+"; ModuleID = 'array/arrayLiteral.ts'
+source_filename = \\"array/arrayLiteral.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -37,52 +37,6 @@ declare { i32, i32, i4* }* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
-
-declare void @speedyJsGc()
-
-attributes #0 = { argmemonly nounwind }
-"
-`;
-
-exports[`Array [i] 1`] = `
-"; ModuleID = 'array/[i].ts'
-source_filename = \\"array/[i].ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
-@items = private local_unnamed_addr constant [5 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5]
-
-define void @_arrayElementAccess() {
-entry:
-  %items = alloca [5 x i32]
-  %array = alloca { i32, i32, i4* }*
-  %items1 = getelementptr inbounds [5 x i32], [5 x i32]* %items, i32 0, i32 0
-  %0 = bitcast [5 x i32]* %items to i8*
-  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([5 x i32]* @items to i8*), i32 mul nuw (i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32), i32 5), i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i4* }* @ArrayIi_constructorPii(i32* %items1, i32 5)
-  store { i32, i32, i4* }* %constructorReturnValue, { i32, i32, i4* }** %array, align 4
-  %array2 = load { i32, i32, i4* }*, { i32, i32, i4* }** %array, align 4
-  %array3 = load { i32, i32, i4* }*, { i32, i32, i4* }** %array, align 4
-  %1 = call i32 @ArrayIi_geti({ i32, i32, i4* }* %array3, i32 2)
-  %2 = mul i32 %1, 10
-  call void @ArrayIi_setii({ i32, i32, i4* }* %array2, i32 2, i32 %2)
-  ret void
-}
-
-declare { i32, i32, i4* }* @ArrayIi_constructorPii(i32*, i32)
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
-
-declare i32 @ArrayIi_geti({ i32, i32, i4* }*, i32)
-
-declare void @ArrayIi_setii({ i32, i32, i4* }*, i32, i32)
 
 declare void @speedyJsGc()
 
@@ -131,6 +85,52 @@ declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture r
 declare double @ArrayId_geti({ i32, i32, i4* }*, i32)
 
 declare void @ArrayId_setid({ i32, i32, i4* }*, i32, double)
+
+declare void @speedyJsGc()
+
+attributes #0 = { argmemonly nounwind }
+"
+`;
+
+exports[`Array elementAccess 1`] = `
+"; ModuleID = 'array/elementAccess.ts'
+source_filename = \\"array/elementAccess.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@items = private local_unnamed_addr constant [5 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5]
+
+define void @_arrayElementAccess() {
+entry:
+  %items = alloca [5 x i32]
+  %array = alloca { i32, i32, i4* }*
+  %items1 = getelementptr inbounds [5 x i32], [5 x i32]* %items, i32 0, i32 0
+  %0 = bitcast [5 x i32]* %items to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([5 x i32]* @items to i8*), i32 mul nuw (i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32), i32 5), i32 0, i1 false)
+  %constructorReturnValue = call { i32, i32, i4* }* @ArrayIi_constructorPii(i32* %items1, i32 5)
+  store { i32, i32, i4* }* %constructorReturnValue, { i32, i32, i4* }** %array, align 4
+  %array2 = load { i32, i32, i4* }*, { i32, i32, i4* }** %array, align 4
+  %array3 = load { i32, i32, i4* }*, { i32, i32, i4* }** %array, align 4
+  %1 = call i32 @ArrayIi_geti({ i32, i32, i4* }* %array3, i32 2)
+  %2 = mul i32 %1, 10
+  call void @ArrayIi_setii({ i32, i32, i4* }* %array2, i32 2, i32 %2)
+  ret void
+}
+
+declare { i32, i32, i4* }* @ArrayIi_constructorPii(i32*, i32)
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
+
+declare i32 @ArrayIi_geti({ i32, i32, i4* }*, i32)
+
+declare void @ArrayIi_setii({ i32, i32, i4* }*, i32, i32)
 
 declare void @speedyJsGc()
 
