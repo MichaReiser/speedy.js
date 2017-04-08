@@ -1,3 +1,12 @@
+class Point {
+    x: number;
+    y: number;
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 async function emptyArrayLiteral(): Promise<int> {
     "use speedyjs";
 
@@ -15,6 +24,18 @@ async function newEmptyArray() {
     "use speedyjs";
 
     return new Array<boolean>().length;
+}
+
+async function newArrayOfObjects(x: number) {
+    "use speedyjs";
+    const array = [
+        new Point(x, x),
+        new Point(2.0*x, 2.0*x),
+        new Point(3.0*x, 3.0*x),
+        new Point(4.0*x, 4.0*x)
+    ];
+
+    return array.length;
 }
 
 async function newArrayOfSize(size: int) {
@@ -35,6 +56,19 @@ async function arrayElementAccess(index: int, value: number) {
     const array = new Array<number>(index * 2);
     array[index] = value;
     return array[index];
+}
+
+async function objectArrayElementAccess(x: number) {
+    "use speedyjs";
+    const array = [
+        new Point(x, x),
+        new Point(2.0*x, 2.0*x),
+        new Point(3.0*x, 3.0*x),
+        new Point(4.0*x, 4.0*x)
+    ];
+
+    const tmp = array[0];
+    return tmp.x;
 }
 
 async function arrayFill(size: int, value: number) {
@@ -200,11 +234,21 @@ describe("Array", () => {
             expect(await newArrayWithElements(10, 20, 30)).toBe(3);
             cb();
         });
+
+        it("creates an array containing objects", async(cb) => {
+            expect(await newArrayOfObjects(10)).toBe(4);
+            cb();
+        });
     });
 
     describe("array[x]", () => {
         it("sets and returns the value at the given index", async (cb) => {
             expect(await arrayElementAccess(40, 1000)).toBe(1000);
+            cb();
+        });
+
+        it("returns the object at the given address", async(cb) => {
+            expect(await objectArrayElementAccess(10)).toBe(10);
             cb();
         });
     });

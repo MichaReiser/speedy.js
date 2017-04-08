@@ -1,20 +1,20 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ObjectReference} from "./object-reference";
-import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {toLLVMType} from "../util/types";
-import {ObjectPropertyReference} from "./object-property-reference";
 import {DefaultNameMangler} from "../default-name-mangler";
+import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
+import {ObjectPropertyReference} from "../value/object-property-reference";
+import {ObjectReference} from "../value/object-reference";
+import {toLLVMType} from "./types";
 
-export class ObjectPropertyReferenceBuilder {
+export class ComputedObjectPropertyReferenceBuilder {
     private runtimeFn = false;
 
     private constructor(private property: ts.PropertyAccessExpression, private context: CodeGenerationContext) {
     }
 
     static forProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext) {
-        return new ObjectPropertyReferenceBuilder(property, context);
+        return new ComputedObjectPropertyReferenceBuilder(property, context);
     }
 
     fromRuntime() {
@@ -24,13 +24,14 @@ export class ObjectPropertyReferenceBuilder {
 
     build(objectReference: ObjectReference) {
         const propertyType = this.context.typeChecker.getTypeAtLocation(this.property);
+        const property = this.context.typeChecker.getSymbolAtLocation(this.property);
         const propertyLLVMType = toLLVMType(propertyType, this.context);
         const thisLLVMType = toLLVMType(objectReference.type, this.context);
 
         const getter = this.createGetter(thisLLVMType, propertyLLVMType);
         const setter = this.createSetter(thisLLVMType, propertyLLVMType);
 
-        return new ObjectPropertyReference(propertyType, objectReference, getter, setter);
+        return ObjectPropertyReference.createComputedPropertyReference(propertyType, objectReference, property, getter, setter);
     }
 
     private getNameMangler() {

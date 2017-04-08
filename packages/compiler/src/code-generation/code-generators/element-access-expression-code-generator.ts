@@ -1,7 +1,7 @@
 import * as ts from "typescript";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {CodeGenerationError} from "../../code-generation-error";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ObjectReference} from "../value/object-reference";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {ObjectIndexReference} from "../value/object-index-reference";
 
 /**
@@ -11,8 +11,13 @@ class ElementAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Ele
     syntaxKind = ts.SyntaxKind.ElementAccessExpression;
 
     generate(node: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
-        const object = context.generateValue(node.expression).dereference(context) as ObjectReference;
-        return object.getIndexer(node, context);
+        const value = context.generateValue(node.expression).dereference(context);
+
+        if (value.isObject()) {
+            return value.getIndexer(node, context);
+        }
+
+        throw CodeGenerationError.unsupportedIndexer(node);
     }
 }
 

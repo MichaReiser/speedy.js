@@ -57,6 +57,14 @@ export class RuntimeSystemNameMangler extends BaseNameMangler {
         return super.getParameterTypeCode(parameter);
     }
 
+    protected typeToCode(type: ts.Type) {
+        if (type.flags & ts.TypeFlags.Object) {
+            return "Pv";
+        }
+
+        return super.typeToCode(type);
+    }
+
     protected encodeName(name: string): string {
         return name;
     }

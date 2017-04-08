@@ -10,6 +10,7 @@ import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
 import {CompilationContext} from "../../compilation-context";
+import {getArrayElementType, toLLVMType} from "../util/types";
 
 /**
  * Implements the static methods of the Array<T> class
@@ -28,7 +29,7 @@ export class ArrayClassReference extends ClassReference {
      * Creates an array instance from an array literal
      * @param type the type of the array
      * @param elements the elements that are to be stored in the created array
-     * @param context the code gneeration context
+     * @param context the code generation context
      * @return {ArrayReference} the created array
      */
     static fromLiteral(type: ts.ObjectType, elements: Value[], context: CodeGenerationContext): ArrayReference {
@@ -40,16 +41,25 @@ export class ArrayClassReference extends ClassReference {
         return constructorFunction.invokeWith(elements, context) as ArrayReference;
     }
 
-    static getArrayType(context: CodeGenerationContext) {
+    static getArrayType(arrayType: ts.Type, context: CodeGenerationContext) {
+        const elementType = getArrayElementType(arrayType);
+        let llvmElementType: llvm.Type;
+
+        if (elementType.flags & ts.TypeFlags.Object) {
+            llvmElementType = llvm.Type.getInt8PtrTy(context.llvmContext);
+        } else {
+            llvmElementType = toLLVMType(elementType, context);
+        }
+
         return llvm.StructType.get(context.llvmContext, [
             llvm.Type.getInt32Ty(context.llvmContext),
             llvm.Type.getInt32Ty(context.llvmContext),
-            llvm.Type.getIntNTy(context.llvmContext, context.module.dataLayout.getPointerSize(0)).getPointerTo()
-        ]).getPointerTo();
+            llvmElementType.getPointerTo()
+        ]);
     }
 
     objectFor(pointer: llvm.Value, type: ts.ObjectType) {
-        return new ArrayReference(pointer, type)
+        return new ArrayReference(pointer, type, this)
     }
 
     getFields() {
@@ -64,6 +74,6 @@ export class ArrayClassReference extends ClassReference {
     }
 
     getLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
-        return ArrayClassReference.getArrayType(context);
+        return ArrayClassReference.getArrayType(type, context);
     }
 }

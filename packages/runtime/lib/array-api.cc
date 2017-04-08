@@ -44,7 +44,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructori(int32_t size) {
     return new Array<void*> { size, nullptr };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPvi(void** const elements, int32_t size) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPPvi(void** const elements, int32_t size) {
     return new Array<void*> { size, elements };
 }
 
@@ -156,7 +156,7 @@ DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_pushPdi(Array<double>* const array, dou
     return array->push(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_pushPvi(Array<void*>* const array, void** elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_pushPPvi(Array<void*>* const array, void** elements, int32_t numElements) {
     return array->push(elements, numElements);
 }
 
@@ -176,7 +176,7 @@ DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_unshiftPdi(Array<double>* const array, 
     return array->unshift(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_unshiftPvi(Array<void*>* const array, void** elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_unshiftPPvi(Array<void*>* const array, void** elements, int32_t numElements) {
     return array->unshift(elements, numElements);
 }
 
@@ -319,7 +319,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceii(Array<void*>* const arr
     return array->splice(index, deleteCount);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceiiPvi(Array<void*>* const array, int32_t index, int32_t deleteCount, void** elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceiiPPvi(Array<void*>* const array, int32_t index, int32_t deleteCount, void** elements, int32_t elementsCount) {
     return array->splice(index, deleteCount, elements, elementsCount);
 }
 
@@ -357,26 +357,6 @@ DLL_PUBLIC ALWAYS_INLINE void ArrayId_lengthi(Array<double>* const array, int32_
 
 DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_lengthi(Array<void*>* const array, int32_t size) {
     array->resize(size);
-}
-
-//---------------------------------------------------------------------------------
-// free
-//---------------------------------------------------------------------------------
-
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_free(Array<bool>* array) {
-    delete array;
-}
-
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_free(Array<int32_t>* array) {
-    delete array;
-}
-
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_free(Array<double>* array) {
-    delete array;
-}
-
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_free(Array<void*>* array) {
-    delete array;
 }
 
 #ifdef __cplusplus

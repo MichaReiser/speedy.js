@@ -4,6 +4,7 @@ import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {FunctionReference} from "./function-reference";
 import {CodeGenerationContext} from "../code-generation-context";
+import {ClassReference} from "./class-reference";
 
 /**
  * Represents an object that is stored at a specific address.
@@ -13,7 +14,12 @@ import {CodeGenerationContext} from "../code-generation-context";
 export interface ObjectReference extends AssignableValue {
 
     /**
-     * The type of the object, e.g. Array
+     * The class reference
+     */
+    clazz: ClassReference;
+
+    /**
+     * The (resolved, e.g. generic parameters replaced) type of the object
      */
     type: ts.ObjectType;
 
@@ -30,9 +36,4 @@ export interface ObjectReference extends AssignableValue {
      * @returns the value of the element
      */
     getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference;
-
-    /**
-     * Destructs the object
-     */
-    destruct(context: CodeGenerationContext): void;
 }

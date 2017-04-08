@@ -3,11 +3,13 @@ import * as ts from "typescript";
 import {CodeGenerationError} from "../../code-generation-error";
 import {CodeGenerationContext} from "../code-generation-context";
 import {BuiltInObjectReference} from "./built-in-object-reference";
+import {MathClassReference} from "./math-class-reference";
 import {Primitive} from "./primitive";
 import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
+import {Address} from "./address";
 
 /**
  * Wrapper for the built in Math object
@@ -16,8 +18,8 @@ export class MathObjectReference extends BuiltInObjectReference {
 
     typeName = "Math";
 
-    constructor(objAddr: llvm.Value, type: ts.ObjectType) {
-        super(objAddr, type);
+    constructor(objAddr: llvm.Value, mathType: ts.ObjectType, mathClass: MathClassReference) {
+        super(objAddr, mathType, mathClass);
     }
 
     /**
@@ -47,10 +49,6 @@ export class MathObjectReference extends BuiltInObjectReference {
         }
     }
 
-    destruct() {
-        // no need for free, is a static references
-    }
-
     /**
      * Calls the pow function
      * @param lhs the left hand side value (base)
@@ -62,7 +60,7 @@ export class MathObjectReference extends BuiltInObjectReference {
     static pow(lhs: Value, rhs: Value, numberType: ts.Type, context: CodeGenerationContext) {
         const mathSymbol = context.compilationContext.builtIns.get("Math");
         const mathObject = context.scope.getVariable(mathSymbol!);
-        const mathType = mathObject.type as ts.ObjectType;
+        const mathType = (mathObject as Address).type as ts.ObjectType;
 
         const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
         const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);

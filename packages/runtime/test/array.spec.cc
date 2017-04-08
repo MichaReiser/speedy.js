@@ -9,6 +9,10 @@ class ArrayTests: public ::testing::Test {
 public:
     Array<double>* array;
 
+    void SetUp() {
+        array = nullptr;
+    }
+
     void TearDown() {
         if (array != nullptr) {
             delete array;
@@ -72,6 +76,25 @@ TEST_F(ArrayTests, get_throws_if_the_index_is_out_of_bound) {
     array = new Array<double>(100);
 
     EXPECT_THROW(array->get(1000), std::out_of_range);
+}
+
+TEST_F(ArrayTests, get_for_object_array) {
+    auto* array1 = new Array<double>();
+    auto* array2 = new Array<double>();
+    auto* array3 = new Array<double>();
+
+    void* elements[3] = { array1, array2, array3 };
+    auto* voidArray = new Array<void*>(3, elements);
+
+    EXPECT_EQ(voidArray->size(), 3);
+    EXPECT_EQ(voidArray->get(0), array1);
+    EXPECT_EQ(voidArray->get(1), array2);
+    EXPECT_EQ(voidArray->get(2), array3);
+
+    delete voidArray;
+    delete array1;
+    delete array2;
+    delete array3;
 }
 
 // -----------------------------------------

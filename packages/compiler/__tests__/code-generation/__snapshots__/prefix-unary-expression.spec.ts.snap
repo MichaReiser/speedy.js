@@ -20,11 +20,11 @@ entry:
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
-  %0 = sub i32 %intValue1, 1
-  store i32 %0, i32* %intValue, align 4
+  %sub = sub i32 %intValue1, 1
+  store i32 %sub, i32* %intValue, align 4
   %doubleValue2 = load double, double* %doubleValue, align 8
-  %1 = fsub double %doubleValue2, 1.000000e+00
-  store double %1, double* %doubleValue, align 8
+  %fsub = fsub double %doubleValue2, 1.000000e+00
+  store double %fsub, double* %doubleValue, align 8
   ret void
 }
 "
@@ -50,9 +50,9 @@ entry:
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
-  %0 = sub i32 0, %intValue1
+  %neg = sub i32 0, %intValue1
   %doubleValue2 = load double, double* %doubleValue, align 8
-  %1 = fsub double -0.000000e+00, %doubleValue2
+  %neg3 = fsub double -0.000000e+00, %doubleValue2
   ret void
 }
 "
@@ -80,13 +80,13 @@ entry:
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %boolValue1 = load i1, i1* %boolValue, align 1
-  %0 = xor i1 %boolValue1, true
+  %not = xor i1 %boolValue1, true
   %intValue2 = load i32, i32* %intValue, align 4
   %intValue2AsBool = icmp ne i32 %intValue2, 0
-  %1 = xor i1 %intValue2AsBool, true
-  %doubleValue3 = load double, double* %doubleValue, align 8
-  %doubleValue3AsBool = fcmp one double %doubleValue3, 0.000000e+00
-  %2 = xor i1 %doubleValue3AsBool, true
+  %not3 = xor i1 %intValue2AsBool, true
+  %doubleValue4 = load double, double* %doubleValue, align 8
+  %doubleValue4AsBool = fcmp one double %doubleValue4, 0.000000e+00
+  %not5 = xor i1 %doubleValue4AsBool, true
   ret void
 }
 "
@@ -112,11 +112,11 @@ entry:
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
-  %0 = add i32 %intValue1, 1
-  store i32 %0, i32* %intValue, align 4
+  %add = add i32 %intValue1, 1
+  store i32 %add, i32* %intValue, align 4
   %doubleValue2 = load double, double* %doubleValue, align 8
-  %1 = fadd double %doubleValue2, 1.000000e+00
-  store double %1, double* %doubleValue, align 8
+  %fadd = fadd double %doubleValue2, 1.000000e+00
+  store double %fadd, double* %doubleValue, align 8
   ret void
 }
 "
@@ -144,13 +144,13 @@ entry:
   store double 1.000000e+01, double* %doubleValue, align 8
   store i1 false, i1* %boolValue, align 1
   %intValue1 = load i32, i32* %intValue, align 4
-  %0 = xor i32 %intValue1, -1
+  %not = xor i32 %intValue1, -1
   %boolValue2 = load i1, i1* %boolValue, align 1
   %boolValue2AsInt32 = zext i1 %boolValue2 to i32
-  %1 = xor i32 %boolValue2AsInt32, -1
-  %doubleValue3 = load double, double* %doubleValue, align 8
-  %doubleValue3AsInt32 = call i32 @toInt32d(double %doubleValue3)
-  %2 = xor i32 %doubleValue3AsInt32, -1
+  %not3 = xor i32 %boolValue2AsInt32, -1
+  %doubleValue4 = load double, double* %doubleValue, align 8
+  %doubleValue4AsInt32 = call i32 @toInt32d(double %doubleValue4)
+  %not5 = xor i32 %doubleValue4AsInt32, -1
   ret void
 }
 

@@ -46,13 +46,15 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
         const arraySymbol = builtins.get("Array");
         if (arraySymbol) {
-            context.scope.addClass(ArrayClassReference.create(arraySymbol, context));
+            const arrayClassReference = ArrayClassReference.create(arraySymbol, context);
+            context.scope.addClass(arraySymbol, arrayClassReference);
+            context.scope.addClass(builtins.get("ArrayConstructor")!, arrayClassReference);
         }
 
         const mathSymbol = builtins.get("Math");
         if (mathSymbol) {
             const mathClassReference = MathClassReference.create(mathSymbol, context);
-            context.scope.addClass(mathClassReference);
+            context.scope.addClass(mathSymbol, mathClassReference);
             context.scope.addVariable(mathSymbol, mathClassReference.createGlobalVariable(mathSymbol, context));
         }
     }

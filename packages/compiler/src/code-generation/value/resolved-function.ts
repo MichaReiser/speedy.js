@@ -162,7 +162,7 @@ function isInstanceMethod(signature: ts.Signature) {
         return false;
     }
 
-    if (signature.getDeclaration().kind === ts.SyntaxKind.MethodSignature) {
+    if (signature.getDeclaration().kind === ts.SyntaxKind.MethodSignature || signature.getDeclaration().kind === ts.SyntaxKind.MethodDeclaration) {
         const modifiers = signature.declaration.modifiers || [] as ts.Modifier[];
         return !modifiers.find(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword);
     }
@@ -171,7 +171,7 @@ function isInstanceMethod(signature: ts.Signature) {
 }
 
 function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeChecker: TypeChecker) {
-    if (declaration.kind === ts.SyntaxKind.ConstructSignature) {
+    if (declaration.kind === ts.SyntaxKind.ConstructSignature || declaration.kind === ts.SyntaxKind.Constructor) {
         return "constructor";
     } else {
         assert(declaration.name, "Anonymous functions are not supported");

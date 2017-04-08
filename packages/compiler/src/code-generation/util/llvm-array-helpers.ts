@@ -1,7 +1,8 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Allocation} from "../value/allocation";
+import {Address} from "../value/address";
+import {sizeof} from "./types";
 
 /**
  * Allocates a llvm array in the entry block of the current function and stores the passed in elements in the array
@@ -14,7 +15,7 @@ import {Allocation} from "../value/allocation";
 function allocateLlvmArrayWith(elements: llvm.Value[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.Value {
     const ZERO = llvm.ConstantInt.get(context.llvmContext, 0);
     const arrayType = llvm.ArrayType.get(elementType, elements.length);
-    const allocation = Allocation.createAllocaInstInEntryBlock(arrayType, context.scope, name);
+    const allocation = Address.createAllocaInstInEntryBlock(arrayType, context.scope, name);
 
     const areAllElementsConstants = elements.every(value => value instanceof llvm.Constant);
     const array = context.builder.createInBoundsGEP(allocation, [ZERO, ZERO], name);
@@ -49,18 +50,6 @@ function assignFromConstantArray(arrayAllocation: llvm.AllocaInst, elements: llv
         llvm.ConstantInt.get(context.llvmContext, 0),
         llvm.ConstantInt.getFalse(context.llvmContext)
     ]);
-}
-
-/**
- * Computes the size of the given type
- * http://stackoverflow.com/questions/14608250/how-can-i-find-the-size-of-a-type
- * @param type the type of which the size is to be computed
- * @param context the code generation context
- * @return {Value} the value containing the size of the type
- */
-function sizeof(type: llvm.Type, context: CodeGenerationContext) {
-    const size = context.builder.createInBoundsGEP(type, llvm.ConstantPointerNull.get(type.getPointerTo()), [llvm.ConstantInt.get(context.llvmContext, 1)]);
-    return context.builder.createPtrToInt(size, llvm.Type.getInt32Ty(context.llvmContext));
 }
 
 export function llvmArrayValue(elements: llvm.Value[] | ts.Node[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.Value {

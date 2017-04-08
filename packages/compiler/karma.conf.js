@@ -41,7 +41,10 @@ module.exports = function (config) {
                         test: /\.ts$/,
                         loader: "speedyjs-loader",
                         options: {
-                            tsconfig: path.resolve(__dirname, "__integrationtests__/tsconfig.json")
+                            tsconfig: path.resolve(__dirname, "__integrationtests__/tsconfig.json"),
+                            speedyJS: {
+                                optimizationLevel: 2
+                            }
                         }
                     }
                 ]

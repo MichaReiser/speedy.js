@@ -6,7 +6,7 @@ import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationError} from "../../code-generation-error";
 import {MathObjectReference} from "../value/math-object-reference";
 import {Primitive} from "../value/primitive";
-import {Allocation} from "../value/allocation";
+import {Address} from "../value/address";
 
 function isAssignment(operatorToken: ts.BinaryOperatorToken) {
     return operatorToken.kind === ts.SyntaxKind.EqualsToken ||
@@ -40,7 +40,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
 
         switch (binaryExpression.operatorToken.kind) {
             case ts.SyntaxKind.AmpersandAmpersandToken: {
-                const andResult = Allocation.createInEntryBlock(resultType, context, "andResult");
+                const andResult = Address.createAllocationInEntryBlock(resultType, context, "andResult");
                 const leftValue = left.generateIR(context);
                 andResult.generateAssignmentIR(leftValue, context);
 
@@ -67,9 +67,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.AsteriskEqualsToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createMul(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createMul(left.generateIR(context), right.generateIR(context), "mul");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFMul(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFMul(left.generateIR(context), right.generateIR(context), "mul");
                 }
 
                 break;
@@ -91,13 +91,13 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const right = context.generateValue(binaryExpression.right);
                 const lhsIntValue = Primitive.toInt32(left, leftType, intType, context).generateIR();
                 const rhsIntValue = Primitive.toInt32(right, rightType, intType, context).generateIR();
-                result = context.builder.createOr(lhsIntValue, rhsIntValue);
+                result = context.builder.createOr(lhsIntValue, rhsIntValue, "or");
 
                 break;
             }
 
             case ts.SyntaxKind.BarBarToken: {
-                const orResult = Allocation.createInEntryBlock(resultType, context, "orResult");
+                const orResult = Address.createAllocationInEntryBlock(resultType, context, "orResult");
                 const leftValue = left.generateIR(context);
                 orResult.generateAssignmentIR(leftValue, context);
 
@@ -124,9 +124,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.EqualsEqualsEqualsToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
-                    result = context.builder.createICmpEQ(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createICmpEQ(left.generateIR(context), right.generateIR(context), "cmpEQ");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOEQ(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFCmpOEQ(left.generateIR(context), right.generateIR(context), "cmpEQ");
                 }
 
                 break;
@@ -135,9 +135,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.ExclamationEqualsEqualsToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
-                    result = context.builder.createICmpNE(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createICmpNE(left.generateIR(context), right.generateIR(context), "cmpNE");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpONE(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFCmpONE(left.generateIR(context), right.generateIR(context), "cmpNE");
                 }
 
                 break;
@@ -146,11 +146,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.GreaterThanToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSGT(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)));
+                    result = context.builder.createICmpSGT(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), "cmpGT");
                 } else if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSGT(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createICmpSGT(left.generateIR(context), right.generateIR(context), "cmpGT");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOGT(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFCmpOGT(left.generateIR(context), right.generateIR(context), "cmpGT");
                 }
 
                 break;
@@ -159,11 +159,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.GreaterThanEqualsToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSGE(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)));
+                    result = context.builder.createICmpSGE(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), "cmpGE");
                 } else if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSGE(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createICmpSGE(left.generateIR(context), right.generateIR(context), "cmpGE");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOGE(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFCmpOGE(left.generateIR(context), right.generateIR(context), "cmpGE");
                 }
 
                 break;
@@ -172,11 +172,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.LessThanToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSLT(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)));
+                    result = context.builder.createICmpSLT(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), "cmpLT");
                 } else if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSLT(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createICmpSLT(left.generateIR(context), right.generateIR(context), "cmpLT");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOLT(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFCmpOLT(left.generateIR(context), right.generateIR(context), "cmpLT");
                 }
 
                 break;
@@ -185,11 +185,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.LessThanEqualsToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSLE(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)));
+                    result = context.builder.createICmpSLE(context.builder.createZExt(left.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(right.generateIR(context), llvm.Type.getInt32Ty(context.llvmContext)), "cmpLE");
                 } else if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createICmpSLE(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createICmpSLE(left.generateIR(context), right.generateIR(context), "cmpLE");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFCmpOLE(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFCmpOLE(left.generateIR(context), right.generateIR(context), "cmpLE");
                 }
 
                 break;
@@ -199,9 +199,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.MinusToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSub(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createSub(left.generateIR(context), right.generateIR(context), "sub");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFSub(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFSub(left.generateIR(context), right.generateIR(context), "fsub");
                 }
 
                 break;
@@ -210,9 +210,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.PercentToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSRem(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createSRem(left.generateIR(context), right.generateIR(context), "srem");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFRem(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFRem(left.generateIR(context), right.generateIR(context), "frem");
                 }
 
                 break;
@@ -222,9 +222,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.PlusToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createAdd(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createAdd(left.generateIR(context), right.generateIR(context), "add");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFAdd(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFAdd(left.generateIR(context), right.generateIR(context), "fadd");
                 }
 
                 break;
@@ -234,9 +234,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.SlashToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
-                    result = context.builder.createSDiv(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createSDiv(left.generateIR(context), right.generateIR(context), "sdiv");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
-                    result = context.builder.createFDiv(left.generateIR(context), right.generateIR(context));
+                    result = context.builder.createFDiv(left.generateIR(context), right.generateIR(context), "div");
                 }
 
                 break;

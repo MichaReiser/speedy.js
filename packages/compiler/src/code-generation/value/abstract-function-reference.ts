@@ -9,6 +9,7 @@ import {AssignableValue, Value} from "./value";
 import {Primitive} from "./primitive";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
+import {CompilationContext} from "../../compilation-context";
 
 /**
  * Base class for function references. Handles the coercion of the argument values to the expected types of the function parametes
@@ -39,7 +40,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     invoke(callExpression: ts.CallExpression | ts.NewExpression, callerContext: CodeGenerationContext): void | Value {
         const resolvedSignature = callerContext.typeChecker.getResolvedSignature(callExpression);
-        const resolvedFunction = createResolvedFunctionFromSignature(resolvedSignature, callerContext.compilationContext, this.classType);
+        const resolvedFunction = this.getResolvedFunctionFromSignature(resolvedSignature, callerContext.compilationContext);
 
         const passedArguments = this.getCoercedCallArguments(callExpression.arguments || [] as ts.Node[], resolvedFunction, callerContext);
         return this.invokeResolvedFunction(resolvedFunction, passedArguments, callerContext);
@@ -47,6 +48,10 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     invokeWith(args: Value[], callerContext: CodeGenerationContext): void | Value {
         return this.invokeResolvedFunction(this.getResolvedFunction(callerContext), args, callerContext);
+    }
+
+    protected getResolvedFunctionFromSignature(signature: ts.Signature, compilationContext: CompilationContext): ResolvedFunction {
+        return createResolvedFunctionFromSignature(signature, compilationContext, this.classType);
     }
 
     protected getCoercedCallArguments(args: ts.Node[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {

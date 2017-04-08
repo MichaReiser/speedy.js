@@ -2,15 +2,14 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
+import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
+import {ObjectIndexReferenceBuilder} from "../util/object-index-reference-builder";
 import {getArrayElementType} from "../util/types";
 import {ArrayClassReference} from "./array-class-reference";
 import {BuiltInObjectReference} from "./built-in-object-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
-import {ObjectIndexReferenceBuilder} from "./object-index-reference-builder";
 import {ObjectPropertyReference} from "./object-property-reference";
-import {ObjectPropertyReferenceBuilder} from "./object-property-reference-builder";
 import {UnresolvedMethodReference} from "./unresolved-method-reference";
 
 /**
@@ -23,12 +22,13 @@ export class ArrayReference extends BuiltInObjectReference {
     /**
      * Creates a new instance
      * @param objectAddress the address of the array object
-     * @param type the array type (instantiated)
+     * @param arrayType the type of the array
+     * @param arrayClass the arrayClass
      */
-    constructor(objectAddress: llvm.Value, type: ts.ObjectType) {
-        super(objectAddress, type);
+    constructor(objectAddress: llvm.Value, arrayType: ts.ObjectType, arrayClass: ArrayClassReference) {
+        super(objectAddress, arrayType, arrayClass);
 
-        this.elementType = getArrayElementType(type);
+        this.elementType = getArrayElementType(arrayType);
     }
 
 
@@ -54,7 +54,7 @@ export class ArrayReference extends BuiltInObjectReference {
     protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference {
         switch (symbol.name) {
             case "length":
-                return ObjectPropertyReferenceBuilder
+                return ComputedObjectPropertyReferenceBuilder
                     .forProperty(propertyAccess, context)
                     .fromRuntime()
                     .build(this);
@@ -69,20 +69,5 @@ export class ArrayReference extends BuiltInObjectReference {
             .forElement(elementAccessExpression, context)
             .fromRuntime()
             .build(this);
-    }
-
-    /**
-     * Inserts the instruction that releases the memory allocated by the array
-     */
-    destruct(context: CodeGenerationContext) {
-        const nameMangler = new RuntimeSystemNameMangler(context.compilationContext);
-        const fnName = nameMangler.mangleMethodName(this.type, "free", []);
-
-        const deleteFunction = context.module.getOrInsertFunction(
-            fnName,
-            llvm.FunctionType.get(llvm.Type.getVoidTy(context.llvmContext), [ArrayClassReference.getArrayType(context)], false)
-        );
-
-        context.builder.createCall(deleteFunction, [this.generateIR()]);
     }
 }
