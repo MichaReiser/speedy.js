@@ -72,8 +72,8 @@ entry:
   %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
   store { i32, i32, i32* }* %array2, { i32, i32, i32* }** %other, align 4
   %other3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %other, align 4
-  %1 = call i32 @ArrayIi_geti({ i32, i32, i32* }* %other3, i32 2)
-  store i32 %1, i32* %value, align 4
+  %\\"[i]\\" = call i32 @ArrayIi_geti({ i32, i32, i32* }* %other3, i32 2)
+  store i32 %\\"[i]\\", i32* %value, align 4
   ret void
 }
 
@@ -117,8 +117,8 @@ entry:
   store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
   %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
   %array3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %1 = call i32 @ArrayIi_geti({ i32, i32, i32* }* %array3, i32 2)
-  %mul = mul i32 %1, 10
+  %\\"[i]\\" = call i32 @ArrayIi_geti({ i32, i32, i32* }* %array3, i32 2)
+  %mul = mul i32 %\\"[i]\\", 10
   call void @ArrayIi_setii({ i32, i32, i32* }* %array2, i32 2, i32 %mul)
   ret void
 }
@@ -199,8 +199,8 @@ entry:
   %array1 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
   call void @ArrayId_lengthi({ i32, i32, double* }* %array1, i32 100)
   %array2 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
-  %0 = call i32 @ArrayId_length({ i32, i32, double* }* %array2)
-  store i32 %0, i32* %i, align 4
+  %length = call i32 @ArrayId_length({ i32, i32, double* }* %array2)
+  store i32 %length, i32* %i, align 4
   ret void
 }
 

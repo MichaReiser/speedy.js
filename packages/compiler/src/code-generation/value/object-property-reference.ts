@@ -13,13 +13,14 @@ export abstract class ObjectPropertyReference implements AssignableValue {
     /**
      * Creates a computed property
      * @param propertyType the type of the property
-     * @param object the objec to which the property belongs
+     * @param object the object to which the property belongs
+     * @param property the property symbol
      * @param getter the getter to access the property
      * @param setter the setter to change the value of the property
      * @return the property reference
      */
-    static createComputedPropertyReference(propertyType: ts.Type, object: ObjectReference, getter: llvm.Function | undefined, setter: llvm.Function | undefined) {
-        return new ComputedObjectPropertyReference(propertyType, object, getter, setter);
+    static createComputedPropertyReference(propertyType: ts.Type, object: ObjectReference, property: ts.Symbol, getter: llvm.Function | undefined, setter: llvm.Function | undefined) {
+        return new ComputedObjectPropertyReference(propertyType, object, property, getter, setter);
     }
 
     static createFieldProperty(propertyType: ts.Type, object: ObjectReference, property: ts.Symbol) {
@@ -68,12 +69,12 @@ export abstract class ObjectPropertyReference implements AssignableValue {
  * Backs a computed property, e.g. one that is implemented using get index() or one that resits in the runtime
  */
 class ComputedObjectPropertyReference extends ObjectPropertyReference {
-    constructor(propertyType: ts.Type, object: ObjectReference, private getter: llvm.Function | undefined, private setter: llvm.Function | undefined) {
+    constructor(propertyType: ts.Type, object: ObjectReference, private property: ts.Symbol, private getter: llvm.Function | undefined, private setter: llvm.Function | undefined) {
         super(propertyType, object);
     }
 
     protected getValue(context: CodeGenerationContext): Value {
-        return context.call(this.getter!, [this.object], this.propertyType)!;
+        return context.call(this.getter!, [this.object], this.propertyType, this.property.name)!;
     }
 
     protected setValue(value: Value, context: CodeGenerationContext): void {

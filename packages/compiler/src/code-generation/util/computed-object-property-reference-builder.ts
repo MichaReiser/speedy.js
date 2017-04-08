@@ -24,13 +24,14 @@ export class ComputedObjectPropertyReferenceBuilder {
 
     build(objectReference: ObjectReference) {
         const propertyType = this.context.typeChecker.getTypeAtLocation(this.property);
+        const property = this.context.typeChecker.getSymbolAtLocation(this.property);
         const propertyLLVMType = toLLVMType(propertyType, this.context);
         const thisLLVMType = toLLVMType(objectReference.type, this.context);
 
         const getter = this.createGetter(thisLLVMType, propertyLLVMType);
         const setter = this.createSetter(thisLLVMType, propertyLLVMType);
 
-        return ObjectPropertyReference.createComputedPropertyReference(propertyType, objectReference, getter, setter);
+        return ObjectPropertyReference.createComputedPropertyReference(propertyType, objectReference, property, getter, setter);
     }
 
     private getNameMangler() {

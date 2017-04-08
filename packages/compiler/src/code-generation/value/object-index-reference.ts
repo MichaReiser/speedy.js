@@ -17,7 +17,7 @@ export class ObjectIndexReference implements AssignableValue {
     }
 
     getValue(context: CodeGenerationContext): Value {
-        return context.call(this.getter!, [this.object, this.index], this.type)!;
+        return context.call(this.getter!, [this.object, this.index], this.type, "[i]")!;
     }
 
     generateAssignmentIR(value: Value, context: CodeGenerationContext): void {

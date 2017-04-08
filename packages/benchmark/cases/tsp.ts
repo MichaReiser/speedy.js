@@ -1,8 +1,5 @@
 class Point {
-    x: int;
-    y: int;
-
-    constructor(x: int, y: int) {
+    constructor(private x: int, private y: int) {
         this.x = x;
         this.y = y;
     }
