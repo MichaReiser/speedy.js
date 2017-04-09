@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionalExpression boolean-condition 1`] = `
+"; ModuleID = 'conditional-expression/boolean-condition.ts'
+source_filename = \\"conditional-expression/boolean-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @_booleanConditionalExpression() {
+entry:
+  %conditionResult5 = alloca double
+  %conditionResult1 = alloca i32
+  %conditionResult = alloca i1
+  br i1 true, label %whenTrue, label %whenFalse
+
+whenTrue:                                         ; preds = %entry
+  store i1 true, i1* %conditionResult, align 1
+  br label %successor
+
+whenFalse:                                        ; preds = %entry
+  store i1 false, i1* %conditionResult, align 1
+  br label %successor
+
+successor:                                        ; preds = %whenFalse, %whenTrue
+  br i1 true, label %whenTrue2, label %whenFalse3
+
+whenTrue2:                                        ; preds = %successor
+  store i32 1, i32* %conditionResult1, align 4
+  br label %successor4
+
+whenFalse3:                                       ; preds = %successor
+  store i32 2, i32* %conditionResult1, align 4
+  br label %successor4
+
+successor4:                                       ; preds = %whenFalse3, %whenTrue2
+  br i1 true, label %whenTrue6, label %whenFalse7
+
+whenTrue6:                                        ; preds = %successor4
+  store double 1.000000e+00, double* %conditionResult5, align 8
+  br label %successor8
+
+whenFalse7:                                       ; preds = %successor4
+  store double 2.000000e+00, double* %conditionResult5, align 8
+  br label %successor8
+
+successor8:                                       ; preds = %whenFalse7, %whenTrue6
+  ret void
+}
+"
+`;
+
+exports[`ConditionalExpression int-condition 1`] = `
+"; ModuleID = 'conditional-expression/int-condition.ts'
+source_filename = \\"conditional-expression/int-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @_intConditionalExpression() {
+entry:
+  %conditionResult5 = alloca double
+  %conditionResult1 = alloca i32
+  %conditionResult = alloca i1
+  br i1 true, label %whenTrue, label %whenFalse
+
+whenTrue:                                         ; preds = %entry
+  store i1 true, i1* %conditionResult, align 1
+  br label %successor
+
+whenFalse:                                        ; preds = %entry
+  store i1 false, i1* %conditionResult, align 1
+  br label %successor
+
+successor:                                        ; preds = %whenFalse, %whenTrue
+  br i1 true, label %whenTrue2, label %whenFalse3
+
+whenTrue2:                                        ; preds = %successor
+  store i32 1, i32* %conditionResult1, align 4
+  br label %successor4
+
+whenFalse3:                                       ; preds = %successor
+  store i32 2, i32* %conditionResult1, align 4
+  br label %successor4
+
+successor4:                                       ; preds = %whenFalse3, %whenTrue2
+  br i1 true, label %whenTrue6, label %whenFalse7
+
+whenTrue6:                                        ; preds = %successor4
+  store double 1.000000e+00, double* %conditionResult5, align 8
+  br label %successor8
+
+whenFalse7:                                       ; preds = %successor4
+  store double 2.000000e+00, double* %conditionResult5, align 8
+  br label %successor8
+
+successor8:                                       ; preds = %whenFalse7, %whenTrue6
+  ret void
+}
+"
+`;
+
+exports[`ConditionalExpression number-condition 1`] = `
+"; ModuleID = 'conditional-expression/number-condition.ts'
+source_filename = \\"conditional-expression/number-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @_intConditionalExpression() {
+entry:
+  %conditionResult5 = alloca double
+  %conditionResult1 = alloca i32
+  %conditionResult = alloca i1
+  br i1 true, label %whenTrue, label %whenFalse
+
+whenTrue:                                         ; preds = %entry
+  store i1 true, i1* %conditionResult, align 1
+  br label %successor
+
+whenFalse:                                        ; preds = %entry
+  store i1 false, i1* %conditionResult, align 1
+  br label %successor
+
+successor:                                        ; preds = %whenFalse, %whenTrue
+  br i1 true, label %whenTrue2, label %whenFalse3
+
+whenTrue2:                                        ; preds = %successor
+  store i32 1, i32* %conditionResult1, align 4
+  br label %successor4
+
+whenFalse3:                                       ; preds = %successor
+  store i32 2, i32* %conditionResult1, align 4
+  br label %successor4
+
+successor4:                                       ; preds = %whenFalse3, %whenTrue2
+  br i1 true, label %whenTrue6, label %whenFalse7
+
+whenTrue6:                                        ; preds = %successor4
+  store double 1.000000e+00, double* %conditionResult5, align 8
+  br label %successor8
+
+whenFalse7:                                       ; preds = %successor4
+  store double 2.000000e+00, double* %conditionResult5, align 8
+  br label %successor8
+
+successor8:                                       ; preds = %whenFalse7, %whenTrue6
+  ret void
+}
+"
+`;

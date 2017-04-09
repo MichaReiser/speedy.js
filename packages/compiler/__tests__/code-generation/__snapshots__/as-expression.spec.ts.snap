@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AsExpression as-int 1`] = `
+"; ModuleID = 'as-expression/as-int.ts'
+source_filename = \\"as-expression/as-int.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @_asInt() {
+entry:
+  %intValue = alloca i32
+  %AsInt32 = call i32 @toInt32d(double 3.212000e+00)
+  store i32 %AsInt32, i32* %intValue, align 4
+  ret void
+}
+
+declare i32 @toInt32d(double)
+"
+`;
+
+exports[`AsExpression as-number 1`] = `
+"; ModuleID = 'as-expression/as-number.ts'
+source_filename = \\"as-expression/as-number.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+
+define void @_asNumber() {
+entry:
+  %numberValue = alloca double
+  store double 3.000000e+00, double* %numberValue, align 8
+  ret void
+}
+"
+`;

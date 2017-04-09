@@ -39,6 +39,16 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         let result: llvm.Value | undefined;
 
         switch (binaryExpression.operatorToken.kind) {
+
+            case ts.SyntaxKind.AmpersandToken:
+            case ts.SyntaxKind.AmpersandEqualsToken: {
+                const leftInt = Primitive.toInt32(left, leftType, resultType, context);
+                const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context);
+
+                result = context.builder.createAnd(leftInt.generateIR(), rightInt.generateIR(), "and");
+                break;
+            }
+
             case ts.SyntaxKind.AmpersandAmpersandToken: {
                 const andResult = Address.createAllocationInEntryBlock(resultType, context, "andResult");
                 const leftValue = left.generateIR(context);
@@ -121,6 +131,16 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            case ts.SyntaxKind.CaretEqualsToken:
+            case ts.SyntaxKind.CaretToken: {
+                const leftInt = Primitive.toInt32(left, leftType, resultType, context);
+                const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context);
+
+                result = context.builder.createXor(leftInt.generateIR(), rightInt.generateIR(), "xor");
+
+                break;
+            }
+
             case ts.SyntaxKind.EqualsEqualsEqualsToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
@@ -169,6 +189,15 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken: {
+                const leftInt = Primitive.toInt32(left, leftType, resultType, context);
+                const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context);
+
+                result = context.builder.createLShr(leftInt.generateIR(), rightInt.generateIR(), "lshr");
+                break;
+            }
+
             case ts.SyntaxKind.LessThanToken: {
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
@@ -194,6 +223,15 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
 
                 break;
             }
+
+            case ts.SyntaxKind.LessThanLessThanToken:
+            case ts.SyntaxKind.LessThanLessThanEqualsToken:
+                const leftInt = Primitive.toInt32(left, leftType, resultType, context);
+                const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context);
+
+                result = context.builder.createShl(leftInt.generateIR(), rightInt.generateIR(), "shl");
+
+                break;
 
             case ts.SyntaxKind.MinusEqualsToken:
             case ts.SyntaxKind.MinusToken: {

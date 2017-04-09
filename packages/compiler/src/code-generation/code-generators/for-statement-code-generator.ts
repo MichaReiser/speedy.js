@@ -2,6 +2,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Primitive} from "../value/primitive";
 
 class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, void> {
     syntaxKind = ts.SyntaxKind.ForStatement;
@@ -22,7 +23,7 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
             context.builder.setInsertionPoint(forBlock);
 
             const condition = context.generateValue(forStatement.condition).generateIR(context);
-            context.builder.createCondBr(condition, body, successor);
+            context.builder.createCondBr(Primitive.toBoolean(condition, context.typeChecker.getTypeAtLocation(forStatement.condition), context), body, successor);
 
             forEntry = forBlock;
         } else {

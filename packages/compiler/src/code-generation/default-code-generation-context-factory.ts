@@ -13,6 +13,7 @@ import {CompilationContext} from "../compilation-context";
 import {ArrayClassReference} from "./value/array-class-reference";
 import {MathClassReference} from "./value/math-class-reference";
 import {Value} from "./value/value";
+import {Primitive} from "./value/primitive";
 
 const log = debug("DefaultLLVMEmitContextFactory");
 
@@ -56,6 +57,11 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
             const mathClassReference = MathClassReference.create(mathSymbol, context);
             context.scope.addClass(mathSymbol, mathClassReference);
             context.scope.addVariable(mathSymbol, mathClassReference.createGlobalVariable(mathSymbol, context));
+        }
+
+        const nan = builtins.get("NaN");
+        if (nan) {
+            context.scope.addVariable(nan, new Primitive(llvm.ConstantFP.getNaN(llvm.Type.getDoubleTy(context.llvmContext)), context.typeChecker.getDeclaredTypeOfSymbol(nan)));
         }
     }
 

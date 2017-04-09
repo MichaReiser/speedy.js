@@ -1,6 +1,10 @@
 "use strict";
 
 const TEST_CASES = {
+    "simjs": {
+        args: [10],
+        result: 0.7216851827628226
+    },
     "tsp": {
         args: [],
         result: 135751.77804825202
@@ -83,7 +87,7 @@ async function getWasmFunctionForTestCase(caseName) {
         options.speedyJS.totalMemory = testCase.totalMemory;
     }
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true}}!./cases/"+ caseName + ".ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: false, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 

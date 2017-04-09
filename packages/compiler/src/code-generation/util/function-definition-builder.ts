@@ -109,19 +109,24 @@ export class FunctionDefinitionBuilder {
         for (let i = 0; i < this.resolvedFunction.parameters.length; ++i) {
             const parameter = this.resolvedFunction.parameters[i];
             const parameterDeclaration = declaration.parameters[i];
-            const parameterSymbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
+            const declaredParameterSymbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
             const allocation = Address.create(parameter.type, this.context, parameter.name);
 
             assert(!parameter.variadic, "Variadic arguments are only supported for runtime functions but not speedyJS functions");
             allocation.generateAssignmentIR(args[i], this.context);
 
-            this.context.scope.addVariable(parameterSymbol, allocation);
+            if (!parameter.symbol || parameter.symbol.flags & ts.SymbolFlags.Transient) {
+                this.context.scope.addVariable(declaredParameterSymbol, allocation);
+            } else {
+                this.context.scope.addVariable(parameter.symbol, allocation);
+            }
+
             args[i].name = parameter.name;
 
             // a field in a constructor that is marked with private, protected or public. Set the argument value on the field.
-            if (this._this && parameterSymbol.flags & ts.SymbolFlags.Property) {
-                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._this!.clazz.getFieldOffset(parameterSymbol));
-                const fieldAddress = this.context.builder.createInBoundsGEP(this._this.generateIR(this.context), [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset ], `&${parameterSymbol.name}`);
+            if (this._this && declaredParameterSymbol.flags & ts.SymbolFlags.Property) {
+                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._this!.clazz.getFieldOffset(declaredParameterSymbol));
+                const fieldAddress = this.context.builder.createInBoundsGEP(this._this.generateIR(this.context), [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset ], `&${declaredParameterSymbol.name}`);
                 this.context.builder.createAlignedStore(args[i], fieldAddress, Address.getPreferredAlignment(parameter.type, this.context));
             }
         }

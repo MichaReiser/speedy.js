@@ -10,6 +10,8 @@ import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
 import {Address} from "./address";
+import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
+import {ObjectPropertyReference} from "./object-property-reference";
 
 /**
  * Wrapper for the built in Math object
@@ -43,9 +45,26 @@ export class MathObjectReference extends BuiltInObjectReference {
         switch (symbol.name) {
             case "pow":
             case "sqrt":
+            case "log":
+            case "sin":
+            case "cos":
                 return UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type);
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
+        }
+    }
+
+    protected createPropertyReference(symbol: ts.Symbol, propertyAccess: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference {
+        switch (symbol.name) {
+            case "PI":
+                return ComputedObjectPropertyReferenceBuilder
+                    .forProperty(propertyAccess, context)
+                    .readonly()
+                    .fromRuntime()
+                    .build(this);
+
+            default:
+                return this.throwUnsupportedBuiltIn(propertyAccess);
         }
     }
 
