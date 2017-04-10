@@ -56,6 +56,7 @@ export class Primitive implements Value {
         if (valueType.flags & ts.TypeFlags.NumberLike) {
             return context.builder.createFCmpONE(llvmValue, llvm.ConstantFP.get(context.llvmContext, 0), `${llvmValue.name}AsBool`);
         }
+
         throw new Error(`value of type ${context.typeChecker.typeToString(valueType)} cannot be converted to bool`);
     }
 

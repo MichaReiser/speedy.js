@@ -100,6 +100,10 @@ export class CodeGenerationError extends Error {
     static unsupportedIndexer(node: ts.ElementAccessExpression) {
         return CodeGenerationError.createException(node, diagnostics.UnsupportedIndexer);
     }
+
+    static unsupportedCast(node: ts.AsExpression, sourceType: string, targetType: string) {
+        return CodeGenerationError.createException(node, diagnostics.UnsupportedCast, sourceType, targetType);
+    }
 }
 
 const diagnostics = {
@@ -170,5 +174,9 @@ const diagnostics = {
     UnsupportedIndexer: {
         message: "The kind of indexer is not yet supported",
         code: 1000016
+    },
+    UnsupportedCast: {
+        message: "Casting from '%s' to '%s' is not yet supported",
+        code: 1000017
     }
 };

@@ -9,6 +9,7 @@ import {toLLVMType} from "./types";
 
 export class ComputedObjectPropertyReferenceBuilder {
     private runtimeFn = false;
+    private _readonly = false;
 
     private constructor(private property: ts.PropertyAccessExpression, private context: CodeGenerationContext) {
     }
@@ -22,6 +23,11 @@ export class ComputedObjectPropertyReferenceBuilder {
         return this;
     }
 
+    readonly(isReadonly = true) {
+        this._readonly = isReadonly;
+        return this;
+    }
+
     build(objectReference: ObjectReference) {
         const propertyType = this.context.typeChecker.getTypeAtLocation(this.property);
         const property = this.context.typeChecker.getSymbolAtLocation(this.property);
@@ -29,7 +35,11 @@ export class ComputedObjectPropertyReferenceBuilder {
         const thisLLVMType = toLLVMType(objectReference.type, this.context);
 
         const getter = this.createGetter(thisLLVMType, propertyLLVMType);
-        const setter = this.createSetter(thisLLVMType, propertyLLVMType);
+        let setter: llvm.Function | undefined;
+
+        if (!this._readonly) {
+            setter = this.createSetter(thisLLVMType, propertyLLVMType);
+        }
 
         return ObjectPropertyReference.createComputedPropertyReference(propertyType, objectReference, property, getter, setter);
     }

@@ -126,6 +126,74 @@ async function binOrEqualsInts(x:  int, y: int) {
     return x;
 }
 
+async function binAndInts(x:  int, y: int) {
+    "use speedyjs";
+    return x & y;
+}
+
+
+async function binAndNumbers(x:  number, y: number) {
+    "use speedyjs";
+    return x & y;
+}
+
+async function binAndEqualsInts(x:  int, y: int) {
+    "use speedyjs";
+    x &= y;
+    return x;
+}
+
+async function binXorInts(x:  int, y: int) {
+    "use speedyjs";
+    return x ^ y;
+}
+
+
+async function binXorNumbers(x:  number, y: number) {
+    "use speedyjs";
+    return x ^ y;
+}
+
+async function binXorEqualsInts(x:  int, y: int) {
+    "use speedyjs";
+    x ^= y;
+    return x;
+}
+
+async function binZeroFillRightShiftInts(x:  int, y: int) {
+    "use speedyjs";
+    return x >>> y;
+}
+
+
+async function binZeroFillRightShiftNumbers(x:  number, y: number) {
+    "use speedyjs";
+    return x >>> y;
+}
+
+async function binZeroFillRightShiftEqualsInts(x:  int, y: int) {
+    "use speedyjs";
+    x >>>= y;
+    return x;
+}
+
+async function binLeftShiftInt(x:  int, y: int) {
+    "use speedyjs";
+    return x << y;
+}
+
+
+async function binLeftShiftNumber(x:  number, y: number) {
+    "use speedyjs";
+    return x << y;
+}
+
+async function binLeftShiftNumberEquals(x:  int, y: int) {
+    "use speedyjs";
+    x <<= y;
+    return x;
+}
+
 async function orBooleans(x:  boolean, y: boolean) {
     "use speedyjs";
     return x || y;
@@ -498,6 +566,86 @@ describe("BinaryExpression", () => {
         //     expect(await orEqualsNumbers(3.495, 0)).toBe(3.495 | 0);
         //     cb();
         // });
+    });
+
+    describe("&", () => {
+        it("performs a binary and on an int", async (cb) => {
+            expect(await binAndInts(10, 16)).toBe(10 & 16);
+            cb();
+        });
+
+        it("performs a binary and on the to int converted number", async (cb) => {
+            expect(await binAndNumbers(3.495, 2)).toBe(3.495 & 2);
+            expect(await binAndNumbers(Number.MAX_SAFE_INTEGER, 2)).toBe(Number.MAX_SAFE_INTEGER & 2);
+            cb();
+        });
+    });
+
+    describe("&=", () => {
+        it("performs a binary and and assigns the result to the variable", async (cb) => {
+            expect(await binAndEqualsInts(10, 16)).toBe(10 & 16);
+            cb();
+        });
+    });
+
+    describe("^", () => {
+        it("performs a binary xor on an int", async (cb) => {
+            expect(await binXorInts(10, 16)).toBe(10 ^ 16);
+            cb();
+        });
+
+        it("performs a binary and on the to int converted number", async (cb) => {
+            expect(await binXorNumbers(3.495, 2)).toBe(3.495 ^ 2);
+            expect(await binXorNumbers(Number.MAX_SAFE_INTEGER, 2)).toBe(Number.MAX_SAFE_INTEGER ^ 2);
+            cb();
+        });
+    });
+
+    describe("^=", () => {
+        it("performs a binary and and assigns the result to the variable", async (cb) => {
+            expect(await binXorEqualsInts(10, 16)).toBe(10 ^ 16);
+            cb();
+        });
+    });
+
+    describe(">>>", () => {
+        it("performs a right shift and fills the bits on the left with zero on an int", async (cb) => {
+            expect(await binZeroFillRightShiftInts(10, 16)).toBe(10 >>> 16);
+            cb();
+        });
+
+        it("converts the number to an int32 and performs a right shift and fills the bits on the left with zero on an int", async (cb) => {
+            expect(await binZeroFillRightShiftNumbers(3.495, 2)).toBe(3.495 >>> 2);
+            expect(await binZeroFillRightShiftNumbers(Number.MAX_SAFE_INTEGER, 2)).toBe(Number.MAX_SAFE_INTEGER >>> 2);
+            cb();
+        });
+    });
+
+    describe(">>>=", () => {
+        it("performs a right shift and fills the bits on the left with zero and assigns the result to the variable", async (cb) => {
+            expect(await binZeroFillRightShiftEqualsInts(10, 16)).toBe(10 >>> 16);
+            cb();
+        });
+    });
+
+    describe("<<", () => {
+        it("performs a left shift on an int", async (cb) => {
+            expect(await binLeftShiftInt(10, 16)).toBe(10 << 16);
+            cb();
+        });
+
+        it("converts the number to an int32 and performs a left shift", async (cb) => {
+            expect(await binLeftShiftNumber(3.495, 2)).toBe(3.495 << 2);
+            expect(await binLeftShiftNumber(Number.MAX_SAFE_INTEGER, 2)).toBe(Number.MAX_SAFE_INTEGER << 2);
+            cb();
+        });
+    });
+
+    describe("<<=", () => {
+        it("performs a left shift and assigns the result to the variable", async (cb) => {
+            expect(await binLeftShiftNumberEquals(10, 16)).toBe(10 << 16);
+            cb();
+        });
     });
 
     describe("===", () => {
