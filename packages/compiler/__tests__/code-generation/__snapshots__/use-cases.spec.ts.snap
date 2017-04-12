@@ -58,7 +58,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return7
 }
 
-declare hidden %class.Array* @ArrayId_constructorPdi(double* dereferenceable(12), i32)
+declare hidden %class.Array* @ArrayId_constructorPdi(double*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
@@ -711,7 +711,7 @@ entry:
 
 declare i8* @malloc(i32)
 
-declare hidden %class.Array* @ArrayIPv_constructorPPvi(%class.Point** dereferenceable(12), i32)
+declare hidden %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32)
 
 define linkonce_odr double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %points) {
 entry:
@@ -873,7 +873,7 @@ declare hidden double @Math_sqrtd(double) #0
 declare hidden %class.Array* @ArrayIPv_spliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #0
 
 ; Function Attrs: alwaysinline
-declare hidden i32 @ArrayIPv_pushPPvi(%class.Array* nocapture readonly dereferenceable(12), %class.Point** dereferenceable(12), i32) #0
+declare hidden i32 @ArrayIPv_pushPPvi(%class.Array* nocapture readonly dereferenceable(12), %class.Point**, i32) #0
 
 define linkonce_odr double @\\"use-cases/tsp.ts$11computeCost5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %tour) {
 entry:

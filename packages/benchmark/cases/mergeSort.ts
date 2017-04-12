@@ -10056,36 +10056,6 @@ function merge(array: number[], lower: int, middle: int, upper: int, sorted: num
             ++j;
         }
 
-        // does chrome create two branches, one if i has been incremented and another if j has been incremented?
     }
-
-    // while (k < upper && i < middle && j < upper) {
-    //     if (array[i] <= array[j]) {
-    //         while (k < upper && i < middle && array[i] <= array[j]) {
-    //             sorted[k] = array[i];
-    //             ++i;
-    //             ++k;
-    //         }
-    //     } else {
-    //         while (k < upper && j < upper && array[i] > array[j]) {
-    //             // j element is smaller or i has reached the middle
-    //             sorted[k] = array[j];
-    //             ++j;
-    //             ++k;
-    //         }
-    //     }
-    //
-    //     // does chrome create two branches, one if i has been incremented and another if j has been incremented?
-    // }
-    //
-    // for (; i < middle; ++k) {
-    //     sorted[k] = array[i];
-    //     ++i;
-    // }
-    //
-    // for (; j < upper; ++k) {
-    //     sorted[k] = array[j];
-    //     ++j;
-    // }
 }
 

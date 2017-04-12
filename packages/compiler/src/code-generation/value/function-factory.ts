@@ -122,13 +122,13 @@ export class FunctionFactory {
             const parameter = parameters[i];
             const parameterDefinition = resolvedFunction.parameters[i - argumentOffset];
 
+            if (parameterDefinition.variadic) {
+                break;
+            }
+
             if (parameterDefinition.type.flags & ts.TypeFlags.Object) {
                 const classReference = context.resolveClass(parameterDefinition.type as ts.ObjectType)!;
                 parameter.addDereferenceableAttr(classReference.getTypeStoreSize(parameterDefinition.type as ts.ObjectType, context));
-            }
-
-            if (parameterDefinition.variadic) {
-                break;
             }
         }
     }

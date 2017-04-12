@@ -1,5 +1,4 @@
 import * as debug from "debug";
-import * as fs from "fs";
 import {execLLVM} from "./tools";
 
 const LOG = debug("external-tools/llvm-opt");
@@ -20,8 +19,6 @@ export function optimize(filename: string, publicFunctions: string[], optimizedF
 
     LOG(`Link Time optimization of file ${filename}`);
     execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}" -internalize-public-api-list="${publicApi}" ${OPTIMIZATIONS} -O${level}`);
-
-    fs.writeFileSync(`/Users/micha/Desktop/linked-optimized.o`, fs.readFileSync(optimizedFileName));
 
     return optimizedFileName;
 }

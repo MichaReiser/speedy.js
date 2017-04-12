@@ -3,7 +3,7 @@ project(speedyjs)
 
 # Following flags need to be set when invoking cmake -DCMAKE_TOOLCHAIN_FILE=~/git/emscripten/cmake/Modules/Platform/Emscripten.cmake
 set(CMAKE_CXX_STANDARD 11)
-set(SOURCE_FILES lib/array-api.cc lib/macros.h lib/array.h lib/conversion.cc lib/math.cc lib/memory.cc playground/mergeSort.cc)
+set(SOURCE_FILES lib/array-api.cc lib/macros.h lib/array.h lib/conversion.cc lib/math.cc lib/memory.cc)
 
 set(EM_CONFIG_PATH "${CMAKE_SOURCE_DIR}/.emscripten")
 set(EMSCRIPTEN_COMPILE_FLAGS --cache "${CMAKE_SOURCE_DIR}/.emscripten_cache" --em-config "${EM_CONFIG_PATH}")
