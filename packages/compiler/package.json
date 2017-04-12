@@ -35,7 +35,7 @@
     "@types/tmp": "0.0.32",
     "commander": "^2.9.0",
     "debug": "^2.6.3",
-    "llvm-node": "^0.1.9",
+    "llvm-node": "^1.0.0",
     "lodash": "^4.17.4",
     "speedyjs-runtime": "0.x.x",
     "tmp": "0.0.31",
