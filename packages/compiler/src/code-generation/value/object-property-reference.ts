@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import {Value, AssignableValue} from "./value";
 import {ObjectReference} from "./object-reference";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Address} from "./address";
+import {Allocation} from "./allocation";
 
 /**
  * Reference to an object property (x.name)
@@ -74,11 +74,18 @@ class ComputedObjectPropertyReference extends ObjectPropertyReference {
     }
 
     protected getValue(context: CodeGenerationContext): Value {
-        return context.call(this.getter!, [this.object], this.propertyType, this.property.name)!;
+        const result = context.builder.createCall(this.getter!, [this.object.generateIR(context)], this.property.name);
+        result.addDereferenceableAttr(1, this.object.getTypeStoreSize(context));
+        return context.value(result, this.propertyType);
     }
 
     protected setValue(value: Value, context: CodeGenerationContext): void {
-        context.call(this.setter!, [this.object, value], this.propertyType);
+        const args = [
+            value.generateIR(context),
+            this.object.generateIR(context)
+        ].reverse();
+        const call = context.builder.createCall(this.setter!, args);
+        call.addDereferenceableAttr(1, this.object.getTypeStoreSize(context));
     }
 
     isAssignable(): boolean {
@@ -96,13 +103,13 @@ class ObjectFieldPropertyReference extends ObjectPropertyReference {
     }
 
     protected getValue(context: CodeGenerationContext): Value {
-        const alignment = Address.getPreferredAlignment(this.propertyType, context);
+        const alignment = Allocation.getPreferredValueAlignment(this.propertyType, context);
         const value = context.builder.createAlignedLoad(this.getFieldAddress(context), alignment, this.property.name);
         return context.value(value, this.propertyType);
     }
 
     protected setValue(value: Value, context: CodeGenerationContext): void {
-        const alignment = Address.getPreferredAlignment(this.propertyType, context);
+        const alignment = Allocation.getPreferredValueAlignment(this.propertyType, context);
         context.builder.createAlignedStore(value.generateIR(context), this.getFieldAddress(context), alignment);
     }
 

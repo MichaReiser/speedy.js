@@ -4,7 +4,7 @@ import {execLLVM} from "./tools";
 
 const LOG = debug("external-tools/llvm-llc");
 const EXECUTABLE_NAME = "llc";
-const DEFAULT_OPTIONS = "-march=wasm32 -filetype=asm -asm-verbose=false -thread-model=single -combiner-global-alias-analysis=false -enable-emscripten-cxx-exceptions -enable-emscripten-sjlj";
+const DEFAULT_OPTIONS = "-march=wasm32 -filetype=asm -asm-verbose=false -thread-model=single -combiner-global-alias-analysis=false -enable-emscripten-sjlj";
 
 /**
  * Generates the static assembly using llc

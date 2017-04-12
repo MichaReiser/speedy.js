@@ -7,10 +7,10 @@ import {TypeChecker} from "../type-checker";
 import {ClassReference} from "./value/class-reference";
 
 /**
- * The stateful code generation context for a specific llvm module
+ * The code generation context without extension methods
+ * @see CodeGenerationContextMixin
  */
-export interface CodeGenerationContext {
-
+export interface BaseCodeGenerationContext {
     /**
      * The compilation context
      */
@@ -53,32 +53,11 @@ export interface CodeGenerationContext {
     createChildContext(): CodeGenerationContext;
 
     /**
-     * Generates the llvm code for all children of the given node
-     * @param node the node for which the children should be generated
-     */
-    generateChildren(node: ts.Node): void;
-
-    /**
-     * Generates the llvm IR code for the given code and returns the value for this node.
-     * @param node the node for which the IR code is to be generated
-     * @throws if the given node has no return value
-     */
-    generateValue(node: ts.Node): Value;
-
-    /**
      * Generates the llvm IR code for the given node without returning the generated value.
      * @param node the node for which the IR code is to be generated
      * @returns the value generated if any or void if this node resulted in no generated IR value
      */
     generate(node: ts.Node): void | Value;
-
-    /**
-     * Assigns the given value to the target if the target is assignable
-     * @param target the target to which the value is to be assigned
-     * @param value the value to assign
-     * @throws if the target cannot be assigned a value
-     */
-    assignValue(target: Value, value: Value): void;
 
     /**
      * Adds the name of an entry function
@@ -102,6 +81,35 @@ export interface CodeGenerationContext {
      * @returns the left scope
      */
     leaveChildScope(): Scope;
+}
+
+/**
+ * The stateful code generation context for a specific llvm module
+ */
+export interface CodeGenerationContext extends BaseCodeGenerationContext {
+
+    /**
+     * Assigns the given value to the target if the target is assignable
+     * @param target the target to which the value is to be assigned
+     * @param value the value to assign
+     * @throws if the target cannot be assigned a value
+     */
+    assignValue(target: Value, value: Value): void;
+
+
+    /**
+     * Generates the llvm code for all children of the given node
+     * @param node the node for which the children should be generated
+     */
+    generateChildren(node: ts.Node): void;
+
+    /**
+     * Generates the llvm IR code for the given code and returns the value for this node.
+     * @param node the node for which the IR code is to be generated
+     * @throws if the given node has no return value
+     */
+    generateValue(node: ts.Node): Value;
+
 
     /**
      * Creates a value object for the given llvm value
@@ -110,16 +118,6 @@ export interface CodeGenerationContext {
      * @returns the value object wrapper
      */
     value(value: llvm.Value, type: ts.Type): Value;
-
-    /**
-     * Calls the given llvm function with the given arguments
-     * @param fn the llvm function to call
-     * @param args the arguments to pass to the function call
-     * @param returnType the return type of the function
-     * @param name the name of the return value
-     * @returns the result of the function call or void if the called function is void (return type is void)
-     */
-    call(fn: llvm.Function, args: Value[] | llvm.Value[], returnType: ts.Type, name?: string): Value | void;
 
     /**
      * Resolves the class belonging to the given type if supported or returns undefined if not

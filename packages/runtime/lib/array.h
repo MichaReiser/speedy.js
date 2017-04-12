@@ -26,7 +26,13 @@ const int32_t DEFAULT_CAPACITY = 16;
  */
 template<typename T>
 class Array {
-private:
+public:
+    /**
+     * The elements stored in the array. Has the size of {@link capacity}. All elements up to {@link length} are initialized
+     * with zero. Is the nullptr if the length is zero (no allocation is needed in this case)
+     */
+    T* elements;
+
     /**
      * The length of the array
      */
@@ -37,11 +43,6 @@ private:
      */
     int32_t capacity;
 
-    /**
-     * The elements stored in the array. Has the size of {@link capacity}. All elements up to {@link length} are initialized
-     * with zero. Is the nullptr if the length is zero (no allocation is needed in this case)
-     */
-    T* elements;
 public:
     /**
      * Creates a new array of the given size
@@ -80,13 +81,12 @@ public:
     /**
      * Returns the element at the given index
      * @param index the index of the element to return
-     * @return the element at the given index
-     * @throws {@link std::out_of_range} if the index is <= length
+     * @return the element at the given index or the default value for T if the index is out of bound (only in safe mode)
      */
     inline T get(int32_t index) const {
  #ifdef SAFE
         if (length <= index) {
-            throw std::out_of_range{"Index out of bound"};
+            return T {};
         }
  #endif
 
@@ -324,7 +324,7 @@ private:
 
         size_t newCapacity = static_cast<size_t>(capacity == 0 ? DEFAULT_CAPACITY : capacity * CAPACITY_GROW_FACTOR);
 
-        if (newCapacity < min) {
+        if (newCapacity < static_cast<size_t>(min)) {
             newCapacity = static_cast<size_t>(min);
         }
 

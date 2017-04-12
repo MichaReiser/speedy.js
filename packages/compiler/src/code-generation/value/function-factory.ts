@@ -1,11 +1,20 @@
+import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {NameMangler} from "../name-mangler";
 import {toLLVMType} from "../util/types";
-import {ResolvedFunction} from "./resolved-function";
-import * as assert from "assert";
 import {ObjectReference} from "./object-reference";
+import {ResolvedFunction} from "./resolved-function";
+
+export interface FunctionProperties {
+    linkage: llvm.LinkageTypes;
+    readonly: boolean;
+    readnone: boolean;
+    alwaysInline: boolean;
+    noInline: boolean;
+    visibility: llvm.VisibilityTypes;
+}
 
 /**
  * Factory for creating the declarations of llvm functions
@@ -24,11 +33,11 @@ export class FunctionFactory {
      * @param resolvedFunction the function to call (specific function, not overload)
      * @param numberOfArguments the number of arguments passed to the function (to know where optional arguments are unset)
      * @param context the code generation context
-     * @param linkage the linkage of the function
+     * @param properties properties of the function to create, e.g. is the function readonly, what is the linkage
      * @return {Function} the existing function instance or the newly declared function
      */
-    getOrCreate(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage = llvm.LinkageTypes.InternalLinkage): llvm.Function {
-        return this.getOrCreateStaticOrInstanceFunction(resolvedFunction, numberOfArguments, context, linkage);
+    getOrCreate(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties?: Partial<FunctionProperties>): llvm.Function {
+        return this.getOrCreateStaticOrInstanceFunction(resolvedFunction, numberOfArguments, context, this.getInitializedProperties(properties));
     }
 
     /**
@@ -38,30 +47,90 @@ export class FunctionFactory {
      * @param resolvedFunction the resolved function (not overloaded)
      * @param numberOfArguments the number of arguments passed to the function
      * @param context the code generation context
-     * @param linkage the linkage of the function
+     * @param properties properties of the function to create, e.g. is the function readonly, what is the linkage
      * @return {Function} the existing or newly declared function
      */
-    getOrCreateInstanceMethod(objectReference: ObjectReference, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage = llvm.LinkageTypes.InternalLinkage) {
+    getOrCreateInstanceMethod(objectReference: ObjectReference, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties?: Partial<FunctionProperties>) {
         assert(resolvedFunction.instanceMethod && resolvedFunction.classType, "Resolved function needs to be an instance method");
 
-        return this.getOrCreateStaticOrInstanceFunction(resolvedFunction, numberOfArguments, context, linkage, objectReference);
+        return this.getOrCreateStaticOrInstanceFunction(resolvedFunction, numberOfArguments, context, this.getInitializedProperties(properties), objectReference);
     }
 
-    private getOrCreateStaticOrInstanceFunction(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage: llvm.LinkageTypes, objectReference?: ObjectReference) {
+    private getInitializedProperties(properties?: Partial<FunctionProperties>): FunctionProperties {
+        return Object.assign({}, this.getDefaultFunctionProperties(), properties);
+    }
+
+    protected getDefaultFunctionProperties(): FunctionProperties {
+        return {
+            linkage: llvm.LinkageTypes.LinkOnceODRLinkage,
+            readonly: false,
+            readnone: false,
+            alwaysInline: false,
+            noInline: false,
+            visibility: llvm.VisibilityTypes.Default
+        };
+    }
+
+    private getOrCreateStaticOrInstanceFunction(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties: FunctionProperties, objectReference?: ObjectReference) {
         const mangledName = this.getMangledFunctionName(resolvedFunction, numberOfArguments);
         let fn = context.module.getFunction(mangledName);
 
         if (!fn) {
-            fn = this.createFunction(mangledName, resolvedFunction, numberOfArguments, context, linkage, objectReference);
+            fn = this.createFunction(mangledName, resolvedFunction, numberOfArguments, context, properties, objectReference);
         }
 
         return fn;
     }
 
-    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage: llvm.LinkageTypes, objectReference?: ObjectReference) {
+    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties: FunctionProperties, objectReference?: ObjectReference) {
         const llvmArgumentTypes = this.getLLVMArgumentTypes(resolvedFunction, numberOfArguments, context, objectReference);
         const functionType = llvm.FunctionType.get(toLLVMType(resolvedFunction.returnType, context), llvmArgumentTypes, false);
-        return llvm.Function.create(functionType, linkage, mangledName, context.module);
+        const fn = llvm.Function.create(functionType, properties.linkage, mangledName, context.module);
+        fn.visibility = properties.visibility;
+
+        if (properties.readonly) {
+            fn.addFnAttr(llvm.Attribute.AttrKind.ReadOnly);
+        }
+
+        if (properties.alwaysInline) {
+            fn.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
+        }
+
+        if (properties.noInline) {
+            fn.addFnAttr(llvm.Attribute.AttrKind.NoInline);
+        }
+
+
+        this.attributeParameters(fn, resolvedFunction, context, objectReference);
+
+        return fn;
+    }
+
+    private attributeParameters(fn: llvm.Function, resolvedFunction: ResolvedFunction, context: CodeGenerationContext, object?: ObjectReference) {
+        const parameters = fn.getArguments();
+        let argumentOffset = 0;
+
+        if (object) {
+            const self = parameters[0];
+            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
+            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
+            self.addDereferenceableAttr(object.getTypeStoreSize(context));
+            argumentOffset = 1;
+        }
+
+        for (let i = argumentOffset; i < parameters.length; ++i) {
+            const parameter = parameters[i];
+            const parameterDefinition = resolvedFunction.parameters[i - argumentOffset];
+
+            if (parameterDefinition.type.flags & ts.TypeFlags.Object) {
+                const classReference = context.resolveClass(parameterDefinition.type as ts.ObjectType)!;
+                parameter.addDereferenceableAttr(classReference.getTypeStoreSize(parameterDefinition.type as ts.ObjectType, context));
+            }
+
+            if (parameterDefinition.variadic) {
+                break;
+            }
+        }
     }
 
     private getMangledFunctionName(resolvedFunction: ResolvedFunction, numberOfArguments: number) {

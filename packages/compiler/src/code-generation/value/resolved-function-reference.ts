@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {AbstractFunctionReference} from "./abstract-function-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
-import {FunctionFactory} from "./function-factory";
+import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 
 /**
@@ -15,11 +15,13 @@ export class ResolvedFunctionReference extends AbstractFunctionReference {
      * Creates a new reference to the specified runtime function
      * @param resolvedFunction the resolved overload of the runtime function
      * @param context the context
+     * @param functionProperties the function properties
      * @return {ResolvedFunctionReference} the reference to the specified runtime function overload
      */
-    static createRuntimeFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext) {
+    static createRuntimeFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, functionProperties?: Partial<FunctionProperties>) {
+        functionProperties = Object.assign({}, { linkage: llvm.LinkageTypes.ExternalLinkage, inline: true }, functionProperties);
         const llvmFunctionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
-        const fn = llvmFunctionFactory.getOrCreate(resolvedFunction, resolvedFunction.parameters.length, context, llvm.LinkageTypes.ExternalLinkage);
+        const fn = llvmFunctionFactory.getOrCreate(resolvedFunction, resolvedFunction.parameters.length, context, functionProperties);
         return new ResolvedFunctionReference(fn, resolvedFunction);
     }
 

@@ -1,18 +1,23 @@
 import * as assert from "assert";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Address} from "./address";
 import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectReference} from "./object-reference";
 import {SpeedyJSClassReference} from "./speedy-js-class-reference";
-import {AssignableValue, Value} from "./value";
 import {UnresolvedMethodReference} from "./unresolved-method-reference";
+import {AssignableValue, Value} from "./value";
+import {Pointer} from "./pointer";
 
 export class SpeedyJSObjectReference implements ObjectReference {
 
-    constructor(private objectAddress: llvm.Value, public type: ts.ObjectType, public clazz: SpeedyJSClassReference) {
-        assert(objectAddress.type.isPointerTy(), `Object address needs to be a pointer type`);
+    constructor(private address: Address, public type: ts.ObjectType, public clazz: SpeedyJSClassReference) {
+    }
+
+    getTypeStoreSize(context: CodeGenerationContext) {
+        return this.clazz.getTypeStoreSize(this.type, context);
     }
 
     getProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference | FunctionReference {
@@ -36,11 +41,14 @@ export class SpeedyJSObjectReference implements ObjectReference {
     }
 
     generateAssignmentIR(value: Value, context: CodeGenerationContext): void {
-        context.builder.createStore(value.generateIR(context), this.objectAddress);
+        assert(value.isObject(), "Cannot assign non objects");
+        assert(this.address.isPointer(), "Cannot assign to an address");
+
+        (this.address as Pointer).set(value.generateIR(context), context);
     }
 
     isAssignable(): this is AssignableValue {
-        return true;
+        return this.address.isPointer();
     }
 
     isObject(): this is ObjectReference {
@@ -52,6 +60,6 @@ export class SpeedyJSObjectReference implements ObjectReference {
     }
 
     generateIR(context: CodeGenerationContext): llvm.Value {
-        return this.objectAddress;
+        return this.address.get(context);
     }
 }

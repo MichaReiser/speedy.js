@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Address} from "../value/address";
+import {Allocation} from "../value/allocation";
 
 class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclaration, void> {
     syntaxKind = ts.SyntaxKind.VariableDeclaration;
@@ -11,7 +11,7 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         const symbol = context.typeChecker.getSymbolAtLocation(variableDeclaration.name);
         const type = context.typeChecker.getTypeAtLocation(variableDeclaration);
 
-        const allocation = Address.createAllocationInEntryBlock(type, context, (variableDeclaration.name as ts.Identifier).text);
+        const allocation = Allocation.create(type, context, (variableDeclaration.name as ts.Identifier).text);
         let initializer: llvm.Value | undefined;
 
         if (variableDeclaration.initializer) {

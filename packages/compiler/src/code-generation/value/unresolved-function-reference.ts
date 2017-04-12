@@ -4,7 +4,7 @@ import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {AbstractFunctionReference} from "./abstract-function-reference";
-import {FunctionFactory} from "./function-factory";
+import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {SpeedyJSFunctionFactory} from "./speedyjs-function-factory";
 import {Value} from "./value";
@@ -15,6 +15,13 @@ import {Value} from "./value";
  */
 export class UnresolvedFunctionReference extends AbstractFunctionReference {
     /**
+     * The function properties
+     */
+    properties: Partial<FunctionProperties> = {
+        linkage: llvm.LinkageTypes.LinkOnceODRLinkage
+    };
+
+    /**
      * Creates a reference to a function reference that has the specified overloads
      * @param signatures the references of the function
      * @param context the context
@@ -23,7 +30,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
      */
     static createRuntimeFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType) {
         const functionReference = new UnresolvedFunctionReference(signatures, new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext)), classType);
-        functionReference.linkage = llvm.LinkageTypes.ExternalLinkage;
+        functionReference.properties = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true };
         return functionReference;
     }
 
@@ -37,11 +44,6 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
     static createFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType) {
         return new UnresolvedFunctionReference(signatures, new SpeedyJSFunctionFactory(context.compilationContext), classType);
     }
-
-    /**
-     * The linkage of the created function
-     */
-    public linkage = llvm.LinkageTypes.InternalLinkage;
 
     protected constructor(private signatures: ts.Signature[], protected llvmFunctionFactory: FunctionFactory, classType?: ts.ObjectType) {
         super(classType);
@@ -69,6 +71,6 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
     getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {
         const numberOfArguments = passedArguments ? passedArguments.length : resolvedFunction.parameters.length;
 
-        return this.llvmFunctionFactory.getOrCreate(resolvedFunction, numberOfArguments, context, this.linkage);
+        return this.llvmFunctionFactory.getOrCreate(resolvedFunction, numberOfArguments, context, this.properties);
     }
 }

@@ -6,34 +6,37 @@ source_filename = \\"array/arrayLiteral.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [4 x i32] [i32 1, i32 2, i32 3, i32 4]
 
-define { i32, i32, i32* }* @_arrayLiteral() {
+define %class.Array* @_arrayLiteral() {
 entry:
-  %items = alloca [4 x i32]
-  %empty = alloca { i32, i32, i32* }*
-  %return = alloca { i32, i32, i32* }*
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* null, i32 0)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %empty, align 4
+  %items = alloca [4 x i32], align 4
+  %empty = alloca %class.Array*, align 4
+  %return = alloca %class.Array*, align 4
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* null, i32 0)
+  store %class.Array* %constructorReturnValue, %class.Array** %empty, align 4
   %items1 = getelementptr inbounds [4 x i32], [4 x i32]* %items, i32 0, i32 0
   %0 = bitcast [4 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([4 x i32]* @items to i8*), i32 16, i32 0, i1 false)
-  %constructorReturnValue2 = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 4)
-  store { i32, i32, i32* }* %constructorReturnValue2, { i32, i32, i32* }** %return, align 4
+  %constructorReturnValue2 = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 4)
+  store %class.Array* %constructorReturnValue2, %class.Array** %return, align 4
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
-  %return3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %return, align 4
-  ret { i32, i32, i32* }* %return3
+  %return3 = load %class.Array*, %class.Array** %return, align 4
+  ret %class.Array* %return3
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
@@ -50,45 +53,52 @@ source_filename = \\"array/assignment.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [3 x i32] [i32 1, i32 2, i32 3]
 
 define void @_arrayAssignment() {
 entry:
-  %value = alloca i32
-  %other = alloca { i32, i32, i32* }*
-  %items = alloca [3 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %value = alloca i32, align 4
+  %other = alloca %class.Array*, align 4
+  %items = alloca [3 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [3 x i32], [3 x i32]* %items, i32 0, i32 0
   %0 = bitcast [3 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([3 x i32]* @items to i8*), i32 12, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 3)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  store { i32, i32, i32* }* %array2, { i32, i32, i32* }** %other, align 4
-  %other3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %other, align 4
-  %\\"[i]\\" = call i32 @ArrayIi_geti({ i32, i32, i32* }* %other3, i32 2)
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 3)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  store %class.Array* %array2, %class.Array** %other, align 4
+  %other3 = load %class.Array*, %class.Array** %other, align 4
+  %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* dereferenceable(12) %other3, i32 2)
   store i32 %\\"[i]\\", i32* %value, align 4
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare i32 @ArrayIi_geti({ i32, i32, i32* }*, i32)
+; Function Attrs: alwaysinline norecurse nounwind readonly
+declare i32 @ArrayIi_geti(%class.Array* nocapture readonly, i32) #1
 
-declare void @ArrayIi_setii({ i32, i32, i32* }*, i32, i32)
+; Function Attrs: alwaysinline
+declare void @ArrayIi_setii(%class.Array* nocapture readonly, i32, i32) #2
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline norecurse nounwind readonly }
+attributes #2 = { alwaysinline }
 "
 `;
 
@@ -98,43 +108,50 @@ source_filename = \\"array/elementAccess.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [5 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5]
 
 define void @_arrayElementAccess() {
 entry:
-  %items = alloca [5 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %items = alloca [5 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [5 x i32], [5 x i32]* %items, i32 0, i32 0
   %0 = bitcast [5 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([5 x i32]* @items to i8*), i32 20, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 5)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %array3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %\\"[i]\\" = call i32 @ArrayIi_geti({ i32, i32, i32* }* %array3, i32 2)
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 5)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* dereferenceable(12) %array2, i32 2)
   %mul = mul i32 %\\"[i]\\", 10
-  call void @ArrayIi_setii({ i32, i32, i32* }* %array2, i32 2, i32 %mul)
+  %array3 = load %class.Array*, %class.Array** %array, align 4
+  call void @ArrayIi_setii(%class.Array* dereferenceable(12) %array3, i32 2, i32 %mul)
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare i32 @ArrayIi_geti({ i32, i32, i32* }*, i32)
+; Function Attrs: alwaysinline norecurse nounwind readonly
+declare i32 @ArrayIi_geti(%class.Array* nocapture readonly, i32) #1
 
-declare void @ArrayIi_setii({ i32, i32, i32* }*, i32, i32)
+; Function Attrs: alwaysinline
+declare void @ArrayIi_setii(%class.Array* nocapture readonly, i32, i32) #2
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline norecurse nounwind readonly }
+attributes #2 = { alwaysinline }
 "
 `;
 
@@ -144,36 +161,45 @@ source_filename = \\"array/fill.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { double*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_arrayFill() {
 entry:
-  %array = alloca { i32, i32, double* }*
-  %constructorReturnValue = call { i32, i32, double* }* @ArrayId_constructori(i32 100)
-  store { i32, i32, double* }* %constructorReturnValue, { i32, i32, double* }** %array, align 4
-  %array1 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
-  %fillReturnValue = call { i32, i32, double* }* @ArrayId_filld({ i32, i32, double* }* %array1, double 1.000000e+01)
-  %array2 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
-  %fillReturnValue3 = call { i32, i32, double* }* @ArrayId_filldi({ i32, i32, double* }* %array2, double 1.000000e+01, i32 5)
-  %array4 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
-  %fillReturnValue5 = call { i32, i32, double* }* @ArrayId_filldii({ i32, i32, double* }* %array4, double 1.000000e+01, i32 5, i32 50)
+  %array = alloca %class.Array*, align 4
+  %constructorReturnValue = call %class.Array* @ArrayId_constructori(i32 100)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array1 = load %class.Array*, %class.Array** %array, align 4
+  %fillReturnValue = call %class.Array* @ArrayId_filld(%class.Array* %array1, double 1.000000e+01)
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %fillReturnValue3 = call %class.Array* @ArrayId_filldi(%class.Array* %array2, double 1.000000e+01, i32 5)
+  %array4 = load %class.Array*, %class.Array** %array, align 4
+  %fillReturnValue5 = call %class.Array* @ArrayId_filldii(%class.Array* %array4, double 1.000000e+01, i32 5, i32 50)
   ret void
 }
 
-declare { i32, i32, double* }* @ArrayId_constructori(i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayId_constructori(i32) #0
 
-declare { i32, i32, double* }* @ArrayId_filld({ i32, i32, double* }*, double)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayId_filld(%class.Array* nocapture readonly dereferenceable(12), double) #0
 
-declare { i32, i32, double* }* @ArrayId_filldi({ i32, i32, double* }*, double, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayId_filldi(%class.Array* nocapture readonly dereferenceable(12), double, i32) #0
 
-declare { i32, i32, double* }* @ArrayId_filldii({ i32, i32, double* }*, double, i32, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayId_filldii(%class.Array* nocapture readonly dereferenceable(12), double, i32, i32) #0
 
 declare void @speedyJsGc()
+
+attributes #0 = { alwaysinline }
 "
 `;
 
@@ -183,34 +209,42 @@ source_filename = \\"array/length.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { double*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_arrayLength() {
 entry:
-  %i = alloca i32
-  %array = alloca { i32, i32, double* }*
-  %constructorReturnValue = call { i32, i32, double* }* @ArrayId_constructorPdi(double* null, i32 0)
-  store { i32, i32, double* }* %constructorReturnValue, { i32, i32, double* }** %array, align 4
-  %array1 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
-  call void @ArrayId_lengthi({ i32, i32, double* }* %array1, i32 100)
-  %array2 = load { i32, i32, double* }*, { i32, i32, double* }** %array, align 4
-  %length = call i32 @ArrayId_length({ i32, i32, double* }* %array2)
+  %i = alloca i32, align 4
+  %array = alloca %class.Array*, align 4
+  %constructorReturnValue = call %class.Array* @ArrayId_constructorPdi(double* null, i32 0)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array1 = load %class.Array*, %class.Array** %array, align 4
+  call void @ArrayId_lengthi(%class.Array* dereferenceable(12) %array1, i32 100)
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %length = call i32 @ArrayId_length(%class.Array* dereferenceable(12) %array2)
   store i32 %length, i32* %i, align 4
   ret void
 }
 
-declare { i32, i32, double* }* @ArrayId_constructorPdi(double*, i32)
+declare hidden %class.Array* @ArrayId_constructorPdi(double* dereferenceable(12), i32)
 
-declare i32 @ArrayId_length({ i32, i32, double* }*)
+; Function Attrs: alwaysinline nounwind readonly
+declare i32 @ArrayId_length(%class.Array* nocapture readonly) #0
 
-declare void @ArrayId_lengthi({ i32, i32, double* }*, i32)
+; Function Attrs: alwaysinline
+declare void @ArrayId_lengthi(%class.Array* nocapture readonly, i32) #1
 
 declare void @speedyJsGc()
+
+attributes #0 = { alwaysinline nounwind readonly }
+attributes #1 = { alwaysinline }
 "
 `;
 
@@ -220,52 +254,61 @@ source_filename = \\"array/new.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array.1 = type { double*, i32, i32 }
+%class.Array = type { i1*, i32, i32 }
+%class.Array.0 = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [1 x i1] [i1 true]
 @items.1 = private local_unnamed_addr constant [3 x double] [double 1.000000e+00, double 2.000000e+00, double 3.000000e+00]
 
 define void @_arrayConstructorCase() {
 entry:
-  %items4 = alloca [3 x double]
-  %arrayWithElements = alloca { i32, i32, double* }*
-  %items = alloca [1 x i1]
-  %arrayWithElement = alloca { i32, i32, i1* }*
-  %arrayOfSize = alloca { i32, i32, i32* }*
-  %emptyArray = alloca { i32, i32, i1* }*
-  %constructorReturnValue = call { i32, i32, i1* }* @ArrayIb_constructorPbi(i1* null, i32 0)
-  store { i32, i32, i1* }* %constructorReturnValue, { i32, i32, i1* }** %emptyArray, align 4
-  %constructorReturnValue1 = call { i32, i32, i32* }* @ArrayIi_constructori(i32 1000)
-  store { i32, i32, i32* }* %constructorReturnValue1, { i32, i32, i32* }** %arrayOfSize, align 4
+  %items4 = alloca [3 x double], align 8
+  %arrayWithElements = alloca %class.Array.1*, align 4
+  %items = alloca [1 x i1], align 1
+  %arrayWithElement = alloca %class.Array*, align 4
+  %arrayOfSize = alloca %class.Array.0*, align 4
+  %emptyArray = alloca %class.Array*, align 4
+  %constructorReturnValue = call %class.Array* @ArrayIb_constructorPbi(i1* null, i32 0)
+  store %class.Array* %constructorReturnValue, %class.Array** %emptyArray, align 4
+  %constructorReturnValue1 = call %class.Array.0* @ArrayIi_constructori(i32 1000)
+  store %class.Array.0* %constructorReturnValue1, %class.Array.0** %arrayOfSize, align 4
   %items2 = getelementptr inbounds [1 x i1], [1 x i1]* %items, i32 0, i32 0
   %0 = bitcast [1 x i1]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([1 x i1]* @items to i8*), i32 1, i32 0, i1 false)
-  %constructorReturnValue3 = call { i32, i32, i1* }* @ArrayIb_constructorPbi(i1* %items2, i32 1)
-  store { i32, i32, i1* }* %constructorReturnValue3, { i32, i32, i1* }** %arrayWithElement, align 4
+  %constructorReturnValue3 = call %class.Array* @ArrayIb_constructorPbi(i1* %items2, i32 1)
+  store %class.Array* %constructorReturnValue3, %class.Array** %arrayWithElement, align 4
   %items5 = getelementptr inbounds [3 x double], [3 x double]* %items4, i32 0, i32 0
   %1 = bitcast [3 x double]* %items4 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* bitcast ([3 x double]* @items.1 to i8*), i32 24, i32 0, i1 false)
-  %constructorReturnValue6 = call { i32, i32, double* }* @ArrayId_constructorPdi(double* %items5, i32 3)
-  store { i32, i32, double* }* %constructorReturnValue6, { i32, i32, double* }** %arrayWithElements, align 4
+  %constructorReturnValue6 = call %class.Array.1* @ArrayId_constructorPdi(double* %items5, i32 3)
+  store %class.Array.1* %constructorReturnValue6, %class.Array.1** %arrayWithElements, align 4
   ret void
 }
 
-declare { i32, i32, i1* }* @ArrayIb_constructorPbi(i1*, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIb_constructorPbi(i1* dereferenceable(12), i32) #0
 
-declare { i32, i32, i32* }* @ArrayIi_constructori(i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array.0* @ArrayIi_constructori(i32) #0
 
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
 
-declare { i32, i32, double* }* @ArrayId_constructorPdi(double*, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array.1* @ArrayId_constructorPdi(double* dereferenceable(12), i32) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { argmemonly nounwind }
+attributes #0 = { alwaysinline }
+attributes #1 = { argmemonly nounwind }
 "
 `;
 
@@ -275,40 +318,45 @@ source_filename = \\"array/pop.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [2 x i32] [i32 1, i32 2]
 
 define void @_arrayPop() {
 entry:
-  %end = alloca i32
-  %items = alloca [2 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %end = alloca i32, align 4
+  %items = alloca [2 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [2 x i32], [2 x i32]* %items, i32 0, i32 0
   %0 = bitcast [2 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([2 x i32]* @items to i8*), i32 8, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 2)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %popReturnValue = call i32 @ArrayIi_pop({ i32, i32, i32* }* %array2)
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 2)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %popReturnValue = call i32 @ArrayIi_pop(%class.Array* %array2)
   store i32 %popReturnValue, i32* %end, align 4
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare i32 @ArrayIi_pop({ i32, i32, i32* }*)
+; Function Attrs: alwaysinline
+declare hidden i32 @ArrayIi_pop(%class.Array* nocapture readonly dereferenceable(12)) #1
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline }
 "
 `;
 
@@ -318,54 +366,59 @@ source_filename = \\"array/push.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [2 x i32] [i32 1, i32 2]
 @items.1 = private local_unnamed_addr constant [1 x i32] [i32 1]
 @items.2 = private local_unnamed_addr constant [3 x i32] [i32 1, i32 2, i32 3]
 
 define void @_arrayPush() {
 entry:
-  %items8 = alloca [3 x i32]
-  %newLength = alloca i32
-  %items4 = alloca [1 x i32]
-  %items = alloca [2 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %items7 = alloca [3 x i32], align 4
+  %newLength = alloca i32, align 4
+  %items3 = alloca [1 x i32], align 4
+  %items = alloca [2 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [2 x i32], [2 x i32]* %items, i32 0, i32 0
   %0 = bitcast [2 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([2 x i32]* @items to i8*), i32 8, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 2)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %pushReturnValue = call i32 @ArrayIi_pushPii({ i32, i32, i32* }* %array2, i32* null, i32 0)
-  %array3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %items5 = getelementptr inbounds [1 x i32], [1 x i32]* %items4, i32 0, i32 0
-  %1 = bitcast [1 x i32]* %items4 to i8*
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 2)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %pushReturnValue = call i32 @ArrayIi_pushPii(%class.Array* %array2, i32* null, i32 0)
+  %items4 = getelementptr inbounds [1 x i32], [1 x i32]* %items3, i32 0, i32 0
+  %1 = bitcast [1 x i32]* %items3 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* bitcast ([1 x i32]* @items.1 to i8*), i32 4, i32 0, i1 false)
-  %pushReturnValue6 = call i32 @ArrayIi_pushPii({ i32, i32, i32* }* %array3, i32* %items5, i32 1)
-  %array7 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %items9 = getelementptr inbounds [3 x i32], [3 x i32]* %items8, i32 0, i32 0
-  %2 = bitcast [3 x i32]* %items8 to i8*
+  %array5 = load %class.Array*, %class.Array** %array, align 4
+  %pushReturnValue6 = call i32 @ArrayIi_pushPii(%class.Array* %array5, i32* %items4, i32 1)
+  %items8 = getelementptr inbounds [3 x i32], [3 x i32]* %items7, i32 0, i32 0
+  %2 = bitcast [3 x i32]* %items7 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %2, i8* bitcast ([3 x i32]* @items.2 to i8*), i32 12, i32 0, i1 false)
-  %pushReturnValue10 = call i32 @ArrayIi_pushPii({ i32, i32, i32* }* %array7, i32* %items9, i32 3)
+  %array9 = load %class.Array*, %class.Array** %array, align 4
+  %pushReturnValue10 = call i32 @ArrayIi_pushPii(%class.Array* %array9, i32* %items8, i32 3)
   store i32 %pushReturnValue10, i32* %newLength, align 4
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare i32 @ArrayIi_pushPii({ i32, i32, i32* }*, i32*, i32)
+; Function Attrs: alwaysinline
+declare hidden i32 @ArrayIi_pushPii(%class.Array* nocapture readonly dereferenceable(12), i32* dereferenceable(12), i32) #1
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline }
 "
 `;
 
@@ -375,40 +428,45 @@ source_filename = \\"array/shift.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [2 x i32] [i32 1, i32 2]
 
 define void @_arrayShift() {
 entry:
-  %front = alloca i32
-  %items = alloca [2 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %front = alloca i32, align 4
+  %items = alloca [2 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [2 x i32], [2 x i32]* %items, i32 0, i32 0
   %0 = bitcast [2 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([2 x i32]* @items to i8*), i32 8, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 2)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %shiftReturnValue = call i32 @ArrayIi_shift({ i32, i32, i32* }* %array2)
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 2)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %shiftReturnValue = call i32 @ArrayIi_shift(%class.Array* %array2)
   store i32 %shiftReturnValue, i32* %front, align 4
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare i32 @ArrayIi_shift({ i32, i32, i32* }*)
+; Function Attrs: alwaysinline
+declare hidden i32 @ArrayIi_shift(%class.Array* nocapture readonly dereferenceable(12)) #1
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline }
 "
 `;
 
@@ -418,46 +476,53 @@ source_filename = \\"array/slice.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [10 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6, i32 7, i32 8, i32 9, i32 10]
 
 define void @_arraySlice() {
 entry:
-  %items = alloca [10 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %items = alloca [10 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [10 x i32], [10 x i32]* %items, i32 0, i32 0
   %0 = bitcast [10 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([10 x i32]* @items to i8*), i32 40, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 10)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %sliceReturnValue = call { i32, i32, i32* }* @ArrayIi_slice({ i32, i32, i32* }* %array2)
-  %array3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %sliceReturnValue4 = call { i32, i32, i32* }* @ArrayIi_slicei({ i32, i32, i32* }* %array3, i32 4)
-  %array5 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %sliceReturnValue6 = call { i32, i32, i32* }* @ArrayIi_sliceii({ i32, i32, i32* }* %array5, i32 4, i32 8)
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 10)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %sliceReturnValue = call %class.Array* @ArrayIi_slice(%class.Array* %array2)
+  %array3 = load %class.Array*, %class.Array** %array, align 4
+  %sliceReturnValue4 = call %class.Array* @ArrayIi_slicei(%class.Array* %array3, i32 4)
+  %array5 = load %class.Array*, %class.Array** %array, align 4
+  %sliceReturnValue6 = call %class.Array* @ArrayIi_sliceii(%class.Array* %array5, i32 4, i32 8)
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare { i32, i32, i32* }* @ArrayIi_slice({ i32, i32, i32* }*)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIi_slice(%class.Array* nocapture readonly dereferenceable(12)) #1
 
-declare { i32, i32, i32* }* @ArrayIi_slicei({ i32, i32, i32* }*, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIi_slicei(%class.Array* nocapture readonly dereferenceable(12), i32) #1
 
-declare { i32, i32, i32* }* @ArrayIi_sliceii({ i32, i32, i32* }*, i32, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIi_sliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #1
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline }
 "
 `;
 
@@ -467,51 +532,58 @@ source_filename = \\"array/splice.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [10 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6, i32 7, i32 8, i32 9, i32 10]
 @items.1 = private local_unnamed_addr constant [4 x i32] [i32 11, i32 12, i32 13, i32 14]
 
 define void @_arraySplice() {
 entry:
-  %items6 = alloca [4 x i32]
-  %items = alloca [10 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %items5 = alloca [4 x i32], align 4
+  %items = alloca [10 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [10 x i32], [10 x i32]* %items, i32 0, i32 0
   %0 = bitcast [10 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([10 x i32]* @items to i8*), i32 40, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 10)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %spliceReturnValue = call { i32, i32, i32* }* @ArrayIi_spliceii({ i32, i32, i32* }* %array2, i32 5, i32 2)
-  %array3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %spliceReturnValue4 = call { i32, i32, i32* }* @ArrayIi_splicei({ i32, i32, i32* }* %array3, i32 4)
-  %array5 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %items7 = getelementptr inbounds [4 x i32], [4 x i32]* %items6, i32 0, i32 0
-  %1 = bitcast [4 x i32]* %items6 to i8*
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 10)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %spliceReturnValue = call %class.Array* @ArrayIi_spliceii(%class.Array* %array2, i32 5, i32 2)
+  %array3 = load %class.Array*, %class.Array** %array, align 4
+  %spliceReturnValue4 = call %class.Array* @ArrayIi_splicei(%class.Array* %array3, i32 4)
+  %items6 = getelementptr inbounds [4 x i32], [4 x i32]* %items5, i32 0, i32 0
+  %1 = bitcast [4 x i32]* %items5 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* bitcast ([4 x i32]* @items.1 to i8*), i32 16, i32 0, i1 false)
-  %spliceReturnValue8 = call { i32, i32, i32* }* @ArrayIi_spliceiiPii({ i32, i32, i32* }* %array5, i32 2, i32 2, i32* %items7, i32 4)
+  %array7 = load %class.Array*, %class.Array** %array, align 4
+  %spliceReturnValue8 = call %class.Array* @ArrayIi_spliceiiPii(%class.Array* %array7, i32 2, i32 2, i32* %items6, i32 4)
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare { i32, i32, i32* }* @ArrayIi_spliceii({ i32, i32, i32* }*, i32, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIi_spliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #1
 
-declare { i32, i32, i32* }* @ArrayIi_splicei({ i32, i32, i32* }*, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIi_splicei(%class.Array* nocapture readonly dereferenceable(12), i32) #1
 
-declare { i32, i32, i32* }* @ArrayIi_spliceiiPii({ i32, i32, i32* }*, i32, i32, i32*, i32)
+; Function Attrs: alwaysinline
+declare hidden %class.Array* @ArrayIi_spliceiiPii(%class.Array* nocapture readonly dereferenceable(12), i32, i32, i32* dereferenceable(12), i32) #1
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline }
 "
 `;
 
@@ -521,53 +593,58 @@ source_filename = \\"array/unshift.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+%class.Array = type { i32*, i32, i32 }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 @items = private local_unnamed_addr constant [2 x i32] [i32 1, i32 2]
 @items.1 = private local_unnamed_addr constant [1 x i32] [i32 1]
 @items.2 = private local_unnamed_addr constant [3 x i32] [i32 1, i32 2, i32 3]
 
 define void @_arrayUnshift() {
 entry:
-  %items8 = alloca [3 x i32]
-  %newLength = alloca i32
-  %items4 = alloca [1 x i32]
-  %items = alloca [2 x i32]
-  %array = alloca { i32, i32, i32* }*
+  %items7 = alloca [3 x i32], align 4
+  %newLength = alloca i32, align 4
+  %items3 = alloca [1 x i32], align 4
+  %items = alloca [2 x i32], align 4
+  %array = alloca %class.Array*, align 4
   %items1 = getelementptr inbounds [2 x i32], [2 x i32]* %items, i32 0, i32 0
   %0 = bitcast [2 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([2 x i32]* @items to i8*), i32 8, i32 0, i1 false)
-  %constructorReturnValue = call { i32, i32, i32* }* @ArrayIi_constructorPii(i32* %items1, i32 2)
-  store { i32, i32, i32* }* %constructorReturnValue, { i32, i32, i32* }** %array, align 4
-  %array2 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %unshiftReturnValue = call i32 @ArrayIi_unshiftPii({ i32, i32, i32* }* %array2, i32* null, i32 0)
-  %array3 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %items5 = getelementptr inbounds [1 x i32], [1 x i32]* %items4, i32 0, i32 0
-  %1 = bitcast [1 x i32]* %items4 to i8*
+  %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 2)
+  store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
+  %array2 = load %class.Array*, %class.Array** %array, align 4
+  %unshiftReturnValue = call i32 @ArrayIi_unshiftPii(%class.Array* %array2, i32* null, i32 0)
+  %items4 = getelementptr inbounds [1 x i32], [1 x i32]* %items3, i32 0, i32 0
+  %1 = bitcast [1 x i32]* %items3 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* bitcast ([1 x i32]* @items.1 to i8*), i32 4, i32 0, i1 false)
-  %unshiftReturnValue6 = call i32 @ArrayIi_unshiftPii({ i32, i32, i32* }* %array3, i32* %items5, i32 1)
-  %array7 = load { i32, i32, i32* }*, { i32, i32, i32* }** %array, align 4
-  %items9 = getelementptr inbounds [3 x i32], [3 x i32]* %items8, i32 0, i32 0
-  %2 = bitcast [3 x i32]* %items8 to i8*
+  %array5 = load %class.Array*, %class.Array** %array, align 4
+  %unshiftReturnValue6 = call i32 @ArrayIi_unshiftPii(%class.Array* %array5, i32* %items4, i32 1)
+  %items8 = getelementptr inbounds [3 x i32], [3 x i32]* %items7, i32 0, i32 0
+  %2 = bitcast [3 x i32]* %items7 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %2, i8* bitcast ([3 x i32]* @items.2 to i8*), i32 12, i32 0, i1 false)
-  %unshiftReturnValue10 = call i32 @ArrayIi_unshiftPii({ i32, i32, i32* }* %array7, i32* %items9, i32 3)
+  %array9 = load %class.Array*, %class.Array** %array, align 4
+  %unshiftReturnValue10 = call i32 @ArrayIi_unshiftPii(%class.Array* %array9, i32* %items8, i32 3)
   store i32 %unshiftReturnValue10, i32* %newLength, align 4
   ret void
 }
 
-declare { i32, i32, i32* }* @ArrayIi_constructorPii(i32*, i32)
+declare hidden %class.Array* @ArrayIi_constructorPii(i32* dereferenceable(12), i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
-declare i32 @ArrayIi_unshiftPii({ i32, i32, i32* }*, i32*, i32)
+; Function Attrs: alwaysinline
+declare hidden i32 @ArrayIi_unshiftPii(%class.Array* nocapture readonly dereferenceable(12), i32* dereferenceable(12), i32) #1
 
 declare void @speedyJsGc()
 
 attributes #0 = { argmemonly nounwind }
+attributes #1 = { alwaysinline }
 "
 `;

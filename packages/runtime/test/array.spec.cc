@@ -72,10 +72,10 @@ TEST_F(ArrayTests, new_initializes_array_elements_with_zero_if_no_elements_is_gi
 // GET
 // -----------------------------------------
 
-TEST_F(ArrayTests, get_throws_if_the_index_is_out_of_bound) {
+TEST_F(ArrayTests, get_returns_the_default_value_if_the_index_is_out_of_bound) {
     array = new Array<double>(100);
 
-    EXPECT_THROW(array->get(1000), std::out_of_range);
+    EXPECT_EQ(array->get(1000), 0);
 }
 
 TEST_F(ArrayTests, get_for_object_array) {

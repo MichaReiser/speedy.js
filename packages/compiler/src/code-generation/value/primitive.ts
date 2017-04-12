@@ -27,7 +27,11 @@ export class Primitive implements Value {
         } else if (valueType.flags & ts.TypeFlags.BooleanLike) {
             intValue = context.builder.createZExt(llvmValue, llvm.Type.getInt32Ty(context.llvmContext), `${llvmValue.name}AsInt32`);
         } else if (valueType.flags & (ts.TypeFlags.NumberLike)) {
-            const fn = FunctionDeclarationBuilder.create("toInt32d", [ { name: "value", type: valueType }], int32Type, context).externalLinkage().declareIfNotExisting();
+            const fn = FunctionDeclarationBuilder.create("toInt32d", [ { name: "value", type: valueType }], int32Type, context)
+                .withAttribute(llvm.Attribute.AttrKind.ReadNone)
+                .withAttribute(llvm.Attribute.AttrKind.AlwaysInline)
+                .externalLinkage()
+                .declareIfNotExisting();
             intValue = context.builder.createCall(fn, [llvmValue], `${llvmValue.name}AsInt32`);
         } else {
             throw new Error(`Unsupported conversion of ${context.typeChecker.typeToString(valueType)} to int32`);
@@ -55,6 +59,12 @@ export class Primitive implements Value {
 
         if (valueType.flags & ts.TypeFlags.NumberLike) {
             return context.builder.createFCmpONE(llvmValue, llvm.ConstantFP.get(context.llvmContext, 0), `${llvmValue.name}AsBool`);
+        }
+
+        if (valueType.flags & ts.TypeFlags.Object) {
+            const intPtrType = context.module.dataLayout.getIntPtrType(context.llvmContext, 0);
+            const pointerAsInt = context.builder.createPtrToInt(llvmValue, intPtrType, "ptrAsInt");
+            return context.builder.createICmpNE(pointerAsInt, llvm.Constant.getNullValue(intPtrType), `${llvmValue.name}AsBool`);
         }
 
         throw new Error(`value of type ${context.typeChecker.typeToString(valueType)} cannot be converted to bool`);

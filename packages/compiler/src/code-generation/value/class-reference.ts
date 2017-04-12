@@ -3,6 +3,7 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Address} from "./address";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 
@@ -12,6 +13,8 @@ import {Value} from "./value";
  * Reference to a class (or in JS, to the constructor function)
  */
 export abstract class ClassReference implements Value {
+
+    private llvmType: llvm.StructType | undefined = undefined;
 
     /**
      * Creates a new instance
@@ -70,6 +73,11 @@ export abstract class ClassReference implements Value {
         return this;
     }
 
+    getTypeStoreSize(objectType: ts.ObjectType, context: CodeGenerationContext): number {
+        const llvmType = this.getLLVMType(objectType, context);
+        return context.module.dataLayout.getTypeStoreSize(llvmType);
+    }
+
     getLLVMType(type: ts.ObjectType, context: CodeGenerationContext): llvm.Type {
         return this.getObjectType(type, context);
     }
@@ -104,12 +112,12 @@ export abstract class ClassReference implements Value {
     abstract getConstructor(newExpression: ts.NewExpression, context: CodeGenerationContext): FunctionReference;
 
     /**
-     * Returns a reference to the object instance stored in the given pointer
-     * @param pointer the address where the object is stored
+     * Returns a reference to the object instance stored at the given address
+     * @param address the address where the object is stored
      * @param type the type of the object
      * @param context the context
      */
-    abstract objectFor(pointer: llvm.Value, type: ts.ObjectType, context: CodeGenerationContext): ObjectReference;
+    abstract objectFor(address: Address, type: ts.ObjectType, context: CodeGenerationContext): ObjectReference;
 
     /**
      * Creates the type of the object
@@ -118,9 +126,14 @@ export abstract class ClassReference implements Value {
      * @return {StructType} the llvm type of the object
      */
     protected getObjectType(type: ts.ObjectType, context: CodeGenerationContext) {
-        return llvm.StructType.get(this.compilationContext.llvmContext, [
-            this.typeInformation.type,
-            ...this.getFields(type, context)
-        ]);
+        if (!this.llvmType) {
+            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, [
+                    this.typeInformation.type,
+                    ...this.getFields(type, context)
+                ],
+                `class.${this.symbol.name}`
+            );
+        }
+        return this.llvmType;
     }
 }

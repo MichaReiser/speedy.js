@@ -6,17 +6,19 @@ source_filename = \\"binary-expression/ampersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_ampersand() {
 entry:
-  %numberValue = alloca double
-  %intValue = alloca i32
+  %numberValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   %AsInt32 = call i32 @toInt32d(double 6.500000e+00)
   %AsInt321 = call i32 @toInt32d(double 4.200000e+00)
   %and = and i32 %AsInt32, %AsInt321
@@ -28,7 +30,10 @@ entry:
   ret void
 }
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
 "
 `;
 
@@ -38,58 +43,48 @@ source_filename = \\"binary-expression/ampersandAmpersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_ampersandAmpersand() {
 entry:
-  %andResult10 = alloca i32
-  %andResult6 = alloca i32
-  %andResult2 = alloca i1
-  %andResult = alloca i1
-  %six = alloca i32
+  %six = alloca i32, align 4
   store i32 6, i32* %six, align 4
-  store i1 true, i1* %andResult, align 1
-  br i1 true, label %trueBranch, label %andSuccessor
+  br i1 true, label %land.lhs.true, label %land.end
 
-trueBranch:                                       ; preds = %entry
-  store i1 true, i1* %andResult, align 1
-  br label %andSuccessor
+land.lhs.true:                                    ; preds = %entry
+  br label %land.end
 
-andSuccessor:                                     ; preds = %trueBranch, %entry
-  %andResult1 = load i1, i1* %andResult, align 1
-  store i1 %andResult1, i1* %andResult2, align 1
-  br i1 %andResult1, label %trueBranch3, label %andSuccessor4
+land.end:                                         ; preds = %land.lhs.true, %entry
+  %land = phi i1 [ true, %entry ], [ true, %land.lhs.true ]
+  br i1 %land, label %land.lhs.true1, label %land.end2
 
-trueBranch3:                                      ; preds = %andSuccessor
-  store i1 false, i1* %andResult2, align 1
-  br label %andSuccessor4
+land.lhs.true1:                                   ; preds = %land.end
+  br label %land.end2
 
-andSuccessor4:                                    ; preds = %trueBranch3, %andSuccessor
-  %andResult5 = load i1, i1* %andResult2, align 1
-  store i32 10, i32* %andResult6, align 4
-  br i1 true, label %trueBranch7, label %andSuccessor8
+land.end2:                                        ; preds = %land.lhs.true1, %land.end
+  %land3 = phi i1 [ %land, %land.end ], [ false, %land.lhs.true1 ]
+  br i1 true, label %land.lhs.true4, label %land.end5
 
-trueBranch7:                                      ; preds = %andSuccessor4
-  store i32 3, i32* %andResult6, align 4
-  br label %andSuccessor8
+land.lhs.true4:                                   ; preds = %land.end2
+  br label %land.end5
 
-andSuccessor8:                                    ; preds = %trueBranch7, %andSuccessor4
-  %andResult9 = load i32, i32* %andResult6, align 4
-  store i32 %andResult9, i32* %andResult10, align 4
-  %andResult9AsBool = icmp ne i32 %andResult9, 0
-  br i1 %andResult9AsBool, label %trueBranch11, label %andSuccessor12
+land.end5:                                        ; preds = %land.lhs.true4, %land.end2
+  %land6 = phi i32 [ 10, %land.end2 ], [ 3, %land.lhs.true4 ]
+  %land6AsBool = icmp ne i32 %land6, 0
+  br i1 %land6AsBool, label %land.lhs.true7, label %land.end8
 
-trueBranch11:                                     ; preds = %andSuccessor8
-  store i32 1, i32* %andResult10, align 4
-  br label %andSuccessor12
+land.lhs.true7:                                   ; preds = %land.end5
+  br label %land.end8
 
-andSuccessor12:                                   ; preds = %trueBranch11, %andSuccessor8
-  %andResult13 = load i32, i32* %andResult10, align 4
+land.end8:                                        ; preds = %land.lhs.true7, %land.end5
+  %land9 = phi i32 [ %land6, %land.end5 ], [ 1, %land.lhs.true7 ]
   ret void
 }
 "
@@ -101,17 +96,19 @@ source_filename = \\"binary-expression/asterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_asterisk() {
 entry:
-  %doubleProduct = alloca double
-  %intProduct = alloca i32
+  %doubleProduct = alloca double, align 8
+  %intProduct = alloca i32, align 4
   store i32 12, i32* %intProduct, align 4
   %intProduct1 = load i32, i32* %intProduct, align 4
   %mul = mul i32 %intProduct1, 2
@@ -131,17 +128,19 @@ source_filename = \\"binary-expression/asteriskAsterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_asteriskAsterisk() {
 entry:
-  %doubleProduct = alloca double
-  %intProduct = alloca double
+  %doubleProduct = alloca double, align 8
+  %intProduct = alloca double, align 8
   %powReturnValue = call double @Math_powdd(double 3.000000e+00, double 4.000000e+00)
   store double %powReturnValue, double* %intProduct, align 8
   %intProduct1 = load double, double* %intProduct, align 8
@@ -155,7 +154,10 @@ entry:
   ret void
 }
 
-declare double @Math_powdd(double, double)
+; Function Attrs: readonly
+declare hidden double @Math_powdd(double, double) #0
+
+attributes #0 = { readonly }
 "
 `;
 
@@ -165,18 +167,20 @@ source_filename = \\"binary-expression/bar.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_bar() {
 entry:
-  %intToInt = alloca i32
-  %intValue = alloca i32
-  %six = alloca i32
+  %intToInt = alloca i32, align 4
+  %intValue = alloca i32, align 4
+  %six = alloca i32, align 4
   store i32 6, i32* %six, align 4
   %six1 = load i32, i32* %six, align 4
   %or = or i32 %six1, 8
@@ -187,7 +191,10 @@ entry:
   ret void
 }
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
 "
 `;
 
@@ -197,62 +204,52 @@ source_filename = \\"binary-expression/barBar.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_barBar() {
 entry:
-  %orResult12 = alloca i32
-  %orResult8 = alloca i32
-  %orResult4 = alloca i1
-  %orResult = alloca i1
-  %six = alloca i32
+  %six = alloca i32, align 4
   store i32 6, i32* %six, align 4
   %six1 = load i32, i32* %six, align 4
   %six1AsBool = icmp ne i32 %six1, 0
   %not = xor i1 %six1AsBool, true
   %not2 = xor i1 %not, true
-  store i1 %not2, i1* %orResult, align 1
-  br i1 %not2, label %orSuccessor, label %orCase
+  br i1 %not2, label %lor.end, label %lor.lhs.false
 
-orCase:                                           ; preds = %entry
-  store i1 true, i1* %orResult, align 1
-  br label %orSuccessor
+lor.lhs.false:                                    ; preds = %entry
+  br label %lor.end
 
-orSuccessor:                                      ; preds = %orCase, %entry
-  %orResult3 = load i1, i1* %orResult, align 1
-  store i1 %orResult3, i1* %orResult4, align 1
-  br i1 %orResult3, label %orSuccessor6, label %orCase5
+lor.end:                                          ; preds = %lor.lhs.false, %entry
+  %lor = phi i1 [ %not2, %entry ], [ true, %lor.lhs.false ]
+  br i1 %lor, label %lor.end4, label %lor.lhs.false3
 
-orCase5:                                          ; preds = %orSuccessor
-  store i1 false, i1* %orResult4, align 1
-  br label %orSuccessor6
+lor.lhs.false3:                                   ; preds = %lor.end
+  br label %lor.end4
 
-orSuccessor6:                                     ; preds = %orCase5, %orSuccessor
-  %orResult7 = load i1, i1* %orResult4, align 1
-  store i32 10, i32* %orResult8, align 4
-  br i1 true, label %orSuccessor10, label %orCase9
+lor.end4:                                         ; preds = %lor.lhs.false3, %lor.end
+  %lor5 = phi i1 [ %lor, %lor.end ], [ false, %lor.lhs.false3 ]
+  br i1 true, label %lor.end7, label %lor.lhs.false6
 
-orCase9:                                          ; preds = %orSuccessor6
-  store i32 3, i32* %orResult8, align 4
-  br label %orSuccessor10
+lor.lhs.false6:                                   ; preds = %lor.end4
+  br label %lor.end7
 
-orSuccessor10:                                    ; preds = %orCase9, %orSuccessor6
-  %orResult11 = load i32, i32* %orResult8, align 4
-  store i32 %orResult11, i32* %orResult12, align 4
-  %orResult11AsBool = icmp ne i32 %orResult11, 0
-  br i1 %orResult11AsBool, label %orSuccessor14, label %orCase13
+lor.end7:                                         ; preds = %lor.lhs.false6, %lor.end4
+  %lor8 = phi i32 [ 10, %lor.end4 ], [ 3, %lor.lhs.false6 ]
+  %lor8AsBool = icmp ne i32 %lor8, 0
+  br i1 %lor8AsBool, label %lor.end10, label %lor.lhs.false9
 
-orCase13:                                         ; preds = %orSuccessor10
-  store i32 1, i32* %orResult12, align 4
-  br label %orSuccessor14
+lor.lhs.false9:                                   ; preds = %lor.end7
+  br label %lor.end10
 
-orSuccessor14:                                    ; preds = %orCase13, %orSuccessor10
-  %orResult15 = load i32, i32* %orResult12, align 4
+lor.end10:                                        ; preds = %lor.lhs.false9, %lor.end7
+  %lor11 = phi i32 [ %lor8, %lor.end7 ], [ 1, %lor.lhs.false9 ]
   ret void
 }
 "
@@ -264,17 +261,19 @@ source_filename = \\"binary-expression/caret.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_caret() {
 entry:
-  %numberValue = alloca double
-  %intValue = alloca i32
+  %numberValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   %AsInt32 = call i32 @toInt32d(double 6.500000e+00)
   %AsInt321 = call i32 @toInt32d(double 4.200000e+00)
   %xor = xor i32 %AsInt32, %AsInt321
@@ -286,7 +285,10 @@ entry:
   ret void
 }
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
 "
 `;
 
@@ -296,18 +298,20 @@ source_filename = \\"binary-expression/equalsEqualsEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_equalsEqualsEqualsToken() {
 entry:
-  %trueValue = alloca i1
-  %threePointFour = alloca double
-  %four = alloca i32
+  %trueValue = alloca i1, align 1
+  %threePointFour = alloca double, align 8
+  %four = alloca i32, align 4
   store i32 4, i32* %four, align 4
   store double 3.400000e+00, double* %threePointFour, align 8
   store i1 true, i1* %trueValue, align 1
@@ -328,18 +332,20 @@ source_filename = \\"binary-expression/exclamationEqualsEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_exclamationEqualsEqualsToken() {
 entry:
-  %trueValue = alloca i1
-  %threePointFour = alloca double
-  %four = alloca i32
+  %trueValue = alloca i1, align 1
+  %threePointFour = alloca double, align 8
+  %four = alloca i32, align 4
   store i32 4, i32* %four, align 4
   store double 3.400000e+00, double* %threePointFour, align 8
   store i1 true, i1* %trueValue, align 1
@@ -360,18 +366,20 @@ source_filename = \\"binary-expression/greaterThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_greaterThan() {
 entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
+  %trueValue = alloca i1, align 1
+  %twoDouble = alloca double, align 8
+  %two = alloca i32, align 4
   store i32 2, i32* %two, align 4
   store double 2.000000e+00, double* %twoDouble, align 8
   store i1 true, i1* %trueValue, align 1
@@ -393,18 +401,20 @@ source_filename = \\"binary-expression/greaterThanEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_greaterThanEquals() {
 entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
+  %trueValue = alloca i1, align 1
+  %twoDouble = alloca double, align 8
+  %two = alloca i32, align 4
   store i32 2, i32* %two, align 4
   store double 2.000000e+00, double* %twoDouble, align 8
   store i1 true, i1* %trueValue, align 1
@@ -426,17 +436,19 @@ source_filename = \\"binary-expression/greaterThanGreaterThanGreaterThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_greaterThanGreaterThanGreaterThan() {
 entry:
-  %numberValue = alloca double
-  %intValue = alloca i32
+  %numberValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   %AsInt32 = call i32 @toInt32d(double 6.500000e+00)
   %AsInt321 = call i32 @toInt32d(double 4.200000e+00)
   %lshr = lshr i32 %AsInt32, %AsInt321
@@ -447,7 +459,10 @@ entry:
   ret void
 }
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
 "
 `;
 
@@ -457,18 +472,20 @@ source_filename = \\"binary-expression/lessThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_lessThan() {
 entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
+  %trueValue = alloca i1, align 1
+  %twoDouble = alloca double, align 8
+  %two = alloca i32, align 4
   store i32 2, i32* %two, align 4
   store double 2.000000e+00, double* %twoDouble, align 8
   store i1 true, i1* %trueValue, align 1
@@ -490,18 +507,20 @@ source_filename = \\"binary-expression/lessThanEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_lessThanEquals() {
 entry:
-  %trueValue = alloca i1
-  %twoDouble = alloca double
-  %two = alloca i32
+  %trueValue = alloca i1, align 1
+  %twoDouble = alloca double, align 8
+  %two = alloca i32, align 4
   store i32 2, i32* %two, align 4
   store double 2.000000e+00, double* %twoDouble, align 8
   store i1 true, i1* %trueValue, align 1
@@ -523,17 +542,19 @@ source_filename = \\"binary-expression/lessThanLessThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_lessThanLessThan() {
 entry:
-  %numberValue = alloca double
-  %intValue = alloca i32
+  %numberValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   %AsInt32 = call i32 @toInt32d(double 6.500000e+00)
   %AsInt321 = call i32 @toInt32d(double 4.200000e+00)
   %shl = shl i32 %AsInt32, %AsInt321
@@ -544,7 +565,10 @@ entry:
   ret void
 }
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
 "
 `;
 
@@ -554,17 +578,19 @@ source_filename = \\"binary-expression/minus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_minus() {
 entry:
-  %twoDouble = alloca double
-  %two = alloca i32
+  %twoDouble = alloca double, align 8
+  %two = alloca i32, align 4
   store i32 2, i32* %two, align 4
   store double 2.000000e+00, double* %twoDouble, align 8
   %two1 = load i32, i32* %two, align 4
@@ -588,17 +614,19 @@ source_filename = \\"binary-expression/percent.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_percent() {
 entry:
-  %sixDouble = alloca double
-  %six = alloca i32
+  %sixDouble = alloca double, align 8
+  %six = alloca i32, align 4
   store i32 6, i32* %six, align 4
   store double 6.000000e+00, double* %sixDouble, align 8
   %six1 = load i32, i32* %six, align 4
@@ -616,17 +644,19 @@ source_filename = \\"binary-expression/plus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_plus() {
 entry:
-  %twoDouble = alloca double
-  %two = alloca i32
+  %twoDouble = alloca double, align 8
+  %two = alloca i32, align 4
   store i32 2, i32* %two, align 4
   store double 2.000000e+00, double* %twoDouble, align 8
   %two1 = load i32, i32* %two, align 4
@@ -650,17 +680,19 @@ source_filename = \\"binary-expression/slash.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_slash() {
 entry:
-  %doubleProduct = alloca double
-  %intProduct = alloca i32
+  %doubleProduct = alloca double, align 8
+  %intProduct = alloca i32, align 4
   store i32 1, i32* %intProduct, align 4
   %intProduct1 = load i32, i32* %intProduct, align 4
   %sdiv = sdiv i32 %intProduct1, 2

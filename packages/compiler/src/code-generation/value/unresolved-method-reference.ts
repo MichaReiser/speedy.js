@@ -23,7 +23,7 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
      */
     static createRuntimeMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext) {
         const reference = new UnresolvedMethodReference(object, signatures, new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext)));
-        reference.linkage = llvm.LinkageTypes.ExternalLinkage;
+        reference.properties = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true };
         return reference;
     }
 
@@ -45,10 +45,13 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
     getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {
         const numberOfArguments = passedArguments ? passedArguments.length : resolvedFunction.parameters.length;
 
-        return this.llvmFunctionFactory.getOrCreateInstanceMethod(this.object, resolvedFunction, numberOfArguments, context, this.linkage);
+        return this.llvmFunctionFactory.getOrCreateInstanceMethod(this.object, resolvedFunction, numberOfArguments, context, this.properties);
     }
 
     protected getCallArguments(resolvedFunction: ResolvedFunction, passedArguments: Value[], callerContext: CodeGenerationContext): llvm.Value[] {
-        return [this.object.generateIR(callerContext), ...super.getCallArguments(resolvedFunction, passedArguments, callerContext)];
+        const functionArguments = [
+            ...super.getCallArguments(resolvedFunction, passedArguments, callerContext),
+        ];
+        return [this.object.generateIR(callerContext), ...functionArguments];
     }
 }

@@ -36,4 +36,10 @@ export interface ObjectReference extends AssignableValue {
      * @returns the value of the element
      */
     getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference;
+
+    /**
+     * Returns the size needed to store this object
+     * @param context the context
+     */
+    getTypeStoreSize(context: CodeGenerationContext): number;
 }

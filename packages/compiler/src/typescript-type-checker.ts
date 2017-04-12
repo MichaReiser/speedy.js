@@ -14,7 +14,7 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getApparentType(type: ts.Type): ts.Type {
-        return toSupportedType(this.tsTypeChecker.getApparentType(type));
+        return this.toSupportedType(this.tsTypeChecker.getApparentType(type));
     }
 
     getSignaturesOfType(type: ts.Type, kind: ts.SignatureKind): ts.Signature[] {
@@ -22,11 +22,11 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getReturnTypeOfSignature(signature: ts.Signature): ts.Type {
-        return toSupportedType(this.tsTypeChecker.getReturnTypeOfSignature(signature));
+        return this.toSupportedType(this.tsTypeChecker.getReturnTypeOfSignature(signature));
     }
 
     getDeclaredTypeOfSymbol(symbol: ts.Symbol): ts.Type {
-        return toSupportedType(this.tsTypeChecker.getDeclaredTypeOfSymbol(symbol));
+        return this.toSupportedType(this.tsTypeChecker.getDeclaredTypeOfSymbol(symbol));
     }
 
     getSymbolAtLocation(node: ts.Node): ts.Symbol {
@@ -42,11 +42,11 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getTypeAtLocation(node: ts.Node): ts.Type {
-        return toSupportedType(this.tsTypeChecker.getTypeAtLocation(node));
+        return this.toSupportedType(this.tsTypeChecker.getTypeAtLocation(node));
     }
 
     getContextualType(node: ts.Expression): ts.Type {
-        return toSupportedType(this.tsTypeChecker.getContextualType(node));
+        return this.toSupportedType(this.tsTypeChecker.getContextualType(node));
     }
 
     typeToString(type: ts.Type): string {
@@ -54,7 +54,7 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getTypeOfSymbolAtLocation(symbol: ts.Symbol, location: ts.Node): ts.Type {
-        return toSupportedType(this.tsTypeChecker.getTypeOfSymbolAtLocation(symbol, location));
+        return this.toSupportedType(this.tsTypeChecker.getTypeOfSymbolAtLocation(symbol, location));
     }
 
     getResolvedSignature(callLikeExpression: ts.CallLikeExpression): ts.Signature {
@@ -64,12 +64,28 @@ export class TypeScriptTypeChecker implements TypeChecker {
     isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean {
         return this.tsTypeChecker.isImplementationOfOverload(fun);
     }
+
+    toSupportedType(type: ts.Type): ts.Type {
+        return toSupportedType(type);
+    }
 }
 
-function toSupportedType(type: ts.Type) {
+function toSupportedType(type: ts.Type): ts.Type {
     // getNonNullableType returns never for void?
     if (type.flags === ts.TypeFlags.Void) {
         return type;
+    }
+
+    // e.g. 1 | 2
+    if (type.flags & ts.TypeFlags.Union) {
+        const unionType = type as ts.UnionType;
+        const intLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.IntLike));
+        const numberLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.NumberLike));
+        const booleanLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.BooleanLike));
+
+        if (intLiterals || numberLiterals || booleanLiterals && unionType.types.length > 0) {
+            return toSupportedType(unionType.types[0]);
+        }
     }
 
     return type.getNonNullableType();

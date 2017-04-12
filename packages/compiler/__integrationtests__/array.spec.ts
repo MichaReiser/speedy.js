@@ -296,14 +296,14 @@ describe("Array", () => {
 
     describe("pop", () => {
         it("removes and returns the last element", async (cb) => {
-            expect(await arrayPop()).toBe(-1);
+            expect(await arrayPop()).toBe(0);
             cb();
         });
     });
 
     describe("shift", () => {
         it("removes and returns the first element", async (cb) => {
-            expect(await arrayShift()).toBe(2);
+            expect(await arrayShift()).toBe(3);
             cb();
         });
     });

@@ -38,18 +38,6 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         }
     }
 
-    // e.g. 1 | 2
-    if (type.flags & ts.TypeFlags.Union) {
-        const unionType = type as ts.UnionType;
-        const intLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.IntLike));
-        const numberLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.NumberLike));
-        const booleanLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.BooleanLike));
-
-        if (intLiterals || numberLiterals || booleanLiterals && unionType.types.length > 0) {
-            return toLLVMType(unionType.types[0], context);
-        }
-    }
-
     if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
         throw CodeGenerationError.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
     }

@@ -6,17 +6,19 @@ source_filename = \\"prefix-unary-expression/minusMinus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_minusMinus() {
 entry:
-  %doubleValue = alloca double
-  %intValue = alloca i32
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
@@ -36,17 +38,19 @@ source_filename = \\"prefix-unary-expression/neg.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_minus() {
 entry:
-  %doubleValue = alloca double
-  %intValue = alloca i32
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
@@ -64,18 +68,20 @@ source_filename = \\"prefix-unary-expression/not.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_not() {
 entry:
-  %doubleValue = alloca double
-  %intValue = alloca i32
-  %boolValue = alloca i1
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
+  %boolValue = alloca i1, align 1
   store i1 false, i1* %boolValue, align 1
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
@@ -98,17 +104,19 @@ source_filename = \\"prefix-unary-expression/plusPlus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_plusPlus() {
 entry:
-  %doubleValue = alloca double
-  %intValue = alloca i32
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
@@ -128,18 +136,20 @@ source_filename = \\"prefix-unary-expression/tilde.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_tilde() {
 entry:
-  %boolValue = alloca i1
-  %doubleValue = alloca double
-  %intValue = alloca i32
+  %boolValue = alloca i1, align 1
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   store i1 false, i1* %boolValue, align 1
@@ -154,6 +164,9 @@ entry:
   ret void
 }
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
 "
 `;

@@ -6,6 +6,7 @@ import {toLLVMType} from "../util/types";
 import {ClassReference} from "./class-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
+import {Pointer} from "./pointer";
 import {SpeedyJSConstructorFunctionReference} from "./speedyjs-constructor-function-reference";
 import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
 
@@ -39,7 +40,7 @@ export class SpeedyJSClassReference extends ClassReference {
         return SpeedyJSConstructorFunctionReference.create(signature, this, context);
     }
 
-    objectFor(pointer: llvm.Value, type: ts.ObjectType, context: CodeGenerationContext): ObjectReference {
+    objectFor(pointer: Pointer, type: ts.ObjectType, context: CodeGenerationContext): ObjectReference {
         return new SpeedyJSObjectReference(pointer, type, this);
     }
 }

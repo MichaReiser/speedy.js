@@ -1,15 +1,15 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {llvmArrayValue} from "../util/llvm-array-helpers";
 import {getArrayElementType, toLLVMType} from "../util/types";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
-import {AssignableValue, Value} from "./value";
 import {Primitive} from "./primitive";
-import {llvmArrayValue} from "../util/llvm-array-helpers";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
-import {CompilationContext} from "../../compilation-context";
+import {AssignableValue, Value} from "./value";
 
 /**
  * Base class for function references. Handles the coercion of the argument values to the expected types of the function parametes
@@ -91,9 +91,16 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     private invokeResolvedFunction(resolvedFunction: ResolvedFunction, args: Value[], callerContext: CodeGenerationContext) {
         const llvmFunction = this.getLLVMFunction(resolvedFunction, callerContext, args);
         const callArguments = this.getCallArguments(resolvedFunction, args, callerContext);
+
         const name = resolvedFunction.returnType.flags & ts.TypeFlags.Void ? undefined : `${resolvedFunction.functionName}ReturnValue`;
 
-        return callerContext.call(llvmFunction, callArguments, resolvedFunction.returnType, name);
+        const call = callerContext.builder.createCall(llvmFunction, callArguments, name);
+
+        if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
+            return;
+        }
+
+        return callerContext.value(call, resolvedFunction.returnType);
     }
 
     /**

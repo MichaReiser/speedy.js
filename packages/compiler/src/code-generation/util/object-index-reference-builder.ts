@@ -50,6 +50,14 @@ export class ObjectIndexReferenceBuilder {
         if (!getter) {
             const getterType = llvm.FunctionType.get(elementType, [thisType, this.indexType], false);
             getter = llvm.Function.create(getterType, llvm.LinkageTypes.ExternalLinkage, getterName, this.context.module);
+            getter.addFnAttr(llvm.Attribute.AttrKind.ReadOnly);
+            getter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
+            getter.addFnAttr(llvm.Attribute.AttrKind.NoUnwind);
+            getter.addFnAttr(llvm.Attribute.AttrKind.NoRecurse);
+
+            const self = getter.getArguments()[0];
+            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
+            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
         }
 
         return getter;
@@ -62,6 +70,11 @@ export class ObjectIndexReferenceBuilder {
         if (!setter) {
             const setterType = llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [thisType, this.indexType, elementType], false);
             setter = llvm.Function.create(setterType, llvm.LinkageTypes.ExternalLinkage, setterName, this.context.module);
+            setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
+
+            const self = setter.getArguments()[0];
+            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
+            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
         }
 
         return setter;

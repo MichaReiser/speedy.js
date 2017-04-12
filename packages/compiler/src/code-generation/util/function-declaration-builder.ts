@@ -10,6 +10,8 @@ import {ResolvedFunction} from "../value/resolved-function";
  */
 export class FunctionDeclarationBuilder {
     private linkageType = llvm.LinkageTypes.InternalLinkage;
+    private attributes: llvm.Attribute.AttrKind[] = [];
+
     private constructor(private _name: string, private parameters: { name: string, type: ts.Type}[], private returnType: ts.Type, private context: CodeGenerationContext) {
     }
 
@@ -55,11 +57,21 @@ export class FunctionDeclarationBuilder {
     }
 
     /**
-     * Sets the function as internally linked
+     * Sets the function as link once ODR linked
      * @return this for a fluent api
      */
-    internalLinkage(): this {
-        return this.linkage(llvm.LinkageTypes.InternalLinkage);
+    linkOnceOdrLinkage(): this {
+        return this.linkage(llvm.LinkageTypes.LinkOnceODRLinkage);
+    }
+
+    /**
+     * Adds the given function attribute
+     * @param attribute the attribute to add
+     * @return {FunctionDeclarationBuilder}
+     */
+    withAttribute(attribute: llvm.Attribute.AttrKind) {
+        this.attributes.push(attribute);
+        return this;
     }
 
     /**
@@ -86,7 +98,13 @@ export class FunctionDeclarationBuilder {
 
         const functionType = llvm.FunctionType.get(llvmReturnType, parameters, false);
 
-        return llvm.Function.create(functionType, this.linkageType, this._name, this.context.module);
+        const fn = llvm.Function.create(functionType, this.linkageType, this._name, this.context.module);
+
+        for (const attribute of this.attributes) {
+            fn.addFnAttr(attribute);
+        }
+
+        return fn;
     }
 
     declareIfNotExisting(): llvm.Function {

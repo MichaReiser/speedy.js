@@ -6,23 +6,28 @@ source_filename = \\"math/math.PI.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathPI() {
 entry:
-  %pi = alloca double
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %PI = call double @Math_PI({ { [5 x i8]* }* }* %mathPtr)
+  %pi = alloca double, align 8
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %PI = call double @Math_PI(%class.Math* dereferenceable(4) %mathPtr)
   store double %PI, double* %pi, align 8
   ret void
 }
 
-declare double @Math_PI({ { [5 x i8]* }* }*)
+; Function Attrs: alwaysinline nounwind readonly
+declare double @Math_PI(%class.Math* nocapture readonly) #0
+
+attributes #0 = { alwaysinline nounwind readonly }
 "
 `;
 
@@ -32,23 +37,26 @@ source_filename = \\"math/math.cos.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathCos() {
 entry:
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
   %cosReturnValue = call double @Math_cosd(double 1.130000e+01)
-  %mathPtr1 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %cosReturnValue2 = call double @Math_cosd(double 2.000000e+00)
+  %cosReturnValue1 = call double @Math_cosd(double 2.000000e+00)
   ret void
 }
 
-declare double @Math_cosd(double)
+; Function Attrs: alwaysinline
+declare hidden double @Math_cosd(double) #0
+
+attributes #0 = { alwaysinline }
 "
 `;
 
@@ -58,23 +66,26 @@ source_filename = \\"math/math.log.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathLog() {
 entry:
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
   %logReturnValue = call double @Math_logd(double 1.200000e+00)
-  %mathPtr1 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %logReturnValue2 = call double @Math_logd(double 4.000000e+00)
+  %logReturnValue1 = call double @Math_logd(double 4.000000e+00)
   ret void
 }
 
-declare double @Math_logd(double)
+; Function Attrs: alwaysinline
+declare hidden double @Math_logd(double) #0
+
+attributes #0 = { alwaysinline }
 "
 `;
 
@@ -84,23 +95,26 @@ source_filename = \\"math/math.pow.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathPow() {
 entry:
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
   %powReturnValue = call double @Math_powdd(double 1.200000e+00, double 3.300000e+00)
-  %mathPtr1 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %powReturnValue2 = call double @Math_powdd(double 4.000000e+00, double 3.000000e+00)
+  %powReturnValue1 = call double @Math_powdd(double 4.000000e+00, double 3.000000e+00)
   ret void
 }
 
-declare double @Math_powdd(double, double)
+; Function Attrs: alwaysinline
+declare hidden double @Math_powdd(double, double) #0
+
+attributes #0 = { alwaysinline }
 "
 `;
 
@@ -110,23 +124,26 @@ source_filename = \\"math/math.sin.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathSin() {
 entry:
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
   %sinReturnValue = call double @Math_sind(double 1.130000e+01)
-  %mathPtr1 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %sinReturnValue2 = call double @Math_sind(double 2.000000e+00)
+  %sinReturnValue1 = call double @Math_sind(double 2.000000e+00)
   ret void
 }
 
-declare double @Math_sind(double)
+; Function Attrs: alwaysinline
+declare hidden double @Math_sind(double) #0
+
+attributes #0 = { alwaysinline }
 "
 `;
 
@@ -136,26 +153,29 @@ source_filename = \\"math/math.sqrt.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathSqrt() {
 entry:
-  %intValue = alloca i32
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
+  %intValue = alloca i32, align 4
   %sqrtReturnValue = call double @Math_sqrtd(double 3.140000e+00)
   store i32 4, i32* %intValue, align 4
-  %mathPtr1 = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %intValue2 = load i32, i32* %intValue, align 4
-  %intValue2AsDouble = sitofp i32 %intValue2 to double
-  %sqrtReturnValue3 = call double @Math_sqrtd(double %intValue2AsDouble)
+  %intValue1 = load i32, i32* %intValue, align 4
+  %intValue1AsDouble = sitofp i32 %intValue1 to double
+  %sqrtReturnValue2 = call double @Math_sqrtd(double %intValue1AsDouble)
   ret void
 }
 
-declare double @Math_sqrtd(double)
+; Function Attrs: alwaysinline
+declare hidden double @Math_sqrtd(double) #0
+
+attributes #0 = { alwaysinline }
 "
 `;
