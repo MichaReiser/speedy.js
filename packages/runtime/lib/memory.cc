@@ -20,7 +20,7 @@ extern "C" {
 extern void malloc_inspect_all(void(*handler)(void*, void *, size_t, void*), void* arg);
 extern size_t bulk_free(void**, size_t n_elements);
 
-ALWAYS_INLINE void collectPointers(void* start, void* end, size_t used_bytes, void* callback_arg) {
+ALWAYS_INLINE void collectPointers(void* start, void*, size_t used_bytes, void* callback_arg) {
     auto collectedPointers = static_cast<CollectedPointers*>(callback_arg);
 
     if (used_bytes > 0 && collectedPointers->count < collectedPointers->pointers.size()) {

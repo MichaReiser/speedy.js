@@ -1,7 +1,7 @@
-export async function booleanConditionalExpression() {
+export async function booleanConditionalExpression(condition: boolean) {
     "use speedyjs";
 
-    true ? true : false;
-    true ? 1 : 2;
-    true ? 1.0 : 2.0;
+    condition ? true : false;
+    condition ? 1 : 2;
+    condition ? 1.0 : 2.0;
 }

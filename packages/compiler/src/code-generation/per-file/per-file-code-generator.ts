@@ -106,9 +106,9 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
             const entryFunctions = context.getEntryFunctionNames();
             const linked = this.link(biteCodeFileName, buildDirectory.getTempFileName(`${plainFileName}-linked.o`), buildDirectory, context);
-            const optimized = optimize(linked, entryFunctions, buildDirectory.getTempFileName(`${plainFileName}-opt.o`), context.compilationContext.compilerOptions.optimizationLevel);
+            const linkedOptimized = optimize(linked, entryFunctions, buildDirectory.getTempFileName(`${plainFileName}-lopt.o`), context.compilationContext.compilerOptions.optimizationLevel);
 
-            const assembly = llc(optimized, buildDirectory.getTempFileName(`${plainFileName}.s`));
+            const assembly = llc(linkedOptimized, buildDirectory.getTempFileName(`${plainFileName}.s`));
             const wast = s2wasm(assembly, buildDirectory.getTempFileName(`${plainFileName}.wast`), context.compilationContext.compilerOptions);
 
             const wasmFileName = buildDirectory.getTempFileName(`${plainFileName}.wasm`);

@@ -1,28 +1,27 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Primitive} from "../value/primitive";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {generateCondition} from "../util/conditions";
 
 class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement, void> {
     syntaxKind = ts.SyntaxKind.IfStatement;
 
     generate(ifStatement: ts.IfStatement, context: CodeGenerationContext): void {
         const fun = context.scope.enclosingFunction;
-        let thenBlock = llvm.BasicBlock.create(context.llvmContext, "then", fun);
-        let elseBlock = llvm.BasicBlock.create(context.llvmContext, "else");
-        const successor = llvm.BasicBlock.create(context.llvmContext, "if-successor");
+        let thenBlock = llvm.BasicBlock.create(context.llvmContext, "if.then");
+        let elseBlock = llvm.BasicBlock.create(context.llvmContext, "if.else");
+        const end = llvm.BasicBlock.create(context.llvmContext, "if.end");
 
-        const conditionValue = context.generateValue(ifStatement.expression);
-        const condition = Primitive.toBoolean(conditionValue, context.typeChecker.getTypeAtLocation(ifStatement.expression), context);
-        context.builder.createCondBr(condition, thenBlock, elseBlock);
+        generateCondition(ifStatement.expression, thenBlock, elseBlock, context);
 
+        fun.addBasicBlock(thenBlock);
         context.builder.setInsertionPoint(thenBlock);
         context.generate(ifStatement.thenStatement);
         thenBlock = context.builder.getInsertBlock();
 
         if (!thenBlock.getTerminator()) {
-            context.builder.createBr(successor);
+            context.builder.createBr(end);
         }
 
         fun.addBasicBlock(elseBlock);
@@ -34,14 +33,14 @@ class IfStatementCodeGenerator implements SyntaxCodeGenerator<ts.IfStatement, vo
         }
 
         if (elseBlock.empty) {
-            elseBlock.replaceAllUsesWith(successor);
+            elseBlock.replaceAllUsesWith(end);
             elseBlock.eraseFromParent();
         } else if (!elseBlock.getTerminator()) {
-            context.builder.createBr(successor);
+            context.builder.createBr(end);
         }
 
-        fun.addBasicBlock(successor);
-        context.builder.setInsertionPoint(successor);
+        fun.addBasicBlock(end);
+        context.builder.setInsertionPoint(end);
     }
 }
 

@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES lib/array-api.cc lib/macros.h lib/array.h lib/conversion.cc lib/math.cc lib/memory.cc)
 
 set(EM_CONFIG_PATH "${CMAKE_SOURCE_DIR}/.emscripten")
-set(EMSCRIPTEN_COMPILE_FLAGS --cache "${CMAKE_SOURCE_DIR}/.emscripten_cache" --emscripten-cxx --em-config "${EM_CONFIG_PATH}")
+set(EMSCRIPTEN_COMPILE_FLAGS --cache "${CMAKE_SOURCE_DIR}/.emscripten_cache" --em-config "${EM_CONFIG_PATH}")
+set(CMAKE_CXX_FLAGS "-pedantic -Wextra -O3")
 
 add_library(speedyjs-runtime STATIC ${SOURCE_FILES})
 add_library(speedyjs-runtime-unsafe STATIC ${SOURCE_FILES})

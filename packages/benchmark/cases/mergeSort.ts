@@ -10009,7 +10009,6 @@ export function mergeSortSync() {
         0.16813445539637795,
         0.15010735535582342
     ];
-
     const sorted = array.slice();
     splitAndMerge(array, 0, array.length, sorted);
     return computeCheckSum(sorted);
@@ -10043,12 +10042,12 @@ function splitAndMerge(array: number[], lower: int, upper: int, sorted: number[]
 
 function merge(array: number[], lower: int, middle: int, upper: int, sorted: number[]): void {
     "use speedyjs";
+
     let i = lower;
     let j = middle;
 
-    for (let k = lower; k < upper; ++k) {
-        // i element is smaller or j has reached the end
-        if (i < middle && (j >= upper || array[i] <= array[j]))  {
+    for (let k = i; k < upper; ++k) {
+        if (i < middle && (j >= upper || array[i] <= array[j])) {
             sorted[k] = array[i];
             ++i;
         } else {
@@ -10056,6 +10055,7 @@ function merge(array: number[], lower: int, middle: int, upper: int, sorted: num
             sorted[k] = array[j];
             ++j;
         }
+
     }
 }
 

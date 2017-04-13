@@ -1,10 +1,10 @@
-import * as llvm from "llvm-node";
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
 import {ObjectIndexReferenceBuilder} from "../util/object-index-reference-builder";
 import {getArrayElementType} from "../util/types";
+import {Address} from "./address";
 import {ArrayClassReference} from "./array-class-reference";
 import {BuiltInObjectReference} from "./built-in-object-reference";
 import {FunctionReference} from "./function-reference";
@@ -21,12 +21,12 @@ export class ArrayReference extends BuiltInObjectReference {
 
     /**
      * Creates a new instance
-     * @param objectAddress the address of the array object
+     * @param address the address of the array object
      * @param arrayType the type of the array
      * @param arrayClass the arrayClass
      */
-    constructor(objectAddress: llvm.Value, arrayType: ts.ObjectType, arrayClass: ArrayClassReference) {
-        super(objectAddress, arrayType, arrayClass);
+    constructor(address: Address, arrayType: ts.ObjectType, arrayClass: ArrayClassReference) {
+        super(address, arrayType, arrayClass);
 
         this.elementType = getArrayElementType(arrayType);
     }

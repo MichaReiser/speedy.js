@@ -1,7 +1,7 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Address} from "../value/address";
+import {Allocation} from "../value/allocation";
 import {sizeof} from "./types";
 
 /**
@@ -15,7 +15,7 @@ import {sizeof} from "./types";
 function allocateLlvmArrayWith(elements: llvm.Value[], elementType: llvm.Type, context: CodeGenerationContext, name?: string): llvm.Value {
     const ZERO = llvm.ConstantInt.get(context.llvmContext, 0);
     const arrayType = llvm.ArrayType.get(elementType, elements.length);
-    const allocation = Address.createAllocaInstInEntryBlock(arrayType, context.scope, name);
+    const allocation = Allocation.createAllocaInstInEntryBlock(arrayType, context, name);
 
     const areAllElementsConstants = elements.every(value => value instanceof llvm.Constant);
     const array = context.builder.createInBoundsGEP(allocation, [ZERO, ZERO], name);

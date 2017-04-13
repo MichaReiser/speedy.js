@@ -61,7 +61,7 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
         const nan = builtins.get("NaN");
         if (nan) {
-            context.scope.addVariable(nan, new Primitive(llvm.ConstantFP.getNaN(llvm.Type.getDoubleTy(context.llvmContext)), context.typeChecker.getDeclaredTypeOfSymbol(nan)));
+            context.scope.addVariable(nan, new Primitive(llvm.ConstantFP.getNaN(llvm.Type.getDoubleTy(context.llvmContext)), context.typeChecker.getTypeAtLocation(nan.valueDeclaration!)));
         }
     }
 

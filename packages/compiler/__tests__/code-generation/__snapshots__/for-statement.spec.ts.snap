@@ -6,21 +6,26 @@ source_filename = \\"for/for-empty.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_forEmpty() {
 entry:
-  br label %for-body
+  br label %for.body
 
-for-body:                                         ; preds = %entry
-  br label %for-successor
+for.body:                                         ; preds = %for.inc, %entry
+  br label %for.end
 
-for-successor:                                    ; preds = %for-body
+for.inc:                                          ; No predecessors!
+  br label %for.body
+
+for.end:                                          ; preds = %for.body
   ret void
 }
 "
@@ -32,28 +37,33 @@ source_filename = \\"for/with-condition.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_forWithCondition() {
 entry:
-  %i = alloca i32
+  %i = alloca i32, align 4
   store i32 0, i32* %i, align 4
-  br label %for-header
+  br label %for.cond
 
-for-header:                                       ; preds = %for-body, %entry
+for.cond:                                         ; preds = %for.inc, %entry
   %i1 = load i32, i32* %i, align 4
   %cmpLT = icmp slt i32 %i1, 10
-  br i1 %cmpLT, label %for-body, label %for-successor
+  br i1 %cmpLT, label %for.body, label %for.end
 
-for-body:                                         ; preds = %for-header
-  br label %for-header
+for.body:                                         ; preds = %for.cond
+  br label %for.inc
 
-for-successor:                                    ; preds = %for-header
+for.inc:                                          ; preds = %for.body
+  br label %for.cond
+
+for.end:                                          ; preds = %for.cond
   ret void
 }
 "
@@ -65,23 +75,28 @@ source_filename = \\"for/with-initializer.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_forWithInitializer() {
 entry:
-  %i = alloca i32
+  %i = alloca i32, align 4
   store i32 0, i32* %i, align 4
-  br label %for-body
+  br label %for.body
 
-for-body:                                         ; preds = %entry
-  br label %for-successor
+for.body:                                         ; preds = %for.inc, %entry
+  br label %for.end
 
-for-successor:                                    ; preds = %for-body
+for.inc:                                          ; No predecessors!
+  br label %for.body
+
+for.end:                                          ; preds = %for.body
   ret void
 }
 "
@@ -93,70 +108,79 @@ source_filename = \\"for/with-return-statement.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
-define i1 @_isPrime(i32 %x1) {
+define i1 @_isPrime(i32 %x) {
 entry:
-  %i = alloca i32
-  %return = alloca i1
-  %x = alloca i32
-  store i32 %x1, i32* %x, align 4
-  %x2 = load i32, i32* %x, align 4
-  %cmpLE = icmp sle i32 %x2, 2
-  br i1 %cmpLE, label %then, label %if-successor
+  %i = alloca i32, align 4
+  %x.addr = alloca i32, align 4
+  %return = alloca i1, align 1
+  store i32 %x, i32* %x.addr, align 4
+  %x.addr1 = load i32, i32* %x.addr, align 4
+  %cmpLE = icmp sle i32 %x.addr1, 2
+  br i1 %cmpLE, label %if.then, label %if.end
 
-then:                                             ; preds = %entry
+if.then:                                          ; preds = %entry
   store i1 false, i1* %return, align 1
   br label %returnBlock
 
-if-successor:                                     ; preds = %entry
+if.end:                                           ; preds = %entry
   store i32 2, i32* %i, align 4
-  br label %for-header
+  br label %for.cond
 
-for-header:                                       ; preds = %if-successor8, %if-successor
-  %mathPtr = load { { [5 x i8]* }* }*, { { [5 x i8]* }* }** @Math_ptr, align 4
-  %x3 = load i32, i32* %x, align 4
-  %x3AsDouble = sitofp i32 %x3 to double
-  %sqrtReturnValue = call double @Math_sqrtd(double %x3AsDouble)
+for.cond:                                         ; preds = %for.inc, %if.end
+  %i2 = load i32, i32* %i, align 4
+  %x.addr3 = load i32, i32* %x.addr, align 4
+  %x.addr3AsDouble = sitofp i32 %x.addr3 to double
+  %sqrtReturnValue = call double @Math_sqrtd(double %x.addr3AsDouble)
   %sqrtReturnValueAsInt32 = call i32 @toInt32d(double %sqrtReturnValue)
-  %i4 = load i32, i32* %i, align 4
-  %cmpLT = icmp slt i32 %i4, %sqrtReturnValueAsInt32
-  br i1 %cmpLT, label %for-body, label %for-successor
+  %cmpLT = icmp slt i32 %i2, %sqrtReturnValueAsInt32
+  br i1 %cmpLT, label %for.body, label %for.end
 
-for-body:                                         ; preds = %for-header
-  %x6 = load i32, i32* %x, align 4
-  %i7 = load i32, i32* %i, align 4
-  %srem = srem i32 %x6, %i7
+for.body:                                         ; preds = %for.cond
+  %x.addr4 = load i32, i32* %x.addr, align 4
+  %i5 = load i32, i32* %i, align 4
+  %srem = srem i32 %x.addr4, %i5
   %cmpEQ = icmp eq i32 %srem, 0
-  br i1 %cmpEQ, label %then5, label %if-successor8
+  br i1 %cmpEQ, label %if.then6, label %if.end7
 
-then5:                                            ; preds = %for-body
+if.then6:                                         ; preds = %for.body
   store i1 false, i1* %return, align 1
   br label %returnBlock
 
-if-successor8:                                    ; preds = %for-body
-  %i9 = load i32, i32* %i, align 4
-  %add = add i32 %i9, 1
-  store i32 %add, i32* %i, align 4
-  br label %for-header
+if.end7:                                          ; preds = %for.body
+  br label %for.inc
 
-for-successor:                                    ; preds = %for-header
+for.inc:                                          ; preds = %if.end7
+  %i8 = load i32, i32* %i, align 4
+  %add = add i32 %i8, 1
+  store i32 %add, i32* %i, align 4
+  br label %for.cond
+
+for.end:                                          ; preds = %for.cond
   store i1 true, i1* %return, align 1
   br label %returnBlock
 
-returnBlock:                                      ; preds = %for-successor, %then5, %then
-  %return10 = load i1, i1* %return, align 1
-  ret i1 %return10
+returnBlock:                                      ; preds = %for.end, %if.then6, %if.then
+  %return9 = load i1, i1* %return, align 1
+  ret i1 %return9
 }
 
-declare double @Math_sqrtd(double)
+; Function Attrs: alwaysinline
+declare hidden double @Math_sqrtd(double) #0
 
-declare i32 @toInt32d(double)
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #1
+
+attributes #0 = { alwaysinline }
+attributes #1 = { alwaysinline readnone }
 "
 `;
 
@@ -166,35 +190,40 @@ source_filename = \\"for/with-updater.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
 define void @_forWithUpdater() {
 entry:
-  %i = alloca i32
-  %x = alloca i32
+  %i = alloca i32, align 4
+  %x = alloca i32, align 4
   store i32 0, i32* %x, align 4
   store i32 0, i32* %i, align 4
-  br label %for-header
+  br label %for.cond
 
-for-header:                                       ; preds = %for-body, %entry
+for.cond:                                         ; preds = %for.inc, %entry
   %i1 = load i32, i32* %i, align 4
   %cmpLT = icmp slt i32 %i1, 10
-  br i1 %cmpLT, label %for-body, label %for-successor
+  br i1 %cmpLT, label %for.body, label %for.end
 
-for-body:                                         ; preds = %for-header
+for.body:                                         ; preds = %for.cond
   %i2 = load i32, i32* %i, align 4
   store i32 %i2, i32* %x, align 4
+  br label %for.inc
+
+for.inc:                                          ; preds = %for.body
   %i3 = load i32, i32* %i, align 4
   %add = add i32 %i3, 1
   store i32 %add, i32* %i, align 4
-  br label %for-header
+  br label %for.cond
 
-for-successor:                                    ; preds = %for-header
+for.end:                                          ; preds = %for.cond
   ret void
 }
 "

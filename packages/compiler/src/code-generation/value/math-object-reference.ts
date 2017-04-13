@@ -1,17 +1,17 @@
-import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationError} from "../../code-generation-error";
 import {CodeGenerationContext} from "../code-generation-context";
+import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
+import {Allocation} from "./allocation";
 import {BuiltInObjectReference} from "./built-in-object-reference";
 import {MathClassReference} from "./math-class-reference";
+import {ObjectPropertyReference} from "./object-property-reference";
+import {Pointer} from "./pointer";
 import {Primitive} from "./primitive";
 import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
-import {Address} from "./address";
-import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
-import {ObjectPropertyReference} from "./object-property-reference";
 
 /**
  * Wrapper for the built in Math object
@@ -20,8 +20,8 @@ export class MathObjectReference extends BuiltInObjectReference {
 
     typeName = "Math";
 
-    constructor(objAddr: llvm.Value, mathType: ts.ObjectType, mathClass: MathClassReference) {
-        super(objAddr, mathType, mathClass);
+    constructor(pointer: Pointer, mathType: ts.ObjectType, mathClass: MathClassReference) {
+        super(pointer, mathType, mathClass);
     }
 
     /**
@@ -48,7 +48,9 @@ export class MathObjectReference extends BuiltInObjectReference {
             case "log":
             case "sin":
             case "cos":
-                return UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type);
+                const fn = UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type);
+                fn.properties.readnone = true;
+                return fn;
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
@@ -79,11 +81,11 @@ export class MathObjectReference extends BuiltInObjectReference {
     static pow(lhs: Value, rhs: Value, numberType: ts.Type, context: CodeGenerationContext) {
         const mathSymbol = context.compilationContext.builtIns.get("Math");
         const mathObject = context.scope.getVariable(mathSymbol!);
-        const mathType = (mathObject as Address).type as ts.ObjectType;
+        const mathType = (mathObject as Allocation).type as ts.ObjectType;
 
         const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
         const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);
-        const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context);
+        const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readonly: true });
 
         const args = [Primitive.toNumber(lhs, numberType, context), Primitive.toNumber(rhs, numberType, context)];
         return powFunction.invokeWith(args, context)!;

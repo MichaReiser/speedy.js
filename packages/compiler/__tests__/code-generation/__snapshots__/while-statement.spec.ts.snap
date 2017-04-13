@@ -6,31 +6,33 @@ source_filename = \\"while-statement/simple-while.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
-define void @_simpleWhile(i32 %arg1) {
+define void @_simpleWhile(i32 %arg) {
 entry:
-  %arg = alloca i32
-  store i32 %arg1, i32* %arg, align 4
-  br label %whileCondition
+  %arg.addr = alloca i32, align 4
+  store i32 %arg, i32* %arg.addr, align 4
+  br label %while.cond
 
-whileCondition:                                   ; preds = %whileBody, %entry
-  %arg2 = load i32, i32* %arg, align 4
-  %arg2AsBool = icmp ne i32 %arg2, 0
-  br i1 %arg2AsBool, label %whileBody, label %whileSuccessor
+while.cond:                                       ; preds = %while.body, %entry
+  %arg.addr1 = load i32, i32* %arg.addr, align 4
+  %arg.addr1AsBool = icmp ne i32 %arg.addr1, 0
+  br i1 %arg.addr1AsBool, label %while.body, label %while.end
 
-whileBody:                                        ; preds = %whileCondition
-  %arg3 = load i32, i32* %arg, align 4
-  %sub = sub i32 %arg3, 1
-  store i32 %sub, i32* %arg, align 4
-  br label %whileCondition
+while.body:                                       ; preds = %while.cond
+  %arg.addr2 = load i32, i32* %arg.addr, align 4
+  %sub = sub i32 %arg.addr2, 1
+  store i32 %sub, i32* %arg.addr, align 4
+  br label %while.cond
 
-whileSuccessor:                                   ; preds = %whileCondition
+while.end:                                        ; preds = %while.cond
   ret void
 }
 "
@@ -42,36 +44,38 @@ source_filename = \\"while-statement/while-with-return-as-last-statement.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
-define i32 @_whileWithReturnAsLastStatement(i32 %arg1) {
+define i32 @_whileWithReturnAsLastStatement(i32 %arg) {
 entry:
-  %return = alloca i32
-  %arg = alloca i32
-  store i32 %arg1, i32* %arg, align 4
-  br label %whileCondition
+  %arg.addr = alloca i32, align 4
+  %return = alloca i32, align 4
+  store i32 %arg, i32* %arg.addr, align 4
+  br label %while.cond
 
-whileCondition:                                   ; preds = %entry
-  %arg2 = load i32, i32* %arg, align 4
-  %arg2AsBool = icmp ne i32 %arg2, 0
-  br i1 %arg2AsBool, label %whileBody, label %whileSuccessor
+while.cond:                                       ; preds = %entry
+  %arg.addr1 = load i32, i32* %arg.addr, align 4
+  %arg.addr1AsBool = icmp ne i32 %arg.addr1, 0
+  br i1 %arg.addr1AsBool, label %while.body, label %while.end
 
-whileBody:                                        ; preds = %whileCondition
+while.body:                                       ; preds = %while.cond
   store i32 10, i32* %return, align 4
   br label %returnBlock
 
-whileSuccessor:                                   ; preds = %whileCondition
+while.end:                                        ; preds = %while.cond
   store i32 0, i32* %return, align 4
   br label %returnBlock
 
-returnBlock:                                      ; preds = %whileSuccessor, %whileBody
-  %return3 = load i32, i32* %return, align 4
-  ret i32 %return3
+returnBlock:                                      ; preds = %while.end, %while.body
+  %return2 = load i32, i32* %return, align 4
+  ret i32 %return2
 }
 "
 `;

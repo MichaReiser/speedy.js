@@ -1,8 +1,8 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Primitive} from "../value/primitive";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {generateCondition} from "../util/conditions";
 
 class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, void> {
     syntaxKind = ts.SyntaxKind.ForStatement;
@@ -12,23 +12,21 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
             context.generate(forStatement.initializer);
         }
 
-        let forEntry: llvm.BasicBlock;
+        let head: llvm.BasicBlock;
         const fun = context.scope.enclosingFunction;
-        const successor = llvm.BasicBlock.create(context.llvmContext, "for-successor");
-        let body = llvm.BasicBlock.create(context.llvmContext, "for-body");
+        const end = llvm.BasicBlock.create(context.llvmContext, "for.end");
+        let body = llvm.BasicBlock.create(context.llvmContext, "for.body");
 
         if (forStatement.condition) {
-            const forBlock = llvm.BasicBlock.create(context.llvmContext, "for-header", fun);
+            const forBlock = llvm.BasicBlock.create(context.llvmContext, "for.cond", fun);
             context.builder.createBr(forBlock);
             context.builder.setInsertionPoint(forBlock);
 
-            const condition = context.generateValue(forStatement.condition).generateIR(context);
-            context.builder.createCondBr(Primitive.toBoolean(condition, context.typeChecker.getTypeAtLocation(forStatement.condition), context), body, successor);
-
-            forEntry = forBlock;
+            generateCondition(forStatement.condition, body, end, context);
+            head = forBlock;
         } else {
             context.builder.createBr(body);
-            forEntry = body;
+            head = body;
         }
 
         fun.addBasicBlock(body);
@@ -36,17 +34,22 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
 
         context.generate(forStatement.statement);
         body = context.builder.getInsertBlock();
+        const incrementor = llvm.BasicBlock.create(context.llvmContext, "for.inc");
 
         if (!body.getTerminator()) {
-            if (forStatement.incrementor) {
-                context.generate(forStatement.incrementor);
-            }
-
-            context.builder.createBr(forEntry);
+            context.builder.createBr(incrementor);
         }
 
-        fun.addBasicBlock(successor);
-        context.builder.setInsertionPoint(successor);
+        fun.addBasicBlock(incrementor);
+        context.builder.setInsertionPoint(incrementor);
+        if (forStatement.incrementor) {
+            context.generate(forStatement.incrementor);
+        }
+
+        context.builder.createBr(head);
+
+        fun.addBasicBlock(end);
+        context.builder.setInsertionPoint(end);
     }
 }
 

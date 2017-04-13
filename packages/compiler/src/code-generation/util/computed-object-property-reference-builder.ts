@@ -56,6 +56,13 @@ export class ComputedObjectPropertyReferenceBuilder {
         if (!getter) {
             const getterType = llvm.FunctionType.get(propertyType, [thisType], false);
             getter = llvm.Function.create(getterType, llvm.LinkageTypes.ExternalLinkage, getterName, this.context.module);
+            getter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
+            getter.addFnAttr(llvm.Attribute.AttrKind.ReadOnly);
+            getter.addFnAttr(llvm.Attribute.AttrKind.NoUnwind);
+
+            const self = getter.getArguments()[0];
+            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
+            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
         }
 
         return getter;
@@ -69,6 +76,11 @@ export class ComputedObjectPropertyReferenceBuilder {
         if (!setter) {
             const setterType = llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [thisType, propertyType], false);
             setter = llvm.Function.create(setterType, llvm.LinkageTypes.ExternalLinkage, setterName, this.context.module);
+            setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
+
+            const self = setter.getArguments()[0];
+            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
+            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
         }
 
         return setter;

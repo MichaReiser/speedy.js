@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import * as assert from "assert";
-import {Address} from "./value/address";
+import {Allocation} from "./value/allocation";
 import {ClassReference} from "./value/class-reference";
 import {FunctionReference} from "./value/function-reference";
 import {Value} from "./value/value";
@@ -11,22 +11,25 @@ import {Value} from "./value/value";
  */
 export class Scope {
     private variables = new Map<ts.Symbol, Value>();
-    private functions = new Map<ts.Symbol, FunctionReference>();
-    private classes = new Map<ts.Symbol, ClassReference>();
-    private returnAlloca: Address | undefined;
+    private functions: Map<ts.Symbol, FunctionReference>;
+    private classes: Map<ts.Symbol, ClassReference>;
+    private returnAlloca: Allocation | undefined;
     private retBlock: llvm.BasicBlock | undefined;
     private children: Scope[] = [];
 
-    constructor(private parent?: Scope, private fn?: llvm.Function) {}
+    constructor(private parent?: Scope, private fn?: llvm.Function) {
+        this.functions = parent ? parent.functions : new Map<ts.Symbol, FunctionReference>();
+        this.classes = parent ? parent.classes : new Map<ts.Symbol, ClassReference>();
+    }
 
     /**
      * Stores the function result. Only present in a function that is non void
      */
-    get returnAllocation(): Address | undefined {
+    get returnAllocation(): Allocation | undefined {
         return this.returnAlloca || (this.parent ? this.parent.returnAllocation : undefined);
     }
 
-    set returnAllocation(allocation: Address | undefined) {
+    set returnAllocation(allocation: Allocation | undefined) {
         this.returnAlloca = allocation;
     }
 
@@ -98,10 +101,6 @@ export class Scope {
         assert(symbol, "symbol is undefined");
 
         const fun = this.functions.get(symbol);
-        if (!fun && this.parent) {
-            return this.parent.getFunction(symbol);
-        }
-
         assert(fun, `function ${symbol.name} is not defined in scope`);
         return fun!;
     }
@@ -118,10 +117,6 @@ export class Scope {
         assert(symbol, "symbol is undefined");
 
         const cls = this.classes.get(symbol);
-        if (!cls && this.parent) {
-            return this.parent.getClass(symbol);
-        }
-
         assert(cls, `Class ${symbol.name} is not defined in scope`);
         return cls!;
     }
@@ -138,10 +133,10 @@ export class Scope {
     }
 
     hasFunction(symbol: ts.Symbol): boolean {
-        return this.functions.has(symbol) || (!!this.parent && this.parent.hasFunction(symbol));
+        return this.functions.has(symbol);
     }
 
     hasClass(symbol: ts.Symbol): boolean {
-        return this.classes.has(symbol) || (!!this.parent && this.parent.hasClass(symbol));
+        return this.classes.has(symbol);
     }
 }

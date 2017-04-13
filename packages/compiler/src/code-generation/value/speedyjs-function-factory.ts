@@ -4,7 +4,7 @@ import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {DefaultNameMangler} from "../default-name-mangler";
 import {FunctionDefinitionBuilder} from "../util/function-definition-builder";
-import {FunctionFactory} from "./function-factory";
+import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {ResolvedFunction} from "./resolved-function";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ObjectReference} from "./object-reference";
@@ -26,12 +26,18 @@ export class SpeedyJSFunctionFactory extends FunctionFactory {
         return super.mangleFunctionName(resolvedFunction, typesOfUsedParameters);
     }
 
-    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, linkage: llvm.LinkageTypes, objectReference?: ObjectReference) {
+    protected getDefaultFunctionProperties(): FunctionProperties {
+        return Object.assign({}, super.getDefaultFunctionProperties(), {
+            visibility: llvm.VisibilityTypes.Hidden
+        });
+    }
+
+    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties: FunctionProperties, objectReference?: ObjectReference) {
         const declaration = resolvedFunction.declaration as ts.FunctionDeclaration;
         assert(declaration, "Cannot define a function without a declaration");
         assert(declaration.body, "Cannot define a function without a body");
 
-        const fn = super.createFunction(mangledName, resolvedFunction, numberOfArguments, context, linkage, objectReference);
+        const fn = super.createFunction(mangledName, resolvedFunction, numberOfArguments, context, properties, objectReference);
 
         const childContext = context.createChildContext();
         FunctionDefinitionBuilder.create(fn, resolvedFunction, childContext)

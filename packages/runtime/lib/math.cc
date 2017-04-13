@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cstdint>
+#include <algorithm>
 #include "macros.h"
 
 extern "C" {
@@ -30,5 +31,15 @@ ALWAYS_INLINE DLL_PUBLIC double Math_sind(double value) {
 
 ALWAYS_INLINE DLL_PUBLIC double_t Math_logd(double value) {
     return std::log(value);
+}
+
+ALWAYS_INLINE DLL_PUBLIC double Math_maxPd(double* values, int32_t valueCount) {
+    double max = -INFINITY;
+
+    for (int32_t i = 0; i < valueCount; ++i) {
+        max = std::max(values[i], max);
+    }
+
+    return max;
 }
 }

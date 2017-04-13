@@ -1,7 +1,7 @@
-export async function intConditionalExpression() {
+export async function intConditionalExpression(condition: number) {
     "use speedyjs";
 
-    1.3 ? true : false;
-    1.5 ? 1 : 2;
-    1.2 ? 1.0 : 2.0;
+    condition ? true : false;
+    condition ? 1 : 2;
+    condition ? 1.0 : 2.0;
 }

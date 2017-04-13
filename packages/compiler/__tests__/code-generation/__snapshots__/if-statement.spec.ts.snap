@@ -6,52 +6,54 @@ source_filename = \\"if/if-else-if-else.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
-define i32 @_cmp(i32 %x1, i32 %y2) {
+define i32 @_cmp(i32 %x, i32 %y) {
 entry:
-  %result = alloca i32
-  %return = alloca i32
-  %x = alloca i32
-  store i32 %x1, i32* %x, align 4
-  %y = alloca i32
-  store i32 %y2, i32* %y, align 4
-  %x3 = load i32, i32* %x, align 4
-  %y4 = load i32, i32* %y, align 4
-  %cmpLT = icmp slt i32 %x3, %y4
-  br i1 %cmpLT, label %then, label %else
+  %result = alloca i32, align 4
+  %y.addr = alloca i32, align 4
+  %x.addr = alloca i32, align 4
+  %return = alloca i32, align 4
+  store i32 %x, i32* %x.addr, align 4
+  store i32 %y, i32* %y.addr, align 4
+  %x.addr1 = load i32, i32* %x.addr, align 4
+  %y.addr2 = load i32, i32* %y.addr, align 4
+  %cmpLT = icmp slt i32 %x.addr1, %y.addr2
+  br i1 %cmpLT, label %if.then, label %if.else
 
-then:                                             ; preds = %entry
+if.then:                                          ; preds = %entry
   store i32 -1, i32* %result, align 4
-  br label %if-successor
+  br label %if.end
 
-else:                                             ; preds = %entry
-  %x6 = load i32, i32* %x, align 4
-  %y7 = load i32, i32* %y, align 4
-  %cmpEQ = icmp eq i32 %x6, %y7
-  br i1 %cmpEQ, label %then5, label %else8
+if.else:                                          ; preds = %entry
+  %x.addr3 = load i32, i32* %x.addr, align 4
+  %y.addr4 = load i32, i32* %y.addr, align 4
+  %cmpEQ = icmp eq i32 %x.addr3, %y.addr4
+  br i1 %cmpEQ, label %if.then5, label %if.else6
 
-then5:                                            ; preds = %else
+if.then5:                                         ; preds = %if.else
   store i32 0, i32* %result, align 4
-  br label %if-successor
+  br label %if.end
 
-else8:                                            ; preds = %else
+if.else6:                                         ; preds = %if.else
   store i32 1, i32* %result, align 4
-  br label %if-successor
+  br label %if.end
 
-if-successor:                                     ; preds = %then5, %else8, %then
-  %result9 = load i32, i32* %result, align 4
-  store i32 %result9, i32* %return, align 4
+if.end:                                           ; preds = %if.then5, %if.else6, %if.then
+  %result7 = load i32, i32* %result, align 4
+  store i32 %result7, i32* %return, align 4
   br label %returnBlock
 
-returnBlock:                                      ; preds = %if-successor
-  %return10 = load i32, i32* %return, align 4
-  ret i32 %return10
+returnBlock:                                      ; preds = %if.end
+  %return8 = load i32, i32* %return, align 4
+  ret i32 %return8
 }
 "
 `;
@@ -62,38 +64,197 @@ source_filename = \\"if/if-statement.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
+%class.Math = type { { [5 x i8]* }* }
+
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant { { [5 x i8]* }* } { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant { { [5 x i8]* }* }* @Math_object
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
 
-define double @_max(double %x1, double %y2) {
+define double @_max(double %x, double %y) {
 entry:
-  %return = alloca double
-  %x = alloca double
-  store double %x1, double* %x, align 8
-  %y = alloca double
-  store double %y2, double* %y, align 8
-  %x3 = load double, double* %x, align 8
-  %y4 = load double, double* %y, align 8
-  %cmpLT = fcmp olt double %x3, %y4
-  br i1 %cmpLT, label %then, label %if-successor
+  %y.addr = alloca double, align 8
+  %x.addr = alloca double, align 8
+  %return = alloca double, align 8
+  store double %x, double* %x.addr, align 8
+  store double %y, double* %y.addr, align 8
+  %x.addr1 = load double, double* %x.addr, align 8
+  %y.addr2 = load double, double* %y.addr, align 8
+  %cmpLT = fcmp olt double %x.addr1, %y.addr2
+  br i1 %cmpLT, label %if.then, label %if.end
 
-then:                                             ; preds = %entry
-  %y5 = load double, double* %y, align 8
-  store double %y5, double* %return, align 8
+if.then:                                          ; preds = %entry
+  %y.addr3 = load double, double* %y.addr, align 8
+  store double %y.addr3, double* %return, align 8
   br label %returnBlock
 
-if-successor:                                     ; preds = %entry
-  %x6 = load double, double* %x, align 8
-  store double %x6, double* %return, align 8
+if.end:                                           ; preds = %entry
+  %x.addr4 = load double, double* %x.addr, align 8
+  store double %x.addr4, double* %return, align 8
   br label %returnBlock
 
-returnBlock:                                      ; preds = %if-successor, %then
-  %return7 = load double, double* %return, align 8
-  ret double %return7
+returnBlock:                                      ; preds = %if.end, %if.then
+  %return5 = load double, double* %return, align 8
+  ret double %return5
+}
+"
+`;
+
+exports[`IfStatement if-with-and-condition 1`] = `
+"; ModuleID = 'if/if-with-and-condition.ts'
+source_filename = \\"if/if-with-and-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { { [5 x i8]* }* }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
+
+define i32 @_ifWithAndCondition(i32 %x) {
+entry:
+  %x.addr = alloca i32, align 4
+  %return = alloca i32, align 4
+  store i32 %x, i32* %x.addr, align 4
+  %x.addr1 = load i32, i32* %x.addr, align 4
+  %cmpGT = icmp sgt i32 %x.addr1, 10
+  br i1 %cmpGT, label %land.lhs.true, label %if.end
+
+land.lhs.true:                                    ; preds = %entry
+  %x.addr2 = load i32, i32* %x.addr, align 4
+  %cmpLT = icmp slt i32 %x.addr2, 100
+  br i1 %cmpLT, label %if.then, label %if.end
+
+if.then:                                          ; preds = %land.lhs.true
+  store i32 42, i32* %return, align 4
+  br label %returnBlock
+
+if.end:                                           ; preds = %entry, %land.lhs.true
+  store i32 10, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if.end, %if.then
+  %return3 = load i32, i32* %return, align 4
+  ret i32 %return3
+}
+"
+`;
+
+exports[`IfStatement if-with-nested-and-or-condition 1`] = `
+"; ModuleID = 'if/if-with-nested-and-or-condition.ts'
+source_filename = \\"if/if-with-nested-and-or-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { { [5 x i8]* }* }
+%class.TestClass = type { { [10 x i8]* }*, i1, i32 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
+@TestClass_name = private unnamed_addr constant [10 x i8] c\\"TestClass\\\\00\\"
+@TestClass_type_descriptor = private constant { [10 x i8]* } { [10 x i8]* @TestClass_name }
+
+define i32 @_ifWithNestedAndOrCondition(%class.TestClass* %x, %class.TestClass* %y) {
+entry:
+  %y.addr = alloca %class.TestClass*, align 4
+  %x.addr = alloca %class.TestClass*, align 4
+  %return = alloca i32, align 4
+  store %class.TestClass* %x, %class.TestClass** %x.addr, align 4
+  store %class.TestClass* %y, %class.TestClass** %y.addr, align 4
+  %x.addr1 = load %class.TestClass*, %class.TestClass** %x.addr, align 4
+  %ptrAsInt = ptrtoint %class.TestClass* %x.addr1 to i32
+  %x.addr1AsBool = icmp ne i32 %ptrAsInt, 0
+  br i1 %x.addr1AsBool, label %lor.end, label %lor.lhs.false
+
+lor.lhs.false:                                    ; preds = %entry
+  %y.addr2 = load %class.TestClass*, %class.TestClass** %y.addr, align 4
+  br label %lor.end
+
+lor.end:                                          ; preds = %lor.lhs.false, %entry
+  %lor = phi %class.TestClass* [ %x.addr1, %entry ], [ %y.addr2, %lor.lhs.false ]
+  %\\"&test\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %lor, i32 0, i32 1
+  %test = load i1, i1* %\\"&test\\", align 1
+  br i1 %test, label %land.lhs.true, label %if.end
+
+land.lhs.true:                                    ; preds = %lor.end
+  %x.addr3 = load %class.TestClass*, %class.TestClass** %x.addr, align 4
+  %\\"&value\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %x.addr3, i32 0, i32 2
+  %value = load i32, i32* %\\"&value\\", align 4
+  %cmpGT = icmp sgt i32 %value, 100
+  br i1 %cmpGT, label %if.then, label %lor.lhs.false4
+
+lor.lhs.false4:                                   ; preds = %land.lhs.true
+  %x.addr5 = load %class.TestClass*, %class.TestClass** %x.addr, align 4
+  %\\"&value6\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %x.addr5, i32 0, i32 2
+  %value7 = load i32, i32* %\\"&value6\\", align 4
+  %cmpLT = icmp slt i32 %value7, 10
+  br i1 %cmpLT, label %if.then, label %if.end
+
+if.then:                                          ; preds = %lor.lhs.false4, %land.lhs.true
+  store i32 42, i32* %return, align 4
+  br label %returnBlock
+
+if.end:                                           ; preds = %lor.end, %lor.lhs.false4
+  store i32 10, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if.end, %if.then
+  %return8 = load i32, i32* %return, align 4
+  ret i32 %return8
+}
+"
+`;
+
+exports[`IfStatement if-with-or-condition 1`] = `
+"; ModuleID = 'if/if-with-or-condition.ts'
+source_filename = \\"if/if-with-or-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { { [5 x i8]* }* }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
+
+define i32 @_ifWithOrCondition(i32 %x) {
+entry:
+  %x.addr = alloca i32, align 4
+  %return = alloca i32, align 4
+  store i32 %x, i32* %x.addr, align 4
+  %x.addr1 = load i32, i32* %x.addr, align 4
+  %cmpGT = icmp sgt i32 %x.addr1, 10
+  br i1 %cmpGT, label %if.then, label %lor.lhs.false
+
+lor.lhs.false:                                    ; preds = %entry
+  %x.addr2 = load i32, i32* %x.addr, align 4
+  %cmpLT = icmp slt i32 %x.addr2, 100
+  br i1 %cmpLT, label %if.then, label %if.end
+
+if.then:                                          ; preds = %lor.lhs.false, %entry
+  store i32 42, i32* %return, align 4
+  br label %returnBlock
+
+if.end:                                           ; preds = %lor.lhs.false
+  store i32 10, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if.end, %if.then
+  %return3 = load i32, i32* %return, align 4
+  ret i32 %return3
 }
 "
 `;

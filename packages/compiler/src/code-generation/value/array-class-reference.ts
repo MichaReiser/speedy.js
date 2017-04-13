@@ -1,6 +1,9 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {getArrayElementType, toLLVMType} from "../util/types";
+import {Address} from "./address";
 
 import {ArrayReference} from "./array-reference";
 import {ClassReference} from "./class-reference";
@@ -9,13 +12,14 @@ import {createResolvedFunction, createResolvedParameter} from "./resolved-functi
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
-import {CompilationContext} from "../../compilation-context";
-import {getArrayElementType, toLLVMType} from "../util/types";
 
 /**
  * Implements the static methods of the Array<T> class
  */
 export class ArrayClassReference extends ClassReference {
+
+    private static arrayTypes = new Map<ts.Type, llvm.StructType>();
+
     private constructor(typeInformation: llvm.GlobalVariable, symbol: ts.Symbol, compilationContext: CompilationContext) {
         super(typeInformation, symbol, compilationContext);
     }
@@ -41,25 +45,8 @@ export class ArrayClassReference extends ClassReference {
         return constructorFunction.invokeWith(elements, context) as ArrayReference;
     }
 
-    static getArrayType(arrayType: ts.Type, context: CodeGenerationContext) {
-        const elementType = getArrayElementType(arrayType);
-        let llvmElementType: llvm.Type;
-
-        if (elementType.flags & ts.TypeFlags.Object) {
-            llvmElementType = llvm.Type.getInt8PtrTy(context.llvmContext);
-        } else {
-            llvmElementType = toLLVMType(elementType, context);
-        }
-
-        return llvm.StructType.get(context.llvmContext, [
-            llvm.Type.getInt32Ty(context.llvmContext),
-            llvm.Type.getInt32Ty(context.llvmContext),
-            llvmElementType.getPointerTo()
-        ]);
-    }
-
-    objectFor(pointer: llvm.Value, type: ts.ObjectType) {
-        return new ArrayReference(pointer, type, this)
+    objectFor(address: Address, type: ts.ObjectType) {
+        return new ArrayReference(address, type, this)
     }
 
     getFields() {
@@ -74,6 +61,33 @@ export class ArrayClassReference extends ClassReference {
     }
 
     getLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
-        return ArrayClassReference.getArrayType(type, context);
+        const elementType = getArrayElementType(type);
+
+        const existing = ArrayClassReference.arrayTypes.get(elementType);
+        if (existing) {
+            return existing;
+        }
+
+        const arrayType = ArrayClassReference.getArrayType(elementType, context);
+        ArrayClassReference.arrayTypes.set(elementType, arrayType);
+        return arrayType;
+    }
+
+    private static getArrayType(elementType: ts.Type, context: CodeGenerationContext) {
+        let llvmElementType: llvm.Type;
+
+        if (elementType.flags & ts.TypeFlags.Object) {
+            llvmElementType = llvm.Type.getInt8PtrTy(context.llvmContext);
+        } else {
+            llvmElementType = toLLVMType(elementType, context);
+        }
+
+        return llvm.StructType.create(context.llvmContext, [
+                llvmElementType.getPointerTo(),
+                llvm.Type.getInt32Ty(context.llvmContext),
+                llvm.Type.getInt32Ty(context.llvmContext)
+            ],
+            "class.Array"
+        );
     }
 }

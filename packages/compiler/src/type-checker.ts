@@ -19,4 +19,10 @@ export interface TypeChecker {
     getReturnTypeOfSignature(signature: ts.Signature): ts.Type;
     getApparentType(type: ts.Type): ts.Type;
     isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean;
+
+    /**
+     * Takes a type script type and converts it to a supported variant of it
+     * @param type the type to convert
+     */
+    toSupportedType(type: ts.Type): ts.Type;
 }

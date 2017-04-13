@@ -1,15 +1,16 @@
-import * as ts from "typescript";
-import * as llvm from "llvm-node";
 import * as assert from "assert";
+import * as ts from "typescript";
+import {CodeGenerationError} from "../../code-generation-error";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {ObjectReference} from "./object-reference";
-import {FunctionReference} from "./function-reference";
-import {ObjectPropertyReference} from "./object-property-reference";
-import {ObjectIndexReference} from "./object-index-reference";
-import {Value} from "./value";
-import {CodeGenerationError} from "../../code-generation-error";
+import {Address} from "./address";
 import {ClassReference} from "./class-reference";
+import {FunctionReference} from "./function-reference";
+import {ObjectIndexReference} from "./object-index-reference";
+import {ObjectPropertyReference} from "./object-property-reference";
+import {ObjectReference} from "./object-reference";
+import {Value} from "./value";
+import {Pointer} from "./pointer";
 
 /**
  * Object reference to a built in object (that is part of the runtime).
@@ -23,20 +24,23 @@ export abstract class BuiltInObjectReference implements ObjectReference {
      * @param type the type of the object
      * @param clazz the class of the object
      */
-    constructor(protected objectAddress: llvm.Value, public type: ts.ObjectType, public clazz: ClassReference) {
-        assert(objectAddress.type.isPointerTy(), `Object address needs to be a pointer type`);
+    constructor(protected objectAddress: Address, public type: ts.ObjectType, public clazz: ClassReference) {
     }
 
-    generateIR() {
-        return this.objectAddress;
+    getTypeStoreSize(context: CodeGenerationContext) {
+        return this.clazz.getTypeStoreSize(this.type, context);
+    }
+
+    generateIR(context: CodeGenerationContext) {
+        return this.objectAddress.get(context);
     }
 
     isObject() {
         return true;
     }
 
-    isAssignable(): true {
-        return true;
+    isAssignable(): boolean {
+        return this.objectAddress.isPointer();
     }
 
     dereference() {
@@ -45,7 +49,9 @@ export abstract class BuiltInObjectReference implements ObjectReference {
 
     generateAssignmentIR(value: Value, context: CodeGenerationContext) {
         assert(value.isObject(), "Cannot assign non object to object reference");
-        this.objectAddress = value.generateIR(context);
+        assert (this.objectAddress.isPointer(), "Cannot assign to address");
+
+        (this.objectAddress as Pointer).set(value.generateIR(context), context);
     }
 
     getProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference | FunctionReference {
