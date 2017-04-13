@@ -214,15 +214,15 @@ entry:
 
 declare i8* @malloc(i32)
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #0
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sqrtd(double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -506,14 +506,14 @@ returnBlock:                                      ; preds = %entry
   ret double %return12
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #0
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sqrtd(double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;

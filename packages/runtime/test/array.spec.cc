@@ -395,10 +395,10 @@ TEST_F(ArrayTests, pop_returns_and_removes_the_last_element) {
     EXPECT_EQ(array->get(3), 4);
 }
 
-TEST_F(ArrayTests, pop_throws_if_the_array_is_empty) {
+TEST_F(ArrayTests, pop_returns_the_default_value_if_the_array_is_empty) {
     array = new Array<double>(0);
 
-    EXPECT_THROW(array->pop(), std::out_of_range);
+    EXPECT_EQ(array->pop(), 0.0);
 }
 
 // -----------------------------------------
@@ -434,11 +434,11 @@ TEST_F(ArrayTests, shift_moves_the_remaining_elements_in_front) {
     EXPECT_EQ(array->get(3), 4);
 }
 
-TEST_F(ArrayTests, shift_throws_if_the_array_is_empty) {
+TEST_F(ArrayTests, shift_returns_the_default_value_if_the_array_is_empty) {
     array = new Array<double>(0);
 
     // act, assert
-    EXPECT_THROW(array->shift(), std::out_of_range);
+    EXPECT_EQ(array->shift(), 0.0);
 }
 
 // -----------------------------------------
@@ -649,20 +649,26 @@ TEST_F(ArrayTests, splices_inserts_from_the_back_if_the_index_is_negative) {
     EXPECT_EQ(array->get(2), 5);
 }
 
-TEST_F(ArrayTests, splice_throws_if_delete_count_is_negative) {
+TEST_F(ArrayTests, splice_returns_an_empty_array_if_delete_count_is_negative) {
     double elements[5] = {1, 2, 3, 4, 5};
     array = new Array<double>(5, elements);
 
     // act
-    EXPECT_THROW(array->splice(2, -3), std::out_of_range);
+    auto* deleted = array->splice(2, -3);
+    EXPECT_EQ(deleted->size(), 0);
+
+    delete deleted;
 }
 
-TEST_F(ArrayTests, splice_throws_if_index_is_out_of_range) {
+TEST_F(ArrayTests, splice_returns_an_empty_array_if_the_index_is_out_of_range) {
     double elements[5] = {1, 2, 3, 4, 5};
     array = new Array<double>(5, elements);
 
     // act
-    EXPECT_THROW(array->splice(10, 2), std::out_of_range);
+    auto* deleted = array->splice(10, 2);
+    EXPECT_EQ(deleted->size(), 0);
+
+    delete deleted;
 }
 
 

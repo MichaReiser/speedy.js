@@ -26,7 +26,7 @@ const int32_t DEFAULT_CAPACITY = 16;
  */
 template<typename T>
 class Array {
-public:
+private:
     /**
      * The elements stored in the array. Has the size of {@link capacity}. All elements up to {@link length} are initialized
      * with zero. Is the nullptr if the length is zero (no allocation is needed in this case)
@@ -55,19 +55,15 @@ public:
             throw std::out_of_range("Size needs to be a positive number");
         }
 
-        if (size == 0) {
-            this->elements = nullptr;
-        } else {
-            this->elements = Array<T>::allocateElements(static_cast<size_t>(size));
+        this->elements = Array<T>::allocateElements(static_cast<size_t>(size));
 
-            if (elements == nullptr && initialize) {
+        if (elements == nullptr && initialize) {
 #ifdef SAFE
-                // This is quite expensive, if there is a GC that guarantees zeroed memory, this is no longer needed
-                std::fill_n(this->elements, size, T {});
+            // This is quite expensive, if there is a GC that guarantees zeroed memory, this is no longer needed
+            std::fill_n(this->elements, size, T {});
 #endif
-            } else if (elements != nullptr) {
-                std::copy(elements, elements + size, this->elements);
-            }
+        } else if (elements != nullptr) {
+            std::copy(elements, elements + size, this->elements);
         }
 
         this->capacity = size;
@@ -163,7 +159,7 @@ public:
      * @return the new length after inserting the given element
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
      */
-    inline int32_t unshift(const T* elements, int32_t numElements) {
+    int32_t unshift(const T* elements, int32_t numElements) {
         const int32_t newLength = this->length + numElements;
         this->ensureCapacity(newLength);
 
@@ -176,14 +172,13 @@ public:
 
     /**
      * Removes the last element and returns it
-     * @return the last element
-     * @throws {@link std::out_of_range} if the array is empty
+     * @return the last element or the default value of T if the array is empty
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop
      */
     inline T pop() {
  #ifdef SAFE
         if (this->length == 0) {
-            throw std::out_of_range { "Array is empty" };
+            return {};
         }
  #endif
 
@@ -192,14 +187,13 @@ public:
 
     /**
      * Removes the first element and returns it
-     * @return the first element
-     * @throws {@link std::out_of_range} if the array is empty
+     * @return the first element or the default value of T if the array is empty
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
      */
-    inline T shift() {
+    T shift() {
 #ifdef SAFE
         if (this->length == 0) {
-            throw std::out_of_range { "Array is empty"};
+            return T {};
         }
 #endif
 
@@ -209,7 +203,7 @@ public:
         return element;
     }
 
-    inline Array<T>* slice(int32_t start = 0) const {
+    Array<T>* slice(int32_t start = 0) const  __attribute__((returns_nonnull)) {
         return this->slice(start, this->length);
     }
 
@@ -217,7 +211,7 @@ public:
      * Returns a copy of the array containing the elements from start to end
      * @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
      */
-    inline Array<T>* slice(int32_t start, int32_t end) const {
+    Array<T>* slice(int32_t start, int32_t end) const  __attribute__((returns_nonnull)) {
 #ifdef SAFE
         if (start < 0) {
             start = this->length + start;
@@ -249,18 +243,18 @@ public:
         return result;
     }
 
-    inline Array<T>* splice(int32_t index, int32_t deleteCount, T* elements = nullptr, int32_t elementsCount = 0) {
+    Array<T>* splice(int32_t index, int32_t deleteCount, T* elements = nullptr, int32_t elementsCount = 0)  __attribute__((returns_nonnull)) {
 #ifdef SAFE
         if (index < 0) {
             index = this->length + index;
         }
 
         if (this->length < index) {
-            throw std::out_of_range { "Delete index out of range" };
+            index = this->length;
         }
 
         if (deleteCount < 0) {
-            throw std::out_of_range { "Delete count needs to be a positive number" };
+            deleteCount = 0;
         }
 
         deleteCount = std::min(this->length - index, deleteCount);
@@ -293,7 +287,7 @@ public:
      * Resizes the array to the new size.
      * @param newSize the new size
      */
-    inline void resize(int32_t newSize) {
+    void resize(int32_t newSize) {
 #ifdef SAFE
         if (newSize < 0) {
             throw std::out_of_range("Size needs to be a positive number");
@@ -342,7 +336,7 @@ private:
      * @param elements existing pointer to the elements array, in this case, a reallocate is performed
      * @returns the pointer to the allocated array
      */
-    static inline T* allocateElements(size_t capacity, T* elements = nullptr) {
+    static inline T* allocateElements(size_t capacity, T* elements = nullptr)  __attribute__((returns_nonnull)) {
 #ifdef SAFE
         if (capacity > INT32_MAX) {
             throw std::out_of_range { "Array size exceeded max limit"};

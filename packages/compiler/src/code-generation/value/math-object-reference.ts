@@ -48,9 +48,7 @@ export class MathObjectReference extends BuiltInObjectReference {
             case "log":
             case "sin":
             case "cos":
-                const fn = UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type);
-                fn.properties.readnone = true;
-                return fn;
+                return UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type, { readnone: true, noUnwind: true });
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
@@ -85,7 +83,7 @@ export class MathObjectReference extends BuiltInObjectReference {
 
         const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
         const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);
-        const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readonly: true });
+        const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
 
         const args = [Primitive.toNumber(lhs, numberType, context), Primitive.toNumber(rhs, numberType, context)];
         return powFunction.invokeWith(args, context)!;

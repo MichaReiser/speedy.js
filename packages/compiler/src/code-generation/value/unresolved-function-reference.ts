@@ -17,9 +17,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
     /**
      * The function properties
      */
-    properties: Partial<FunctionProperties> = {
-        linkage: llvm.LinkageTypes.LinkOnceODRLinkage
-    };
+    properties: Partial<FunctionProperties>;
 
     /**
      * Creates a reference to a function reference that has the specified overloads
@@ -28,10 +26,10 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
      * @param classType the class type if the function is an instance or static method of an object
      * @return {UnresolvedFunctionReference} the function reference
      */
-    static createRuntimeFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType) {
-        const functionReference = new UnresolvedFunctionReference(signatures, new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext)), classType);
-        functionReference.properties = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true };
-        return functionReference;
+    static createRuntimeFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType, properties?: Partial<FunctionProperties>) {
+        properties = Object.assign({ linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true }, properties);
+        const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
+        return new UnresolvedFunctionReference(signatures, functionFactory, classType, properties);
     }
 
     /**
@@ -45,9 +43,10 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
         return new UnresolvedFunctionReference(signatures, new SpeedyJSFunctionFactory(context.compilationContext), classType);
     }
 
-    protected constructor(private signatures: ts.Signature[], protected llvmFunctionFactory: FunctionFactory, classType?: ts.ObjectType) {
+    protected constructor(private signatures: ts.Signature[], protected llvmFunctionFactory: FunctionFactory, classType?: ts.ObjectType, properties?: Partial<FunctionProperties>) {
         super(classType);
         assert(signatures.length, "Cannot reference a function without a signature");
+        this.properties = properties || { linkage: llvm.LinkageTypes.LinkOnceODRLinkage }
     }
 
     protected getResolvedFunction(context: CodeGenerationContext) {

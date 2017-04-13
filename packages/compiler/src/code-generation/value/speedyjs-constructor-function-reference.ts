@@ -120,7 +120,7 @@ class ConstructorFunctionBuilder {
             if (declaration.initializer) {
                 value = this.context.generateValue(declaration.initializer).generateIR(this.context);
             } else if (this.context.compilationContext.compilerOptions.unsafe) {
-                return;
+                break;
             } else {
                 value = llvm.Constant.getNullValue(toLLVMType(this.context.typeChecker.getTypeAtLocation(declaration), this.context));
             }

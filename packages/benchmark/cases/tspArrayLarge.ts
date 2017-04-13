@@ -990,6 +990,12 @@ export async function tspArrayLarge() {
 function tspSync(points: number[]) {
     "use speedyjs";
 
+    const tour = computeTour(points);
+    return computeCost(tour);
+}
+
+function computeTour(points: number[]) {
+    "use speedyjs";
     let currentX = points.shift()!;
     let currentY = points.shift()!;
     const solution: number[] = [currentX, currentY];
@@ -1014,7 +1020,7 @@ function tspSync(points: number[]) {
         points.splice(nearestIndex, 2);
     }
 
-    return computeCost(solution);
+    return solution;
 }
 
 function computeCost(tour: number[]) {

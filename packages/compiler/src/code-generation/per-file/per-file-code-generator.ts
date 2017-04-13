@@ -116,7 +116,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
     private static createTransformationChain(context: CodeGenerationContext) {
         const transforms = [
-            new LinkageTransformationStep(),
+            new LinkTransformationStep(),
             new OptimizationTransformationStep()
         ];
 
@@ -189,7 +189,7 @@ interface TransformationStep {
     transform(inputFileName: string, transformationContext: TransformationContext): string;
 }
 
-class LinkageTransformationStep implements TransformationStep {
+class LinkTransformationStep implements TransformationStep {
     transform(inputFileName: string, {plainFileName, buildDirectory, codeGenerationContext}: TransformationContext): string {
         const llvmLinker = new LLVMLink(buildDirectory);
         const entryFunctions = codeGenerationContext.getEntryFunctionNames();
