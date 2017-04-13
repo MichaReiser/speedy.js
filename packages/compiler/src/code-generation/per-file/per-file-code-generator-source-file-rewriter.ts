@@ -11,15 +11,19 @@ import {TypeChecker} from "../../type-checker";
  * Inserts a wasm module loader function, the wasm byte code and rewrites the entry functions to call the wasm module.
  */
 export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFileRewirter {
+
     private loadWasmFunctionIdentifier: ts.Identifier | undefined;
     private wasmOutput: Buffer | undefined;
     private wastMetaData: Partial<WastMetaData> = {};
 
     constructor(private typeChecker: TypeChecker, private compilerOptions: SpeedyJSCompilerOptions) {}
 
-    setWasmOutput(output: Buffer, wastMetaData: WastMetaData): void {
+    setWastMetaData(metadata: WastMetaData): void {
+        this.wastMetaData = metadata;
+    }
+
+    setWasmOutput(output: Buffer): void {
         this.wasmOutput = output;
-        this.wastMetaData = wastMetaData;
     }
 
     /**

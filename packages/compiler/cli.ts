@@ -18,6 +18,8 @@ interface CommandLineArguments extends IExportedCommand {
     config?: string,
     unsafe?: boolean;
     emitLlvm?: boolean;
+    emitWast?: boolean;
+    saveBc?: boolean;
     binaryenOpt?: boolean;
     disableHeapNukeOnExit?: boolean;
     exposeGc?: boolean;
@@ -43,6 +45,8 @@ function parseCommandLine(): CommandLineArguments {
         .option("-c --config <configFile>", "The path to the tsconfig.json")
         .option("--unsafe", "Use the unsafe runtime system")
         .option("--emit-llvm", "Emit LLVM Assembly Code instead of WASM files")
+        .option("--emit-wast", "Emit WAST file instead of embedding the WASM output in the TS file")
+        .option("--save-bc", "Saves a copy of the bitcode to the output directory if compiling to wast or all the way to WebAssembly. The file includes the linked and optimized code.")
         .option("--binaryen-opt", "Optimize using Binaryen opt")
         .option("--expose-gc", "Exposes the speedy js garbage collector in the module as speedyJsGc")
         .option("--export-gc", "Exposes and exports the speedy js garbage collector as the symbol speedyJsGc")
@@ -87,6 +91,8 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
     compilerOptions.unsafe = commandLine.unsafe;
     compilerOptions.binaryenOpt = commandLine.binaryenOpt;
     compilerOptions.emitLLVM = commandLine.emitLlvm;
+    compilerOptions.emitWAST = commandLine.emitWast;
+    compilerOptions.saveBc = commandLine.saveBc;
     compilerOptions.globalBase = commandLine.settings.GLOBAL_BASE;
     compilerOptions.totalMemory = commandLine.settings.TOTAL_MEMORY;
     compilerOptions.totalStack = commandLine.settings.TOTAL_STACK;

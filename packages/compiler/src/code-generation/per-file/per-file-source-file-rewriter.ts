@@ -5,12 +5,18 @@ import {WastMetaData} from "./wast-meta-data";
  * Rewriter for a single source file
  */
 export interface PerFileSourceFileRewirter {
+
+    /**
+     * Sets the wast metadata
+     * @param metadata the metadata
+     */
+    setWastMetaData(metadata: WastMetaData): void;
+
     /**
      * Sets the output for this source file
      * @param output the output
-     * @param wastMetadata the metadata from the wast file
      */
-    setWasmOutput(output: Buffer, wastMetadata: WastMetaData): void;
+    setWasmOutput(output: Buffer): void;
 
     /**
      * Rewrites a SpeedyJS entry function

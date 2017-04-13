@@ -7,16 +7,33 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
 
     /**
      * Indicator if the emitted code and runtime should be memory safe or unsafe (truthy)
+     * @default false
      */
-    unsafe: boolean | undefined;
+    unsafe: boolean;
 
     /**
-     * Indicator if LLVM IR code should be generated instead of the Web Assembly output
+     * Indicator if the llvm output of the module (unoptimized, unlinked) should be emitted instead of the web assembly output.
+     * Disables source file transformation
+     * @default false
      */
     emitLLVM: boolean;
 
     /**
+     * Indicator if, instead of the web assembly output, a wast file should be written.
+     * Disables source file transformation
+     * @default false
+     */
+    emitWAST: boolean;
+
+    /**
+     * If true, the bc file of the linked and optimized output is saved in the output directory
+     * @default false
+     */
+    saveBc: boolean;
+
+    /**
      * Indicator if the Binaryen Optimizer should be used on top of the LLVM optimizer
+     * @default false
      */
     binaryenOpt: boolean;
 
@@ -82,10 +99,12 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
     const defaults = {
         unsafe: false,
         emitLLVM: false,
+        emitWAST: false,
         binaryenOpt: false,
         totalMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,
         globalBase: 1024,
+        saveBc: false,
         disableHeapNukeOnExit: false,
         exposeGc: false,
         exportGc: false,
