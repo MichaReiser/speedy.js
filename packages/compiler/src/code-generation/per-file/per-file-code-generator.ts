@@ -11,7 +11,7 @@ import {s2wasm} from "../../external-tools/binaryen-s2wasm";
 import {wasmAs} from "../../external-tools/binaryen-wasm-as";
 import {LLVMLink} from "../../external-tools/llvm-link";
 import {llc} from "../../external-tools/llvm-llc";
-import {optimize} from "../../external-tools/llvm-opt";
+import {optimize, optimizeLinked} from "../../external-tools/llvm-opt";
 import {BuildDirectory} from "../build-directory";
 import {CodeGenerationContext} from "../code-generation-context";
 import {CodeGenerator} from "../code-generator";
@@ -116,8 +116,10 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
     private static createTransformationChain(context: CodeGenerationContext) {
         const transforms = [
-            new LinkTransformationStep(),
-            new OptimizationTransformationStep()
+            LinkTransformationStep.createRuntimeLinking(),
+            new OptimizationTransformationStep(),
+            LinkTransformationStep.createSharedLibsLinking(),
+            new LinkTimeOptimizationTransformationStep()
         ];
 
         if (context.compilationContext.compilerOptions.saveBc) {
@@ -189,25 +191,51 @@ interface TransformationStep {
     transform(inputFileName: string, transformationContext: TransformationContext): string;
 }
 
+class OptimizationTransformationStep implements TransformationStep {
+    transform(inputFileName: string, {plainFileName, buildDirectory, codeGenerationContext}: TransformationContext): string {
+        const optimizedFileName = buildDirectory.getTempFileName(`${plainFileName}-opt.bc`);
+        const optimizationLevel = codeGenerationContext.compilationContext.compilerOptions.optimizationLevel;
+
+        return optimize(inputFileName, optimizedFileName, optimizationLevel);
+    }
+}
+
 class LinkTransformationStep implements TransformationStep {
+
+    static createRuntimeLinking() {
+        return new LinkTransformationStep(true);
+    }
+
+    static createSharedLibsLinking() {
+        return new LinkTransformationStep(false);
+    }
+
+    private constructor(private runtime: boolean) {
+
+    }
+
     transform(inputFileName: string, {plainFileName, buildDirectory, codeGenerationContext}: TransformationContext): string {
         const llvmLinker = new LLVMLink(buildDirectory);
         const entryFunctions = codeGenerationContext.getEntryFunctionNames();
 
         llvmLinker.addByteCodeFile(inputFileName);
-        llvmLinker.addRuntime(codeGenerationContext.compilationContext.compilerOptions.unsafe);
+
+        if (this.runtime) {
+            llvmLinker.addRuntime(codeGenerationContext.compilationContext.compilerOptions.unsafe);
+        } else {
+            llvmLinker.addSharedLibs();
+        }
 
         return llvmLinker.link(buildDirectory.getTempFileName(`${plainFileName}-linked.o`), entryFunctions);
     }
 }
 
-class OptimizationTransformationStep implements TransformationStep {
+class LinkTimeOptimizationTransformationStep implements TransformationStep {
     transform(inputFileName: string, {plainFileName, buildDirectory, codeGenerationContext}: TransformationContext): string {
-        const optimizedFileName = buildDirectory.getTempFileName(`${plainFileName}-opt.bc`);
+        const optimizedFileName = buildDirectory.getTempFileName(`${plainFileName}-lopt.bc`);
         const entryFunctionNames = codeGenerationContext.getEntryFunctionNames();
-        const optimizationLevel = codeGenerationContext.compilationContext.compilerOptions.optimizationLevel;
 
-        return optimize(inputFileName, entryFunctionNames, optimizedFileName, optimizationLevel);
+        return optimizeLinked(inputFileName, entryFunctionNames, optimizedFileName);
     }
 }
 
