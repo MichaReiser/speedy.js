@@ -1,10 +1,6 @@
 "use strict";
 
 const TEST_CASES = {
-    "tspLarge": {
-        args: [],
-        result: 14212.721606057083
-    },
     "mergeSort": {
         args: [],
         result: 1659.0906736166776
@@ -21,6 +17,10 @@ const TEST_CASES = {
         args: [],
         result: 135751.77804825202
     },
+    "tspLarge": {
+        args: [],
+        result: 14212.721606057083
+    },
     "tspArray": {
         args: [],
         result: 135751.77804825202
@@ -28,26 +28,6 @@ const TEST_CASES = {
     "tspArrayLarge": {
         args: [],
         result: 14212.721606057083
-    },
-    "arrayElementAccess": {
-        args: [],
-        result: 487.65628197917226
-    },
-    "pow": {
-        args: [],
-        result: 333325
-    },
-    "powInt": {
-        args: [],
-        result: 328350
-    },
-    "sqrt": {
-        args: [1000.0],
-        result: 21081.91129744694
-    },
-    "sqrtInt": {
-        args: [1000],
-        result: 21065.833110879048
     },
     "fib": {
         fnName: "fib",
@@ -86,7 +66,7 @@ async function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 2}}!./cases/tspLarge.ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 268435456, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 

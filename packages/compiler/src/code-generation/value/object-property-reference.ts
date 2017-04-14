@@ -75,7 +75,6 @@ class ComputedObjectPropertyReference extends ObjectPropertyReference {
 
     protected getValue(context: CodeGenerationContext): Value {
         const result = context.builder.createCall(this.getter!, [this.object.generateIR(context)], this.property.name);
-        result.addDereferenceableAttr(1, this.object.getTypeStoreSize(context));
         return context.value(result, this.propertyType);
     }
 
@@ -84,8 +83,8 @@ class ComputedObjectPropertyReference extends ObjectPropertyReference {
             value.generateIR(context),
             this.object.generateIR(context)
         ].reverse();
-        const call = context.builder.createCall(this.setter!, args);
-        call.addDereferenceableAttr(1, this.object.getTypeStoreSize(context));
+
+        context.builder.createCall(this.setter!, args);
     }
 
     isAssignable(): boolean {

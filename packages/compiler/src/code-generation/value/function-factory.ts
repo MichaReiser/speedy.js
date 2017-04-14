@@ -96,6 +96,12 @@ export class FunctionFactory {
 
         this.attributeParameters(fn, resolvedFunction, context, objectReference);
 
+        if (resolvedFunction.returnType.flags & ts.TypeFlags.Object) {
+            const classReference = context.resolveClass(resolvedFunction.returnType)!;
+            // If object can be undefined, or null
+            fn.addDereferenceableAttr(0, classReference.getTypeStoreSize(resolvedFunction.returnType as ts.ObjectType, context));
+        }
+
         return fn;
     }
 

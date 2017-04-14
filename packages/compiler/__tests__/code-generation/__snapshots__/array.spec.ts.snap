@@ -36,7 +36,7 @@ returnBlock:                                      ; preds = %entry
   ret %class.Array* %return3
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
@@ -78,21 +78,21 @@ entry:
   %array2 = load %class.Array*, %class.Array** %array, align 4
   store %class.Array* %array2, %class.Array** %other, align 4
   %other3 = load %class.Array*, %class.Array** %other, align 4
-  %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* dereferenceable(12) %other3, i32 2)
+  %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* %other3, i32 2)
   store i32 %\\"[i]\\", i32* %value, align 4
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
-declare i32 @ArrayIi_geti(%class.Array* nocapture readonly, i32) #1
+declare i32 @ArrayIi_geti(%class.Array* nocapture dereferenceable(12), i32) #1
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIi_setii(%class.Array* nocapture readonly, i32, i32) #2
+declare void @ArrayIi_setii(%class.Array* dereferenceable(12), i32, i32) #2
 
 declare void @speedyJsGc()
 
@@ -129,23 +129,23 @@ entry:
   %constructorReturnValue = call %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 5)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
-  %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* dereferenceable(12) %array2, i32 2)
+  %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* %array2, i32 2)
   %mul = mul i32 %\\"[i]\\", 10
   %array3 = load %class.Array*, %class.Array** %array, align 4
-  call void @ArrayIi_setii(%class.Array* dereferenceable(12) %array3, i32 2, i32 %mul)
+  call void @ArrayIi_setii(%class.Array* %array3, i32 2, i32 %mul)
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
-declare i32 @ArrayIi_geti(%class.Array* nocapture readonly, i32) #1
+declare i32 @ArrayIi_geti(%class.Array* nocapture dereferenceable(12), i32) #1
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIi_setii(%class.Array* nocapture readonly, i32, i32) #2
+declare void @ArrayIi_setii(%class.Array* dereferenceable(12), i32, i32) #2
 
 declare void @speedyJsGc()
 
@@ -186,16 +186,16 @@ entry:
 }
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayId_constructori(i32) #0
+declare hidden dereferenceable(12) %class.Array* @ArrayId_constructori(i32) #0
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayId_filld(%class.Array* nocapture readonly dereferenceable(12), double) #0
+declare hidden dereferenceable(12) %class.Array* @ArrayId_filld(%class.Array* nocapture readonly dereferenceable(12), double) #0
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayId_filldi(%class.Array* nocapture readonly dereferenceable(12), double, i32) #0
+declare hidden dereferenceable(12) %class.Array* @ArrayId_filldi(%class.Array* nocapture readonly dereferenceable(12), double, i32) #0
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayId_filldii(%class.Array* nocapture readonly dereferenceable(12), double, i32, i32) #0
+declare hidden dereferenceable(12) %class.Array* @ArrayId_filldii(%class.Array* nocapture readonly dereferenceable(12), double, i32, i32) #0
 
 declare void @speedyJsGc()
 
@@ -226,20 +226,20 @@ entry:
   %constructorReturnValue = call %class.Array* @ArrayId_constructorPdi(double* null, i32 0)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array1 = load %class.Array*, %class.Array** %array, align 4
-  call void @ArrayId_lengthi(%class.Array* dereferenceable(12) %array1, i32 100)
+  call void @ArrayId_lengthi(%class.Array* %array1, i32 100)
   %array2 = load %class.Array*, %class.Array** %array, align 4
-  %length = call i32 @ArrayId_length(%class.Array* dereferenceable(12) %array2)
+  %length = call i32 @ArrayId_length(%class.Array* %array2)
   store i32 %length, i32* %i, align 4
   ret void
 }
 
-declare hidden %class.Array* @ArrayId_constructorPdi(double*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double*, i32)
 
 ; Function Attrs: alwaysinline nounwind readonly
-declare i32 @ArrayId_length(%class.Array* nocapture readonly) #0
+declare i32 @ArrayId_length(%class.Array* nocapture readonly dereferenceable(12)) #0
 
 ; Function Attrs: alwaysinline
-declare void @ArrayId_lengthi(%class.Array* nocapture readonly, i32) #1
+declare void @ArrayId_lengthi(%class.Array* dereferenceable(12), i32) #1
 
 declare void @speedyJsGc()
 
@@ -294,16 +294,16 @@ entry:
 }
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIb_constructorPbi(i1*, i32) #0
+declare hidden dereferenceable(12) %class.Array* @ArrayIb_constructorPbi(i1*, i32) #0
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array.0* @ArrayIi_constructori(i32) #0
+declare hidden dereferenceable(12) %class.Array.0* @ArrayIi_constructori(i32) #0
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array.1* @ArrayId_constructorPdi(double*, i32) #0
+declare hidden dereferenceable(12) %class.Array.1* @ArrayId_constructorPdi(double*, i32) #0
 
 declare void @speedyJsGc()
 
@@ -345,7 +345,7 @@ entry:
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
@@ -407,7 +407,7 @@ entry:
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
@@ -455,7 +455,7 @@ entry:
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
@@ -505,19 +505,19 @@ entry:
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIi_slice(%class.Array* nocapture readonly dereferenceable(12)) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_slice(%class.Array* nocapture readonly dereferenceable(12)) #1
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIi_slicei(%class.Array* nocapture readonly dereferenceable(12), i32) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_slicei(%class.Array* nocapture readonly dereferenceable(12), i32) #1
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIi_sliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_sliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #1
 
 declare void @speedyJsGc()
 
@@ -566,19 +566,19 @@ entry:
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIi_spliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_spliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #1
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIi_splicei(%class.Array* nocapture readonly dereferenceable(12), i32) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_splicei(%class.Array* nocapture readonly dereferenceable(12), i32) #1
 
 ; Function Attrs: alwaysinline
-declare hidden %class.Array* @ArrayIi_spliceiiPii(%class.Array* nocapture readonly dereferenceable(12), i32, i32, i32*, i32) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_spliceiiPii(%class.Array* nocapture readonly dereferenceable(12), i32, i32, i32*, i32) #1
 
 declare void @speedyJsGc()
 
@@ -634,7 +634,7 @@ entry:
   ret void
 }
 
-declare hidden %class.Array* @ArrayIi_constructorPii(i32*, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32)
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
