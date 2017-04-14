@@ -2,5 +2,4 @@
 cases/*.wasm
 cases/*.js
 cases/*.ll
-results.json
 dist

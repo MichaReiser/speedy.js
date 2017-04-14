@@ -108,7 +108,7 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         disableHeapNukeOnExit: false,
         exposeGc: false,
         exportGc: false,
-        optimizationLevel: "3"
+        optimizationLevel: "2"
     };
 
     for (const key of Object.keys(defaults)) {

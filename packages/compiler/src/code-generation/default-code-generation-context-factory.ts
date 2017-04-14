@@ -13,8 +13,6 @@ import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {ArrayClassReference} from "./value/array-class-reference";
 import {MathClassReference} from "./value/math-class-reference";
 import {Primitive} from "./value/primitive";
-import {createResolvedFunctionFromSignature} from "./value/resolved-function";
-import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {Value} from "./value/value";
 
 const log = debug("DefaultLLVMEmitContextFactory");
@@ -64,12 +62,6 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
         const nan = builtins.get("NaN");
         if (nan) {
             context.scope.addVariable(nan, new Primitive(llvm.ConstantFP.getNaN(llvm.Type.getDoubleTy(context.llvmContext)), context.typeChecker.getTypeAtLocation(nan.valueDeclaration!)));
-        }
-
-        const isNan = builtins.get("isNaN");
-        if (isNan) {
-            const definition = createResolvedFunctionFromSignature(context.typeChecker.getSignatureFromDeclaration(isNan.valueDeclaration as ts.FunctionDeclaration), context.compilationContext);
-            context.scope.addFunction(isNan, ResolvedFunctionReference.createRuntimeFunction(definition, context, { noUnwind: true, readnone: true, alwaysInline: true }));
         }
     }
 

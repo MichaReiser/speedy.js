@@ -50,14 +50,12 @@ async function getJsFunctionForTestCase(caseName) {
     const fnName = TEST_CASES[caseName].fnName || caseName;
     const fn = require("ts-loader!./cases/" + caseName + ".ts")[fnName];
 
-    const wrapped = function () {
+    const wrapped = function jsFunctionWrapper() {
         return fn.apply(undefined, testCase.args);
     };
 
-    const jsResult = await wrapped();
-    if (jsResult !== testCase.result) {
-        console.error(`JS Result for Test Case ${caseName} returned ${jsResult} instead of ${testCase.result}`);
-    }
+    // invoke function once to be fair ;)
+    await wrapped();
 
     return wrapped;
 }
@@ -66,39 +64,42 @@ async function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 268435456, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 
-    const wrapped = function () {
+    const wrapped = function wasmFunctionWrapper() {
         return fn.apply(undefined, testCase.args);
     };
 
-    const wasmResult = await wrapped();
+    // Invoke function once to force module instantiation
+    await wrapped();
     gc();
-
-    if (wasmResult !== testCase.result) {
-        console.error(`WASM Result for Test Case ${caseName} returned ${wasmResult} instead of ${testCase.result}`);
-    }
 
     return { fn: wrapped, gc: gc };
 }
 
 function runBenchmarks() {
-    for (const testCase of Object.keys(TEST_CASES)) {
-        suite(testCase, function () {
+    for (const caseName of Object.keys(TEST_CASES)) {
+        const testCase = TEST_CASES[caseName];
+
+        suite(caseName, function () {
             let wasmFn = undefined;
             let speedyJsGc = undefined;
             let jsFn = undefined;
 
             benchmark("js", function (deferred) {
-                jsFn().then(function () {
+                jsFn().then(function (result) {
+                    if (result !== testCase.result) {
+                        throw new Error(`JS Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
+                    }
+
                     deferred.resolve();
                 });
             }, {
                 defer: true,
                 setup: function (deferred) {
-                    getJsFunctionForTestCase(testCase).then(function (fn) {
+                    getJsFunctionForTestCase(caseName).then(function (fn) {
                         jsFn = fn;
                         deferred.suResolve();
                     });
@@ -106,19 +107,23 @@ function runBenchmarks() {
             });
 
             benchmark("wasm", function (deferred) {
-                wasmFn().then(function () {
+                wasmFn().then(function (result) {
+                    if (result !== testCase.result) {
+                        throw new Error(`WASM Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
+                    }
+
                     deferred.resolve();
                 });
             },
             {
                 defer: true,
                 setup: function (deferred) {
-                    getWasmFunctionForTestCase(testCase)
+                    getWasmFunctionForTestCase(caseName)
                         .then(function (result) {
                             wasmFn = result.fn;
                             speedyJsGc = result.gc;
-                            deferred.suResolve();
-                        });
+                        deferred.suResolve();
+                    });
                 },
                 onCycle: function () { // Is not called after each loop, but after some execution, so might need a little bit more memory
                     speedyJsGc();

@@ -5,10 +5,6 @@
 
 extern "C" {
 
-ALWAYS_INLINE DLL_PUBLIC bool isNaNd(double value) {
-    return std::isnan(value);
-}
-
 ALWAYS_INLINE DLL_PUBLIC double Math_sqrtd(double value) {
     return std::sqrt(value);
 }

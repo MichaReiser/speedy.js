@@ -73,7 +73,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         const state = this.getSourceFileState(sourceFile);
         const context = state.context;
 
-        if (context.module.empty) {
+        if (context.module.empty || context.getEntryFunctionNames().length === 0) {
             return sourceFile;
         }
 
