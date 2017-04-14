@@ -64,6 +64,18 @@ async function cosNumber(value: number) {
     return Math.cos(value);
 }
 
+async function testNaNForNaN() {
+    "use speedyjs";
+
+    return isNaN(NaN);
+}
+
+async function testNonNaNValueForNan(value: number) {
+    "use speedyjs";
+
+    return isNaN(value);
+}
+
 describe("Math", () => {
     describe("PI", () => {
         it("returns the value PI", async (cb) => {
@@ -128,6 +140,19 @@ describe("Math", () => {
 
         it("computes the cos of a number", async (cb) => {
             expect(await cosNumber(23.33)).toBe(Math.cos(23.33));
+            cb();
+        });
+    });
+
+    describe("isNaN", () => {
+        it("returns true for NaN", async (cb) => {
+            expect(await testNaNForNaN()).toBe(true);
+            expect(await testNonNaNValueForNan(NaN)).toBe(true);
+            cb();
+        });
+
+        it("returns false for non NaN values", async (cb) => {
+            expect(await testNonNaNValueForNan(10)).toBe(false);
             cb();
         });
     });

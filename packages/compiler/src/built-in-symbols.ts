@@ -33,7 +33,7 @@ export class BuiltInSymbols {
         const stdLibFiles = program.getSourceFiles().filter(file => file.fileName.startsWith(defaultLibFileLocation));
 
         for (const lib of stdLibFiles) {
-            const stdLibVariables = program.getTypeChecker().getSymbolsInScope(lib, ts.SymbolFlags.Variable | ts.SymbolFlags.Interface);
+            const stdLibVariables = program.getTypeChecker().getSymbolsInScope(lib, ts.SymbolFlags.Variable | ts.SymbolFlags.Interface | ts.SymbolFlags.Function);
             for (const type of stdLibVariables) {
                 symbols.set(type.name, type);
             }
