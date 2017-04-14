@@ -43,7 +43,7 @@ TEST_F(ArrayTests, new_initializes_the_array_with_the_given_elements) {
         elements[i] = static_cast<double>(i);
     }
 
-    array = new Array<double>(1024, elements);
+    array = new Array<double>(elements, 1024);
 
     ASSERT_NE(array, nullptr);
     EXPECT_EQ(array->size(), 1024);
@@ -58,7 +58,7 @@ TEST_F(ArrayTests, new_initializes_array_elements_with_zero_if_no_elements_is_gi
         elements[i] = static_cast<int32_t>(i);
     }
 
-    auto* previousArray = new Array<double>(1024, elements);
+    auto* previousArray = new Array<double>(elements, 1024);
     delete previousArray;
 
     array = new Array<double>(1024);
@@ -78,13 +78,19 @@ TEST_F(ArrayTests, get_returns_the_default_value_if_the_index_is_out_of_bound) {
     EXPECT_EQ(array->get(1000), 0);
 }
 
+TEST_F(ArrayTests, get_returns_undefined_if_the_index_is_negative) {
+    array = new Array<double>(100);
+
+    EXPECT_EQ(array->get(-5), 0);
+}
+
 TEST_F(ArrayTests, get_for_object_array) {
     auto* array1 = new Array<double>();
     auto* array2 = new Array<double>();
     auto* array3 = new Array<double>();
 
     void* elements[3] = { array1, array2, array3 };
-    auto* voidArray = new Array<void*>(3, elements);
+    auto* voidArray = new Array<void*>(elements, 3);
 
     EXPECT_EQ(voidArray->size(), 3);
     EXPECT_EQ(voidArray->get(0), array1);
@@ -149,7 +155,19 @@ TEST_F(ArrayTests, set_does_initialize_new_elements_with_zero_when_resizing) {
     EXPECT_EQ(array->get(98), 0);
 }
 
-TEST_F(ArrayTests, set_size_changes_the_length_of_the_array) {
+
+TEST_F(ArrayTests, set_throws_if_the_index_is_negative) {
+    array = new Array<double>(5);
+
+    // act
+    EXPECT_THROW(array->set(-3, 34), std::out_of_range);
+}
+
+// -----------------------------------------
+// resize
+// -----------------------------------------
+
+TEST_F(ArrayTests, resize_changes_the_length_of_the_array) {
     array = new Array<double>(10);
 
     // act
@@ -160,7 +178,7 @@ TEST_F(ArrayTests, set_size_changes_the_length_of_the_array) {
     EXPECT_EQ(array->get(19), 0);
 }
 
-TEST_F(ArrayTests, set_size_resizes_an_empty_array) {
+TEST_F(ArrayTests, resize_resizes_an_empty_array) {
     array = new Array<double>();
 
     // act
@@ -241,20 +259,36 @@ TEST_F(ArrayTests, fill_negative_end_is_treaded_as_length_plus_end) {
     EXPECT_EQ(array->get(8), 0.0);
 }
 
-TEST_F(ArrayTests, fill_throws_if_start_is_out_of_bound) {
+TEST_F(ArrayTests, fill_is_a_noop_if_start_is_out_of_range) {
     array = new Array<double>(10);
 
     // act
-    EXPECT_THROW(array->fill(5.0, 10), std::out_of_range);
-    EXPECT_THROW(array->fill(5.0, -11), std::out_of_range);
+    array->fill(5.0, 10);
+
+    EXPECT_EQ(array->get(0), 0);
+    EXPECT_EQ(array->get(9), 0);
 }
 
-TEST_F(ArrayTests, fill_throws_if_end_is_out_of_bound) {
-    array = new Array<double>();
+TEST_F(ArrayTests, fill_fills_the_whole_array_if_the_computed_start_index_is_negative) {
+    array = new Array<double>(10);
 
     // act
-    EXPECT_THROW(array->fill(5.0, 3, 12), std::out_of_range);
-    EXPECT_THROW(array->fill(5.0, 3, -11), std::out_of_range);
+    array->fill(5.0, -11);
+    EXPECT_EQ(array->get(0), 5.0);
+    EXPECT_EQ(array->get(9), 5.0);
+}
+
+TEST_F(ArrayTests, fill_fills_the_elements_to_the_array_length_if_end_is_out_of_range) {
+    array = new Array<double>(5);
+
+    // act
+    array->fill(5.0, 3, 12);
+    EXPECT_EQ(array->get(3), 5.0);
+    EXPECT_EQ(array->get(4), 5.0);
+
+    array->fill(5.0, 3, -11);
+    EXPECT_EQ(array->get(3), 5.0);
+    EXPECT_EQ(array->get(4), 5.0);
 }
 
 TEST_F(ArrayTests, fill_does_not_change_the_array_if_end_is_less_than_start) {
@@ -446,7 +480,7 @@ TEST_F(ArrayTests, shift_returns_the_default_value_if_the_array_is_empty) {
 // -----------------------------------------
 TEST_F(ArrayTests, slice_returns_a_copy_of_the_array) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice();
@@ -464,7 +498,7 @@ TEST_F(ArrayTests, slice_returns_a_copy_of_the_array) {
 
 TEST_F(ArrayTests, slice_returns_a_subset_starting_from_the_specified_start) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice(2);
@@ -480,7 +514,7 @@ TEST_F(ArrayTests, slice_returns_a_subset_starting_from_the_specified_start) {
 
 TEST_F(ArrayTests, slice_returns_the_subset_in_between_start_and_end) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice(1, 3);
@@ -495,7 +529,7 @@ TEST_F(ArrayTests, slice_returns_the_subset_in_between_start_and_end) {
 
 TEST_F(ArrayTests, slice_with_a_start_larger_than_the_array_returns_an_empty_array) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice(10, 15);
@@ -508,7 +542,7 @@ TEST_F(ArrayTests, slice_with_a_start_larger_than_the_array_returns_an_empty_arr
 
 TEST_F(ArrayTests, slice_with_a_negative_start_computes_the_start_from_the_end) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice(-2);
@@ -523,7 +557,7 @@ TEST_F(ArrayTests, slice_with_a_negative_start_computes_the_start_from_the_end) 
 
 TEST_F(ArrayTests, slice_with_a_negative_end_computes_the_end_from_the_end) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice(2, -1);
@@ -538,7 +572,7 @@ TEST_F(ArrayTests, slice_with_a_negative_end_computes_the_end_from_the_end) {
 
 TEST_F(ArrayTests, slice_returns_an_empty_array_if_start_is_larger_than_the_end) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* copy = array->slice(3, 1);
@@ -554,7 +588,7 @@ TEST_F(ArrayTests, slice_returns_an_empty_array_if_start_is_larger_than_the_end)
 // -----------------------------------------
 TEST_F(ArrayTests, splice_removes_the_number_of_elements) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* deleted = array->splice(2, 2);
@@ -569,7 +603,7 @@ TEST_F(ArrayTests, splice_removes_the_number_of_elements) {
 
 TEST_F(ArrayTests, splice_returns_an_array_containing_the_deleted_elements) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* deleted = array->splice(2, 2);
@@ -584,7 +618,7 @@ TEST_F(ArrayTests, splice_returns_an_array_containing_the_deleted_elements) {
 
 TEST_F(ArrayTests, splice_removes_the_elements_and_inserts_the_new_ones) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     double toInsert[1] = { 2.5 };
 
@@ -602,7 +636,7 @@ TEST_F(ArrayTests, splice_removes_the_elements_and_inserts_the_new_ones) {
 
 TEST_F(ArrayTests, splice_shifts_the_new_elements_to_the_back_if_more_elements_are_inserted_than_removed) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     double toInsert[3] = { 2.25, 2.5, 2.75 };
 
@@ -622,7 +656,7 @@ TEST_F(ArrayTests, splice_shifts_the_new_elements_to_the_back_if_more_elements_a
 
 TEST_F(ArrayTests, splice_removes_all_elements_from_the_index_if_deleteCount_is_larger_than_the_length) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* deleted = array->splice(2, 10);
@@ -636,7 +670,7 @@ TEST_F(ArrayTests, splice_removes_all_elements_from_the_index_if_deleteCount_is_
 
 TEST_F(ArrayTests, splices_inserts_from_the_back_if_the_index_is_negative) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     Array<double>* deleted = array->splice(-3, 2);
@@ -651,7 +685,7 @@ TEST_F(ArrayTests, splices_inserts_from_the_back_if_the_index_is_negative) {
 
 TEST_F(ArrayTests, splice_returns_an_empty_array_if_delete_count_is_negative) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     auto* deleted = array->splice(2, -3);
@@ -662,7 +696,7 @@ TEST_F(ArrayTests, splice_returns_an_empty_array_if_delete_count_is_negative) {
 
 TEST_F(ArrayTests, splice_returns_an_empty_array_if_the_index_is_out_of_range) {
     double elements[5] = {1, 2, 3, 4, 5};
-    array = new Array<double>(5, elements);
+    array = new Array<double>(elements, 5);
 
     // act
     auto* deleted = array->splice(10, 2);
