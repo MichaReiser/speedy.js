@@ -11,7 +11,6 @@ import {FunctionReference} from "./function-reference";
 import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
-import {Value} from "./value";
 
 /**
  * Implements the static methods of the Array<T> class
@@ -36,7 +35,7 @@ export class ArrayClassReference extends ClassReference {
      * @param context the code generation context
      * @return {ArrayReference} the created array
      */
-    static fromLiteral(type: ts.ObjectType, elements: Value[], context: CodeGenerationContext): ArrayReference {
+    static fromLiteral(type: ts.ObjectType, elements: llvm.Value[], context: CodeGenerationContext): ArrayReference {
         const parameters = [ createResolvedParameter("items", type, false, undefined, true) ];
         const resolvedConstructor = createResolvedFunction("constructor", [], parameters, type, type.getSymbol().getDeclarations()[0].getSourceFile(), type);
         const constructorFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedConstructor, context);

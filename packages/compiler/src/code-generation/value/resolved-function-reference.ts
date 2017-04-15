@@ -19,7 +19,7 @@ export class ResolvedFunctionReference extends AbstractFunctionReference {
      * @return {ResolvedFunctionReference} the reference to the specified runtime function overload
      */
     static createRuntimeFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, functionProperties?: Partial<FunctionProperties>) {
-        functionProperties = Object.assign({}, { linkage: llvm.LinkageTypes.ExternalLinkage, inline: true }, functionProperties);
+        functionProperties = Object.assign({}, { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true } as Partial<FunctionProperties>, functionProperties);
         const llvmFunctionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
         const fn = llvmFunctionFactory.getOrCreate(resolvedFunction, resolvedFunction.parameters.length, context, functionProperties);
         return new ResolvedFunctionReference(fn, resolvedFunction);

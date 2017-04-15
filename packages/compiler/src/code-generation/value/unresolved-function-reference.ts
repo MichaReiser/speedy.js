@@ -5,9 +5,8 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {AbstractFunctionReference} from "./abstract-function-reference";
 import {FunctionFactory, FunctionProperties} from "./function-factory";
-import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
+import {ResolvedFunction} from "./resolved-function";
 import {SpeedyJSFunctionFactory} from "./speedyjs-function-factory";
-import {Value} from "./value";
 
 /**
  * Reference to a probably overloaded function.
@@ -24,6 +23,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
      * @param signatures the references of the function
      * @param context the context
      * @param classType the class type if the function is an instance or static method of an object
+     * @param properties properties for the declared function
      * @return {UnresolvedFunctionReference} the function reference
      */
     static createRuntimeFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType, properties?: Partial<FunctionProperties>) {
@@ -64,10 +64,10 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
             throw new Error(`Cannot deference a function with optional arguments`);
         }
 
-        return createResolvedFunctionFromSignature(signature, context.compilationContext, this.classType);
+        return this.getResolvedFunctionFromSignature(signature, context.compilationContext);
     }
 
-    getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {
+    protected getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): llvm.Function {
         const numberOfArguments = passedArguments ? passedArguments.length : resolvedFunction.parameters.length;
 
         return this.llvmFunctionFactory.getOrCreate(resolvedFunction, numberOfArguments, context, this.properties);

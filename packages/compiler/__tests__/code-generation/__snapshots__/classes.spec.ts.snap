@@ -71,18 +71,19 @@ entry:
 
 declare i8* @malloc(i32)
 
-declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32)
+; Function Attrs: alwaysinline
+declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
-declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #0
+declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #1
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIPv_setiPv(%class.Array* dereferenceable(12), i32, %class.Point*) #1
+declare void @ArrayIPv_setiPv(%class.Array* dereferenceable(12), i32, %class.Point*) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { alwaysinline norecurse nounwind readonly }
-attributes #1 = { alwaysinline }
+attributes #0 = { alwaysinline }
+attributes #1 = { alwaysinline norecurse nounwind readonly }
 "
 `;
 
@@ -215,10 +216,10 @@ entry:
 declare i8* @malloc(i32)
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_powdd(double, double) #0
+declare hidden double @Math_sqrtd(double) #0
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_sqrtd(double) #0
+declare hidden double @Math_powdd(double, double) #0
 
 declare void @speedyJsGc()
 
@@ -507,10 +508,10 @@ returnBlock:                                      ; preds = %entry
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_powdd(double, double) #0
+declare hidden double @Math_sqrtd(double) #0
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_sqrtd(double) #0
+declare hidden double @Math_powdd(double, double) #0
 
 declare void @speedyJsGc()
 

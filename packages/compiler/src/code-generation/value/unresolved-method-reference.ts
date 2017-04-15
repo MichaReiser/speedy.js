@@ -5,9 +5,8 @@ import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {ObjectReference} from "./object-reference";
 import {ResolvedFunction} from "./resolved-function";
-import {UnresolvedFunctionReference} from "./unresolved-function-reference";
-import {Value} from "./value";
 import {SpeedyJSFunctionFactory} from "./speedyjs-function-factory";
+import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 
 /**
  * Reference to a possibly overloaded instance method
@@ -41,16 +40,13 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
         super(signatures, llvmFunctionFactory, object.type, properties);
     }
 
-    getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {
+    protected getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): llvm.Function {
         const numberOfArguments = passedArguments ? passedArguments.length : resolvedFunction.parameters.length;
 
         return this.llvmFunctionFactory.getOrCreateInstanceMethod(this.object, resolvedFunction, numberOfArguments, context, this.properties);
     }
 
-    protected getCallArguments(resolvedFunction: ResolvedFunction, passedArguments: Value[], callerContext: CodeGenerationContext): llvm.Value[] {
-        const functionArguments = [
-            ...super.getCallArguments(resolvedFunction, passedArguments, callerContext),
-        ];
-        return [this.object.generateIR(callerContext), ...functionArguments];
+    protected getCallArguments(resolvedFunction: ResolvedFunction, passedArguments: llvm.Value[], callerContext: CodeGenerationContext): llvm.Value[] {
+        return [this.object.generateIR(callerContext), ...super.getCallArguments(resolvedFunction, passedArguments, callerContext)];
     }
 }

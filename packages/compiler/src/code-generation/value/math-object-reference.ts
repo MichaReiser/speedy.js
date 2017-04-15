@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import * as ts from "typescript";
 import {CodeGenerationError} from "../../code-generation-error";
 import {CodeGenerationContext} from "../code-generation-context";
@@ -8,9 +9,12 @@ import {MathClassReference} from "./math-class-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {Pointer} from "./pointer";
 import {Primitive} from "./primitive";
-import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
+import {
+    createResolvedFunction,
+    createResolvedFunctionFromSignature,
+    createResolvedParameter
+} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
-import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 import {Value} from "./value";
 
 /**
@@ -48,7 +52,10 @@ export class MathObjectReference extends BuiltInObjectReference {
             case "log":
             case "sin":
             case "cos":
-                return UnresolvedFunctionReference.createRuntimeFunction(signatures, context, this.type, { readnone: true, noUnwind: true });
+                assert(signatures.length === 1, "Math functions have not to be overloaded");
+                const resolvedFunction = createResolvedFunctionFromSignature(signatures[0], context.compilationContext, this.type);
+                resolvedFunction.instanceMethod = false; // they are not really instance methods as this does not have to be passed
+                return ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
@@ -85,7 +92,7 @@ export class MathObjectReference extends BuiltInObjectReference {
         const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);
         const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
 
-        const args = [Primitive.toNumber(lhs, numberType, context), Primitive.toNumber(rhs, numberType, context)];
+        const args = [Primitive.toNumber(lhs, numberType, context).generateIR(), Primitive.toNumber(rhs, numberType, context).generateIR()];
         return powFunction.invokeWith(args, context)!;
     }
 }

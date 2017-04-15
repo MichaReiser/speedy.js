@@ -14,7 +14,6 @@ import {ObjectReference} from "./object-reference";
 import {createResolvedFunction, createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {SpeedyJSClassReference} from "./speedy-js-class-reference";
 import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
-import {Value} from "./value";
 
 export class SpeedyJSConstructorFunctionReference extends AbstractFunctionReference {
 
@@ -48,7 +47,7 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
         return signature.declaration ? super.getResolvedFunctionFromSignature(signature, compilationContext) : this.resolvedFunction;
     }
 
-    protected getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {
+    protected getLLVMFunction(): llvm.Function {
         return this.fn;
     }
 }
