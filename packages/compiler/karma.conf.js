@@ -80,12 +80,12 @@ module.exports = function (config) {
 
     if (travis) {
         const customLaunchers = {
-            // sl_chrome_dev: {
-            //     base: 'SauceLabs',
-            //     browserName: 'chrome',
-            //     platform: 'Windows 8.1',
-            //     version: 'dev'
-            // },
+            sl_chrome: {
+                base: 'SauceLabs',
+                browserName: 'chrome',
+                platform: 'Windows 8.1',
+                version: '57'
+            },
             sl_firefox: {
                 base: 'SauceLabs',
                 browserName: 'firefox',

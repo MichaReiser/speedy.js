@@ -2,7 +2,7 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {FunctionFactory} from "./function-factory";
+import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {ObjectReference} from "./object-reference";
 import {ResolvedFunction} from "./resolved-function";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
@@ -22,9 +22,8 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
      * @return {UnresolvedMethodReference} the reference to this method
      */
     static createRuntimeMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext) {
-        const reference = new UnresolvedMethodReference(object, signatures, new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext)));
-        reference.properties = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true };
-        return reference;
+        const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
+        return new UnresolvedMethodReference(object, signatures, functionFactory, { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true });
     }
 
     /**
@@ -38,8 +37,8 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
         return new UnresolvedMethodReference(object, signatures, new SpeedyJSFunctionFactory(context.compilationContext));
     }
 
-    protected constructor(private object: ObjectReference, signatures: ts.Signature[], llvmFunctionFactory: FunctionFactory) {
-        super(signatures, llvmFunctionFactory, object.type);
+    protected constructor(private object: ObjectReference, signatures: ts.Signature[], llvmFunctionFactory: FunctionFactory, properties?: Partial<FunctionProperties>) {
+        super(signatures, llvmFunctionFactory, object.type, properties);
     }
 
     getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: Value[]): llvm.Function {

@@ -1,6 +1,7 @@
 export async function tspArrayLarge() {
     "use speedyjs";
 
+    // Luxembourg
     const points = [
         49525.5556, 5940.5556,
         49525.5556, 5940.5556,
@@ -990,20 +991,26 @@ export async function tspArrayLarge() {
 function tspSync(points: number[]) {
     "use speedyjs";
 
+    const tour = computeTour(points);
+    return computeCost(tour);
+}
+
+function computeTour(points: number[]) {
+    "use speedyjs";
     let currentX = points.shift()!;
     let currentY = points.shift()!;
     const solution: number[] = [currentX, currentY];
 
-    while (points.length) {
+    for (let i = 0; i < points.length - 1; i+=2) {
         let shortestDistance: number = 2.0**31.0 - 1.0;
         let nearestIndex = 0;
 
-        for (let i = 0; i < points.length - 1; i += 2) {
-            const distance = euclideanDistance(currentX, currentY, points[i], points[i+1]);
+        for (let j = i; j < points.length - 1; j += 2) {
+            const distance = euclideanDistance(currentX, currentY, points[j], points[j+1]);
 
             if (distance < shortestDistance) {
                 shortestDistance = distance;
-                nearestIndex = i;
+                nearestIndex = j;
             }
         }
 
@@ -1011,10 +1018,22 @@ function tspSync(points: number[]) {
         currentY = points[nearestIndex + 1];
 
         solution.push(currentX, currentY);
-        points.splice(nearestIndex, 2);
+
+        // move the point that was at this location before at a position larger than i to ensure this point
+        // is considered in future moves
+        swap(points, nearestIndex, i);
+        swap(points, nearestIndex + 1, i + 1);
     }
 
-    return computeCost(solution);
+    return solution;
+}
+
+function swap(array: number[], i1: int, i2: int) {
+    "use speedyjs";
+
+    const tmp = array[i1];
+    array[i1] = array[i2];
+    array[i2] = tmp;
 }
 
 function computeCost(tour: number[]) {

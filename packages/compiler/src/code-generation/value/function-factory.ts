@@ -13,6 +13,7 @@ export interface FunctionProperties {
     readnone: boolean;
     alwaysInline: boolean;
     noInline: boolean;
+    noUnwind: boolean;
     visibility: llvm.VisibilityTypes;
 }
 
@@ -67,6 +68,7 @@ export class FunctionFactory {
             readnone: false,
             alwaysInline: false,
             noInline: false,
+            noUnwind: false,
             visibility: llvm.VisibilityTypes.Default
         };
     }
@@ -88,22 +90,45 @@ export class FunctionFactory {
         const fn = llvm.Function.create(functionType, properties.linkage, mangledName, context.module);
         fn.visibility = properties.visibility;
 
-        if (properties.readonly) {
-            fn.addFnAttr(llvm.Attribute.AttrKind.ReadOnly);
+        for (const attribute of this.getFunctionAttributes(properties)) {
+            fn.addFnAttr(attribute);
         }
-
-        if (properties.alwaysInline) {
-            fn.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
-        }
-
-        if (properties.noInline) {
-            fn.addFnAttr(llvm.Attribute.AttrKind.NoInline);
-        }
-
 
         this.attributeParameters(fn, resolvedFunction, context, objectReference);
 
+        if (resolvedFunction.returnType.flags & ts.TypeFlags.Object) {
+            const classReference = context.resolveClass(resolvedFunction.returnType)!;
+            // If object can be undefined, or null
+            fn.addDereferenceableAttr(0, classReference.getTypeStoreSize(resolvedFunction.returnType as ts.ObjectType, context));
+        }
+
         return fn;
+    }
+
+    private getFunctionAttributes(properties: FunctionProperties) {
+        const attributes = [];
+
+        if (properties.noUnwind) {
+            attributes.push(llvm.Attribute.AttrKind.NoUnwind);
+        }
+
+        if (properties.alwaysInline) {
+            attributes.push(llvm.Attribute.AttrKind.AlwaysInline);
+        }
+
+        if (properties.noInline) {
+            attributes.push(llvm.Attribute.AttrKind.NoInline);
+        }
+
+        if (properties.readonly) {
+            attributes.push(llvm.Attribute.AttrKind.ReadOnly);
+        }
+
+        if (properties.readnone) {
+            attributes.push(llvm.Attribute.AttrKind.ReadNone);
+        }
+
+        return attributes;
     }
 
     private attributeParameters(fn: llvm.Function, resolvedFunction: ResolvedFunction, context: CodeGenerationContext, object?: ObjectReference) {

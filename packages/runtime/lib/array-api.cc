@@ -17,35 +17,35 @@ extern "C" {
 //---------------------------------------------------------------------------------
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructori(int32_t size) {
-    return new Array<bool> { size, nullptr };
+    return new Array<bool> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructorPbi(bool* const elements, int32_t size) {
-    return new Array<bool> { size, elements };
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructorPbi(bool* const elements, int32_t elementsCount) {
+    return new Array<bool> { elements, elementsCount};
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructori(int32_t size) {
-    return new Array<int32_t> { size, nullptr };
+    return new Array<int32_t> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructorPii(int32_t* const elements, int32_t size) {
-    return new Array<int32_t> { size, elements };
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructorPii(int32_t* const elements, int32_t elementsCount) {
+    return new Array<int32_t> { elements, elementsCount};
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructori(const int32_t size) {
-    return new Array<double> { size, nullptr };
+    return new Array<double> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructorPdi(double* const elements, int32_t size) {
-    return new Array<double> { size, elements };
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructorPdi(double* const elements, int32_t elementsCount) {
+    return new Array<double> { elements, elementsCount };
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructori(int32_t size) {
-    return new Array<void*> { size, nullptr };
+    return new Array<void*> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPPvi(void** const elements, int32_t size) {
-    return new Array<void*> { size, elements };
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPPvi(void** const elements, int32_t elementsCount) {
+    return new Array<void*> { elements, elementsCount };
 }
 
 //---------------------------------------------------------------------------------

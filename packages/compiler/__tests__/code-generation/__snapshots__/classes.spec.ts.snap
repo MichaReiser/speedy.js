@@ -37,7 +37,7 @@ entry:
   %constructorReturnValue4 = call %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items3, i32 3)
   store %class.Array* %constructorReturnValue4, %class.Array** %array, align 4
   %array5 = load %class.Array*, %class.Array** %array, align 4
-  %\\"[i]\\" = call %class.Point* @ArrayIPv_geti(%class.Array* dereferenceable(12) %array5, i32 0)
+  %\\"[i]\\" = call %class.Point* @ArrayIPv_geti(%class.Array* %array5, i32 0)
   %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %\\"[i]\\", i32 0, i32 1
   %x = load double, double* %\\"&x\\", align 8
   store double %x, double* %return, align 8
@@ -71,13 +71,13 @@ entry:
 
 declare i8* @malloc(i32)
 
-declare hidden %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32)
+declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32)
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
-declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture readonly, i32) #0
+declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #0
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIPv_setiPv(%class.Array* nocapture readonly, i32, %class.Point*) #1
+declare void @ArrayIPv_setiPv(%class.Array* dereferenceable(12), i32, %class.Point*) #1
 
 declare void @speedyJsGc()
 
@@ -214,15 +214,15 @@ entry:
 
 declare i8* @malloc(i32)
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #0
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sqrtd(double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -506,14 +506,14 @@ returnBlock:                                      ; preds = %entry
   ret double %return12
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #0
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sqrtd(double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;

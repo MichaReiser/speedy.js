@@ -125,7 +125,7 @@ export class FunctionDefinitionBuilder {
 
             // a field in a constructor that is marked with private, protected or public. Set the argument value on the field.
             if (this._this && declaredParameterSymbol.flags & ts.SymbolFlags.Property) {
-                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._this!.clazz.getFieldOffset(declaredParameterSymbol));
+                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._this.clazz.getFieldOffset(declaredParameterSymbol));
                 const fieldAddress = this.context.builder.createInBoundsGEP(this._this.generateIR(this.context), [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset ], `&${declaredParameterSymbol.name}`);
                 this.context.builder.createAlignedStore(args[i], fieldAddress, Allocation.getPreferredValueAlignment(parameter.type, this.context));
             }

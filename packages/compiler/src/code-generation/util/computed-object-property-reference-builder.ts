@@ -34,11 +34,11 @@ export class ComputedObjectPropertyReferenceBuilder {
         const propertyLLVMType = toLLVMType(propertyType, this.context);
         const thisLLVMType = toLLVMType(objectReference.type, this.context);
 
-        const getter = this.createGetter(thisLLVMType, propertyLLVMType);
+        const getter = this.createGetter(thisLLVMType, propertyLLVMType, objectReference);
         let setter: llvm.Function | undefined;
 
         if (!this._readonly) {
-            setter = this.createSetter(thisLLVMType, propertyLLVMType);
+            setter = this.createSetter(thisLLVMType, propertyLLVMType, objectReference);
         }
 
         return ObjectPropertyReference.createComputedPropertyReference(propertyType, objectReference, property, getter, setter);
@@ -48,7 +48,7 @@ export class ComputedObjectPropertyReferenceBuilder {
         return this.runtimeFn ? new RuntimeSystemNameMangler(this.context.compilationContext) : new DefaultNameMangler(this.context.compilationContext);
     }
 
-    private createGetter(thisType: llvm.Type, propertyType: llvm.Type): llvm.Function {
+    private createGetter(thisType: llvm.Type, propertyType: llvm.Type, objectReference: ObjectReference): llvm.Function {
         const getterName = this.getNameMangler().mangleProperty(this.property, false);
 
         let getter = this.context.module.getFunction(getterName);
@@ -63,12 +63,13 @@ export class ComputedObjectPropertyReferenceBuilder {
             const self = getter.getArguments()[0];
             self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
             self.addAttr(llvm.Attribute.AttrKind.NoCapture);
+            self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context));
         }
 
         return getter;
     }
 
-    private createSetter(thisType: llvm.Type, propertyType: llvm.Type): llvm.Function {
+    private createSetter(thisType: llvm.Type, propertyType: llvm.Type, objectReference: ObjectReference): llvm.Function {
         const setterName = this.getNameMangler().mangleProperty(this.property, true);
 
         let setter = this.context.module.getFunction(setterName);
@@ -79,8 +80,7 @@ export class ComputedObjectPropertyReferenceBuilder {
             setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
 
             const self = setter.getArguments()[0];
-            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
-            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
+            self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context))
         }
 
         return setter;

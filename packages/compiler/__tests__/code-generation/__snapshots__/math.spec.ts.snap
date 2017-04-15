@@ -19,13 +19,13 @@ define void @_mathPI() {
 entry:
   %pi = alloca double, align 8
   %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
-  %PI = call double @Math_PI(%class.Math* dereferenceable(4) %mathPtr)
+  %PI = call double @Math_PI(%class.Math* %mathPtr)
   store double %PI, double* %pi, align 8
   ret void
 }
 
 ; Function Attrs: alwaysinline nounwind readonly
-declare double @Math_PI(%class.Math* nocapture readonly) #0
+declare double @Math_PI(%class.Math* nocapture readonly dereferenceable(4)) #0
 
 attributes #0 = { alwaysinline nounwind readonly }
 "
@@ -53,10 +53,10 @@ entry:
   ret void
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_cosd(double) #0
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -82,10 +82,10 @@ entry:
   ret void
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_logd(double) #0
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -111,10 +111,10 @@ entry:
   ret void
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #0
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -140,10 +140,10 @@ entry:
   ret void
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sind(double) #0
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -173,9 +173,9 @@ entry:
   ret void
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sqrtd(double) #0
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;

@@ -173,13 +173,13 @@ returnBlock:                                      ; preds = %for.end, %if.then6,
   ret i1 %return9
 }
 
-; Function Attrs: alwaysinline
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_sqrtd(double) #0
 
 ; Function Attrs: alwaysinline readnone
 declare i32 @toInt32d(double) #1
 
-attributes #0 = { alwaysinline }
+attributes #0 = { alwaysinline nounwind readnone }
 attributes #1 = { alwaysinline readnone }
 "
 `;

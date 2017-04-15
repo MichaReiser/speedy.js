@@ -91,7 +91,7 @@ gulp.task("build:libs", function() {
 
     const outputTmpFile = tmp.fileSync({ postfix: ".js" });
     const env = Object.create(process.env);
-    env.EMCC_CFLAGS = (env.EMCC_CFLAGS || "") + " -DMALLOC_INSPECT_ALL"; // expose the malloc_inspect_all function
+    env.EMCC_CFLAGS = (env.EMCC_CFLAGS || "") + " -DMALLOC_INSPECT_ALL -O3"; // expose the malloc_inspect_all function
 
     child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s --em-config %s -O3", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR, path.resolve("./.emscripten")),
         {

@@ -48,7 +48,12 @@ export class LLVMLink {
         } else {
             this.addByteCodeFile(SAFE_RUNTIME);
         }
+    }
 
+    /**
+     * Adds the shared libs (e.g. c(++) std lib) to the linkage
+     */
+    addSharedLibs(): void {
         this.addObjectFilesFromDirectory(SHARED_LIBRARIES_DIRECTORY);
     }
 

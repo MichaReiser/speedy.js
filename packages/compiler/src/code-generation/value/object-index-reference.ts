@@ -18,7 +18,6 @@ export class ObjectIndexReference implements AssignableValue {
 
     getValue(context: CodeGenerationContext): Value {
         const call = context.builder.createCall(this.getter!, [this.object.generateIR(context), this.index.generateIR(context)], "[i]")!;
-        call.addDereferenceableAttr(1, this.object.getTypeStoreSize(context));
 
         return context.value(call, this.type);
     }
@@ -30,9 +29,7 @@ export class ObjectIndexReference implements AssignableValue {
             this.object.generateIR(context)
         ].reverse();
 
-        const call = context.builder.createCall(this.setter!, args);
-
-        call.addDereferenceableAttr(1, this.object.getTypeStoreSize(context));
+        context.builder.createCall(this.setter!, args);
     }
 
     isAssignable(): true {

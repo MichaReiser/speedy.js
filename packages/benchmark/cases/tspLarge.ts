@@ -1005,35 +1005,53 @@ export async function tspLarge() {
 function tspSync(points: Point[]) {
     "use speedyjs";
 
+    const tour = computeTour(points);
+    return computeCost(tour);
+}
+
+function computeTour(points: Point[]) {
+    "use speedyjs";
+
     let current = points.shift()!;
     const solution: Point[] = [current];
 
-    while (points.length) {
+    for (let i = 0; i < points.length; ++i) {
         let shortestDistance: number = 2.0 ** 31.0 - 1.0;
         let nearestIndex = 0;
 
-        for (let i = 0; i < points.length; ++i) {
-            const distance = current.distanceTo(points[i]);
+        for (let j = i; j < points.length; ++j) {
+            const distance = current.distanceTo(points[j]);
 
             if (distance < shortestDistance) {
                 shortestDistance = distance;
-                nearestIndex = i;
+                nearestIndex = j;
             }
         }
 
         current = points[nearestIndex];
-        points.splice(nearestIndex, 1);
         solution.push(current);
+
+        // move the point that was at this location before at a position larger than i to ensure this point
+        // is considered in future moves
+        swap(points, nearestIndex, i);
     }
 
-    return computeCost(solution);
+    return solution;
+}
+
+function swap(array: Point[], i1: int, i2: int) {
+    "use speedyjs";
+
+    const tmp = array[i1];
+    array[i1] = array[i2];
+    array[i2] = tmp;
 }
 
 function computeCost(tour: Point[]) {
     "use speedyjs";
     let total = 0.0;
 
-    for (let i = 1; i < tour.length ; ++i) {
+    for (let i = 1; i < tour.length; ++i) {
         total += tour[i - 1].distanceTo(tour[i]);
     }
 

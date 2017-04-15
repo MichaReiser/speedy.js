@@ -1,19 +1,19 @@
-import * as ts from "typescript";
-import * as llvm from "llvm-node";
-import * as fs from "fs";
-import * as debug from "debug";
 import * as assert from "assert";
+import * as debug from "debug";
+import * as fs from "fs";
+import * as llvm from "llvm-node";
+import * as ts from "typescript";
+import {CompilationContext} from "../compilation-context";
+import {CodeGenerationContext} from "./code-generation-context";
 
 import {CodeGenerationContextFactory} from "./code-generation-context-factory";
-import {CodeGenerationContext} from "./code-generation-context";
 import {DefaultCodeGenerationContext} from "./default-code-generation-context";
-import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
-import {CompilationContext} from "../compilation-context";
+import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {ArrayClassReference} from "./value/array-class-reference";
 import {MathClassReference} from "./value/math-class-reference";
-import {Value} from "./value/value";
 import {Primitive} from "./value/primitive";
+import {Value} from "./value/value";
 
 const log = debug("DefaultLLVMEmitContextFactory");
 

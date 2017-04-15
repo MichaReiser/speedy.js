@@ -31,8 +31,8 @@ export class ObjectIndexReferenceBuilder {
         const llvmElementType = toLLVMType(elementType, this.context);
         const llvmThisType = toLLVMType(objectReference.type, this.context);
 
-        const getter = this.createGetter(llvmThisType, llvmElementType);
-        const setter = this.createSetter(llvmThisType, llvmElementType);
+        const getter = this.createGetter(llvmThisType, llvmElementType, objectReference);
+        const setter = this.createSetter(llvmThisType, llvmElementType, objectReference);
 
         const index = this.context.generateValue(this.element.argumentExpression!);
 
@@ -43,7 +43,7 @@ export class ObjectIndexReferenceBuilder {
         return this.runtimeFn ? new RuntimeSystemNameMangler(this.context.compilationContext) : new DefaultNameMangler(this.context.compilationContext);
     }
 
-    private createGetter(thisType: llvm.Type, elementType: llvm.Type): llvm.Function {
+    private createGetter(thisType: llvm.Type, elementType: llvm.Type, objectReference: ObjectReference): llvm.Function {
         const getterName = this.getNameMangler().mangleIndexer(this.element, false);
         let getter = this.context.module.getFunction(getterName);
 
@@ -56,14 +56,14 @@ export class ObjectIndexReferenceBuilder {
             getter.addFnAttr(llvm.Attribute.AttrKind.NoRecurse);
 
             const self = getter.getArguments()[0];
-            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
+            self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context));
             self.addAttr(llvm.Attribute.AttrKind.NoCapture);
         }
 
         return getter;
     }
 
-    private createSetter(thisType: llvm.Type, elementType: llvm.Type): llvm.Function {
+    private createSetter(thisType: llvm.Type, elementType: llvm.Type, objectReference: ObjectReference): llvm.Function {
         const setterName = this.getNameMangler().mangleIndexer(this.element, true);
         let setter = this.context.module.getFunction(setterName);
 
@@ -73,8 +73,7 @@ export class ObjectIndexReferenceBuilder {
             setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
 
             const self = setter.getArguments()[0];
-            self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
-            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
+            self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context));
         }
 
         return setter;
