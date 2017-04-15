@@ -58,19 +58,20 @@ returnBlock:                                      ; preds = %entry
   ret double %return7
 }
 
-declare hidden dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double*, i32)
+; Function Attrs: alwaysinline
+declare hidden dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double*, i32) #0
 
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #0
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Array* @ArrayId_slice(%class.Array* nocapture readonly dereferenceable(12)) #1
+declare hidden dereferenceable(12) %class.Array* @ArrayId_slice(%class.Array* nocapture readonly dereferenceable(12)) #0
 
 ; Function Attrs: alwaysinline nounwind readonly
 declare i32 @ArrayId_length(%class.Array* nocapture readonly dereferenceable(12)) #2
 
 ; Function Attrs: alwaysinline
-declare void @ArrayId_lengthi(%class.Array* dereferenceable(12), i32) #1
+declare void @ArrayId_lengthi(%class.Array* dereferenceable(12), i32) #0
 
 define linkonce_odr void @\\"use-cases/mergeSort.ts$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
 entry:
@@ -177,9 +178,9 @@ if.then:                                          ; preds = %lor.lhs.false, %lan
   %array.addr16 = load %class.Array*, %class.Array** %array.addr, align 4
   %i17 = load i32, i32* %i, align 4
   %\\"[i]18\\" = call double @ArrayId_geti(%class.Array* %array.addr16, i32 %i17)
-  %k19 = load i32, i32* %k, align 4
-  %sorted.addr20 = load %class.Array*, %class.Array** %sorted.addr, align 4
-  call void @ArrayId_setid(%class.Array* %sorted.addr20, i32 %k19, double %\\"[i]18\\")
+  %sorted.addr19 = load %class.Array*, %class.Array** %sorted.addr, align 4
+  %k20 = load i32, i32* %k, align 4
+  call void @ArrayId_setid(%class.Array* %sorted.addr19, i32 %k20, double %\\"[i]18\\")
   %i21 = load i32, i32* %i, align 4
   %add = add i32 %i21, 1
   store i32 %add, i32* %i, align 4
@@ -189,9 +190,9 @@ if.else:                                          ; preds = %lor.lhs.false, %for
   %array.addr22 = load %class.Array*, %class.Array** %array.addr, align 4
   %j23 = load i32, i32* %j, align 4
   %\\"[i]24\\" = call double @ArrayId_geti(%class.Array* %array.addr22, i32 %j23)
-  %k25 = load i32, i32* %k, align 4
-  %sorted.addr26 = load %class.Array*, %class.Array** %sorted.addr, align 4
-  call void @ArrayId_setid(%class.Array* %sorted.addr26, i32 %k25, double %\\"[i]24\\")
+  %sorted.addr25 = load %class.Array*, %class.Array** %sorted.addr, align 4
+  %k26 = load i32, i32* %k, align 4
+  call void @ArrayId_setid(%class.Array* %sorted.addr25, i32 %k26, double %\\"[i]24\\")
   %j27 = load i32, i32* %j, align 4
   %add28 = add i32 %j27, 1
   store i32 %add28, i32* %j, align 4
@@ -214,7 +215,7 @@ for.end:                                          ; preds = %for.cond
 declare double @ArrayId_geti(%class.Array* nocapture dereferenceable(12), i32) #3
 
 ; Function Attrs: alwaysinline
-declare void @ArrayId_setid(%class.Array* dereferenceable(12), i32, double) #1
+declare void @ArrayId_setid(%class.Array* dereferenceable(12), i32, double) #0
 
 define linkonce_odr double @\\"use-cases/mergeSort.ts$15computeCheckSum5ArrayId\\"(%class.Array* dereferenceable(12) %array) {
 entry:
@@ -265,8 +266,8 @@ returnBlock:                                      ; preds = %for.end
   ret double %return12
 }
 
-attributes #0 = { argmemonly nounwind }
-attributes #1 = { alwaysinline }
+attributes #0 = { alwaysinline }
+attributes #1 = { argmemonly nounwind }
 attributes #2 = { alwaysinline nounwind readonly }
 attributes #3 = { alwaysinline norecurse nounwind readonly }
 "
@@ -711,11 +712,12 @@ entry:
 
 declare i8* @malloc(i32)
 
-declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32)
+; Function Attrs: alwaysinline
+declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
 
 define linkonce_odr double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %points) {
 entry:
-  %items23 = alloca [1 x %class.Point*], align 4
+  %items24 = alloca [1 x %class.Point*], align 4
   %distance = alloca double, align 8
   %i = alloca i32, align 4
   %nearestIndex = alloca i32, align 4
@@ -795,11 +797,11 @@ for.end:                                          ; preds = %for.cond
   %points.addr21 = load %class.Array*, %class.Array** %points.addr, align 4
   %spliceReturnValue = call %class.Array* @ArrayIPv_spliceii(%class.Array* %points.addr21, i32 %nearestIndex20, i32 1)
   %current22 = load %class.Point*, %class.Point** %current, align 4
-  %items24 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items23, i32 0, i32 0
-  %1 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items23, i32 0, i32 0
+  %solution23 = load %class.Array*, %class.Array** %solution, align 4
+  %items25 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items24, i32 0, i32 0
+  %1 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items24, i32 0, i32 0
   store %class.Point* %current22, %class.Point** %1, align 4
-  %solution25 = load %class.Array*, %class.Array** %solution, align 4
-  %pushReturnValue = call i32 @ArrayIPv_pushPPvi(%class.Array* %solution25, %class.Point** %items24, i32 1)
+  %pushReturnValue = call i32 @ArrayIPv_pushPPvi(%class.Array* %solution23, %class.Point** %items25, i32 1)
   br label %while.cond
 
 while.end:                                        ; preds = %while.cond
@@ -822,7 +824,7 @@ declare i32 @ArrayIPv_length(%class.Array* nocapture readonly dereferenceable(12
 ; Function Attrs: alwaysinline
 declare void @ArrayIPv_lengthi(%class.Array* dereferenceable(12), i32) #0
 
-; Function Attrs: nounwind readnone
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #2
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
@@ -867,7 +869,7 @@ returnBlock:                                      ; preds = %entry
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_sqrtd(double) #4
+declare hidden double @Math_sqrtd(double) #2
 
 ; Function Attrs: alwaysinline
 declare hidden dereferenceable(12) %class.Array* @ArrayIPv_spliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #0
@@ -938,8 +940,7 @@ declare void @speedyJsGc()
 
 attributes #0 = { alwaysinline }
 attributes #1 = { alwaysinline nounwind readonly }
-attributes #2 = { nounwind readnone }
+attributes #2 = { alwaysinline nounwind readnone }
 attributes #3 = { alwaysinline norecurse nounwind readonly }
-attributes #4 = { alwaysinline nounwind readnone }
 "
 `;

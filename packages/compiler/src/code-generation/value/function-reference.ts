@@ -19,5 +19,5 @@ export interface FunctionReference extends Value {
      * @param args the arguments to pass.
      * @param callerContext the context of the function caller
      */
-    invokeWith(args: Value[], callerContext: CodeGenerationContext): Value | void;
+    invokeWith(args: llvm.Value[], callerContext: CodeGenerationContext): Value | void;
 }

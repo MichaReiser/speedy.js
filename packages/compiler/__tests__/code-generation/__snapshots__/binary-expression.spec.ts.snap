@@ -154,10 +154,10 @@ entry:
   ret void
 }
 
-; Function Attrs: nounwind readnone
+; Function Attrs: alwaysinline nounwind readnone
 declare hidden double @Math_powdd(double, double) #0
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 

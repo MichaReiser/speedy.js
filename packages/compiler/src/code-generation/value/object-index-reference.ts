@@ -13,23 +13,20 @@ export class ObjectIndexReference implements AssignableValue {
     }
 
     generateIR(context: CodeGenerationContext): llvm.Value {
-        return this.getValue(context).generateIR(context);
+        return context.builder.createCall(this.getter!, [this.object.generateIR(context), this.index.generateIR(context)], "[i]")!;
     }
 
     getValue(context: CodeGenerationContext): Value {
-        const call = context.builder.createCall(this.getter!, [this.object.generateIR(context), this.index.generateIR(context)], "[i]")!;
-
+        const call = this.generateIR(context);
         return context.value(call, this.type);
     }
 
     generateAssignmentIR(value: Value, context: CodeGenerationContext): void {
-        const args = [
-            value.generateIR(context),
-            this.index.generateIR(context),
-            this.object.generateIR(context)
-        ].reverse();
+        const valueToSet = value.generateIR(context);
+        const objectPtr = this.object.generateIR(context);
+        const indexValue = this.index.generateIR(context);
 
-        context.builder.createCall(this.setter!, args);
+        context.builder.createCall(this.setter!, [objectPtr, indexValue, valueToSet]);
     }
 
     isAssignable(): true {

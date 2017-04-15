@@ -19,7 +19,8 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
             type = context.typeChecker.getContextualType(arrayLiteral);
         }
 
-        return ArrayClassReference.fromLiteral(type as ts.ObjectType, arrayLiteral.elements.map(value => context.generateValue(value)), context);
+        const elements = arrayLiteral.elements.map(value => context.generateValue(value).generateIR(context));
+        return ArrayClassReference.fromLiteral(type as ts.ObjectType, elements, context);
     }
 }
 
