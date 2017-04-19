@@ -7,10 +7,9 @@ import * as program from "commander";
 const packageJson = require("./package.json");
 import {reportDiagnostics} from "./src/util/diagnostics";
 import {Compiler} from "./src/compiler";
-import {IExportedCommand} from "commander";
 import {initializeCompilerOptions, UninitializedSpeedyJSCompilerOptions} from "./src/speedyjs-compiler-options";
 
-interface CommandLineArguments extends IExportedCommand {
+interface CommandLineArguments {
     /**
      * The name of the files to process
      */
@@ -30,6 +29,8 @@ interface CommandLineArguments extends IExportedCommand {
         TOTAL_STACK?: number;
         GLOBAL_BASE?: number;
     };
+
+    outputHelp(): void;
 }
 
 function parseCommandLine(): CommandLineArguments {
@@ -55,7 +56,7 @@ function parseCommandLine(): CommandLineArguments {
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);
 
-    return program as CommandLineArguments;
+    return program as any as CommandLineArguments;
 }
 
 function parseConfigFile(configFileName: string): ts.ParsedCommandLine {

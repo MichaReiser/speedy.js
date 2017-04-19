@@ -1,5 +1,7 @@
 !__integrationtests__/index.js
 **/*.js
+!scripts
+!env.js
 __tests__/code-generation/tmp
 *.map
 tools

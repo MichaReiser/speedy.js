@@ -16,7 +16,7 @@ function buildBinaryen(directory) {
         fs.mkdirSync(binaryenBuildDirectory);
     }
 
-    dependencyUtils.exec('cmake -E chdir %s cmake %s', binaryenBuildDirectory, binaryenDirectory);
+    dependencyUtils.exec('cmake -E chdir "%s" cmake "%s"', binaryenBuildDirectory, binaryenDirectory);
     dependencyUtils.make(binaryenBuildDirectory);
 
     return binaryenBuildDirectory;

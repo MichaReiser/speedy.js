@@ -11,6 +11,7 @@
   "devDependencies": {
     "@types/jasmine": "^2.5.47",
     "@types/jest": "^19.2.2",
+    "env-cmd": "^5.0.0",
     "gulp": "^3.9.1",
     "jasmine-core": "^2.5.2",
     "jest": "^19.0.2",
@@ -35,14 +36,13 @@
     "@types/tmp": "0.0.32",
     "commander": "^2.9.0",
     "debug": "^2.6.3",
-    "llvm-node": "^1.0.0",
     "lodash": "^4.17.4",
     "speedyjs-runtime": "0.x.x",
     "tmp": "0.0.31",
     "typescript": "MichaReiser/TypeScript#release"
   },
   "scripts": {
-    "preinstall": "node ./scripts/install-dependencies.js",
+    "preinstall": "node ./scripts/install-dependencies.js && env-cmd ./env.js npm install llvm-node@^1.0.0",
     "prepublish": "tsc",
     "start": "tsc --watch",
     "test": "jest && karma start karma.conf.js --single-run",
