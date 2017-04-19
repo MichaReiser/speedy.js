@@ -93,7 +93,7 @@ gulp.task("build:libs", function() {
     const env = Object.create(process.env);
     env.EMCC_CFLAGS = (env.EMCC_CFLAGS || "") + " -DMALLOC_INSPECT_ALL -O3"; // expose the malloc_inspect_all function
 
-    child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s --em-config %s -O3", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR, path.resolve("./.emscripten")),
+    child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s --em-config %s -O3 -s DISABLE_EXCEPTION_CATCHING=0", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR, path.resolve("./.emscripten")),
         {
             env: env,
             stdio: "inherit"
@@ -103,7 +103,7 @@ gulp.task("build:libs", function() {
 });
 
 gulp.task("copy:libs", function () {
-    const libs = ["dlmalloc.bc", "libc.bc", "libcxx.a", "libcxx_noexcept.a", "libcxxabi.bc", "wasm-libc.bc", "wasm_compiler_rt.a"];
+    const libs = ["dlmalloc.bc", "libc.bc", "libcxx.a", "libcxx.a", "libcxxabi.bc", "wasm-libc.bc", "wasm_compiler_rt.a"];
     const src = gulp.src(libs.map(lib => path.join(EMSCRIPTEN_CACHE_DIR, "wasm", lib)));
 
     return src.pipe(gulp.dest("./bin/shared"));

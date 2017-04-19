@@ -1,3 +1,4 @@
+import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
@@ -27,6 +28,13 @@ export class SpeedyJSClassReference extends ClassReference {
 
     protected getFields(type: ts.ObjectType, context: CodeGenerationContext): llvm.Type[] {
         const fields = this.type.getApparentProperties().filter(property => property.flags & ts.SymbolFlags.Property);
+
+        if (fields.length === 0) {
+            // LLVM doesn't seem to like empty structs, at least when marked as dereferencaeble (throws value out of range as size is 0).
+            // Therefore, add a boolean fake field. Seems to be the same as clang is doing?!
+            // TODO this can be removed when a reference to the type descriptor is added to each object
+            return [ llvm.Type.getInt1Ty(context.llvmContext) ];
+        }
 
         return fields.map(field => {
             const type = context.typeChecker.getTypeOfSymbolAtLocation(field, field.valueDeclaration!);

@@ -38,7 +38,7 @@ export class MathClassReference extends ClassReference {
     }
 
     getFields() {
-        return [];
+        return [this.typeInformation.type]; // llvm doesn't seem to like empty structs that much... so at least put in the type information pointer
     }
 
     getConstructor(): FunctionReference {

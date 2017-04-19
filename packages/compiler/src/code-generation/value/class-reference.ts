@@ -82,10 +82,6 @@ export abstract class ClassReference implements Value {
         return this.getObjectType(type, context);
     }
 
-    getFieldsOffset(): number {
-        return 1;
-    }
-
     getFieldOffset(property: ts.Symbol) {
         const field = this.type.getProperty(property.getName()); // in case the passed in property is transient or this class type is transient
         assert(field.flags & ts.SymbolFlags.Property, `The property ${property.name} is not a property (e.g. a method instead)`);
@@ -93,7 +89,7 @@ export abstract class ClassReference implements Value {
         const index = this.type.getProperties().indexOf(field);
         assert(index >= 0, `The property ${property.name} could not be found in class ${this.type.getSymbol().name}`);
 
-        return this.getFieldsOffset() + index;
+        return index;
     }
 
     /**
@@ -123,14 +119,11 @@ export abstract class ClassReference implements Value {
      * Creates the type of the object
      * @param type the type
      * @param context the code generation context
-     * @return {StructType} the llvm type of the object
+     * @return the llvm type of the object
      */
     protected getObjectType(type: ts.ObjectType, context: CodeGenerationContext) {
         if (!this.llvmType) {
-            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, [
-                    this.typeInformation.type,
-                    ...this.getFields(type, context)
-                ],
+            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, this.getFields(type, context),
                 `class.${this.symbol.name}`
             );
         }

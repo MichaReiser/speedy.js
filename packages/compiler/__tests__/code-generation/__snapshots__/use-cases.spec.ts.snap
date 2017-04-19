@@ -7,7 +7,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { double*, i32, i32 }
+%class.Array = type { double*, double*, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -29,7 +29,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return1
 }
 
-define linkonce_odr double @\\"use-cases/mergeSort.ts$13mergeSortSync\\"() {
+define linkonce_odr hidden double @\\"use-cases/mergeSort.ts$13mergeSortSync\\"() {
 entry:
   %sorted = alloca %class.Array*, align 4
   %items = alloca [10000 x double], align 8
@@ -38,10 +38,10 @@ entry:
   %items1 = getelementptr inbounds [10000 x double], [10000 x double]* %items, i32 0, i32 0
   %0 = bitcast [10000 x double]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([10000 x double]* @items to i8*), i32 80000, i32 0, i1 false)
-  %constructorReturnValue = call %class.Array* @ArrayId_constructorPdi(double* %items1, i32 10000)
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double* %items1, i32 10000)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
-  %sliceReturnValue = call %class.Array* @ArrayId_slice(%class.Array* %array2)
+  %sliceReturnValue = call dereferenceable(12) %class.Array* @ArrayId_slice(%class.Array* %array2)
   store %class.Array* %sliceReturnValue, %class.Array** %sorted, align 4
   %array3 = load %class.Array*, %class.Array** %array, align 4
   %array4 = load %class.Array*, %class.Array** %array, align 4
@@ -59,13 +59,13 @@ returnBlock:                                      ; preds = %entry
 }
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double*, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double*, i32) #0
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Array* @ArrayId_slice(%class.Array* nocapture readonly dereferenceable(12)) #0
+declare dereferenceable(12) %class.Array* @ArrayId_slice(%class.Array* readonly dereferenceable(12)) #0
 
 ; Function Attrs: alwaysinline nounwind readonly
 declare i32 @ArrayId_length(%class.Array* nocapture readonly dereferenceable(12)) #2
@@ -73,7 +73,7 @@ declare i32 @ArrayId_length(%class.Array* nocapture readonly dereferenceable(12)
 ; Function Attrs: alwaysinline
 declare void @ArrayId_lengthi(%class.Array* dereferenceable(12), i32) #0
 
-define linkonce_odr void @\\"use-cases/mergeSort.ts$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
+define linkonce_odr hidden void @\\"use-cases/mergeSort.ts$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
 entry:
   %middle = alloca i32, align 4
   %sorted.addr = alloca %class.Array*, align 4
@@ -86,7 +86,7 @@ entry:
   store %class.Array* %sorted, %class.Array** %sorted.addr, align 4
   %upper.addr1 = load i32, i32* %upper.addr, align 4
   %lower.addr2 = load i32, i32* %lower.addr, align 4
-  %sub = sub i32 %upper.addr1, %lower.addr2
+  %sub = sub nsw i32 %upper.addr1, %lower.addr2
   %cmpLT = icmp slt i32 %sub, 2
   br i1 %cmpLT, label %if.then, label %if.end
 
@@ -96,10 +96,10 @@ if.then:                                          ; preds = %entry
 if.end:                                           ; preds = %entry
   %upper.addr3 = load i32, i32* %upper.addr, align 4
   %lower.addr4 = load i32, i32* %lower.addr, align 4
-  %sub5 = sub i32 %upper.addr3, %lower.addr4
+  %sub5 = sub nsw i32 %upper.addr3, %lower.addr4
   %sdiv = sdiv i32 %sub5, 2
   %lower.addr6 = load i32, i32* %lower.addr, align 4
-  %add = add i32 %sdiv, %lower.addr6
+  %add = add nsw i32 %sdiv, %lower.addr6
   store i32 %add, i32* %middle, align 4
   %sorted.addr7 = load %class.Array*, %class.Array** %sorted.addr, align 4
   %lower.addr8 = load i32, i32* %lower.addr, align 4
@@ -123,7 +123,7 @@ returnBlock:                                      ; preds = %if.end, %if.then
   ret void
 }
 
-define linkonce_odr void @\\"use-cases/mergeSort.ts$5merge5ArrayIdiii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %middle, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
+define linkonce_odr hidden void @\\"use-cases/mergeSort.ts$5merge5ArrayIdiii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %middle, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
 entry:
   %k = alloca i32, align 4
   %j = alloca i32, align 4
@@ -182,7 +182,7 @@ if.then:                                          ; preds = %lor.lhs.false, %lan
   %k20 = load i32, i32* %k, align 4
   call void @ArrayId_setid(%class.Array* %sorted.addr19, i32 %k20, double %\\"[i]18\\")
   %i21 = load i32, i32* %i, align 4
-  %add = add i32 %i21, 1
+  %add = add nsw i32 %i21, 1
   store i32 %add, i32* %i, align 4
   br label %if.end
 
@@ -194,7 +194,7 @@ if.else:                                          ; preds = %lor.lhs.false, %for
   %k26 = load i32, i32* %k, align 4
   call void @ArrayId_setid(%class.Array* %sorted.addr25, i32 %k26, double %\\"[i]24\\")
   %j27 = load i32, i32* %j, align 4
-  %add28 = add i32 %j27, 1
+  %add28 = add nsw i32 %j27, 1
   store i32 %add28, i32* %j, align 4
   br label %if.end
 
@@ -203,7 +203,7 @@ if.end:                                           ; preds = %if.else, %if.then
 
 for.inc:                                          ; preds = %if.end
   %k29 = load i32, i32* %k, align 4
-  %add30 = add i32 %k29, 1
+  %add30 = add nsw i32 %k29, 1
   store i32 %add30, i32* %k, align 4
   br label %for.cond
 
@@ -217,7 +217,7 @@ declare double @ArrayId_geti(%class.Array* nocapture dereferenceable(12), i32) #
 ; Function Attrs: alwaysinline
 declare void @ArrayId_setid(%class.Array* dereferenceable(12), i32, double) #0
 
-define linkonce_odr double @\\"use-cases/mergeSort.ts$15computeCheckSum5ArrayId\\"(%class.Array* dereferenceable(12) %array) {
+define linkonce_odr hidden double @\\"use-cases/mergeSort.ts$15computeCheckSum5ArrayId\\"(%class.Array* dereferenceable(12) %array) {
 entry:
   %i = alloca i32, align 4
   %result = alloca double, align 8
@@ -232,7 +232,7 @@ for.cond:                                         ; preds = %for.inc, %entry
   %i1 = load i32, i32* %i, align 4
   %array.addr2 = load %class.Array*, %class.Array** %array.addr, align 4
   %length = call i32 @ArrayId_length(%class.Array* %array.addr2)
-  %sub = sub i32 %length, 1
+  %sub = sub nsw i32 %length, 1
   %cmpLT = icmp slt i32 %i1, %sub
   br i1 %cmpLT, label %for.body, label %for.end
 
@@ -242,7 +242,7 @@ for.body:                                         ; preds = %for.cond
   %i5 = load i32, i32* %i, align 4
   %\\"[i]\\" = call double @ArrayId_geti(%class.Array* %array.addr4, i32 %i5)
   %i6 = load i32, i32* %i, align 4
-  %add = add i32 %i6, 1
+  %add = add nsw i32 %i6, 1
   %array.addr7 = load %class.Array*, %class.Array** %array.addr, align 4
   %\\"[i]8\\" = call double @ArrayId_geti(%class.Array* %array.addr7, i32 %add)
   %mul = fmul double %\\"[i]\\", %\\"[i]8\\"
@@ -252,7 +252,7 @@ for.body:                                         ; preds = %for.cond
 
 for.inc:                                          ; preds = %for.body
   %i9 = load i32, i32* %i, align 4
-  %add10 = add i32 %i9, 2
+  %add10 = add nsw i32 %i9, 2
   store i32 %add10, i32* %i, align 4
   br label %for.cond
 
@@ -280,8 +280,8 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Point = type { { [6 x i8]* }*, i32, i32 }
-%class.Array = type { i8**, i32, i32 }
+%class.Point = type { i32, i32 }
+%class.Array = type { i8**, i8**, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -297,133 +297,133 @@ entry:
   %items = alloca [127 x %class.Point*], align 4
   %points = alloca %class.Array*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9860, i32 14152)
-  %constructorReturnValue1 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9396, i32 14616)
-  %constructorReturnValue2 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 14848)
-  %constructorReturnValue3 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13456)
-  %constructorReturnValue4 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 15776)
-  %constructorReturnValue5 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10788, i32 13804)
-  %constructorReturnValue6 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10208, i32 14384)
-  %constructorReturnValue7 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11600, i32 13456)
-  %constructorReturnValue8 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 14036)
-  %constructorReturnValue9 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 15080)
-  %constructorReturnValue10 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 14152)
-  %constructorReturnValue11 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9860, i32 13108)
-  %constructorReturnValue12 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10092, i32 14964)
-  %constructorReturnValue13 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 13340)
-  %constructorReturnValue14 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10556, i32 13688)
-  %constructorReturnValue15 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9628, i32 14036)
-  %constructorReturnValue16 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10904, i32 13108)
-  %constructorReturnValue17 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11368, i32 12644)
-  %constructorReturnValue18 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 13340)
-  %constructorReturnValue19 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 13340)
-  %constructorReturnValue20 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13108)
-  %constructorReturnValue21 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13340)
-  %constructorReturnValue22 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 13572)
-  %constructorReturnValue23 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13688)
-  %constructorReturnValue24 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 11136)
-  %constructorReturnValue25 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8932, i32 12064)
-  %constructorReturnValue26 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 12412)
-  %constructorReturnValue27 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7772, i32 11020)
-  %constructorReturnValue28 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 10672)
-  %constructorReturnValue29 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 12876)
-  %constructorReturnValue30 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 12528)
-  %constructorReturnValue31 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 10324)
-  %constructorReturnValue32 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 11020)
-  %constructorReturnValue33 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 12876)
-  %constructorReturnValue34 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8700, i32 14036)
-  %constructorReturnValue35 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8932, i32 13688)
-  %constructorReturnValue36 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9048, i32 13804)
-  %constructorReturnValue37 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 12296)
-  %constructorReturnValue38 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 12644)
-  %constructorReturnValue39 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 13572)
-  %constructorReturnValue40 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 13340)
-  %constructorReturnValue41 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8004, i32 12760)
-  %constructorReturnValue42 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8584, i32 13108)
-  %constructorReturnValue43 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7772, i32 14732)
-  %constructorReturnValue44 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7540, i32 15080)
-  %constructorReturnValue45 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7424, i32 17516)
-  %constructorReturnValue46 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 17052)
-  %constructorReturnValue47 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7540, i32 16820)
-  %constructorReturnValue48 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7888, i32 17168)
-  %constructorReturnValue49 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 15196)
-  %constructorReturnValue50 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 14964)
-  %constructorReturnValue51 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 16240)
-  %constructorReturnValue52 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7888, i32 16936)
-  %constructorReturnValue53 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 15428)
-  %constructorReturnValue54 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 17400)
-  %constructorReturnValue55 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 16008)
-  %constructorReturnValue56 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8700, i32 15312)
-  %constructorReturnValue57 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11716, i32 16008)
-  %constructorReturnValue58 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12992, i32 14964)
-  %constructorReturnValue59 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12412, i32 14964)
-  %constructorReturnValue60 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12296, i32 15312)
-  %constructorReturnValue61 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12528, i32 15196)
-  %constructorReturnValue62 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15312, i32 6612)
-  %constructorReturnValue63 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11716, i32 16124)
-  %constructorReturnValue64 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11600, i32 19720)
-  %constructorReturnValue65 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10324, i32 17516)
-  %constructorReturnValue66 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12412, i32 13340)
-  %constructorReturnValue67 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12876, i32 12180)
-  %constructorReturnValue68 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 10904)
-  %constructorReturnValue69 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 11716)
-  %constructorReturnValue70 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 12528)
-  %constructorReturnValue71 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 13224)
-  %constructorReturnValue72 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12296, i32 12760)
-  %constructorReturnValue73 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12064, i32 12528)
-  %constructorReturnValue74 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12644, i32 10556)
-  %constructorReturnValue75 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11832, i32 11252)
-  %constructorReturnValue76 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11368, i32 12296)
-  %constructorReturnValue77 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 11020)
-  %constructorReturnValue78 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10556, i32 11948)
-  %constructorReturnValue79 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10324, i32 11716)
-  %constructorReturnValue80 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 9512)
-  %constructorReturnValue81 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 7540)
-  %constructorReturnValue82 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 7424)
-  %constructorReturnValue83 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 9744)
-  %constructorReturnValue84 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16936, i32 12180)
-  %constructorReturnValue85 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 17052, i32 12064)
-  %constructorReturnValue86 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16936, i32 11832)
-  %constructorReturnValue87 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 17052, i32 11600)
-  %constructorReturnValue88 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13804, i32 18792)
-  %constructorReturnValue89 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12064, i32 14964)
-  %constructorReturnValue90 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12180, i32 15544)
-  %constructorReturnValue91 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 14152, i32 18908)
-  %constructorReturnValue92 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5104, i32 14616)
-  %constructorReturnValue93 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 6496, i32 17168)
-  %constructorReturnValue94 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5684, i32 13224)
-  %constructorReturnValue95 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15660, i32 10788)
-  %constructorReturnValue96 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5336, i32 10324)
-  %constructorReturnValue97 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 812, i32 6264)
-  %constructorReturnValue98 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 14384, i32 20184)
-  %constructorReturnValue99 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 15776)
-  %constructorReturnValue100 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 3132)
-  %constructorReturnValue101 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10904, i32 3480)
-  %constructorReturnValue102 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7308, i32 14848)
-  %constructorReturnValue103 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16472, i32 16472)
-  %constructorReturnValue104 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10440, i32 14036)
-  %constructorReturnValue105 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 13804)
-  %constructorReturnValue106 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1160, i32 18560)
-  %constructorReturnValue107 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10788, i32 13572)
-  %constructorReturnValue108 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15660, i32 11368)
-  %constructorReturnValue109 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15544, i32 12760)
-  %constructorReturnValue110 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5336, i32 18908)
-  %constructorReturnValue111 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 6264, i32 19140)
-  %constructorReturnValue112 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11832, i32 17516)
-  %constructorReturnValue113 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 14152)
-  %constructorReturnValue114 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10208, i32 15196)
-  %constructorReturnValue115 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12180, i32 14848)
-  %constructorReturnValue116 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 10208)
-  %constructorReturnValue117 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7656, i32 17052)
-  %constructorReturnValue118 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16240, i32 8352)
-  %constructorReturnValue119 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10440, i32 14732)
-  %constructorReturnValue120 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 15544)
-  %constructorReturnValue121 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8004, i32 11020)
-  %constructorReturnValue122 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5684, i32 11948)
-  %constructorReturnValue123 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 16472)
-  %constructorReturnValue124 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 17516)
-  %constructorReturnValue125 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 8468)
-  %constructorReturnValue126 = call %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 3248, i32 14152)
+  %constructorReturnValue = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9860, i32 14152)
+  %constructorReturnValue1 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9396, i32 14616)
+  %constructorReturnValue2 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 14848)
+  %constructorReturnValue3 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13456)
+  %constructorReturnValue4 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 15776)
+  %constructorReturnValue5 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10788, i32 13804)
+  %constructorReturnValue6 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10208, i32 14384)
+  %constructorReturnValue7 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11600, i32 13456)
+  %constructorReturnValue8 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 14036)
+  %constructorReturnValue9 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 15080)
+  %constructorReturnValue10 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 14152)
+  %constructorReturnValue11 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9860, i32 13108)
+  %constructorReturnValue12 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10092, i32 14964)
+  %constructorReturnValue13 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 13340)
+  %constructorReturnValue14 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10556, i32 13688)
+  %constructorReturnValue15 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9628, i32 14036)
+  %constructorReturnValue16 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10904, i32 13108)
+  %constructorReturnValue17 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11368, i32 12644)
+  %constructorReturnValue18 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 13340)
+  %constructorReturnValue19 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 13340)
+  %constructorReturnValue20 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13108)
+  %constructorReturnValue21 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13340)
+  %constructorReturnValue22 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 13572)
+  %constructorReturnValue23 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 13688)
+  %constructorReturnValue24 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 11136)
+  %constructorReturnValue25 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8932, i32 12064)
+  %constructorReturnValue26 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 12412)
+  %constructorReturnValue27 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7772, i32 11020)
+  %constructorReturnValue28 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 10672)
+  %constructorReturnValue29 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 12876)
+  %constructorReturnValue30 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 12528)
+  %constructorReturnValue31 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 10324)
+  %constructorReturnValue32 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 11020)
+  %constructorReturnValue33 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 12876)
+  %constructorReturnValue34 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8700, i32 14036)
+  %constructorReturnValue35 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8932, i32 13688)
+  %constructorReturnValue36 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9048, i32 13804)
+  %constructorReturnValue37 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8468, i32 12296)
+  %constructorReturnValue38 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 12644)
+  %constructorReturnValue39 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 13572)
+  %constructorReturnValue40 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 13340)
+  %constructorReturnValue41 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8004, i32 12760)
+  %constructorReturnValue42 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8584, i32 13108)
+  %constructorReturnValue43 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7772, i32 14732)
+  %constructorReturnValue44 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7540, i32 15080)
+  %constructorReturnValue45 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7424, i32 17516)
+  %constructorReturnValue46 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8352, i32 17052)
+  %constructorReturnValue47 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7540, i32 16820)
+  %constructorReturnValue48 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7888, i32 17168)
+  %constructorReturnValue49 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 15196)
+  %constructorReturnValue50 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 14964)
+  %constructorReturnValue51 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 16240)
+  %constructorReturnValue52 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7888, i32 16936)
+  %constructorReturnValue53 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8236, i32 15428)
+  %constructorReturnValue54 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 17400)
+  %constructorReturnValue55 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 16008)
+  %constructorReturnValue56 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8700, i32 15312)
+  %constructorReturnValue57 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11716, i32 16008)
+  %constructorReturnValue58 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12992, i32 14964)
+  %constructorReturnValue59 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12412, i32 14964)
+  %constructorReturnValue60 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12296, i32 15312)
+  %constructorReturnValue61 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12528, i32 15196)
+  %constructorReturnValue62 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15312, i32 6612)
+  %constructorReturnValue63 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11716, i32 16124)
+  %constructorReturnValue64 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11600, i32 19720)
+  %constructorReturnValue65 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10324, i32 17516)
+  %constructorReturnValue66 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12412, i32 13340)
+  %constructorReturnValue67 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12876, i32 12180)
+  %constructorReturnValue68 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 10904)
+  %constructorReturnValue69 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 11716)
+  %constructorReturnValue70 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 12528)
+  %constructorReturnValue71 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 13224)
+  %constructorReturnValue72 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12296, i32 12760)
+  %constructorReturnValue73 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12064, i32 12528)
+  %constructorReturnValue74 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12644, i32 10556)
+  %constructorReturnValue75 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11832, i32 11252)
+  %constructorReturnValue76 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11368, i32 12296)
+  %constructorReturnValue77 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11136, i32 11020)
+  %constructorReturnValue78 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10556, i32 11948)
+  %constructorReturnValue79 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10324, i32 11716)
+  %constructorReturnValue80 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 9512)
+  %constructorReturnValue81 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 7540)
+  %constructorReturnValue82 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 7424)
+  %constructorReturnValue83 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 9744)
+  %constructorReturnValue84 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16936, i32 12180)
+  %constructorReturnValue85 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 17052, i32 12064)
+  %constructorReturnValue86 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16936, i32 11832)
+  %constructorReturnValue87 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 17052, i32 11600)
+  %constructorReturnValue88 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13804, i32 18792)
+  %constructorReturnValue89 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12064, i32 14964)
+  %constructorReturnValue90 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12180, i32 15544)
+  %constructorReturnValue91 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 14152, i32 18908)
+  %constructorReturnValue92 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5104, i32 14616)
+  %constructorReturnValue93 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 6496, i32 17168)
+  %constructorReturnValue94 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5684, i32 13224)
+  %constructorReturnValue95 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15660, i32 10788)
+  %constructorReturnValue96 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5336, i32 10324)
+  %constructorReturnValue97 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 812, i32 6264)
+  %constructorReturnValue98 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 14384, i32 20184)
+  %constructorReturnValue99 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11252, i32 15776)
+  %constructorReturnValue100 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9744, i32 3132)
+  %constructorReturnValue101 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10904, i32 3480)
+  %constructorReturnValue102 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7308, i32 14848)
+  %constructorReturnValue103 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16472, i32 16472)
+  %constructorReturnValue104 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10440, i32 14036)
+  %constructorReturnValue105 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 13804)
+  %constructorReturnValue106 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 1160, i32 18560)
+  %constructorReturnValue107 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10788, i32 13572)
+  %constructorReturnValue108 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15660, i32 11368)
+  %constructorReturnValue109 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 15544, i32 12760)
+  %constructorReturnValue110 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5336, i32 18908)
+  %constructorReturnValue111 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 6264, i32 19140)
+  %constructorReturnValue112 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11832, i32 17516)
+  %constructorReturnValue113 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10672, i32 14152)
+  %constructorReturnValue114 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10208, i32 15196)
+  %constructorReturnValue115 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 12180, i32 14848)
+  %constructorReturnValue116 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11020, i32 10208)
+  %constructorReturnValue117 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 7656, i32 17052)
+  %constructorReturnValue118 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 16240, i32 8352)
+  %constructorReturnValue119 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 10440, i32 14732)
+  %constructorReturnValue120 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9164, i32 15544)
+  %constructorReturnValue121 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 8004, i32 11020)
+  %constructorReturnValue122 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 5684, i32 11948)
+  %constructorReturnValue123 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 9512, i32 16472)
+  %constructorReturnValue124 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 13688, i32 17516)
+  %constructorReturnValue125 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 11484, i32 8468)
+  %constructorReturnValue126 = call dereferenceable(8) %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(i32 3248, i32 14152)
   %items127 = getelementptr inbounds [127 x %class.Point*], [127 x %class.Point*]* %items, i32 0, i32 0
   %0 = getelementptr inbounds [127 x %class.Point*], [127 x %class.Point*]* %items, i32 0, i32 0
   store %class.Point* %constructorReturnValue, %class.Point** %0, align 4
@@ -679,7 +679,7 @@ entry:
   store %class.Point* %constructorReturnValue125, %class.Point** %125, align 4
   %126 = getelementptr inbounds [127 x %class.Point*], [127 x %class.Point*]* %items, i32 0, i32 126
   store %class.Point* %constructorReturnValue126, %class.Point** %126, align 4
-  %constructorReturnValue128 = call %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items127, i32 127)
+  %constructorReturnValue128 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items127, i32 127)
   store %class.Array* %constructorReturnValue128, %class.Array** %points, align 4
   %points129 = load %class.Array*, %class.Array** %points, align 4
   %tspSyncReturnValue = call double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* %points129)
@@ -695,17 +695,17 @@ define linkonce_odr %class.Point* @\\"use-cases/tsp.ts$Point$11constructorii\\"(
 entry:
   %y.addr = alloca i32, align 4
   %x.addr = alloca i32, align 4
-  %\\"thisVoid*\\" = call i8* @malloc(i32 12)
+  %\\"thisVoid*\\" = call i8* @malloc(i32 8)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.Point*
-  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 0
   store i32 0, i32* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
   store i32 0, i32* %\\"&y\\"
   store i32 %x, i32* %x.addr, align 4
-  %\\"&x1\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
+  %\\"&x1\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 0
   store i32 %x, i32* %\\"&x1\\", align 4
   store i32 %y, i32* %y.addr, align 4
-  %\\"&y2\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 2
+  %\\"&y2\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
   store i32 %y, i32* %\\"&y2\\", align 4
   ret %class.Point* %this
 }
@@ -713,9 +713,9 @@ entry:
 declare i8* @malloc(i32)
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
 
-define linkonce_odr double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %points) {
+define linkonce_odr hidden double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %points) {
 entry:
   %items24 = alloca [1 x %class.Point*], align 4
   %distance = alloca double, align 8
@@ -729,13 +729,13 @@ entry:
   %return = alloca double, align 8
   store %class.Array* %points, %class.Array** %points.addr, align 4
   %points.addr1 = load %class.Array*, %class.Array** %points.addr, align 4
-  %shiftReturnValue = call %class.Point* @ArrayIPv_shift(%class.Array* %points.addr1)
+  %shiftReturnValue = call dereferenceable(8) %class.Point* @ArrayIPv_shift(%class.Array* %points.addr1)
   store %class.Point* %shiftReturnValue, %class.Point** %current, align 4
   %current2 = load %class.Point*, %class.Point** %current, align 4
   %items3 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items, i32 0, i32 0
   %0 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items, i32 0, i32 0
   store %class.Point* %current2, %class.Point** %0, align 4
-  %constructorReturnValue = call %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items3, i32 1)
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items3, i32 1)
   store %class.Array* %constructorReturnValue, %class.Array** %solution, align 4
   br label %while.cond
 
@@ -784,7 +784,7 @@ if.end:                                           ; preds = %for.body, %if.then
 
 for.inc:                                          ; preds = %if.end
   %i16 = load i32, i32* %i, align 4
-  %add = add i32 %i16, 1
+  %add = add nsw i32 %i16, 1
   store i32 %add, i32* %i, align 4
   br label %for.cond
 
@@ -795,7 +795,7 @@ for.end:                                          ; preds = %for.cond
   store %class.Point* %\\"[i]19\\", %class.Point** %current, align 4
   %nearestIndex20 = load i32, i32* %nearestIndex, align 4
   %points.addr21 = load %class.Array*, %class.Array** %points.addr, align 4
-  %spliceReturnValue = call %class.Array* @ArrayIPv_spliceii(%class.Array* %points.addr21, i32 %nearestIndex20, i32 1)
+  %spliceReturnValue = call dereferenceable(12) %class.Array* @ArrayIPv_spliceii(%class.Array* %points.addr21, i32 %nearestIndex20, i32 1)
   %current22 = load %class.Point*, %class.Point** %current, align 4
   %solution23 = load %class.Array*, %class.Array** %solution, align 4
   %items25 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items24, i32 0, i32 0
@@ -816,7 +816,7 @@ returnBlock:                                      ; preds = %while.end
 }
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Point* @ArrayIPv_shift(%class.Array* nocapture readonly dereferenceable(12)) #0
+declare dereferenceable(8) %class.Point* @ArrayIPv_shift(%class.Array* readonly dereferenceable(12)) #0
 
 ; Function Attrs: alwaysinline nounwind readonly
 declare i32 @ArrayIPv_length(%class.Array* nocapture readonly dereferenceable(12)) #1
@@ -825,7 +825,7 @@ declare i32 @ArrayIPv_length(%class.Array* nocapture readonly dereferenceable(12
 declare void @ArrayIPv_lengthi(%class.Array* dereferenceable(12), i32) #0
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_powdd(double, double) #2
+declare double @Math_powdd(double, double) #2
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
 declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #3
@@ -833,7 +833,7 @@ declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12)
 ; Function Attrs: alwaysinline
 declare void @ArrayIPv_setiPv(%class.Array* dereferenceable(12), i32, %class.Point*) #0
 
-define linkonce_odr double @\\"use-cases/tsp.ts$Point$10distanceTo5PointI\\"(%class.Point* nocapture readonly dereferenceable(12) %this1, %class.Point* dereferenceable(12) %other) {
+define linkonce_odr hidden double @\\"use-cases/tsp.ts$Point$10distanceTo5PointI\\"(%class.Point* readonly dereferenceable(8) %this1, %class.Point* dereferenceable(8) %other) {
 entry:
   %other.addr = alloca %class.Point*, align 4
   %this = alloca %class.Point*, align 4
@@ -841,21 +841,21 @@ entry:
   store %class.Point* %this1, %class.Point** %this, align 4
   store %class.Point* %other, %class.Point** %other.addr, align 4
   %this2 = load %class.Point*, %class.Point** %this, align 4
-  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this2, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this2, i32 0, i32 0
   %x = load i32, i32* %\\"&x\\", align 4
   %other.addr3 = load %class.Point*, %class.Point** %other.addr, align 4
-  %\\"&x4\\" = getelementptr inbounds %class.Point, %class.Point* %other.addr3, i32 0, i32 1
+  %\\"&x4\\" = getelementptr inbounds %class.Point, %class.Point* %other.addr3, i32 0, i32 0
   %x5 = load i32, i32* %\\"&x4\\", align 4
-  %sub = sub i32 %x, %x5
+  %sub = sub nsw i32 %x, %x5
   %subAsDouble = sitofp i32 %sub to double
   %powReturnValue = call double @Math_powdd(double %subAsDouble, double 2.000000e+00)
   %this6 = load %class.Point*, %class.Point** %this, align 4
-  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this6, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this6, i32 0, i32 1
   %y = load i32, i32* %\\"&y\\", align 4
   %other.addr7 = load %class.Point*, %class.Point** %other.addr, align 4
-  %\\"&y8\\" = getelementptr inbounds %class.Point, %class.Point* %other.addr7, i32 0, i32 2
+  %\\"&y8\\" = getelementptr inbounds %class.Point, %class.Point* %other.addr7, i32 0, i32 1
   %y9 = load i32, i32* %\\"&y8\\", align 4
-  %sub10 = sub i32 %y, %y9
+  %sub10 = sub nsw i32 %y, %y9
   %sub10AsDouble = sitofp i32 %sub10 to double
   %powReturnValue11 = call double @Math_powdd(double %sub10AsDouble, double 2.000000e+00)
   %fadd = fadd double %powReturnValue, %powReturnValue11
@@ -869,15 +869,15 @@ returnBlock:                                      ; preds = %entry
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_sqrtd(double) #2
+declare double @Math_sqrtd(double) #2
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Array* @ArrayIPv_spliceii(%class.Array* nocapture readonly dereferenceable(12), i32, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayIPv_spliceii(%class.Array* readonly dereferenceable(12), i32, i32) #0
 
 ; Function Attrs: alwaysinline
-declare hidden i32 @ArrayIPv_pushPPvi(%class.Array* nocapture readonly dereferenceable(12), %class.Point**, i32) #0
+declare i32 @ArrayIPv_pushPPvi(%class.Array* readonly dereferenceable(12), %class.Point**, i32) #0
 
-define linkonce_odr double @\\"use-cases/tsp.ts$11computeCost5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %tour) {
+define linkonce_odr hidden double @\\"use-cases/tsp.ts$11computeCost5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %tour) {
 entry:
   %i = alloca i32, align 4
   %total = alloca double, align 8
@@ -898,7 +898,7 @@ for.cond:                                         ; preds = %for.inc, %entry
 for.body:                                         ; preds = %for.cond
   %total3 = load double, double* %total, align 8
   %i4 = load i32, i32* %i, align 4
-  %sub = sub i32 %i4, 1
+  %sub = sub nsw i32 %i4, 1
   %tour.addr5 = load %class.Array*, %class.Array** %tour.addr, align 4
   %\\"[i]\\" = call %class.Point* @ArrayIPv_geti(%class.Array* %tour.addr5, i32 %sub)
   %tour.addr6 = load %class.Array*, %class.Array** %tour.addr, align 4
@@ -911,7 +911,7 @@ for.body:                                         ; preds = %for.cond
 
 for.inc:                                          ; preds = %for.body
   %i9 = load i32, i32* %i, align 4
-  %add = add i32 %i9, 1
+  %add = add nsw i32 %i9, 1
   store i32 %add, i32* %i, align 4
   br label %for.cond
 
@@ -919,7 +919,7 @@ for.end:                                          ; preds = %for.cond
   %total10 = load double, double* %total, align 8
   %tour.addr11 = load %class.Array*, %class.Array** %tour.addr, align 4
   %length12 = call i32 @ArrayIPv_length(%class.Array* %tour.addr11)
-  %sub13 = sub i32 %length12, 1
+  %sub13 = sub nsw i32 %length12, 1
   %tour.addr14 = load %class.Array*, %class.Array** %tour.addr, align 4
   %\\"[i]15\\" = call %class.Point* @ArrayIPv_geti(%class.Array* %tour.addr14, i32 %sub13)
   %tour.addr16 = load %class.Array*, %class.Array** %tour.addr, align 4

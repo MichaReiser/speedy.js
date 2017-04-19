@@ -199,12 +199,25 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            case ts.SyntaxKind.GreaterThanGreaterThanToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken: {
+                const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
+                const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context).generateIR();
+
+                const masked = context.builder.createAnd(rightInt, llvm.ConstantInt.get(context.llvmContext, 0x1F));
+                result = context.builder.createAShr(leftInt, masked, "ashr");
+
+                break;
+            }
+
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken: {
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
                 const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context).generateIR();
 
-                result = context.builder.createLShr(leftInt, rightInt, "lshr");
+                const masked = context.builder.createAnd(rightInt, llvm.ConstantInt.get(context.llvmContext, 0x1F));
+                result = context.builder.createLShr(leftInt, masked, "lshr");
+
                 break;
             }
 
@@ -241,7 +254,8 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
                 const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context).generateIR();
 
-                result = context.builder.createShl(leftInt, rightInt, "shl");
+                const masked = context.builder.createAnd(rightInt, llvm.ConstantInt.get(context.llvmContext, 0x1F));
+                result = context.builder.createShl(leftInt, masked, "shl");
 
                 break;
 
