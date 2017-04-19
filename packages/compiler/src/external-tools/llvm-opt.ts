@@ -15,7 +15,7 @@ const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,__errno_location,memcpy,memmove,m
  */
 export function optimize(filename: string, optimizedFileName: string, level: "0" | "1" | "2" | "3" | "z" | "s") {
     LOG(`Optimization of file ${filename}`);
-    execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}"  -licm -loop-unswitch -O${level} -irce -licm -loop-unswitch`);
+    execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}" -licm -loop-unswitch -irce -O${level} -simplifycfg`);
     return optimizedFileName;
 }
 
