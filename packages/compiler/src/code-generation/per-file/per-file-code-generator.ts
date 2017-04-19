@@ -281,8 +281,8 @@ class S2WasmTransformationStep implements TransformationStep {
 }
 
 class BinaryenOptTransformationStep implements TransformationStep {
-    transform(inputFileName: string, { buildDirectory, plainFileName, sourceFileRewriter }: TransformationContext): string {
-        const wasmFileName = wasmOpt(inputFileName, buildDirectory.getTempFileName(`${plainFileName}.wasm`));
+    transform(inputFileName: string, { buildDirectory, plainFileName, sourceFileRewriter, codeGenerationContext }: TransformationContext): string {
+        const wasmFileName = wasmOpt(inputFileName, buildDirectory.getTempFileName(`${plainFileName}.wasm`), codeGenerationContext.compilationContext.compilerOptions.optimizationLevel);
         const buffer = fs.readFileSync(wasmFileName);
         sourceFileRewriter.setWasmOutput(buffer);
         return wasmFileName;
