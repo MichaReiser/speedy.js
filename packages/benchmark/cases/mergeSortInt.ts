@@ -10047,11 +10047,8 @@ function merge(array: int[], lower: int, middle: int, upper: int, sorted: int[])
     let i = lower;
     let j = middle;
 
-    for (let k = lower; k < upper; ++k) {
-        if (i < middle && j >= upper) {
-            sorted[k] = array[i];
-            ++i;
-        } else if (i < middle && array[i] <= array[j])  {
+    for (let k = i; k < upper; ++k) {
+        if (i < middle && (j >= upper || array[i] <= array[j])) {
             sorted[k] = array[i];
             ++i;
         } else {
@@ -10059,6 +10056,7 @@ function merge(array: int[], lower: int, middle: int, upper: int, sorted: int[])
             sorted[k] = array[j];
             ++j;
         }
+
     }
 }
 

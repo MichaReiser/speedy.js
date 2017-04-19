@@ -10055,7 +10055,6 @@ function merge(array: number[], lower: int, middle: int, upper: int, sorted: num
             sorted[k] = array[j];
             ++j;
         }
-
     }
 }
 

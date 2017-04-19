@@ -1,10 +1,5 @@
 class Point {
-    private x: number;
-    private y: number;
-
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    constructor(private x: number, private y: number) {
     }
 
     distanceTo(other: Point) {
@@ -15,8 +10,64 @@ class Point {
 export async function tspLarge() {
     "use speedyjs";
 
+    const tour = computeTour(createPoints());
+    return computeCost(tour);
+}
+
+function computeTour(points: Point[]) {
+    "use speedyjs";
+
+    let current = points[0];
+
+    for (let i = 1; i < points.length; ++i) {
+        let shortestDistance = 2147483647.0;
+        let nearestIndex = i;
+
+        for (let j = i; j < points.length; ++j) {
+            const distance = current.distanceTo(points[j]);
+
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestIndex = j;
+            }
+        }
+
+        current = points[nearestIndex];
+
+        // move the point that was at this location before at a position larger than i to ensure this point
+        // is considered in future moves
+        swap(points, nearestIndex, i);
+    }
+
+    return points;
+}
+
+function swap(array: Point[], i1: int, i2: int) {
+    "use speedyjs";
+
+    const tmp = array[i1];
+    array[i1] = array[i2];
+    array[i2] = tmp;
+}
+
+function computeCost(tour: Point[]) {
+    "use speedyjs";
+    let total = 0.0;
+
+    for (let i = 1; i < tour.length; ++i) {
+        total += tour[i - 1].distanceTo(tour[i]);
+    }
+
+    total += tour[tour.length - 1].distanceTo(tour[0]);
+
+    return total;
+}
+
+function createPoints() {
+    "use speedyjs";
+
     // Luxembourg
-    const points = [
+    return [
         new Point(49525.5556, 5940.5556),
         new Point(49525.5556, 5940.5556),
         new Point(49738.8889, 6345.0),
@@ -996,66 +1047,6 @@ export async function tspLarge() {
         new Point(49880.2778, 6221.9444),
         new Point(49894.4444, 6163.6111),
         new Point(49926.6667, 6173.6111),
-        new Point(49938.6111, 6156.1111),
+        new Point(49938.6111, 6156.1111)
     ];
-
-    return tspSync(points);
-}
-
-function tspSync(points: Point[]) {
-    "use speedyjs";
-
-    const tour = computeTour(points);
-    return computeCost(tour);
-}
-
-function computeTour(points: Point[]) {
-    "use speedyjs";
-
-    let current = points.shift()!;
-    const solution: Point[] = [current];
-
-    for (let i = 0; i < points.length; ++i) {
-        let shortestDistance: number = 2.0 ** 31.0 - 1.0;
-        let nearestIndex = 0;
-
-        for (let j = i; j < points.length; ++j) {
-            const distance = current.distanceTo(points[j]);
-
-            if (distance < shortestDistance) {
-                shortestDistance = distance;
-                nearestIndex = j;
-            }
-        }
-
-        current = points[nearestIndex];
-        solution.push(current);
-
-        // move the point that was at this location before at a position larger than i to ensure this point
-        // is considered in future moves
-        swap(points, nearestIndex, i);
-    }
-
-    return solution;
-}
-
-function swap(array: Point[], i1: int, i2: int) {
-    "use speedyjs";
-
-    const tmp = array[i1];
-    array[i1] = array[i2];
-    array[i2] = tmp;
-}
-
-function computeCost(tour: Point[]) {
-    "use speedyjs";
-    let total = 0.0;
-
-    for (let i = 1; i < tour.length; ++i) {
-        total += tour[i - 1].distanceTo(tour[i]);
-    }
-
-    total += tour[tour.length - 1].distanceTo(tour[0]);
-
-    return total;
 }

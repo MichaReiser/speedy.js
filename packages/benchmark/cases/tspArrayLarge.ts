@@ -997,15 +997,14 @@ function tspSync(points: number[]) {
 
 function computeTour(points: number[]) {
     "use speedyjs";
-    let currentX = points.shift()!;
-    let currentY = points.shift()!;
-    const solution: number[] = [currentX, currentY];
+    let currentX = points[0];
+    let currentY = points[1];
 
-    for (let i = 0; i < points.length - 1; i+=2) {
+    for (let i = 2; i < points.length; i+=2) {
         let shortestDistance: number = 2.0**31.0 - 1.0;
-        let nearestIndex = 0;
+        let nearestIndex = i;
 
-        for (let j = i; j < points.length - 1; j += 2) {
+        for (let j = i; j < points.length; j += 2) {
             const distance = euclideanDistance(currentX, currentY, points[j], points[j+1]);
 
             if (distance < shortestDistance) {
@@ -1017,15 +1016,13 @@ function computeTour(points: number[]) {
         currentX = points[nearestIndex];
         currentY = points[nearestIndex + 1];
 
-        solution.push(currentX, currentY);
-
         // move the point that was at this location before at a position larger than i to ensure this point
         // is considered in future moves
         swap(points, nearestIndex, i);
         swap(points, nearestIndex + 1, i + 1);
     }
 
-    return solution;
+    return points;
 }
 
 function swap(array: number[], i1: int, i2: int) {
@@ -1040,8 +1037,8 @@ function computeCost(tour: number[]) {
     "use speedyjs";
     let total = 0.0;
 
-    for (let i = 3; i < tour.length; i += 2) {
-        total += euclideanDistance(tour[i - 3], tour[i - 2], tour[i - 1], tour[i]);
+    for (let i = 2; i < tour.length; i += 2) {
+        total += euclideanDistance(tour[i - 2], tour[i - 1], tour[i], tour[i + 1]);
     }
 
     total += euclideanDistance(tour[tour.length - 2], tour[tour.length - 1], tour[0], tour[1]);

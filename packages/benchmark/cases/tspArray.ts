@@ -128,7 +128,7 @@ export async function tspArray() {
         9512, 16472,
         13688, 17516,
         11484, 8468,
-        3248, 14152,
+        3248, 14152
     ];
 
     return tspSync(points);
@@ -137,39 +137,54 @@ export async function tspArray() {
 function tspSync(points: int[]) {
     "use speedyjs";
 
-    let currentX = points.shift()!;
-    let currentY = points.shift()!;
-    const solution: int[] = [currentX, currentY];
+    const tour = computeTour(points);
+    return computeCost(tour);
+}
 
-    while (points.length) {
+function computeTour(points: int[]) {
+    "use speedyjs";
+    let currentX = points[0];
+    let currentY = points[1];
+
+    for (let i = 2; i < points.length; i+=2) {
         let shortestDistance: number = 2.0**31.0 - 1.0;
-        let nearestIndex = 0;
+        let nearestIndex = i;
 
-        for (let i = 0; i < points.length - 1; i += 2) {
-            const distance = euclideanDistance(currentX, currentY, points[i], points[i+1]);
+        for (let j = i; j < points.length; j += 2) {
+            const distance = euclideanDistance(currentX, currentY, points[j], points[j+1]);
 
             if (distance < shortestDistance) {
                 shortestDistance = distance;
-                nearestIndex = i;
+                nearestIndex = j;
             }
         }
 
         currentX = points[nearestIndex];
         currentY = points[nearestIndex + 1];
 
-        solution.push(currentX, currentY);
-        points.splice(nearestIndex, 2);
+        // move the point that was at this location before at a position larger than i to ensure this point
+        // is considered in future moves
+        swap(points, nearestIndex, i);
+        swap(points, nearestIndex + 1, i + 1);
     }
 
-    return computeCost(solution);
+    return points;
+}
+
+function swap(array: int[], i1: int, i2: int) {
+    "use speedyjs";
+
+    const tmp = array[i1];
+    array[i1] = array[i2];
+    array[i2] = tmp;
 }
 
 function computeCost(tour: int[]) {
     "use speedyjs";
     let total = 0.0;
 
-    for (let i = 3; i < tour.length; i += 2) {
-        total += euclideanDistance(tour[i - 3], tour[i - 2], tour[i - 1], tour[i]);
+    for (let i = 2; i < tour.length; i += 2) {
+        total += euclideanDistance(tour[i - 2], tour[i - 1], tour[i], tour[i + 1]);
     }
 
     total += euclideanDistance(tour[tour.length - 2], tour[tour.length - 1], tour[0], tour[1]);
