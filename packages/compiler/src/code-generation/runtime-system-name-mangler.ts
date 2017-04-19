@@ -51,7 +51,7 @@ export class RuntimeSystemNameMangler extends BaseNameMangler {
     protected getParameterTypeCode(parameter: ts.Type) {
         if (parameter.getSymbol() === this.arraySymbol) {
             const elementType = (parameter as ts.GenericType).typeArguments[0];
-            return `P${this.typeToCode(elementType)}i`;
+            return `P${this.typeToCode(elementType)}u`;
         }
 
         return super.getParameterTypeCode(parameter);

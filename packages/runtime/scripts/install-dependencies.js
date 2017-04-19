@@ -24,19 +24,18 @@ function build() {
     const emscripten = emscriptenInstaller.install(TOOLS_DIRECTORY);
 
     const configuration = util.format(
-        "import os\nLLVM_ROOT='%s'\n" +
-        "NODE_JS='node'\n" +
+        "import os\n" +
+        "NODE_JS = os.path.expanduser(os.getenv('NODE') or '/usr/local/bin/node') # executable\n" +
+        "SPIDERMONKEY_ENGINE = [os.path.expanduser(os.getenv('SPIDERMONKEY') or 'js')] # executable\n" +
+        "V8_ENGINE = os.path.expanduser(os.getenv('V8') or 'd8') # executable\n" +
+        "LLVM_ROOT='%s'\n" +
         "EMSCRIPTEN_ROOT='%s'\n" +
-        "EMSCRIPTEN_NATIVE_OPTIMIZER='%s'\n" +
         "BINARYEN_ROOT='%s'\n" +
-        "SPIDERMONKEY_ENGINE = ''\n" +
-        "V8_ENGINE = ''\n" +
         "TEMP_DIR = '%s'\n" +
         "COMPILER_ENGINE = NODE_JS\n" +
         "JS_ENGINES = [NODE_JS]\n",
         llvm,
         emscripten,
-        path.join(emscripten, "optimizer"),
         binaryen,
         os.tmpdir()
     );

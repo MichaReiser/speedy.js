@@ -111,7 +111,7 @@ entry:
   %items1 = getelementptr inbounds [5 x i32], [5 x i32]* %items, i32 0, i32 0
   %0 = bitcast [5 x i32]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([5 x i32]* @items to i8*), i32 20, i32 0, i1 false)
-  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32* %items1, i32 5)
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32* %items1, i32 5)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
   %arrayLengthReturnValue = call i32 @\\"call-expression/array-passing-function-call.ts$11arrayLength5ArrayIi\\"(%class.Array* %array2)
@@ -124,7 +124,7 @@ returnBlock:                                      ; preds = %entry
 }
 
 ; Function Attrs: alwaysinline
-declare dereferenceable(12) %class.Array* @ArrayIi_constructorPii(i32*, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32*, i32) #0
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1

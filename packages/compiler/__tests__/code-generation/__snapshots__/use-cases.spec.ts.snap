@@ -38,7 +38,7 @@ entry:
   %items1 = getelementptr inbounds [10000 x double], [10000 x double]* %items, i32 0, i32 0
   %0 = bitcast [10000 x double]* %items to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([10000 x double]* @items to i8*), i32 80000, i32 0, i1 false)
-  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double* %items1, i32 10000)
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayId_constructorPdu(double* %items1, i32 10000)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
   %sliceReturnValue = call dereferenceable(12) %class.Array* @ArrayId_slice(%class.Array* %array2)
@@ -59,7 +59,7 @@ returnBlock:                                      ; preds = %entry
 }
 
 ; Function Attrs: alwaysinline
-declare dereferenceable(12) %class.Array* @ArrayId_constructorPdi(double*, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayId_constructorPdu(double*, i32) #0
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
@@ -679,7 +679,7 @@ entry:
   store %class.Point* %constructorReturnValue125, %class.Point** %125, align 4
   %126 = getelementptr inbounds [127 x %class.Point*], [127 x %class.Point*]* %items, i32 0, i32 126
   store %class.Point* %constructorReturnValue126, %class.Point** %126, align 4
-  %constructorReturnValue128 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items127, i32 127)
+  %constructorReturnValue128 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point** %items127, i32 127)
   store %class.Array* %constructorReturnValue128, %class.Array** %points, align 4
   %points129 = load %class.Array*, %class.Array** %points, align 4
   %tspSyncReturnValue = call double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* %points129)
@@ -713,7 +713,7 @@ entry:
 declare i8* @malloc(i32)
 
 ; Function Attrs: alwaysinline
-declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point**, i32) #0
 
 define linkonce_odr hidden double @\\"use-cases/tsp.ts$7tspSync5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %points) {
 entry:
@@ -735,7 +735,7 @@ entry:
   %items3 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items, i32 0, i32 0
   %0 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items, i32 0, i32 0
   store %class.Point* %current2, %class.Point** %0, align 4
-  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items3, i32 1)
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point** %items3, i32 1)
   store %class.Array* %constructorReturnValue, %class.Array** %solution, align 4
   br label %while.cond
 
@@ -801,7 +801,7 @@ for.end:                                          ; preds = %for.cond
   %items25 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items24, i32 0, i32 0
   %1 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items24, i32 0, i32 0
   store %class.Point* %current22, %class.Point** %1, align 4
-  %pushReturnValue = call i32 @ArrayIPv_pushPPvi(%class.Array* %solution23, %class.Point** %items25, i32 1)
+  %pushReturnValue = call i32 @ArrayIPv_pushPPvu(%class.Array* %solution23, %class.Point** %items25, i32 1)
   br label %while.cond
 
 while.end:                                        ; preds = %while.cond
@@ -875,7 +875,7 @@ declare double @Math_sqrtd(double) #2
 declare dereferenceable(12) %class.Array* @ArrayIPv_spliceii(%class.Array* readonly dereferenceable(12), i32, i32) #0
 
 ; Function Attrs: alwaysinline
-declare i32 @ArrayIPv_pushPPvi(%class.Array* readonly dereferenceable(12), %class.Point**, i32) #0
+declare i32 @ArrayIPv_pushPPvu(%class.Array* readonly dereferenceable(12), %class.Point**, i32) #0
 
 define linkonce_odr hidden double @\\"use-cases/tsp.ts$11computeCost5ArrayI5PointI\\"(%class.Array* dereferenceable(12) %tour) {
 entry:

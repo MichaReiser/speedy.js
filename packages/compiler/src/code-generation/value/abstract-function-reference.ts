@@ -136,7 +136,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
                 result.push(
                     llvmArrayValue(passedArguments.slice(i), toLLVMType(elementType, callerContext), callerContext, parameter.name),
-                    llvm.ConstantInt.get(callerContext.llvmContext, passedArguments.length - i)
+                    llvm.ConstantInt.get(callerContext.llvmContext, passedArguments.length - i, undefined, false)
                 );
 
                 break;

@@ -34,7 +34,7 @@ entry:
   store %class.Point* %constructorReturnValue1, %class.Point** %1, align 4
   %2 = getelementptr inbounds [3 x %class.Point*], [3 x %class.Point*]* %items, i32 0, i32 2
   store %class.Point* %constructorReturnValue2, %class.Point** %2, align 4
-  %constructorReturnValue4 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items3, i32 3)
+  %constructorReturnValue4 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point** %items3, i32 3)
   store %class.Array* %constructorReturnValue4, %class.Array** %array, align 4
   %array5 = load %class.Array*, %class.Array** %array, align 4
   %\\"[i]\\" = call %class.Point* @ArrayIPv_geti(%class.Array* %array5, i32 0)
@@ -72,7 +72,7 @@ entry:
 declare i8* @malloc(i32)
 
 ; Function Attrs: alwaysinline
-declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point**, i32) #0
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
 declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #1
