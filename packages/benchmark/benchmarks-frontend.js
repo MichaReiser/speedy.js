@@ -28,6 +28,8 @@ function addBenchmark(suite, name, fn, options) {
 }
 
 function runNextSuite() {
+    const totalSuites = suites.length + Object.keys(result).length;
+    progress.style.width = (1 - suites.length / totalSuites) * 100 + "%";
     const suite = suites.shift();
 
     if (suite) {
@@ -70,10 +72,11 @@ function runNextSuite() {
 function complete() {
     printSummary();
 
+    progress.style.width = "100%";
     output.innerHTML += "Done!";
 
     json.textContent = JSON.stringify(result, undefined, "  ");
-    runButton.disabled = undefined;
+    buttons.forEach(button => button.disabled = undefined);
 }
 
 function printSummary() {
@@ -92,15 +95,30 @@ function printSummary() {
 // expected from karma-benchmark
 global.suite = addSuite;
 const runButton = document.querySelector("#run");
+const run5TimesButton = document.querySelector("#run-5x");
+const buttons = [runButton,  run5TimesButton];
+const progress = document.querySelector("#progress-bar");
 
-runButton.addEventListener("click", function () {
-    runButton.disabled = "disabled";
+let startBenchmark = function (numRuns=1) {
+    buttons.forEach(button => button.disabled = "disabled");
     output.textContent = json.textContent = "";
     result = {};
+    progress.style.width = "0%";
+    progress.parentNode.attributes.removeNamedItem("hidden");
 
-    runBenchmarks();
+    runBenchmarks(numRuns);
     setImmediate(runNextSuite);
+};
+
+runButton.addEventListener("click", function () {
+    startBenchmark();
 });
+
+run5TimesButton.addEventListener("click", function () {
+    startBenchmark(5);
+});
+
+
 
 
 

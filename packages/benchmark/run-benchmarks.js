@@ -64,7 +64,7 @@ async function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 
@@ -79,56 +79,65 @@ async function getWasmFunctionForTestCase(caseName) {
     return { fn: wrapped, gc: gc };
 }
 
-function runBenchmarks() {
+let runBenchmark = function (caseName, testCase, run) {
+    let wasmFn = undefined;
+    let speedyJsGc = undefined;
+    let jsFn = undefined;
+
+    benchmark(run ? `js-${run}` : "js", function (deferred) {
+        jsFn().then(function (result) {
+            if (result !== testCase.result) {
+                throw new Error(`JS Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
+            }
+
+            deferred.resolve();
+        });
+    }, {
+        defer: true,
+        setup: function (deferred) {
+            getJsFunctionForTestCase(caseName).then(function (fn) {
+                jsFn = fn;
+                deferred.suResolve();
+            });
+        }
+    });
+
+    benchmark(run ? `wasm-${run}` : "wasm", function (deferred) {
+            wasmFn().then(function (result) {
+                if (result !== testCase.result) {
+                    throw new Error(`WASM Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
+                }
+
+                deferred.resolve();
+            });
+        },
+        {
+            defer: true,
+            setup: function (deferred) {
+                getWasmFunctionForTestCase(caseName)
+                    .then(function (result) {
+                        wasmFn = result.fn;
+                        speedyJsGc = result.gc;
+                        deferred.suResolve();
+                    });
+            },
+            onCycle: function () { // Is not called after each loop, but after some execution, so might need a little bit more memory
+                speedyJsGc();
+            }
+        });
+};
+function runBenchmarks(numRuns = 1) {
     for (const caseName of Object.keys(TEST_CASES)) {
         const testCase = TEST_CASES[caseName];
 
         suite(caseName, function () {
-            let wasmFn = undefined;
-            let speedyJsGc = undefined;
-            let jsFn = undefined;
-
-            benchmark("js", function (deferred) {
-                jsFn().then(function (result) {
-                    if (result !== testCase.result) {
-                        throw new Error(`JS Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
-                    }
-
-                    deferred.resolve();
-                });
-            }, {
-                defer: true,
-                setup: function (deferred) {
-                    getJsFunctionForTestCase(caseName).then(function (fn) {
-                        jsFn = fn;
-                        deferred.suResolve();
-                    });
+            if (numRuns === 1) {
+                runBenchmark(caseName, testCase);
+            } else {
+                for (let i = 0; i < numRuns; ++i) {
+                    runBenchmark(caseName, testCase, i);
                 }
-            });
-
-            benchmark("wasm", function (deferred) {
-                wasmFn().then(function (result) {
-                    if (result !== testCase.result) {
-                        throw new Error(`WASM Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
-                    }
-
-                    deferred.resolve();
-                });
-            },
-            {
-                defer: true,
-                setup: function (deferred) {
-                    getWasmFunctionForTestCase(caseName)
-                        .then(function (result) {
-                            wasmFn = result.fn;
-                            speedyJsGc = result.gc;
-                        deferred.suResolve();
-                    });
-                },
-                onCycle: function () { // Is not called after each loop, but after some execution, so might need a little bit more memory
-                    speedyJsGc();
-                }
-            });
+            }
         });
     }
 }

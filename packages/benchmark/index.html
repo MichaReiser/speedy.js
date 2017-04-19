@@ -6,7 +6,7 @@
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 			<meta http-equiv="x-ua-compatible" content="ie=edge">
-			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 
 			<script type="text/javascript" src="node_modules/platform/platform.js"></script>
 			<script type="text/javascript" src="node_modules/lodash/lodash.min.js"></script>
@@ -17,10 +17,18 @@
 <body>
 <div class="container">
 	<h1>Benchmark</h1>
-	<input type="button" value="Run..." id="run" class="btn btn-primary"/>
 
+	<input type="button" value="Run..." id="run" class="btn btn-primary"/>
+	<input type="button" value="Run 5x..." id="run-5x" class="btn btn-default"/>
+
+
+	<div class="progress mt-2 mb-2" hidden>
+		<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progress-bar" style="width: 0%"></div>
+	</div>
 
 	<h3>Results</h3>
+
+
 	<pre><code id="output">Run the Tests to see your results</code></pre>
 
 	<h3>JSON</h3>
