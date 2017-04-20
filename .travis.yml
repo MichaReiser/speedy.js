@@ -26,12 +26,12 @@ env:
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
   && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
-- wget http://famreiser.ch/llvm/llvm-5.0-webassembly.tar.gz
-- mkdir llvm && tar -xzf llvm-5.0-webassembly.tar.gz -C llvm
-- cd llvm && sudo dpkg -i clang-5.0_5.0~svn298384-1~exp1_amd64.deb libclang1-5.0_5.0~svn298384-1~exp1_amd64.deb
-  libclang-5.0-dev_5.0~svn298384-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn298384-1~exp1_amd64.deb
-  libllvm5.0_5.0~svn298384-1~exp1_amd64.deb llvm-5.0_5.0~svn298384-1~exp1_amd64.deb
-  llvm-5.0-runtime_5.0~svn298384-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn298384-1~exp1_amd64.deb
+- wget http://famreiser.ch/llvm/llvm-5.0-20042017-webassembly.tar.gz
+- mkdir llvm && tar -xzf llvm-5.0-20042017-webassembly.tar.gz -C llvm
+- cd llvm && sudo dpkg -i clang-5.0_5.0~svn300824-1~exp1_amd64.deb libclang1-5.0_5.0~svn300824-1~exp1_amd64.deb
+  libclang-5.0-dev_5.0~svn300824-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn300824-1~exp1_amd64.deb
+  libllvm5.0_5.0~svn300824-1~exp1_amd64.deb llvm-5.0_5.0~svn300824-1~exp1_amd64.deb
+  llvm-5.0-runtime_5.0~svn300824-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn300824-1~exp1_amd64.deb
   && cd ..
 - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 50
 - sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang-5.0 50
