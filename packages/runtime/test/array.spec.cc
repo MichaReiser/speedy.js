@@ -117,44 +117,13 @@ TEST_F(ArrayTests, set_changes_the_value_at_the_given_index) {
     EXPECT_EQ(array->get(99), 100);
 }
 
-TEST_F(ArrayTests, set_resizes_the_array_if_necessary) {
+TEST_F(ArrayTests, set_throws_if_the_index_is_out_of_range) {
     array = new Array<double>(100);
 
-    array->set(999, 1000);
+    EXPECT_THROW(array->set(999, 1000), std::out_of_range);
 
-    EXPECT_EQ(array->size(), 1000);
-    EXPECT_EQ(array->get(999), 1000);
+    EXPECT_EQ(array->size(), 100);
 }
-
-TEST_F(ArrayTests, set_does_not_keep_existing_values_when_resizing) {
-    array = new Array<double>(10);
-
-    array->set(0, 1);
-    array->set(9, 10);
-
-    // act
-    array->set(99, 100);
-
-    // assert
-    EXPECT_EQ(array->get(0), 1);
-    EXPECT_EQ(array->get(9), 10);
-    EXPECT_EQ(array->get(99), 100);
-}
-
-TEST_F(ArrayTests, set_does_initialize_new_elements_with_zero_when_resizing) {
-    array = new Array<double>(10);
-
-    array->set(0, 1);
-    array->set(9, 10);
-
-    // act
-    array->set(99, 100);
-
-    // assert
-    EXPECT_EQ(array->get(10), 0);
-    EXPECT_EQ(array->get(98), 0);
-}
-
 
 TEST_F(ArrayTests, set_throws_if_the_index_is_negative) {
     array = new Array<double>(5);
