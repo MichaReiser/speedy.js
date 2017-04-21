@@ -18,12 +18,13 @@ function computeTour(points: Point[]) {
     "use speedyjs";
 
     let current = points[0];
+    const tourSize = points.length;
 
-    for (let i = 1; i < points.length; ++i) {
+    for (let i = 1; i < tourSize; ++i) {
         let shortestDistance = 2147483647.0;
         let nearestIndex = i;
 
-        for (let j = i; j < points.length; ++j) {
+        for (let j = i; j < tourSize; ++j) {
             const distance = current.distanceTo(points[j]);
 
             if (distance < shortestDistance) {

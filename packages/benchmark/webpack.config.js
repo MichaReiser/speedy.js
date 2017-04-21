@@ -2,14 +2,28 @@ const path = require("path");
 
 module.exports = {
     devtool: "#source-map",
-    entry: "./benchmarks-frontend.js",
+    entry: {
+        "benchmark": "./benchmarks-frontend.js",
+        "results": "./results.js"
+    },
 
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "bundle.js"
+        filename: "[name].js"
+    },
+
+    resolve: {
+        extensions: ['.js', '.jsx', '.ts']
     },
 
     module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                loader: "ts-loader",
+                exclude: path.resolve("./cases")
+            }
+        ],
         noParse: [
             /benchmark\/benchmark\.js/
         ]

@@ -23,6 +23,7 @@
   "homepage": "https://github.com/MichaReiser/speedy.js#readme",
   "dependencies": {
     "benchmark": "git+https://github.com/MichaReiser/benchmark.js.git",
+    "d3": "^4.8.0",
     "karma-benchmark": "git+https://github.com/MichaReiser/karma-benchmark.git#peer-deps-published",
     "karma-benchmark-reporter": "^0.1.1",
     "karma-json-reporter": "git+https://github.com/MichaReiser/karma-json-reporter.git#correctly-output-result",

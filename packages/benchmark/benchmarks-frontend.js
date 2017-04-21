@@ -5,9 +5,11 @@ const platform = require("platform");
 const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
 
 const runBenchmarks = require("./run-benchmarks");
+const barChart = require("./chart.ts");
 
 const output = document.querySelector("#output");
 const json = document.querySelector("#json");
+const chart = barChart("#chart");
 
 let suites = [];
 let result = {};
@@ -76,6 +78,7 @@ function complete() {
     output.innerHTML += "Done!";
 
     json.textContent = JSON.stringify(result, undefined, "  ");
+    chart(benchmarkToChartResults(result));
     buttons.forEach(button => button.disabled = undefined);
 }
 
@@ -119,7 +122,44 @@ run5TimesButton.addEventListener("click", function () {
 });
 
 
+function benchmarkToChartResults(benchmarkResult) {
+    const browsers = [ { id: 1, name: platform.name + " " + platform.version }];
 
+    const testCases = _.chain(Object.keys(benchmarkResult))
+        .map(caseName => {
+            const testCase = benchmarkResult[caseName];
+            return { name: caseName, results: { 1: { js: testCase.js.hz, wasm: testCase.wasm.hz } } };
+        })
+        .value();
+    return { browsers: browsers, testCases: testCases };
 
+    // this is for the karma results
+//     const browsers = Object.keys(benchmarkResult.browsers).map(browserId => { return { name: benchmarkResult.browsers[browserId].name, id: browserId } });
+//     const testCases = _.chain(Object.keys(benchmarkResult.browsers))
+//         .flatMap(browserId => benchmarkResult.result[browserId].map(result => { return { browser: browserId, benchmark: result.benchmark } }))
+//         .groupBy(testCase => testCase.benchmark.suite)
+//         .map(testResults => {
+//             const resultsPerBrowser = _.chain(testResults)
+//                 .groupBy(testCase => testCase.browser)
+//                 .mapValues(browserResult => {
+//                     let wasm, js;
+//                     if (browserResult[0].benchmark.name === "js") {
+//                         js = browserResult[0];
+//                         wasm = browserResult[1];
+//                     } else {
+//                         js = browserResult[1];
+//                         wasm = browserResult[0];
+//                     }
+//
+//                     return { js: js.benchmark.hz, wasm: wasm.benchmark.hz };
+//                 }).value();
+//
+//
+//             return { name: testResults[0].benchmark.suite, results: resultsPerBrowser };
+//         })
+//         .value();
+//
+//     return { browsers: browsers, testCases: testCases };
+}
 
 

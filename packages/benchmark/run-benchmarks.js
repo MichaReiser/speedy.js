@@ -1,6 +1,14 @@
 "use strict";
 
 const TEST_CASES = {
+    "tspLarge": {
+        args: [],
+        result: 14212.721606057083
+    },
+    "tspArray": {
+        args: [],
+        result: 135751.77804825202
+    },
     "mergeSort": {
         args: [],
         result: 1659.0906736166776
@@ -14,14 +22,6 @@ const TEST_CASES = {
         result: 0.7216851827628226
     },
     "tsp": {
-        args: [],
-        result: 135751.77804825202
-    },
-    "tspLarge": {
-        args: [],
-        result: 14212.721606057083
-    },
-    "tspArray": {
         args: [],
         result: 135751.77804825202
     },

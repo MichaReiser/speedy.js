@@ -5,12 +5,9 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "pretty": true,
-    "types": [],
     "lib": [
-      "es2015"
+      "es2015",
+      "dom"
     ]
-  },
-  "include": [
-    "**/*.ts"
-  ]
+  }
 }
