@@ -81,7 +81,7 @@ export class LLVMLink {
     link(target: string, entrySymbols: string[]): string {
         const linkingFiles = Array.from(this.getObjectFilesToLink(this.byteCodeFiles, entrySymbols));
         const quotedFileNames = Array.from(linkingFiles).map(file => `"${file}"`).join(" ");
-        execLLVM(EXECUTABLE_NAME, `${quotedFileNames} -o "${target}"`);
+        LOG(execLLVM(EXECUTABLE_NAME, `${quotedFileNames} -o "${target}"`));
         return target;
     }
 

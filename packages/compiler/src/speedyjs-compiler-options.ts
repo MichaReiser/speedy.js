@@ -1,5 +1,7 @@
 import {CompilerOptions} from "typescript";
 
+export type OptimizationLevel = "0" | "1" | "2" | "3" | "z" | "s";
+
 /**
  * Speedy JS Compiler Options
  */
@@ -19,11 +21,10 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
     emitLLVM: boolean;
 
     /**
-     * Indicator if, instead of the web assembly output, a wast file should be written.
-     * Disables source file transformation
+     * Indicator if the intermediate wast file representation should be saved in the output directory
      * @default false
      */
-    emitWAST: boolean;
+    saveWast: boolean;
 
     /**
      * If true, the bc file of the linked and optimized output is saved in the output directory
@@ -80,7 +81,7 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
      * The optimization level passed to llvm
      * @default "3"
      */
-    optimizationLevel: "0" | "1" | "2" | "3" | "z" | "s";
+    optimizationLevel: OptimizationLevel;
 }
 
 /**
@@ -99,7 +100,7 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
     const defaults = {
         unsafe: false,
         emitLLVM: false,
-        emitWAST: false,
+        saveWast: false,
         binaryenOpt: false,
         totalMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,

@@ -7,7 +7,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -56,7 +56,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -95,7 +95,7 @@ declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture r
 declare i32 @ArrayIi_geti(%class.Array* nocapture dereferenceable(12), i32) #2
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIi_setii(%class.Array* dereferenceable(12), i32, i32) #0
+declare void @ArrayIi_setii(%class.Array* nocapture dereferenceable(12), i32, i32) #0
 
 declare void @speedyJsGc()
 
@@ -112,7 +112,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -149,7 +149,7 @@ declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture r
 declare i32 @ArrayIi_geti(%class.Array* nocapture dereferenceable(12), i32) #2
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIi_setii(%class.Array* dereferenceable(12), i32, i32) #0
+declare void @ArrayIi_setii(%class.Array* nocapture dereferenceable(12), i32, i32) #0
 
 declare void @speedyJsGc()
 
@@ -166,7 +166,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { double*, double*, i32 }
+%class.Array = type { double*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -214,7 +214,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { double*, double*, i32 }
+%class.Array = type { double*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -260,9 +260,9 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array.1 = type { double*, double*, i32 }
-%class.Array = type { i1*, i1*, i32 }
-%class.Array.0 = type { i32*, i32*, i32 }
+%class.Array.1 = type { double*, i32, i32 }
+%class.Array = type { i1*, i32, i32 }
+%class.Array.0 = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -324,7 +324,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -373,7 +373,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -436,7 +436,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -485,7 +485,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -542,7 +542,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -604,7 +604,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Array = type { i32*, i32*, i32 }
+%class.Array = type { i32*, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }

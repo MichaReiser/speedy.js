@@ -38,12 +38,7 @@ export function execLLVM(tool: string, args: string, cwd?: string): string {
         throw new Error(`LLVM executable ${toolPath} is missing`);
     }
 
-    const env = Object.create(process.env);
-    const command = `${toolPath} ${args}`;
-
-    log(`Execute command '${command}'`);
-    const output = child_process.execSync(command, { env: env, cwd });
-    return outputToString(output);
+    return execute(toolPath, args, cwd);
 }
 
 /**
@@ -59,11 +54,15 @@ export function execBinaryen(tool: string, args: string): string {
         throw new Error(`BINARYEN executable ${toolPath} is missing`);
     }
 
+    return execute(toolPath, args);
+}
+
+function execute(tool: string, args: string, cwd?: string) {
     const env = Object.create(process.env);
-    const command = `${toolPath} ${args}`;
+    const command = `${tool} ${args}`;
 
     log(`Execute command '${command}'`);
-    const output = child_process.execSync(`${toolPath} ${args}`, { env: env });
+    const output = child_process.execSync(`${tool} ${args}`, { env: env, cwd: cwd });
 
     return outputToString(output);
 }

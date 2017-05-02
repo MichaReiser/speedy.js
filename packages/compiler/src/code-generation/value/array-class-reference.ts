@@ -83,7 +83,7 @@ export class ArrayClassReference extends ClassReference {
 
         return llvm.StructType.create(context.llvmContext, [
                 llvmElementType.getPointerTo(),
-                llvmElementType.getPointerTo(),
+                llvm.Type.getInt32Ty(context.llvmContext),
                 llvm.Type.getInt32Ty(context.llvmContext)
             ],
             "class.Array"

@@ -74,6 +74,7 @@ export class ObjectIndexReferenceBuilder {
 
             const self = setter.getArguments()[0];
             self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context));
+            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
         }
 
         return setter;

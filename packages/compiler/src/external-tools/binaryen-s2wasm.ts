@@ -16,6 +16,6 @@ const EXECUTABLE_NAME = "s2wasm";
 export function s2wasm(sFile: string, wastFile: string, { globalBase, totalMemory }: { globalBase: number, totalMemory: number}): string {
     LOG(`Compile ${sFile} to wast file`);
 
-    execBinaryen(EXECUTABLE_NAME, `"${sFile}" -o "${wastFile}" -l "${COMPILER_RT_FILE}" --emscripten-glue --global-base=${globalBase} --initial-memory=${totalMemory}`);
+    LOG(execBinaryen(EXECUTABLE_NAME, `"${sFile}" -o "${wastFile}" -l "${COMPILER_RT_FILE}" --emscripten-glue --global-base=${globalBase} --initial-memory=${totalMemory}`));
     return wastFile;
 }

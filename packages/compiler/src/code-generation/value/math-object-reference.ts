@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationError} from "../../code-generation-error";
 import {CodeGenerationContext} from "../code-generation-context";
@@ -46,16 +47,19 @@ export class MathObjectReference extends BuiltInObjectReference {
      * Maybe using Math.pow and sqrt from the browser directly?
      */
     protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
+        assert(signatures.length === 1, "Math functions have not to be overloaded");
+
         switch (symbol.name) {
-            case "pow":
-            case "sqrt":
             case "log":
             case "sin":
             case "cos":
-                assert(signatures.length === 1, "Math functions have not to be overloaded");
                 const resolvedFunction = createResolvedFunctionFromSignature(signatures[0], context.compilationContext, this.type);
                 resolvedFunction.instanceMethod = false; // they are not really instance methods as this does not have to be passed
                 return ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
+            case "pow":
+                return MathObjectReference.createPowFunction(signatures[0].getReturnType(), this.type, context);
+            case "sqrt":
+                return this.createSqrtFunction(signatures[0], context);
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
@@ -87,12 +91,38 @@ export class MathObjectReference extends BuiltInObjectReference {
         const mathSymbol = context.compilationContext.builtIns.get("Math");
         const mathObject = context.scope.getVariable(mathSymbol!);
         const mathType = (mathObject as Allocation).type as ts.ObjectType;
-
-        const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
-        const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);
-        const powFunction = ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
+        const powFunction = this.createPowFunction(numberType, mathType, context);
 
         const args = [Primitive.toNumber(lhs, numberType, context).generateIR(), Primitive.toNumber(rhs, numberType, context).generateIR()];
         return powFunction.invokeWith(args, context)!;
+    }
+
+    private static createPowFunction(numberType: ts.Type, mathType: ts.ObjectType, context: CodeGenerationContext) {
+        let fn = context.module.getFunction("llvm.pow.f64");
+
+        if (!fn) {
+            const doubleTy = llvm.Type.getDoubleTy(context.llvmContext);
+            fn = llvm.Function.create(llvm.FunctionType.get(doubleTy, [doubleTy, doubleTy], false), llvm.LinkageTypes.ExternalLinkage, "llvm.pow.f64", context.module);
+        }
+
+        const parameters = [createResolvedParameter("value", numberType), createResolvedParameter("exp", numberType)];
+        const resolvedFunction = createResolvedFunction("pow", [], parameters, numberType, undefined, mathType);
+        resolvedFunction.instanceMethod = false;
+
+        return ResolvedFunctionReference.create(fn, resolvedFunction);
+    }
+
+    private createSqrtFunction(signature: ts.Signature, context: CodeGenerationContext) {
+        let fn = context.module.getFunction("llvm.sqrt.f64");
+
+        if (!fn) {
+            const doubleTy = llvm.Type.getDoubleTy(context.llvmContext);
+            fn = llvm.Function.create(llvm.FunctionType.get(doubleTy, [doubleTy], false), llvm.LinkageTypes.ExternalLinkage, "llvm.sqrt.f64", context.module);
+        }
+
+        const resolvedFunction = createResolvedFunctionFromSignature(signature, context.compilationContext, this.type);
+        resolvedFunction.instanceMethod = false;
+
+        return ResolvedFunctionReference.create(fn, resolvedFunction);
     }
 }

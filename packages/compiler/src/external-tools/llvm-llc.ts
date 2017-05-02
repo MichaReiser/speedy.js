@@ -16,7 +16,7 @@ const DEFAULT_OPTIONS = "-march=wasm32 -filetype=asm -asm-verbose=false -thread-
 export function llc(input: string, sFileName: string): string {
     LOG(`Execute LLC for file ${input}`);
 
-    execLLVM(EXECUTABLE_NAME, `${DEFAULT_OPTIONS} "${input}" -o "${sFileName}"`);
+    LOG(execLLVM(EXECUTABLE_NAME, `${DEFAULT_OPTIONS} "${input}" -o "${sFileName}"`));
 
     return sFileName;
 }
