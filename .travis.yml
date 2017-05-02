@@ -1,4 +1,5 @@
 sudo: required
+dist: precise # TODO Update in near future, requires new LLVM build
 language: node_js
 node_js:
 - node
