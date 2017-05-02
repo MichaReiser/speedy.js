@@ -7,7 +7,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --stream --loglevel verbose",
-    "test": "lerna run test --stream"
+    "test": "lerna run test --stream ---max-buffer 10485760"
   },
   "dependencies": {},
   "license": "MIT"

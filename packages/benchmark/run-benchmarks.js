@@ -86,7 +86,7 @@ function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("!speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("!speedyjs-loader?{speedyJS:{unsafe: true, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 

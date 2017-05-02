@@ -25,7 +25,7 @@ interface CommandLineArguments {
     exportGc?: boolean;
     optimizationLevel?: "0" | "1" | "2" | "3" | "z" | "s";
     settings: {
-        TOTAL_MEMORY?: number;
+        INITIAL_MEMORY?: number;
         TOTAL_STACK?: number;
         GLOBAL_BASE?: number;
     };

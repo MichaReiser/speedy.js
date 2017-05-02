@@ -243,18 +243,27 @@ function createChart(svgElementQuery) {
             .duration(TRANSITION_DURATION)
             .text(wasmResult => percentFormat(wasmResult.percentage));
 
-        barsEnter
+        const emcc = barsMerged.selectAll("line")
+            .data(wasmResult => wasmResult.emccPercentage ? [wasmResult] : []);
+
+        const emccEnter = emcc.enter()
             .append("line")
             .attr("class", "emcc")
             .attr("stroke", z("emcc"))
-            .attr("stroke-width", 2);
-
-        barsMerged.select("line")
+            .attr("stroke-width", 2)
             .attr("x1", 0)
+            .attr("x2", xPerCase.bandwidth())
+            .attr("y1", height)
+            .attr("y2", height);
+
+        emcc.merge(emccEnter)
+            .transition()
+            .duration(TRANSITION_DURATION)
             .attr("y1", wasmResult => y(wasmResult.emccPercentage))
             .attr("x2", xPerCase.bandwidth())
             .attr("y2", wasmResult => y(wasmResult.emccPercentage));
 
+        emcc.exit().remove();
         bars.exit().remove();
         cases.exit().remove();
 

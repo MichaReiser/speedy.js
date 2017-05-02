@@ -91,7 +91,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         const options = ts.createObjectLiteral([
             ts.createPropertyAssignment("totalStack", ts.createLiteral(this.compilerOptions.totalStack)),
-            ts.createPropertyAssignment("totalMemory", ts.createLiteral(this.compilerOptions.totalMemory)),
+            ts.createPropertyAssignment("initialMemory", ts.createLiteral(this.compilerOptions.initialMemory)),
             ts.createPropertyAssignment("globalBase", ts.createLiteral(this.compilerOptions.globalBase)),
             ts.createPropertyAssignment("staticBump", ts.createLiteral(this.wastMetaData.staticBump || 0)),
             ts.createPropertyAssignment("exposeGc", ts.createLiteral(this.compilerOptions.exportGc || this.compilerOptions.exposeGc))

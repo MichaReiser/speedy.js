@@ -39,11 +39,10 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
     binaryenOpt: boolean;
 
     /**
-     * Total memory to allocate (Heap + stack) in bytes. As memory grow is not yet supported, this needs to be large enough to
-     * run the application
+     * The initially allocated memory (Heap + stack) in bytes.
      * @default 16mb 16*1024*1024
      */
-    totalMemory: number;
+    initialMemory: number;
 
     /**
      * Total memory to be allocated for the stack in bytes. Needs to be less than total Memory.
@@ -102,7 +101,7 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         emitLLVM: false,
         saveWast: false,
         binaryenOpt: false,
-        totalMemory: 16 * 1024 * 1024,
+        initialMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,
         globalBase: 1024,
         saveBc: false,

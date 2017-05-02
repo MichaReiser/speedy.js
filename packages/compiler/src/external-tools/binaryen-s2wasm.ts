@@ -13,9 +13,9 @@ const EXECUTABLE_NAME = "s2wasm";
  * @return the path to the .wast file. The caller is responsible for either deleting the working directory or the returned
  * file.
  */
-export function s2wasm(sFile: string, wastFile: string, { globalBase, totalMemory }: { globalBase: number, totalMemory: number}): string {
+export function s2wasm(sFile: string, wastFile: string, { globalBase, initialMemory }: { globalBase: number, initialMemory: number}): string {
     LOG(`Compile ${sFile} to wast file`);
 
-    LOG(execBinaryen(EXECUTABLE_NAME, `"${sFile}" -o "${wastFile}" -l "${COMPILER_RT_FILE}" --emscripten-glue --global-base=${globalBase} --initial-memory=${totalMemory}`));
+    LOG(execBinaryen(EXECUTABLE_NAME, `"${sFile}" -o "${wastFile}" -l "${COMPILER_RT_FILE}" --emscripten-glue --global-base=${globalBase} --initial-memory=${initialMemory}`));
     return wastFile;
 }
