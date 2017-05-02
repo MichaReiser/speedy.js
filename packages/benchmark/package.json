@@ -4,7 +4,7 @@
   "description": "Speedy.js Benchmark",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "./cases/compile-emcc && webpack-dev-server",
     "benchmark": "karma start"
   },
   "repository": {
@@ -22,22 +22,17 @@
   },
   "homepage": "https://github.com/MichaReiser/speedy.js#readme",
   "dependencies": {
-    "benchmark": "git+https://github.com/MichaReiser/benchmark.js.git",
+    "benchmark": "^2.1.4",
     "d3": "^4.8.0",
-    "karma-benchmark": "git+https://github.com/MichaReiser/karma-benchmark.git#peer-deps-published",
-    "karma-benchmark-reporter": "^0.1.1",
-    "karma-json-reporter": "git+https://github.com/MichaReiser/karma-json-reporter.git#correctly-output-result",
+    "d3-tip": "^0.7.1",
+    "exports-loader": "^0.6.4",
+    "file-loader": "^0.11.1",
     "speedyjs-loader": "0.x.x",
     "ts-loader": "^2.0.2",
     "typescript": "MichaReiser/TypeScript#release",
     "webpack-dev-server": "^2.4.2"
   },
   "devDependencies": {
-    "karma": "^1.5.0",
-    "karma-chrome-launcher": "^2.0.0",
-    "karma-firefox-launcher": "^1.0.1",
-    "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^2.0.3",
     "webpack": "^2.3.2"
   }
 }

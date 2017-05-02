@@ -7,7 +7,7 @@ set(SOURCE_FILES lib/array-api.cc lib/macros.h lib/array.h lib/conversion.cc lib
 
 set(EM_CONFIG_PATH "${CMAKE_SOURCE_DIR}/.emscripten")
 set(EMSCRIPTEN_COMPILE_FLAGS --cache "${CMAKE_SOURCE_DIR}/.emscripten_cache" --em-config "${EM_CONFIG_PATH}")
-set(CMAKE_CXX_FLAGS "-pedantic -Wextra -O3")
+set(CMAKE_CXX_FLAGS "-pedantic -Wextra -O2")
 
 add_library(speedyjs-runtime STATIC ${SOURCE_FILES})
 add_library(speedyjs-runtime-unsafe STATIC ${SOURCE_FILES})

@@ -1,13 +1,31 @@
 "use strict";
 
+const benchmarkImport = require("benchmark");
+const _ = require("lodash");
+const platform = require("platform");
+
+const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
+
 const TEST_CASES = {
-    "tspLarge": {
-        args: [],
-        result: 14212.721606057083
+    "isPrime": {
+        args: [2147483647],
+        result: true
     },
-    "tspArray": {
+    "tspArrayInt": {
         args: [],
-        result: 135751.77804825202
+        result: 500074.11491760757
+    },
+    "tspArrayDouble": {
+        args: [],
+        result: 500016.6164722443
+    },
+    "tspInt": {
+        args: [],
+        result: 500074.11491760757
+    },
+    "tspDouble": {
+        args: [],
+        result: 500016.6164722443
     },
     "mergeSort": {
         args: [],
@@ -17,74 +35,102 @@ const TEST_CASES = {
         args: [],
         result: 7.643593152571829e+21
     },
-    "simjs": {
-        args: [10],
-        result: 0.7216851827628226
-    },
-    "tsp": {
-        args: [],
-        result: 135751.77804825202
-    },
-    "tspArrayLarge": {
-        args: [],
-        result: 14212.721606057083
-    },
     "fib": {
         fnName: "fib",
         args: [40],
         result: 102334155
     },
-    "prime": {
-        fnName: "isPrime",
-        args: [2147483647],
-        result: true
+    "simjs": {
+        args: [10],
+        result: 0.7216851827628226
     },
     "nsieve": {
         args: [40000],
         result: 4203
+    },
+    // "createPoints": {
+    //     args: [10],
+    //     result: 114038
+    // },
+    "doubleAdd": {
+        args: [],
+        result: 1.0000099999980838
+    },
+    "doubleCompare": {
+        args: [],
+        result: 4999951.000000405
+    },
+    "intCompare": {
+        args: [2548965],
+        result: 2548965
+    },
+    "arrayReverse": {
+        args: [],
+        result: 1222.1247886583424
     }
 };
 
-async function getJsFunctionForTestCase(caseName) {
+function getJsFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = TEST_CASES[caseName].fnName || caseName;
     const fn = require("ts-loader!./cases/" + caseName + ".ts")[fnName];
 
-    const wrapped = function jsFunctionWrapper() {
+    function jsFunctionWrapper() {
         return fn.apply(undefined, testCase.args);
-    };
+    }
 
-    // invoke function once to be fair ;)
-    await wrapped();
-
-    return wrapped;
+    return jsFunctionWrapper;
 }
 
-async function getWasmFunctionForTestCase(caseName) {
+function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("!speedyjs-loader?{speedyJS:{unsafe: true, totalMemory: 134217728, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + ".ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 
-    const wrapped = function wasmFunctionWrapper() {
+    function wasmFunctionWrapper() {
         return fn.apply(undefined, testCase.args);
-    };
+    }
 
-    // Invoke function once to force module instantiation
-    await wrapped();
-    gc();
-
-    return { fn: wrapped, gc: gc };
+    return { fn: wasmFunctionWrapper, gc: gc };
 }
 
-let runBenchmark = function (caseName, testCase, run) {
-    let wasmFn = undefined;
-    let speedyJsGc = undefined;
-    let jsFn = undefined;
+async function getEmccFunctionForTestCase(caseName) {
+    const testCase = TEST_CASES[caseName];
+    const fnName = testCase.fnName || caseName;
 
-    benchmark(run ? `js-${run}` : "js", function (deferred) {
+    const emccModule = require("exports-loader?Module!./cases/" + caseName + "-emcc.js");
+    await emccModule.initialized;
+
+    const fn = emccModule["_" + fnName];
+
+    function emccFunctionWrapper() {
+        let result = fn.apply(undefined, testCase.args);
+        if (typeof(testCase.result) === "boolean") {
+            result = result !== 0;
+        }
+
+        return Promise.resolve(result);
+    }
+
+    return emccFunctionWrapper;
+}
+
+async function addBenchmark(suite, testCase, run) {
+    const caseName = suite.name;
+
+    const jsFn = getJsFunctionForTestCase(caseName);
+    const { fn: wasmFn, gc: speedyJsGc } = getWasmFunctionForTestCase(caseName);
+    const emccFn = await getEmccFunctionForTestCase(caseName);
+
+    // call each function once to not profile loading time
+    jsFn();
+    await wasmFn();
+    await emccFn();
+
+    suite.add(run ? `js-${run}` : "js", function (deferred) {
         jsFn().then(function (result) {
             if (result !== testCase.result) {
                 throw new Error(`JS Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
@@ -93,16 +139,10 @@ let runBenchmark = function (caseName, testCase, run) {
             deferred.resolve();
         });
     }, {
-        defer: true,
-        setup: function (deferred) {
-            getJsFunctionForTestCase(caseName).then(function (fn) {
-                jsFn = fn;
-                deferred.suResolve();
-            });
-        }
+        defer: true
     });
 
-    benchmark(run ? `wasm-${run}` : "wasm", function (deferred) {
+    suite.add(run ? `wasm-${run}` : "wasm", function (deferred) {
             wasmFn().then(function (result) {
                 if (result !== testCase.result) {
                     throw new Error(`WASM Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
@@ -113,35 +153,69 @@ let runBenchmark = function (caseName, testCase, run) {
         },
         {
             defer: true,
-            setup: function (deferred) {
-                getWasmFunctionForTestCase(caseName)
-                    .then(function (result) {
-                        wasmFn = result.fn;
-                        speedyJsGc = result.gc;
-                        deferred.suResolve();
-                    });
-            },
             onCycle: function () { // Is not called after each loop, but after some execution, so might need a little bit more memory
                 speedyJsGc();
             }
-        });
-};
-function runBenchmarks(numRuns = 1) {
-    for (const caseName of Object.keys(TEST_CASES)) {
-        const testCase = TEST_CASES[caseName];
+        }
+    );
 
-        suite(caseName, function () {
-            if (numRuns === 1) {
-                runBenchmark(caseName, testCase);
-            } else {
-                for (let i = 0; i < numRuns; ++i) {
-                    runBenchmark(caseName, testCase, i);
-                }
+    suite.add(run ? `emcc-${run}` : "emcc", function (deferred) {
+        emccFn().then(function (result) {
+            if (result !== testCase.result) {
+                throw new Error(`EMCC Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
             }
+
+            deferred.resolve();
         });
-    }
+    }, {
+        defer: true
+    });
+
+    return suite;
 }
 
-module.exports = runBenchmarks;
+async function createSuite(caseName, numRuns = 1) {
+    const suite = new Benchmark.Suite(caseName, { async: true });
+    if (numRuns === 1) {
+        await addBenchmark(suite, TEST_CASES[caseName]);
+    } else {
+        for (let i = 0; i < numRuns; ++i) {
+            await addBenchmark(suite, TEST_CASES[caseName], i);
+        }
+    }
+
+    return suite;
+}
+
+function runSuites(numRuns = 1, beforeRun, progress) {
+    const pendingNames = Object.keys(TEST_CASES).reverse();
+    const totalCases = pendingNames.length;
+
+    function processNext() {
+        if (pendingNames.length === 0) {
+            return;
+        }
+
+        progress(totalCases - pendingNames.length, totalCases);
+
+        const next = pendingNames.pop();
+        return createSuite(next, numRuns)
+            .then(suite => {
+                return new Promise((resolve, reject) => {
+                    beforeRun(suite);
+
+                    suite.on("complete", resolve);
+                    suite.on("error", reject);
+
+                    suite.run({ async: true });
+                });
+            })
+            .then(processNext);
+    }
+
+    return Promise.resolve(1).then(processNext);
+}
+
+module.exports = runSuites;
 
 

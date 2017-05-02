@@ -28,6 +28,9 @@ module.exports = {
             /benchmark\/benchmark\.js/
         ]
     },
+    node: {
+        fs: "empty" // mock fs as empty module. Needed for EMCC modules
+    },
     devServer: {
         compress: true
     }

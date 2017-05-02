@@ -18,14 +18,38 @@
 			}
 
 			.bar:hover {
-				fill: brown;
+				opacity: 0.8;
+			}
+
+			div.tooltip {
+				position: absolute;
+				text-align: center;
+				width: 60px;
+				height: 28px;
+				padding: 2px;
+				font: 12px sans-serif;
+				background: lightsteelblue;
+				border: 0px;
+				border-radius: 8px;
+				pointer-events: none;
 			}
 		</style>
 <body>
 <div class="container">
 	<h1>Results</h1>
 
-	<svg width="800" height="600" id="chart"></svg>
+	<form>
+		<div class="form-group row">
+			<label class="col-sm-2 col-form-label">File</label>
+			<div class="col-sm-6">
+				<select id="file" class="custom-select">
+				</select>
+			</div>
+		</div>
+	</form>
+
+
+	<svg width="1024" height="600" id="chart"></svg>
 </div>
 
 	<script type="text/javascript" src="results.js"></script>

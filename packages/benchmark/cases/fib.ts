@@ -13,7 +13,3 @@ function fibSync(value: int): int {
 
     return fibSync(value - 2) + fibSync(value - 1);
 }
-
-async function main() {
-    const value = await fib(1000);
-}

@@ -1,10 +1,4 @@
-const benchmarkImport = require("benchmark");
-const _ = require("lodash");
-const platform = require("platform");
-
-const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
-
-const runBenchmarks = require("./run-benchmarks");
+const runSuites = require("./run-benchmarks");
 const barChart = require("./chart.ts");
 
 const output = document.querySelector("#output");
@@ -12,64 +6,7 @@ const json = document.querySelector("#json");
 const chart = barChart("#chart");
 
 let suites = [];
-let result = {};
-
-function addSuite(name, fn, options) {
-    const suite = new Benchmark.Suite(name, options);
-    try {
-        global.benchmark = addBenchmark.bind(undefined, suite);
-        fn();
-    } finally {
-        delete global.benchmark;
-    }
-    suites.push(suite);
-}
-
-function addBenchmark(suite, name, fn, options) {
-    suite.add(name, fn, options);
-}
-
-function runNextSuite() {
-    const totalSuites = suites.length + Object.keys(result).length;
-    progress.style.width = (1 - suites.length / totalSuites) * 100 + "%";
-    const suite = suites.shift();
-
-    if (suite) {
-        suite.on("start", function () {
-            output.innerHTML += suite.name + "...<br/>";
-        });
-
-        suite.on("cycle", function (event) {
-            const benchmark = event.target;
-            const suiteResults = result[suite.name] = result[suite.name] || {};
-            suiteResults[benchmark.name] = {
-                info: benchmark.toString(),
-                name: benchmark.name,
-                hz: benchmark.hz,
-                count: benchmark.count,
-                cycles: benchmark.cycles,
-                stats: benchmark.stats,
-                times: benchmark.times,
-                error: benchmark.error
-            };
-
-            output.innerHTML += "&nbsp;&nbsp;" + benchmark.toString() + "<br/>";
-        });
-
-        suite.on("complete", function () {
-            output.innerHTML +=  "<br/>";
-
-            const fastest = suite.filter("fastest")[0];
-            result[suite.name][fastest.name].fastest = true;
-
-            runNextSuite();
-        });
-
-        suite.run({ async: true });
-    } else {
-        complete();
-    }
-}
+let result;
 
 function complete() {
     printSummary();
@@ -78,13 +15,13 @@ function complete() {
     output.innerHTML += "Done!";
 
     json.textContent = JSON.stringify(result, undefined, "  ");
-    chart(benchmarkToChartResults(result));
+    chart.render(benchmarkToChartResults(result));
     buttons.forEach(button => button.disabled = undefined);
 }
 
 function printSummary() {
-    for (const suite of Object.keys(result)) {
-        const benchmarks = result[suite];
+    for (const suite of Object.keys(result.suites)) {
+        const benchmarks = result.suites[suite];
         const fastest = Object.values(benchmarks).find(benchmark => benchmark.fastest);
         const others = Object.values(benchmarks).filter(benchmark => benchmark !== fastest);
 
@@ -95,23 +32,55 @@ function printSummary() {
     }
 }
 
-// expected from karma-benchmark
-global.suite = addSuite;
 const runButton = document.querySelector("#run");
 const run5TimesButton = document.querySelector("#run-5x");
 const buttons = [runButton,  run5TimesButton];
 const progress = document.querySelector("#progress-bar");
 
-let startBenchmark = function (numRuns=1) {
+function progressHandler(current, total) {
+    progress.style.width = current / total * 100 + "%";
+}
+
+function beforeSuiteRun(suite) {
+    suite.on("start", function () {
+        output.innerHTML += suite.name + "...<br/>";
+    });
+
+    suite.on("cycle", function (event) {
+        const benchmark = event.target;
+        const suiteResults = result.suites[suite.name] = result.suites[suite.name] || {};
+        suiteResults[benchmark.name] = {
+            suite: suite.name,
+            info: benchmark.toString(),
+            name: benchmark.name,
+            hz: benchmark.hz,
+            count: benchmark.count,
+            cycles: benchmark.cycles,
+            stats: benchmark.stats,
+            times: benchmark.times,
+            error: benchmark.error
+        };
+
+        output.innerHTML += "&nbsp;&nbsp;" + benchmark.toString() + "<br/>";
+    });
+
+    suite.on("complete", function () {
+        output.innerHTML +=  "<br/>";
+
+        const fastest = suite.filter("fastest")[0];
+        result.suites[suite.name][fastest.name].fastest = true;
+    });
+}
+
+function startBenchmark (numRuns=1) {
     buttons.forEach(button => button.disabled = "disabled");
     output.textContent = json.textContent = "";
-    result = {};
+    result = { platform: platform, suites: {} };
     progress.style.width = "0%";
     progress.parentNode.attributes.removeNamedItem("hidden");
 
-    runBenchmarks(numRuns);
-    setImmediate(runNextSuite);
-};
+    runSuites(numRuns, beforeSuiteRun, progressHandler).then(complete);
+}
 
 runButton.addEventListener("click", function () {
     startBenchmark();
@@ -121,45 +90,26 @@ run5TimesButton.addEventListener("click", function () {
     startBenchmark(5);
 });
 
+function benchmarkToChartResults(result) {
+    const browserId = result.platform.description;
+    const browsers = [ { id: browserId, name: result.platform.name + " " + result.platform.version }];
 
-function benchmarkToChartResults(benchmarkResult) {
-    const browsers = [ { id: 1, name: platform.name + " " + platform.version }];
-
-    const testCases = _.chain(Object.keys(benchmarkResult))
+    const testCases = _.chain(Object.keys(result.suites))
         .map(caseName => {
-            const testCase = benchmarkResult[caseName];
-            return { name: caseName, results: { 1: { js: testCase.js.hz, wasm: testCase.wasm.hz } } };
+            const testCase = result.suites[caseName];
+            return {
+                name: caseName,
+                results: {
+                    [browserId]: {
+                        js: testCase.js.hz,
+                        wasm: testCase.wasm.hz,
+                        emcc: testCase.emcc.hz
+                    }
+                }
+            };
         })
         .value();
     return { browsers: browsers, testCases: testCases };
-
-    // this is for the karma results
-//     const browsers = Object.keys(benchmarkResult.browsers).map(browserId => { return { name: benchmarkResult.browsers[browserId].name, id: browserId } });
-//     const testCases = _.chain(Object.keys(benchmarkResult.browsers))
-//         .flatMap(browserId => benchmarkResult.result[browserId].map(result => { return { browser: browserId, benchmark: result.benchmark } }))
-//         .groupBy(testCase => testCase.benchmark.suite)
-//         .map(testResults => {
-//             const resultsPerBrowser = _.chain(testResults)
-//                 .groupBy(testCase => testCase.browser)
-//                 .mapValues(browserResult => {
-//                     let wasm, js;
-//                     if (browserResult[0].benchmark.name === "js") {
-//                         js = browserResult[0];
-//                         wasm = browserResult[1];
-//                     } else {
-//                         js = browserResult[1];
-//                         wasm = browserResult[0];
-//                     }
-//
-//                     return { js: js.benchmark.hz, wasm: wasm.benchmark.hz };
-//                 }).value();
-//
-//
-//             return { name: testResults[0].benchmark.suite, results: resultsPerBrowser };
-//         })
-//         .value();
-//
-//     return { browsers: browsers, testCases: testCases };
 }
 
 
