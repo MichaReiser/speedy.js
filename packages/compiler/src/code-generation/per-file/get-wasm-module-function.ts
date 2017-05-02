@@ -36,7 +36,6 @@ interface ModuleLoader {
     gc(): void;
 }
 
-
 function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: number, totalMemory: number, globalBase: number, staticBump: number }): ModuleLoader {
     const TOTAL_STACK = options.totalStack;
     const TOTAL_MEMORY = options.totalMemory;
@@ -61,7 +60,6 @@ function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: num
     HEAP32[DYNAMIC_TOP_PTR>>2] = DYNAMIC_BASE;
 
     function sbrk(increment: number) {
-        // console.log("sbrk");
         increment = increment|0;
         let oldDynamicTop = 0;
         let newDynamicTop = 0;
