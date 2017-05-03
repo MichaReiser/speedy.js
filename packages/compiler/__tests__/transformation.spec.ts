@@ -37,8 +37,8 @@ describe("Transformation", () => {
              `, "transform/isPrime.ts");
     });
 
-    it("passes the configured total memory to the module loader", () => {
-        expectCompiledJSOutputMatchesSnapshot(fibSourceCode, "transform/fib.ts", { totalMemory: 10 * 1024 * 1024 });
+    it("passes the configured initial memory to the module loader", () => {
+        expectCompiledJSOutputMatchesSnapshot(fibSourceCode, "transform/fib.ts", { initialMemory: 10 * 1024 * 1024 });
     });
 
     it("passes the configured total stack to the module loader", () => {

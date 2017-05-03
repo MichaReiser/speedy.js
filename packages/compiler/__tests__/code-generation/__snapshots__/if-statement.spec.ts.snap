@@ -153,7 +153,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.TestClass = type { { [10 x i8]* }*, i1, i32 }
+%class.TestClass = type { i1, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -182,20 +182,20 @@ lor.lhs.false:                                    ; preds = %entry
 
 lor.end:                                          ; preds = %lor.lhs.false, %entry
   %lor = phi %class.TestClass* [ %x.addr1, %entry ], [ %y.addr2, %lor.lhs.false ]
-  %\\"&test\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %lor, i32 0, i32 1
+  %\\"&test\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %lor, i32 0, i32 0
   %test = load i1, i1* %\\"&test\\", align 1
   br i1 %test, label %land.lhs.true, label %if.end
 
 land.lhs.true:                                    ; preds = %lor.end
   %x.addr3 = load %class.TestClass*, %class.TestClass** %x.addr, align 4
-  %\\"&value\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %x.addr3, i32 0, i32 2
+  %\\"&value\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %x.addr3, i32 0, i32 1
   %value = load i32, i32* %\\"&value\\", align 4
   %cmpGT = icmp sgt i32 %value, 100
   br i1 %cmpGT, label %if.then, label %lor.lhs.false4
 
 lor.lhs.false4:                                   ; preds = %land.lhs.true
   %x.addr5 = load %class.TestClass*, %class.TestClass** %x.addr, align 4
-  %\\"&value6\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %x.addr5, i32 0, i32 2
+  %\\"&value6\\" = getelementptr inbounds %class.TestClass, %class.TestClass* %x.addr5, i32 0, i32 1
   %value7 = load i32, i32* %\\"&value6\\", align 4
   %cmpLT = icmp slt i32 %value7, 10
   br i1 %cmpLT, label %if.then, label %if.end

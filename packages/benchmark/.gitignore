@@ -1,5 +1,10 @@
 # Created by .ignore support plugin (hsz.mobi)
 cases/*.wasm
+cases/*.wasm.pre
+cases/*.wast
+cases/*.wast.mappedGlobals
 cases/*.js
 cases/*.ll
+cases/*.bc
+!cases/pre.js
 dist

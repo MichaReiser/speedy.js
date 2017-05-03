@@ -138,7 +138,6 @@ export class FunctionFactory {
         if (object) {
             const self = parameters[0];
             self.addAttr(llvm.Attribute.AttrKind.ReadOnly);
-            self.addAttr(llvm.Attribute.AttrKind.NoCapture);
             self.addDereferenceableAttr(object.getTypeStoreSize(context));
             argumentOffset = 1;
         }

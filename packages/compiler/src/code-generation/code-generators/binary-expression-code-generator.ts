@@ -199,12 +199,25 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            case ts.SyntaxKind.GreaterThanGreaterThanToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken: {
+                const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
+                const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context).generateIR();
+
+                // mask not needed, less than 32 guaranteed by wasm
+                result = context.builder.createAShr(leftInt, rightInt, "ashr");
+
+                break;
+            }
+
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken: {
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
                 const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context).generateIR();
 
+                // mask not needed, less than 32 guaranteed by wasm
                 result = context.builder.createLShr(leftInt, rightInt, "lshr");
+
                 break;
             }
 
@@ -241,6 +254,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
                 const rightInt = Primitive.toInt32(context.generateValue(binaryExpression.right), rightType, resultType, context).generateIR();
 
+                // mask not needed, less than 32 guaranteed by wasm
                 result = context.builder.createShl(leftInt, rightInt, "shl");
 
                 break;

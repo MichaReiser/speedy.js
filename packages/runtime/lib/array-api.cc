@@ -20,7 +20,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructori(int32_t size) {
     return new Array<bool> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructorPbi(bool* const elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_constructorPbu(bool* const elements, size_t elementsCount) {
     return new Array<bool> { elements, elementsCount};
 }
 
@@ -28,7 +28,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructori(int32_t size) {
     return new Array<int32_t> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructorPii(int32_t* const elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_constructorPiu(int32_t* const elements, size_t elementsCount) {
     return new Array<int32_t> { elements, elementsCount};
 }
 
@@ -36,7 +36,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructori(const int32_t size)
     return new Array<double> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructorPdi(double* const elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_constructorPdu(double* const elements, size_t elementsCount) {
     return new Array<double> { elements, elementsCount };
 }
 
@@ -44,7 +44,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructori(int32_t size) {
     return new Array<void*> { size };
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPPvi(void** const elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_constructorPPvu(void** const elements, size_t elementsCount) {
     return new Array<void*> { elements, elementsCount };
 }
 
@@ -144,19 +144,19 @@ DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvii(Array<void*>& array, void* value
 // push
 //---------------------------------------------------------------------------------
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_pushPbi(Array<bool>& array, bool* elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_pushPbu(Array<bool>& array, bool* elements, size_t numElements) {
     return array.push(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_pushPii(Array<int32_t>& array, int32_t* elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_pushPiu(Array<int32_t>& array, int32_t* elements, size_t numElements) {
     return array.push(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_pushPdi(Array<double>& array, double* elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_pushPdu(Array<double>& array, double* elements, size_t numElements) {
     return array.push(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_pushPPvi(Array<void*>& array, void** elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_pushPPvu(Array<void*>& array, void** elements, size_t numElements) {
     return array.push(elements, numElements);
 }
 
@@ -164,19 +164,19 @@ DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_pushPPvi(Array<void*>& array, void** e
 // unshift
 //---------------------------------------------------------------------------------
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_unshiftPbi(Array<bool>& array, bool* elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_unshiftPbu(Array<bool>& array, bool* elements, size_t numElements) {
     return array.unshift(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_unshiftPii(Array<int32_t>& array, int32_t* elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_unshiftPiu(Array<int32_t>& array, int32_t* elements, size_t numElements) {
     return array.unshift(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_unshiftPdi(Array<double>& array, double* elements, int32_t numElements)  {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_unshiftPdu(Array<double>& array, double* elements, size_t numElements)  {
     return array.unshift(elements, numElements);
 }
 
-DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_unshiftPPvi(Array<void*>& array, void** elements, int32_t numElements) {
+DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_unshiftPPvu(Array<void*>& array, void** elements, size_t numElements) {
     return array.unshift(elements, numElements);
 }
 
@@ -283,7 +283,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceii(Array<bool>& array, int32
     return array.splice(index, deleteCount);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceiiPbi(Array<bool>& array, int32_t index, int32_t deleteCount, bool* elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceiiPbu(Array<bool>& array, int32_t index, int32_t deleteCount, bool* elements, size_t elementsCount) {
     return array.splice(index, deleteCount, elements, elementsCount);
 }
 
@@ -295,7 +295,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceii(Array<int32_t>& array,
     return array.splice(index, deleteCount);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceiiPii(Array<int32_t>& array, int32_t index, int32_t deleteCount, int32_t* elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceiiPiu(Array<int32_t>& array, int32_t index, int32_t deleteCount, int32_t* elements, size_t elementsCount) {
     return array.splice(index, deleteCount, elements, elementsCount);
 }
 
@@ -307,7 +307,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceii(Array<double>& array, i
     return array.splice(index, deleteCount);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceiiPdi(Array<double>& array, int32_t index, int32_t deleteCount, double* elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceiiPdu(Array<double>& array, int32_t index, int32_t deleteCount, double* elements, size_t elementsCount) {
     return array.splice(index, deleteCount, elements, elementsCount);
 }
 
@@ -319,7 +319,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceii(Array<void*>& array, in
     return array.splice(index, deleteCount);
 }
 
-DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceiiPPvi(Array<void*>& array, int32_t index, int32_t deleteCount, void** elements, int32_t elementsCount) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceiiPPvu(Array<void*>& array, int32_t index, int32_t deleteCount, void** elements, size_t elementsCount) {
     return array.splice(index, deleteCount, elements, elementsCount);
 }
 

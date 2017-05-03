@@ -7,10 +7,9 @@ import * as program from "commander";
 const packageJson = require("./package.json");
 import {reportDiagnostics} from "./src/util/diagnostics";
 import {Compiler} from "./src/compiler";
-import {IExportedCommand} from "commander";
 import {initializeCompilerOptions, UninitializedSpeedyJSCompilerOptions} from "./src/speedyjs-compiler-options";
 
-interface CommandLineArguments extends IExportedCommand {
+interface CommandLineArguments {
     /**
      * The name of the files to process
      */
@@ -18,18 +17,20 @@ interface CommandLineArguments extends IExportedCommand {
     config?: string,
     unsafe?: boolean;
     emitLlvm?: boolean;
-    emitWast?: boolean;
+    saveWast?: boolean;
     saveBc?: boolean;
     binaryenOpt?: boolean;
     disableHeapNukeOnExit?: boolean;
     exposeGc?: boolean;
     exportGc?: boolean;
-    optimization?: boolean;
+    optimizationLevel?: "0" | "1" | "2" | "3" | "z" | "s";
     settings: {
-        TOTAL_MEMORY?: number;
+        INITIAL_MEMORY?: number;
         TOTAL_STACK?: number;
         GLOBAL_BASE?: number;
     };
+
+    outputHelp(): void;
 }
 
 function parseCommandLine(): CommandLineArguments {
@@ -45,17 +46,17 @@ function parseCommandLine(): CommandLineArguments {
         .option("-c --config <configFile>", "The path to the tsconfig.json")
         .option("--unsafe", "Use the unsafe runtime system")
         .option("--emit-llvm", "Emit LLVM Assembly Code instead of WASM files")
-        .option("--emit-wast", "Emit WAST file instead of embedding the WASM output in the TS file")
-        .option("--save-bc", "Saves a copy of the bitcode to the output directory if compiling to wast or all the way to WebAssembly. The file includes the linked and optimized code.")
+        .option("--save-wast", "Saves the WAST file in the output directory if compiling all the way to WebAssembly")
+        .option("--save-bc", "Saves a copy of the bitcode to the output directory if compiling all the way to WebAssembly. The file includes the linked and optimized code.")
         .option("--binaryen-opt", "Optimize using Binaryen opt")
         .option("--expose-gc", "Exposes the speedy js garbage collector in the module as speedyJsGc")
         .option("--export-gc", "Exposes and exports the speedy js garbage collector as the symbol speedyJsGc")
         .option("--disable-heap-nuke-on-exit", "Disables nuking of the heap prior to the exit of the entry function (its your responsible to call the gc in this case!)")
-        .option("--no-optimization")
+        .option("--optimization-level [value]", "The optimization level to use. One of the following values: '0, 1, 2, 3, s or z'")
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);
 
-    return program as CommandLineArguments;
+    return program as any as CommandLineArguments;
 }
 
 function parseConfigFile(configFileName: string): ts.ParsedCommandLine {
@@ -91,15 +92,15 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
     compilerOptions.unsafe = commandLine.unsafe;
     compilerOptions.binaryenOpt = commandLine.binaryenOpt;
     compilerOptions.emitLLVM = commandLine.emitLlvm;
-    compilerOptions.emitWAST = commandLine.emitWast;
+    compilerOptions.saveWast = commandLine.saveWast;
     compilerOptions.saveBc = commandLine.saveBc;
     compilerOptions.globalBase = commandLine.settings.GLOBAL_BASE;
-    compilerOptions.totalMemory = commandLine.settings.TOTAL_MEMORY;
+    compilerOptions.totalMemory = commandLine.settings.INITIAL_MEMORY;
     compilerOptions.totalStack = commandLine.settings.TOTAL_STACK;
     compilerOptions.exposeGc = commandLine.exposeGc;
     compilerOptions.exportGc = commandLine.exportGc;
     compilerOptions.disableHeapNukeOnExit = commandLine.disableHeapNukeOnExit;
-    compilerOptions.optimizationLevel = !commandLine.optimization ? "0" : undefined;
+    compilerOptions.optimizationLevel = commandLine.optimizationLevel;
 
     return { rootFileNames, compilerOptions: initializeCompilerOptions(compilerOptions) };
 }

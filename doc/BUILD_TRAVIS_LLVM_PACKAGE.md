@@ -17,7 +17,7 @@ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 echo "deb http://apt.llvm.org/precise/ llvm-toolchain-precise main" | tee -a /etc/apt/sources.list
 echo "deb-src http://apt.llvm.org/precise/ llvm-toolchain-precise main" | tee -a /etc/apt/sources.list
 apt-get update
-apt-get install devscripts fakeroot g++-4.9 dh-make dh-ocaml checkinstall libffi-dev python-sphinx python-dev swig libjsoncpp-dev help-man subversion rsync quilt help2man chrpath lftp git -y
+apt-get install devscripts fakeroot g++-4.9 dh-make dh-ocaml checkinstall libffi-dev python-sphinx python-dev swig libjsoncpp-dev help-man subversion rsync quilt help2man chrpath lftp git ocaml -y
 ```
 
 Install up to date cmake

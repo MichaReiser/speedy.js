@@ -37,7 +37,7 @@ export class SpeedyJSObjectReference implements ObjectReference {
     }
 
     getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
-        throw new Error('Method not implemented.');
+        throw new Error('Indexers are not supported for speedyJS objects.');
     }
 
     generateAssignmentIR(value: Value, context: CodeGenerationContext): void {

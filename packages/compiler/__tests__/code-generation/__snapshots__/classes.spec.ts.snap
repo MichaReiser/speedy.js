@@ -7,7 +7,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Point = type { { [6 x i8]* }*, double, double }
+%class.Point = type { double, double }
 %class.Array = type { i8**, i32, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
@@ -24,9 +24,9 @@ entry:
   %items = alloca [3 x %class.Point*], align 4
   %array = alloca %class.Array*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 1.000000e+00, double 2.000000e+00)
-  %constructorReturnValue1 = call %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 3.000000e+00, double 4.000000e+00)
-  %constructorReturnValue2 = call %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 5.000000e+00, double 6.000000e+00)
+  %constructorReturnValue = call dereferenceable(16) %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 1.000000e+00, double 2.000000e+00)
+  %constructorReturnValue1 = call dereferenceable(16) %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 3.000000e+00, double 4.000000e+00)
+  %constructorReturnValue2 = call dereferenceable(16) %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 5.000000e+00, double 6.000000e+00)
   %items3 = getelementptr inbounds [3 x %class.Point*], [3 x %class.Point*]* %items, i32 0, i32 0
   %0 = getelementptr inbounds [3 x %class.Point*], [3 x %class.Point*]* %items, i32 0, i32 0
   store %class.Point* %constructorReturnValue, %class.Point** %0, align 4
@@ -34,11 +34,11 @@ entry:
   store %class.Point* %constructorReturnValue1, %class.Point** %1, align 4
   %2 = getelementptr inbounds [3 x %class.Point*], [3 x %class.Point*]* %items, i32 0, i32 2
   store %class.Point* %constructorReturnValue2, %class.Point** %2, align 4
-  %constructorReturnValue4 = call %class.Array* @ArrayIPv_constructorPPvi(%class.Point** %items3, i32 3)
+  %constructorReturnValue4 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point** %items3, i32 3)
   store %class.Array* %constructorReturnValue4, %class.Array** %array, align 4
   %array5 = load %class.Array*, %class.Array** %array, align 4
   %\\"[i]\\" = call %class.Point* @ArrayIPv_geti(%class.Array* %array5, i32 0)
-  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %\\"[i]\\", i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %\\"[i]\\", i32 0, i32 0
   %x = load double, double* %\\"&x\\", align 8
   store double %x, double* %return, align 8
   br label %returnBlock
@@ -52,19 +52,19 @@ define linkonce_odr %class.Point* @\\"classes/array-with-objects-literal.ts$Poin
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
-  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.Point*
-  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 0
   store double 0.000000e+00, double* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&y\\"
   store double %x, double* %x.addr, align 8
   store double %y, double* %y.addr, align 8
   %x.addr1 = load double, double* %x.addr, align 8
-  %\\"&x2\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
+  %\\"&x2\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 0
   store double %x.addr1, double* %\\"&x2\\", align 8
   %y.addr3 = load double, double* %y.addr, align 8
-  %\\"&y4\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 2
+  %\\"&y4\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
   store double %y.addr3, double* %\\"&y4\\", align 8
   ret %class.Point* %this
 }
@@ -72,13 +72,13 @@ entry:
 declare i8* @malloc(i32)
 
 ; Function Attrs: alwaysinline
-declare hidden dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvi(%class.Point**, i32) #0
+declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Point**, i32) #0
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
 declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #1
 
 ; Function Attrs: alwaysinline
-declare void @ArrayIPv_setiPv(%class.Array* dereferenceable(12), i32, %class.Point*) #0
+declare void @ArrayIPv_setiPv(%class.Array* nocapture dereferenceable(12), i32, %class.Point*) #0
 
 declare void @speedyJsGc()
 
@@ -94,7 +94,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.ClassOnlyWithAttributes = type { { [24 x i8]* }*, double, double }
+%class.ClassOnlyWithAttributes = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -109,13 +109,13 @@ define double @_classOnlyWithAttributes() {
 entry:
   %instance = alloca %class.ClassOnlyWithAttributes*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call %class.ClassOnlyWithAttributes* @\\"classes/class-only-with-attributes.ts$ClassOnlyWithAttributes$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(16) %class.ClassOnlyWithAttributes* @\\"classes/class-only-with-attributes.ts$ClassOnlyWithAttributes$11constructor\\"()
   store %class.ClassOnlyWithAttributes* %constructorReturnValue, %class.ClassOnlyWithAttributes** %instance, align 4
   %instance1 = load %class.ClassOnlyWithAttributes*, %class.ClassOnlyWithAttributes** %instance, align 4
-  %\\"&x\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %instance1, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %instance1, i32 0, i32 0
   %x = load double, double* %\\"&x\\", align 8
   %instance2 = load %class.ClassOnlyWithAttributes*, %class.ClassOnlyWithAttributes** %instance, align 4
-  %\\"&y\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %instance2, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %instance2, i32 0, i32 1
   %y = load double, double* %\\"&y\\", align 8
   %fadd = fadd double %x, %y
   store double %fadd, double* %return, align 8
@@ -128,16 +128,89 @@ returnBlock:                                      ; preds = %entry
 
 define linkonce_odr %class.ClassOnlyWithAttributes* @\\"classes/class-only-with-attributes.ts$ClassOnlyWithAttributes$11constructor\\"() {
 entry:
-  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassOnlyWithAttributes*
-  %\\"&x\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %this, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %this, i32 0, i32 0
   store double 0.000000e+00, double* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %this, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&y\\"
   ret %class.ClassOnlyWithAttributes* %this
 }
 
 declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`Classes class-only-with-methods 1`] = `
+"; ModuleID = 'classes/class-only-with-methods.ts'
+source_filename = \\"classes/class-only-with-methods.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { { [5 x i8]* }* }
+%class.ClassOnlyWithMethods = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
+@ClassOnlyWithMethods_name = private unnamed_addr constant [21 x i8] c\\"ClassOnlyWithMethods\\\\00\\"
+@ClassOnlyWithMethods_type_descriptor = private constant { [21 x i8]* } { [21 x i8]* @ClassOnlyWithMethods_name }
+
+define double @_classOnlyWithMethods(double %x, double %y) {
+entry:
+  %instance = alloca %class.ClassOnlyWithMethods*, align 4
+  %y.addr = alloca double, align 8
+  %x.addr = alloca double, align 8
+  %return = alloca double, align 8
+  store double %x, double* %x.addr, align 8
+  store double %y, double* %y.addr, align 8
+  %constructorReturnValue = call dereferenceable(1) %class.ClassOnlyWithMethods* @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$11constructor\\"()
+  store %class.ClassOnlyWithMethods* %constructorReturnValue, %class.ClassOnlyWithMethods** %instance, align 4
+  %x.addr1 = load double, double* %x.addr, align 8
+  %y.addr2 = load double, double* %y.addr, align 8
+  %instance3 = load %class.ClassOnlyWithMethods*, %class.ClassOnlyWithMethods** %instance, align 4
+  %addReturnValue = call double @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$3adddd\\"(%class.ClassOnlyWithMethods* %instance3, double %x.addr1, double %y.addr2)
+  store double %addReturnValue, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return4 = load double, double* %return, align 8
+  ret double %return4
+}
+
+define linkonce_odr %class.ClassOnlyWithMethods* @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassOnlyWithMethods*
+  ret %class.ClassOnlyWithMethods* %this
+}
+
+declare i8* @malloc(i32)
+
+define linkonce_odr hidden double @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$3adddd\\"(%class.ClassOnlyWithMethods* readonly dereferenceable(1) %this1, double %x, double %y) {
+entry:
+  %y.addr = alloca double, align 8
+  %x.addr = alloca double, align 8
+  %this = alloca %class.ClassOnlyWithMethods*, align 4
+  %return = alloca double, align 8
+  store %class.ClassOnlyWithMethods* %this1, %class.ClassOnlyWithMethods** %this, align 4
+  store double %x, double* %x.addr, align 8
+  store double %y, double* %y.addr, align 8
+  %x.addr2 = load double, double* %x.addr, align 8
+  %y.addr3 = load double, double* %y.addr, align 8
+  %fadd = fadd double %x.addr2, %y.addr3
+  store double %fadd, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return4 = load double, double* %return, align 8
+  ret double %return4
+}
 
 declare void @speedyJsGc()
 "
@@ -150,7 +223,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.ClassWithAttributeInitializer = type { { [30 x i8]* }*, double, double, double }
+%class.ClassWithAttributeInitializer = type { double, double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -165,91 +238,7 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithAttributeInitializer*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call %class.ClassWithAttributeInitializer* @\\"classes/class-with-access-to-constructor-defined-fields.ts$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
-  store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
-  %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
-  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 2
-  %x = load double, double* %\\"&x\\", align 8
-  %instance2 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
-  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance2, i32 0, i32 3
-  %y = load double, double* %\\"&y\\", align 8
-  %fadd = fadd double %x, %y
-  store double %fadd, double* %return, align 8
-  br label %returnBlock
-
-returnBlock:                                      ; preds = %entry
-  %return3 = load double, double* %return, align 8
-  ret double %return3
-}
-
-define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-access-to-constructor-defined-fields.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
-entry:
-  %y.addr = alloca double, align 8
-  %x.addr = alloca double, align 8
-  %\\"thisVoid*\\" = call i8* @malloc(i32 32)
-  %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassWithAttributeInitializer*
-  %\\"&distance\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
-  store double 0.000000e+00, double* %\\"&distance\\"
-  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
-  store double 0.000000e+00, double* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 3
-  store double 0.000000e+00, double* %\\"&y\\"
-  store double %x, double* %x.addr, align 8
-  %\\"&x1\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
-  store double %x, double* %\\"&x1\\", align 8
-  store double %y, double* %y.addr, align 8
-  %\\"&y2\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 3
-  store double %y, double* %\\"&y2\\", align 8
-  %\\"&x3\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
-  %x4 = load double, double* %\\"&x3\\", align 8
-  %powReturnValue = call double @Math_powdd(double %x4, double 2.000000e+00)
-  %\\"&y5\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 3
-  %y6 = load double, double* %\\"&y5\\", align 8
-  %powReturnValue7 = call double @Math_powdd(double %y6, double 2.000000e+00)
-  %fadd = fadd double %powReturnValue, %powReturnValue7
-  %sqrtReturnValue = call double @Math_sqrtd(double %fadd)
-  %\\"&distance8\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
-  store double %sqrtReturnValue, double* %\\"&distance8\\", align 8
-  ret %class.ClassWithAttributeInitializer* %this
-}
-
-declare i8* @malloc(i32)
-
-; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_sqrtd(double) #0
-
-; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_powdd(double, double) #0
-
-declare void @speedyJsGc()
-
-attributes #0 = { alwaysinline nounwind readnone }
-"
-`;
-
-exports[`Classes class-with-attribute-defined-in-constructor 1`] = `
-"; ModuleID = 'classes/class-with-attribute-defined-in-constructor.ts'
-source_filename = \\"classes/class-with-attribute-defined-in-constructor.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-%class.Math = type { { [5 x i8]* }* }
-%class.ClassWithAttributeInitializer = type { { [30 x i8]* }*, double, double }
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
-@Math_ptr = private constant %class.Math* @Math_object
-@ClassWithAttributeInitializer_name = private unnamed_addr constant [30 x i8] c\\"ClassWithAttributeInitializer\\\\00\\"
-@ClassWithAttributeInitializer_type_descriptor = private constant { [30 x i8]* } { [30 x i8]* @ClassWithAttributeInitializer_name }
-
-define double @_classWithConstructor() {
-entry:
-  %instance = alloca %class.ClassWithAttributeInitializer*, align 4
-  %return = alloca double, align 8
-  %constructorReturnValue = call %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
+  %constructorReturnValue = call dereferenceable(24) %class.ClassWithAttributeInitializer* @\\"classes/class-with-access-to-constructor-defined-fields.ts$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
   store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
   %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
   %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 1
@@ -266,12 +255,14 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
+define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-access-to-constructor-defined-fields.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
   %\\"thisVoid*\\" = call i8* @malloc(i32 24)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassWithAttributeInitializer*
+  %\\"&distance\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
+  store double 0.000000e+00, double* %\\"&distance\\"
   %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&x\\"
   %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
@@ -281,6 +272,88 @@ entry:
   store double %x, double* %\\"&x1\\", align 8
   store double %y, double* %y.addr, align 8
   %\\"&y2\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
+  store double %y, double* %\\"&y2\\", align 8
+  %\\"&x3\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
+  %x4 = load double, double* %\\"&x3\\", align 8
+  %powReturnValue = call double @llvm.pow.f64(double %x4, double 2.000000e+00)
+  %\\"&y5\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
+  %y6 = load double, double* %\\"&y5\\", align 8
+  %powReturnValue7 = call double @llvm.pow.f64(double %y6, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue7
+  %sqrtReturnValue = call double @llvm.sqrt.f64(double %fadd)
+  %\\"&distance8\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
+  store double %sqrtReturnValue, double* %\\"&distance8\\", align 8
+  ret %class.ClassWithAttributeInitializer* %this
+}
+
+declare i8* @malloc(i32)
+
+; Function Attrs: nounwind readnone
+declare double @llvm.sqrt.f64(double) #0
+
+; Function Attrs: nounwind readnone
+declare double @llvm.pow.f64(double, double) #0
+
+declare void @speedyJsGc()
+
+attributes #0 = { nounwind readnone }
+"
+`;
+
+exports[`Classes class-with-attribute-defined-in-constructor 1`] = `
+"; ModuleID = 'classes/class-with-attribute-defined-in-constructor.ts'
+source_filename = \\"classes/class-with-attribute-defined-in-constructor.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { { [5 x i8]* }* }
+%class.ClassWithAttributeInitializer = type { double, double }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_ptr = private constant %class.Math* @Math_object
+@ClassWithAttributeInitializer_name = private unnamed_addr constant [30 x i8] c\\"ClassWithAttributeInitializer\\\\00\\"
+@ClassWithAttributeInitializer_type_descriptor = private constant { [30 x i8]* } { [30 x i8]* @ClassWithAttributeInitializer_name }
+
+define double @_classWithConstructor() {
+entry:
+  %instance = alloca %class.ClassWithAttributeInitializer*, align 4
+  %return = alloca double, align 8
+  %constructorReturnValue = call dereferenceable(16) %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
+  store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
+  %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
+  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 0
+  %x = load double, double* %\\"&x\\", align 8
+  %instance2 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
+  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance2, i32 0, i32 1
+  %y = load double, double* %\\"&y\\", align 8
+  %fadd = fadd double %x, %y
+  store double %fadd, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return3 = load double, double* %return, align 8
+  ret double %return3
+}
+
+define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
+entry:
+  %y.addr = alloca double, align 8
+  %x.addr = alloca double, align 8
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassWithAttributeInitializer*
+  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
+  store double 0.000000e+00, double* %\\"&x\\"
+  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
+  store double 0.000000e+00, double* %\\"&y\\"
+  store double %x, double* %x.addr, align 8
+  %\\"&x1\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
+  store double %x, double* %\\"&x1\\", align 8
+  store double %y, double* %y.addr, align 8
+  %\\"&y2\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
   store double %y, double* %\\"&y2\\", align 8
   ret %class.ClassWithAttributeInitializer* %this
 }
@@ -298,7 +371,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.ClassWithAttributeInitializer = type { { [30 x i8]* }*, double, double }
+%class.ClassWithAttributeInitializer = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -313,13 +386,13 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithAttributeInitializer*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-initializer.ts$ClassWithAttributeInitializer$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(16) %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-initializer.ts$ClassWithAttributeInitializer$11constructor\\"()
   store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
   %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
-  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 0
   %x = load double, double* %\\"&x\\", align 8
   %instance2 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
-  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance2, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance2, i32 0, i32 1
   %y = load double, double* %\\"&y\\", align 8
   %fadd = fadd double %x, %y
   store double %fadd, double* %return, align 8
@@ -332,11 +405,11 @@ returnBlock:                                      ; preds = %entry
 
 define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-initializer.ts$ClassWithAttributeInitializer$11constructor\\"() {
 entry:
-  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassWithAttributeInitializer*
-  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
   store double 1.000000e+01, double* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&y\\"
   ret %class.ClassWithAttributeInitializer* %this
 }
@@ -354,7 +427,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.ClassWithConstructor = type { { [21 x i8]* }*, double, double }
+%class.ClassWithConstructor = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -369,13 +442,13 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithConstructor*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call %class.ClassWithConstructor* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double 1.000000e+01, double 2.000000e+01)
+  %constructorReturnValue = call dereferenceable(16) %class.ClassWithConstructor* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double 1.000000e+01, double 2.000000e+01)
   store %class.ClassWithConstructor* %constructorReturnValue, %class.ClassWithConstructor** %instance, align 4
   %instance1 = load %class.ClassWithConstructor*, %class.ClassWithConstructor** %instance, align 4
-  %\\"&x\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %instance1, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %instance1, i32 0, i32 0
   %x = load double, double* %\\"&x\\", align 8
   %instance2 = load %class.ClassWithConstructor*, %class.ClassWithConstructor** %instance, align 4
-  %\\"&y\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %instance2, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %instance2, i32 0, i32 1
   %y = load double, double* %\\"&y\\", align 8
   %fadd = fadd double %x, %y
   store double %fadd, double* %return, align 8
@@ -390,19 +463,19 @@ define linkonce_odr %class.ClassWithConstructor* @\\"classes/class-with-construc
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
-  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassWithConstructor*
-  %\\"&x\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 0
   store double 0.000000e+00, double* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&y\\"
   store double %x, double* %x.addr, align 8
   store double %y, double* %y.addr, align 8
   %x.addr1 = load double, double* %x.addr, align 8
-  %\\"&x2\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 1
+  %\\"&x2\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 0
   store double %x.addr1, double* %\\"&x2\\", align 8
   %y.addr3 = load double, double* %y.addr, align 8
-  %\\"&y4\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 2
+  %\\"&y4\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %this, i32 0, i32 1
   store double %y.addr3, double* %\\"&y4\\", align 8
   ret %class.ClassWithConstructor* %this
 }
@@ -420,7 +493,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { { [5 x i8]* }* }
-%class.Point = type { { [6 x i8]* }*, double, double }
+%class.Point = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -439,11 +512,11 @@ entry:
   %x.addr = alloca double, align 8
   store double %x, double* %x.addr, align 8
   store double %y, double* %y.addr, align 8
-  %constructorReturnValue = call %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double 0.000000e+00, double 0.000000e+00)
+  %constructorReturnValue = call dereferenceable(16) %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double 0.000000e+00, double 0.000000e+00)
   store %class.Point* %constructorReturnValue, %class.Point** %center, align 4
   %x.addr1 = load double, double* %x.addr, align 8
   %y.addr2 = load double, double* %y.addr, align 8
-  %constructorReturnValue3 = call %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double %x.addr1, double %y.addr2)
+  %constructorReturnValue3 = call dereferenceable(16) %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double %x.addr1, double %y.addr2)
   store %class.Point* %constructorReturnValue3, %class.Point** %other, align 4
   %other4 = load %class.Point*, %class.Point** %other, align 4
   %center5 = load %class.Point*, %class.Point** %center, align 4
@@ -455,26 +528,26 @@ define linkonce_odr %class.Point* @\\"classes/class-with-methods.ts$Point$11cons
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
-  %\\"thisVoid*\\" = call i8* @malloc(i32 24)
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.Point*
-  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 0
   store double 0.000000e+00, double* %\\"&x\\"
-  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
   store double 0.000000e+00, double* %\\"&y\\"
   store double %x, double* %x.addr, align 8
   store double %y, double* %y.addr, align 8
   %x.addr1 = load double, double* %x.addr, align 8
-  %\\"&x2\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
+  %\\"&x2\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 0
   store double %x.addr1, double* %\\"&x2\\", align 8
   %y.addr3 = load double, double* %y.addr, align 8
-  %\\"&y4\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 2
+  %\\"&y4\\" = getelementptr inbounds %class.Point, %class.Point* %this, i32 0, i32 1
   store double %y.addr3, double* %\\"&y4\\", align 8
   ret %class.Point* %this
 }
 
 declare i8* @malloc(i32)
 
-define linkonce_odr double @\\"classes/class-with-methods.ts$Point$10distanceTo5PointI\\"(%class.Point* nocapture readonly dereferenceable(24) %this1, %class.Point* dereferenceable(24) %to) {
+define linkonce_odr hidden double @\\"classes/class-with-methods.ts$Point$10distanceTo5PointI\\"(%class.Point* readonly dereferenceable(16) %this1, %class.Point* dereferenceable(16) %to) {
 entry:
   %to.addr = alloca %class.Point*, align 4
   %this = alloca %class.Point*, align 4
@@ -482,23 +555,23 @@ entry:
   store %class.Point* %this1, %class.Point** %this, align 4
   store %class.Point* %to, %class.Point** %to.addr, align 4
   %this2 = load %class.Point*, %class.Point** %this, align 4
-  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this2, i32 0, i32 1
+  %\\"&x\\" = getelementptr inbounds %class.Point, %class.Point* %this2, i32 0, i32 0
   %x = load double, double* %\\"&x\\", align 8
   %to.addr3 = load %class.Point*, %class.Point** %to.addr, align 4
-  %\\"&x4\\" = getelementptr inbounds %class.Point, %class.Point* %to.addr3, i32 0, i32 1
+  %\\"&x4\\" = getelementptr inbounds %class.Point, %class.Point* %to.addr3, i32 0, i32 0
   %x5 = load double, double* %\\"&x4\\", align 8
   %fsub = fsub double %x, %x5
-  %powReturnValue = call double @Math_powdd(double %fsub, double 2.000000e+00)
+  %powReturnValue = call double @llvm.pow.f64(double %fsub, double 2.000000e+00)
   %this6 = load %class.Point*, %class.Point** %this, align 4
-  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this6, i32 0, i32 2
+  %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this6, i32 0, i32 1
   %y = load double, double* %\\"&y\\", align 8
   %to.addr7 = load %class.Point*, %class.Point** %to.addr, align 4
-  %\\"&y8\\" = getelementptr inbounds %class.Point, %class.Point* %to.addr7, i32 0, i32 2
+  %\\"&y8\\" = getelementptr inbounds %class.Point, %class.Point* %to.addr7, i32 0, i32 1
   %y9 = load double, double* %\\"&y8\\", align 8
   %fsub10 = fsub double %y, %y9
-  %powReturnValue11 = call double @Math_powdd(double %fsub10, double 2.000000e+00)
+  %powReturnValue11 = call double @llvm.pow.f64(double %fsub10, double 2.000000e+00)
   %fadd = fadd double %powReturnValue, %powReturnValue11
-  %sqrtReturnValue = call double @Math_sqrtd(double %fadd)
+  %sqrtReturnValue = call double @llvm.sqrt.f64(double %fadd)
   store double %sqrtReturnValue, double* %return, align 8
   br label %returnBlock
 
@@ -507,14 +580,14 @@ returnBlock:                                      ; preds = %entry
   ret double %return12
 }
 
-; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_sqrtd(double) #0
+; Function Attrs: nounwind readnone
+declare double @llvm.sqrt.f64(double) #0
 
-; Function Attrs: alwaysinline nounwind readnone
-declare hidden double @Math_powdd(double, double) #0
+; Function Attrs: nounwind readnone
+declare double @llvm.pow.f64(double, double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { alwaysinline nounwind readnone }
+attributes #0 = { nounwind readnone }
 "
 `;

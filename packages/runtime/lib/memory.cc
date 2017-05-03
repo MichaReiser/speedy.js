@@ -8,7 +8,7 @@
 #include "macros.h"
 
 struct CollectedPointers {
-    std::array<void*, 1000> pointers;
+    std::array<void*, 10000> pointers;
     size_t count;
 
     CollectedPointers() : pointers {}, count {}

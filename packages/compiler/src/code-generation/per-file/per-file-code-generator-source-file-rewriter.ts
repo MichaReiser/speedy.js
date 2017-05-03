@@ -46,15 +46,8 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const signature = this.typeChecker.getSignatureFromDeclaration(functionDeclaration);
 
         const bodyStatements: ts.Statement[] = [];
-
-        // const instance = await loadWasmModule();
-        const instanceIdentifier = ts.createIdentifier("instance");
-        const instanceLoaded = ts.createAwait(ts.createCall(this.loadWasmFunctionIdentifier, [], []));
-        const instanceDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(instanceIdentifier, undefined, instanceLoaded)], ts.NodeFlags.Const);
-        bodyStatements.push(ts.createVariableStatement([], instanceDeclaration));
-
         // const result = instance.exports.fn(args)
-        const wasmExports = ts.createPropertyAccess(instanceIdentifier,"exports");
+        const wasmExports = ts.createPropertyAccess(ts.createIdentifier("instance"), "exports");
         const targetFunction = ts.createPropertyAccess(wasmExports, name);
         const args = signature.parameters.map(parameter => ts.createIdentifier(parameter.name));
         const functionCall = ts.createCall(targetFunction, [], args);
@@ -68,18 +61,24 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         }
 
         bodyStatements.push(ts.createReturn(ts.createIdentifier("result")));
-        const body = ts.createBlock(bodyStatements);
+
+        // function (instance) { ... }
+        const loadedHandler = ts.createFunctionExpression(undefined, undefined, "instanceLoaded", undefined, [ts.createParameter(undefined, undefined, undefined, "instance") ], undefined, ts.createBlock(bodyStatements));
+
+        // loadWasmModule().then(instance => );
+        const loadInstance = ts.createCall(this.loadWasmFunctionIdentifier, [], []);
+        const instanceLoaded = ts.createCall(ts.createPropertyAccess(loadInstance, "then"), [], [ loadedHandler ]);
 
         return ts.updateFunctionDeclaration(
             functionDeclaration,
             functionDeclaration.decorators,
-            functionDeclaration.modifiers,
+            (functionDeclaration.modifiers || [] as ts.Modifier[]).filter(modifier => modifier.kind !== ts.SyntaxKind.AsyncKeyword),
             functionDeclaration.asteriskToken,
             functionDeclaration.name,
             functionDeclaration.typeParameters,
             functionDeclaration.parameters,
             functionDeclaration.type,
-            body
+            ts.createBlock([ts.createReturn(instanceLoaded)])
         );
     }
 
@@ -92,7 +91,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         const options = ts.createObjectLiteral([
             ts.createPropertyAssignment("totalStack", ts.createLiteral(this.compilerOptions.totalStack)),
-            ts.createPropertyAssignment("totalMemory", ts.createLiteral(this.compilerOptions.totalMemory)),
+            ts.createPropertyAssignment("initialMemory", ts.createLiteral(this.compilerOptions.initialMemory)),
             ts.createPropertyAssignment("globalBase", ts.createLiteral(this.compilerOptions.globalBase)),
             ts.createPropertyAssignment("staticBump", ts.createLiteral(this.wastMetaData.staticBump || 0)),
             ts.createPropertyAssignment("exposeGc", ts.createLiteral(this.compilerOptions.exportGc || this.compilerOptions.exposeGc))
@@ -113,7 +112,6 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         if (this.compilerOptions.exposeGc || this.compilerOptions.exportGc) {
             const speedyJsGcDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"))], ts.NodeFlags.Const);
             const modifiers = this.compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
-
             statementsToInsert.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
         }
 

@@ -43,7 +43,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
     beginSourceFile(sourceFile: ts.SourceFile, compilationContext: CompilationContext, requestEmitHelper: (emitHelper: ts.EmitHelper) => void) {
         const context = this.createContext(sourceFile, compilationContext);
-        let emitsWasm = !compilationContext.compilerOptions.emitLLVM && !compilationContext.compilerOptions.emitWAST;
+        let emitsWasm = !compilationContext.compilerOptions.emitLLVM;
         this.sourceFileStates.set(sourceFile.fileName, {
             context,
             requestEmitHelper,
@@ -131,16 +131,15 @@ export class PerFileCodeGenerator implements CodeGenerator {
             new S2WasmTransformationStep()
         );
 
-        if (context.compilationContext.compilerOptions.emitWAST) {
-            transforms.push(new CopyFileToOutputDirectoryTransformationStep(".wast"));
-            return transforms;
-        }
-
         if (context.compilationContext.compilerOptions.binaryenOpt) {
             transforms.push(new BinaryenOptTransformationStep());
-        } else {
-            transforms.push(new WasmToAsTransformationStep());
         }
+
+        if (context.compilationContext.compilerOptions.saveWast) {
+            transforms.push(new CopyFileToOutputDirectoryTransformationStep(".wast", true));
+        }
+
+        transforms.push(new WasmToAsTransformationStep());
 
         return transforms;
     }
@@ -235,7 +234,7 @@ class LinkTimeOptimizationTransformationStep implements TransformationStep {
         const optimizedFileName = buildDirectory.getTempFileName(`${plainFileName}-lopt.bc`);
         const entryFunctionNames = codeGenerationContext.getEntryFunctionNames();
 
-        return optimizeLinked(inputFileName, entryFunctionNames, optimizedFileName);
+        return optimizeLinked(inputFileName, entryFunctionNames, optimizedFileName, codeGenerationContext.compilationContext.compilerOptions.optimizationLevel);
     }
 }
 
@@ -282,10 +281,7 @@ class S2WasmTransformationStep implements TransformationStep {
 
 class BinaryenOptTransformationStep implements TransformationStep {
     transform(inputFileName: string, { buildDirectory, plainFileName, sourceFileRewriter }: TransformationContext): string {
-        const wasmFileName = wasmOpt(inputFileName, buildDirectory.getTempFileName(`${plainFileName}.wasm`));
-        const buffer = fs.readFileSync(wasmFileName);
-        sourceFileRewriter.setWasmOutput(buffer);
-        return wasmFileName;
+        return wasmOpt(inputFileName, buildDirectory.getTempFileName(`${plainFileName}-opt.wast`));
     }
 }
 

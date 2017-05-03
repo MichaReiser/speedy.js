@@ -15,12 +15,17 @@ function gitCloneOrPull(repository, target) {
     if (fs.existsSync(target) && fs.existsSync(path.join(target, ".git"))) {
         exec("git -C %s pull", target);
     } else {
-        exec("git clone --progress %s %s", repository, target);
+        exec('git clone --progress %s "%s"', repository, target);
     }
 }
 
-function make(directory) {
-    exec("make -C %s -j%d", directory, os.cpus().length + 1);
+function make(directory, install = false) {
+    let command = util.format('cmake -E chdir "%s" cmake --build .', directory);
+    if (install) {
+        command += " --target install";
+    }
+
+    exec('%s -- -j%d', command, os.cpus().length - 1);
 }
 
 module.exports = {

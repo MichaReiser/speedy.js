@@ -1,15 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transformation casts the return value for boolean functions to a bool value 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -39,11 +31,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -55,23 +48,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -154,14 +150,12 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 141, 128, 128, 128, 0, 1, 9, 95, 105, 115, 84, 114, 117, 116, 104, 121, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 139, 128, 128, 128, 0, 1, 133, 128, 128, 128, 0, 0, 32, 0, 69, 11]), {
     totalStack: 532480,
-    totalMemory: 16777216,
+    initialMemory: 16777216,
     globalBase: 1024,
     staticBump: 8,
     exposeGc: false
 });
-function isTruthy(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._isTruthy(value) === 1; loadWasmModule_1.gc(); return result; });
-}
+function isTruthy(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._isTruthy(value) === 1; loadWasmModule_1.gc(); return result; }); }
 "
 `;
 
@@ -201,15 +195,7 @@ exports[`Transformation emits a diagnostic if the entry function is overloaded 1
 `;
 
 exports[`Transformation exports the gc function if exportGc is set 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -239,11 +225,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -255,23 +242,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -354,28 +344,18 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
-    totalMemory: 16777216,
+    initialMemory: 16777216,
     globalBase: 1024,
     staticBump: 8,
     exposeGc: true
 });
 export const speedyJsGc = loadWasmModule_1.gc;
-function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
-}
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
 "
 `;
 
 exports[`Transformation exposes the gc function if exposeGc is set 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -405,11 +385,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -421,23 +402,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -520,28 +504,18 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
-    totalMemory: 16777216,
+    initialMemory: 16777216,
     globalBase: 1024,
     staticBump: 8,
     exposeGc: true
 });
 const speedyJsGc = loadWasmModule_1.gc;
-function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
-}
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
 "
 `;
 
 exports[`Transformation passes the configured global base to the module loader 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -571,11 +545,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -587,23 +562,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -686,27 +664,17 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
-    totalMemory: 16777216,
+    initialMemory: 16777216,
     globalBase: 4000,
     staticBump: 8,
     exposeGc: false
 });
-function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
-}
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
 "
 `;
 
-exports[`Transformation passes the configured total memory to the module loader 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+exports[`Transformation passes the configured initial memory to the module loader 1`] = `
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -736,11 +704,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -752,23 +721,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -851,27 +823,17 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 160, 1, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
-    totalMemory: 10485760,
+    initialMemory: 10485760,
     globalBase: 1024,
     staticBump: 8,
     exposeGc: false
 });
-function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
-}
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
 "
 `;
 
 exports[`Transformation passes the configured total stack to the module loader 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -901,11 +863,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -917,23 +880,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -1016,27 +982,17 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 1048576,
-    totalMemory: 16777216,
+    initialMemory: 16777216,
     globalBase: 1024,
     staticBump: 8,
     exposeGc: false
 });
-function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
-}
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
 "
 `;
 
 exports[`Transformation rewrites the speedyjs function to call into the web assembly module 1`] = `
-"var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator[\\"throw\\"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-/**
+"/**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
@@ -1066,11 +1022,12 @@ var Allocation;
 })(Allocation || (Allocation = {}));
 function __moduleLoader(bytes, options) {
     var TOTAL_STACK = options.totalStack;
-    var TOTAL_MEMORY = options.totalMemory;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
     var GLOBAL_BASE = options.globalBase;
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
-    var memory = new WebAssembly.Memory({ initial: TOTAL_MEMORY / WASM_PAGE_SIZE, maximum: TOTAL_MEMORY / WASM_PAGE_SIZE });
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
     var HEAP32 = new Int32Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
@@ -1082,23 +1039,26 @@ function __moduleLoader(bytes, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
-        // console.log(\\"sbrk\\");
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
-        var totalMemory = 0;
         increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
-            console.error(\\"Cannot grow memory\\");
+            console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
         HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        totalMemory = TOTAL_MEMORY | 0;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            console.error('Cannot enlarge memory arrays. Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which adjusts the size at runtime but prevents some optimizations, (3) set Module.TOTAL_MEMORY to a higher value before the program runs, or if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -1181,13 +1141,11 @@ function __moduleLoader(bytes, options) {
 //# sourceMappingURL=get-wasm-module-function.js.map
 const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
     totalStack: 532480,
-    totalMemory: 16777216,
+    initialMemory: 16777216,
     globalBase: 1024,
     staticBump: 8,
     exposeGc: false
 });
-function fib(value) {
-    return __awaiter(this, void 0, void 0, function* () { const instance = yield loadWasmModule_1(); var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; });
-}
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
 "
 `;

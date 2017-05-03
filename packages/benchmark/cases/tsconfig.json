@@ -5,6 +5,7 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "pretty": true,
+    "types": [],
     "lib": [
       "es2015"
     ]

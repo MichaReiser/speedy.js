@@ -96,6 +96,9 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
         if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
             return;
+        } else if (resolvedFunction.returnType.flags & ts.TypeFlags.Object) {
+            const classReference = callerContext.resolveClass(resolvedFunction.returnType)!;
+            call.addDereferenceableAttr(0, classReference.getTypeStoreSize(resolvedFunction.returnType as ts.ObjectType, callerContext));
         }
 
         return callerContext.value(call, resolvedFunction.returnType);
@@ -133,7 +136,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
                 result.push(
                     llvmArrayValue(passedArguments.slice(i), toLLVMType(elementType, callerContext), callerContext, parameter.name),
-                    llvm.ConstantInt.get(callerContext.llvmContext, passedArguments.length - i)
+                    llvm.ConstantInt.get(callerContext.llvmContext, passedArguments.length - i, undefined, false)
                 );
 
                 break;
