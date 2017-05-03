@@ -45,7 +45,7 @@ function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: num
 
     const WASM_PAGE_SIZE = 64 * 1024;
     const memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    const HEAP32 = new Int32Array(memory.buffer);
+    let HEAP32 = new Int32Array(memory.buffer);
 
     const STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
 
@@ -76,9 +76,16 @@ function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: num
 
         HEAP32[DYNAMIC_TOP_PTR>>2] = newDynamicTop;
         if ((newDynamicTop|0) > (totalMemory|0)) {
-            const addedPages = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-            memory.grow(addedPages);
-            totalMemory += addedPages * WASM_PAGE_SIZE;
+            let pagesToAdd = 0;
+
+            while ((newDynamicTop|0) > (totalMemory|0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+
+            memory.grow(pagesToAdd);
+
+            HEAP32 = new Int32Array(memory.buffer);
         }
         return oldDynamicTop|0;
     }

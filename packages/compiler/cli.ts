@@ -95,7 +95,7 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
     compilerOptions.saveWast = commandLine.saveWast;
     compilerOptions.saveBc = commandLine.saveBc;
     compilerOptions.globalBase = commandLine.settings.GLOBAL_BASE;
-    compilerOptions.totalMemory = commandLine.settings.TOTAL_MEMORY;
+    compilerOptions.totalMemory = commandLine.settings.INITIAL_MEMORY;
     compilerOptions.totalStack = commandLine.settings.TOTAL_STACK;
     compilerOptions.exposeGc = commandLine.exposeGc;
     compilerOptions.exportGc = commandLine.exportGc;

@@ -7,9 +7,9 @@ const platform = require("platform");
 const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
 
 const TEST_CASES = {
-    "isPrime": {
-        args: [2147483647],
-        result: true
+    "simjs": {
+        args: [10, 1000],
+        result: 969.1866817441974
     },
     "tspArrayInt": {
         args: [],
@@ -40,9 +40,9 @@ const TEST_CASES = {
         args: [40],
         result: 102334155
     },
-    "simjs": {
-        args: [10],
-        result: 0.7216851827628226
+    "isPrime": {
+        args: [2147483647],
+        result: true
     },
     "nsieve": {
         args: [40000],
@@ -142,6 +142,18 @@ async function addBenchmark(suite, testCase, run) {
         defer: true
     });
 
+    suite.add(run ? `emcc-${run}` : "emcc", function (deferred) {
+        emccFn().then(function (result) {
+            if (result !== testCase.result) {
+                throw new Error(`EMCC Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
+            }
+
+            deferred.resolve();
+        });
+    }, {
+        defer: true
+    });
+
     suite.add(run ? `wasm-${run}` : "wasm", function (deferred) {
             wasmFn().then(function (result) {
                 if (result !== testCase.result) {
@@ -158,18 +170,6 @@ async function addBenchmark(suite, testCase, run) {
             }
         }
     );
-
-    suite.add(run ? `emcc-${run}` : "emcc", function (deferred) {
-        emccFn().then(function (result) {
-            if (result !== testCase.result) {
-                throw new Error(`EMCC Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
-            }
-
-            deferred.resolve();
-        });
-    }, {
-        defer: true
-    });
 
     return suite;
 }

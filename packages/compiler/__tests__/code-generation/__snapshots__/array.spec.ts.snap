@@ -133,7 +133,7 @@ entry:
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
   %\\"[i]\\" = call i32 @ArrayIi_geti(%class.Array* %array2, i32 2)
-  %mul = mul nsw i32 %\\"[i]\\", 10
+  %mul = mul i32 %\\"[i]\\", 10
   %array3 = load %class.Array*, %class.Array** %array, align 4
   call void @ArrayIi_setii(%class.Array* %array3, i32 2, i32 %mul)
   ret void

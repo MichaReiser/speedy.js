@@ -50,15 +50,16 @@
  #include<vector>
  #include<cmath>
 
-const unsigned N = 624;
-const unsigned M = 397;
-const unsigned MATRIX_A = 0x9908b0df;
-const unsigned UPPER_MASK = 0x80000000;
-const unsigned LOWER_MASK = 0x7fffffff;
-const double LOG4 = std::log(4.0);
-const double SG_MAGICCONST = 1.0 + std::log(4.5);
 
 class Random {
+    const unsigned N = 624;
+    const unsigned M = 397;
+    const unsigned MATRIX_A = 0x9908b0df;
+    const unsigned UPPER_MASK = 0x80000000;
+    const unsigned LOWER_MASK = 0x7fffffff;
+    const double LOG4 = std::log(4.0);
+    const double SG_MAGICCONST = 1.0 + std::log(4.5);
+
     std::vector<unsigned> mt;
     size_t mti;
     bool pythonCompatibility = false;
@@ -296,8 +297,14 @@ public:
 };
 
 extern "C" {
-    double simjs(size_t seed) {
+    double simjs(size_t seed, unsigned runs) {
         Random random { seed };
-        return random.normal(1.0, 1.2);
+
+        double sum = 0.0;
+
+        for (unsigned i = 0; i < runs; ++i) {
+            sum += random.normal(1.0, 1.2);
+        }
+        return sum;
     }
 }

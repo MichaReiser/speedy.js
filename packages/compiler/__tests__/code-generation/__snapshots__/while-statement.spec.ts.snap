@@ -28,7 +28,7 @@ while.cond:                                       ; preds = %while.body, %entry
 
 while.body:                                       ; preds = %while.cond
   %arg.addr2 = load i32, i32* %arg.addr, align 4
-  %sub = sub nsw i32 %arg.addr2, 1
+  %sub = sub i32 %arg.addr2, 1
   store i32 %sub, i32* %arg.addr, align 4
   br label %while.cond
 

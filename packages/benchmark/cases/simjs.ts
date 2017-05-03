@@ -171,7 +171,14 @@ class Random {
             }
             this.skip = true;
         }
-        return (this.genrand_int32() as number)*(1.0/4294967296.0);
+
+        // this is essentially not needed for js but is for speedy js. The issue is that speedyjs does not have a uint32
+        // type. However, >>> returns a uint as result and is, therefore, in the range of 0... 2^32. As the return value
+        // of spdy is an int, we need to handle negative values explicitly
+        const rand = this.genrand_int32() as number;
+        const randNumber = rand < 0.0 ? 4294967296.0 + rand : rand;
+
+        return randNumber*(1.0/4294967296.0);
         /* divided by 2^32 */
     }
 
@@ -290,15 +297,21 @@ class Random {
     }
 }
 
-export async function simjs(seed: int) {
+export async function simjs(seed: int, runs: int) {
     "use speedyjs";
 
-    return syncSimjs(seed);
+    return syncSimjs(seed, runs);
 }
 
-function syncSimjs(seed: int): number {
+function syncSimjs(seed: int, runs: int): number {
     "use speedyjs";
 
     const random = new Random(seed);
-    return random.normal(1.0, 1.2);
+    let sum = 0.0;
+
+    for (let i = 0; i < runs; ++i) {
+        sum += random.normal(1.0, 1.2);
+    }
+
+    return sum;
 }

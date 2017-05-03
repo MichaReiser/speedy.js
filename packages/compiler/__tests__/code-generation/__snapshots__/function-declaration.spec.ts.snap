@@ -35,7 +35,7 @@ if.else:                                          ; preds = %entry
 
 if.end:                                           ; preds = %if.else, %if.then
   %count3 = load i32, i32* %count, align 4
-  %add = add nsw i32 %count3, 1
+  %add = add i32 %count3, 1
   store i32 %add, i32* %count, align 4
   ret void
 }

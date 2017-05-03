@@ -22,7 +22,7 @@ entry:
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
-  %sub = sub nsw i32 %intValue1, 1
+  %sub = sub i32 %intValue1, 1
   store i32 %sub, i32* %intValue, align 4
   %doubleValue2 = load double, double* %doubleValue, align 8
   %fsub = fsub double %doubleValue2, 1.000000e+00
@@ -120,7 +120,7 @@ entry:
   store i32 10, i32* %intValue, align 4
   store double 1.000000e+01, double* %doubleValue, align 8
   %intValue1 = load i32, i32* %intValue, align 4
-  %add = add nsw i32 %intValue1, 1
+  %add = add i32 %intValue1, 1
   store i32 %add, i32* %intValue, align 4
   %doubleValue2 = load double, double* %doubleValue, align 8
   %fadd = fadd double %doubleValue2, 1.000000e+00
