@@ -34,9 +34,9 @@ private:
     T* begin;
 
     /**
-     * The length of the array
+     * Pointer passed the end of the array
      */
-    size_t length;
+    T* back;
 
     /**
      * The capacity of the {@link elements}
@@ -56,6 +56,7 @@ private:
 #endif
 
         begin = Array<T>::allocateElements(static_cast<size_t>(size));
+        back = &begin[size];
 
 #ifdef SAFE
         if (initialize) {
@@ -63,7 +64,7 @@ private:
             std::fill_n(begin, size, T {});
         }
 #endif
-        length = capacity = static_cast<size_t>(size);
+        capacity = static_cast<size_t>(size);
     }
 
 public:
@@ -95,7 +96,7 @@ public:
      */
     inline T get(int32_t index) const {
  #ifdef SAFE
-        if (index < 0 || static_cast<size_t>(index) >= length) {
+        if (index < 0 || static_cast<size_t>(index) >= size()) {
             return T {};
         }
  #endif
@@ -110,7 +111,7 @@ public:
      */
     inline void set(int32_t index, T value) const {
  #ifdef SAFE
-        if (index < 0 || static_cast<size_t>(index) >= length) {
+        if (index < 0 || static_cast<size_t>(index) >= size()) {
             // Throw instead of resizing the array if the index is out of bound. Resizing has the disadvantage that the optimizer
             // might not always be capable to prove that all array accesses are in bound (e.g. merge sort) and therefore
             // cannot optimize the begin ptr load out of the loop. This can be avoided by throwing instead (no resizing,
@@ -123,7 +124,7 @@ public:
     }
 
     inline void fill(const T value, int32_t start=0) const {
-        fill(value, start, static_cast<int32_t>(length));
+        fill(value, start, length());
     }
 
     /**
@@ -134,7 +135,6 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill
      */
     inline void fill(const T value, int32_t startIndex, int32_t endIndex) const {
-        T* back = &begin[length];
         T* start = startIndex < 0 ? &back[startIndex] : &begin[startIndex];
         T* end = endIndex < 0 ? &back[endIndex] : &begin[endIndex];
 
@@ -153,12 +153,11 @@ public:
      * @return the new length of the array
      */
     inline int32_t push(const T* elementsToAdd, size_t numElements) __attribute__((nonnull(2))) {
-        const size_t newLength = length + numElements;
+        const size_t newLength = size() + numElements;
         ensureCapacity(newLength);
 
-        std::copy(elementsToAdd, &elementsToAdd[numElements], &begin[length]);
-        length += numElements;
-        return size();
+        back = std::copy(elementsToAdd, &elementsToAdd[numElements], back);
+        return length();
     }
 
     /**
@@ -169,14 +168,13 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
      */
     inline int32_t unshift(const T* elementsToAdd, size_t numElements) __attribute__((nonnull(2))) {
-        ensureCapacity(length + numElements);
+        const size_t newLength = size() + numElements;
+        ensureCapacity(newLength);
 
-        std::copy(begin, &begin[length], &begin[numElements]);
+        back = std::copy(begin, back, &begin[numElements]);
         std::copy(elementsToAdd, &elementsToAdd[numElements], begin);
 
-        length = length + numElements;
-
-        return size();
+        return length();
     }
 
     /**
@@ -185,14 +183,14 @@ public:
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop
      */
     inline T pop() {
- #ifdef SAFE
-        if (length == 0) {
+#ifdef SAFE
+        if (size() == 0) {
             return {};
         }
- #endif
+#endif
 
-        const T result = begin[length - 1];
-        length--;
+        const T result = back[-1];
+        back--;
         return result;
     }
 
@@ -203,19 +201,18 @@ public:
      */
     inline T shift() {
 #ifdef SAFE
-        if (length == 0) {
+        if (size() == 0) {
             return T {};
         }
 #endif
 
         const T element = begin[0];
-        std::copy(&begin[1], &begin[length], begin);
-        length--;
+        back = std::copy(&begin[1], back, begin);
         return element;
     }
 
     inline Array<T>* slice(int32_t start = 0) const  __attribute__((returns_nonnull)) {
-        return slice(start, size());
+        return slice(start, length());
     }
 
     /**
@@ -223,7 +220,6 @@ public:
      * @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
      */
     inline Array<T>* slice(int32_t startIndex, int32_t endIndex) const  __attribute__((returns_nonnull)) {
-        T* back = &begin[length];
         T* start = startIndex < 0 ? &back[startIndex] : &begin[startIndex];
         T* end = endIndex < 0 ? &back[endIndex] : &begin[endIndex];
 
@@ -231,17 +227,18 @@ public:
         start = std::min(start, back);
         end = std::max(start, std::min(end, back));
 #endif
+        const int32_t elementsCount = static_cast<int32_t>(end - start);
         return new Array<T>(start, end - start);
     }
 
     inline Array<T>* splice(int32_t index, int32_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
 #ifdef SAFE
         if (index < 0) {
-            index = static_cast<int32_t>(length) + index;
+            index = length() + index;
         }
 
-        index = std::max(std::min(index, static_cast<int32_t>(length)), 0);
-        deleteCount = std::min(std::max(deleteCount, 0), static_cast<int32_t>(length) - index);
+        index = std::max(std::min(index, length()), 0);
+        deleteCount = std::min(std::max(deleteCount, 0), length() - index);
 #endif
 
         return splice(static_cast<size_t>(index), static_cast<size_t>(deleteCount), elementsToAdd, elementsCount);
@@ -250,7 +247,7 @@ public:
     inline Array<T>* splice(size_t index, size_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
         if (deleteCount < elementsCount) {
             // Make place for the new items
-            ensureCapacity(length + elementsCount - deleteCount);
+            ensureCapacity(size() + elementsCount - deleteCount);
         }
 
         T* removeBegin = &begin[index];
@@ -261,11 +258,10 @@ public:
         Array<T>* deleted = new Array<T>(removeBegin, deleteCount);
 
         // Move the following elements into right place
-        std::move(removeEnd, &begin[length], insertEnd);
+        back = std::move(removeEnd, back, insertEnd);
 
         // insert the new elements
         std::copy(elementsToAdd, &elementsToAdd[elementsCount], removeBegin);
-        length += elementsCount - deleteCount;
 
         return deleted;
     }
@@ -274,8 +270,16 @@ public:
      * Returns the size of the array
      * @return the size
      */
-    inline int32_t size() const {
-        return static_cast<int32_t>(length);
+    inline size_t size() const {
+        return back - begin;
+    }
+
+    /**
+     * Returns the length of the array as int
+     * @return the size
+     */
+    inline int32_t length() const {
+        return static_cast<int32_t>(size());
     }
 
     /**
@@ -297,12 +301,12 @@ public:
 
         // No reduce
 #ifdef SAFE
-        if (length < newSize) {
-            std::fill_n(&begin[length], newSize - length, T {}); // Default initialize values
+        if (size() < newSize) {
+            std::fill_n(back, newSize - size(), T {}); // Default initialize values
         }
 #endif
 
-        length = newSize;
+        back = begin + newSize;
     }
 
 private:
@@ -322,7 +326,9 @@ private:
         }
 
         newCapacity = std::max(newCapacity, static_cast<size_t>(min));
+        const size_t length = this->size();
         begin = Array<T>::allocateElements(newCapacity, begin);
+        back = begin + length; // update the back pointer for the new allocation
 
         capacity = newCapacity;
     }

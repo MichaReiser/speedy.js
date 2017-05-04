@@ -276,7 +276,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sliceii(const Array<void*>& arra
 //---------------------------------------------------------------------------------
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_splicei(Array<bool>& array, int32_t index) {
-    return array.splice(index, array.size());
+    return array.splice(index, array.length());
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceii(Array<bool>& array, int32_t index, int32_t deleteCount) {
@@ -288,7 +288,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_spliceiiPbu(Array<bool>& array, in
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_splicei(Array<int32_t>& array, int32_t index) {
-    return array.splice(index, array.size());
+    return array.splice(index, array.length());
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceii(Array<int32_t>& array, int32_t index, int32_t deleteCount) {
@@ -300,7 +300,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_spliceiiPiu(Array<int32_t>& arr
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_splicei(Array<double>& array, int32_t index) {
-    return array.splice(index, array.size());
+    return array.splice(index, array.length());
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceii(Array<double>& array, int32_t index, int32_t deleteCount) {
@@ -312,7 +312,7 @@ DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_spliceiiPdu(Array<double>& array
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_splicei(Array<void*>& array, int32_t index) {
-    return array.splice(index, array.size());
+    return array.splice(index, array.length());
 }
 
 DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceii(Array<void*>& array, int32_t index, int32_t deleteCount) {
@@ -328,19 +328,19 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_spliceiiPPvu(Array<void*>& array
 //---------------------------------------------------------------------------------
 
 DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIb_length(const Array<bool>& array) {
-    return array.size();
+    return array.length();
 }
 
 DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIi_length(const Array<int32_t>& array) {
-    return array.size();
+    return array.length();
 }
 
 DLL_PUBLIC ALWAYS_INLINE int32_t ArrayId_length(const Array<double>& array) {
-    return array.size();
+    return array.length();
 }
 
 DLL_PUBLIC ALWAYS_INLINE int32_t ArrayIPv_length(const Array<void*>& array) {
-    return array.size();
+    return array.length();
 }
 
 DLL_PUBLIC ALWAYS_INLINE void ArrayIb_lengthi(Array<bool>& array, int32_t size) {
