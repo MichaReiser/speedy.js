@@ -120,9 +120,7 @@ function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: num
                 "__cxa_atexit": function () {
                     console.log("__cxa_atexit", arguments);
                 },
-                "pow": function pow(x: number, y: number) {
-                    return Math.pow(x, y);
-                },
+                "pow": Math.pow,
                 "fmod": function frem(x: number, y: number) {
                     return x % y;
                 },

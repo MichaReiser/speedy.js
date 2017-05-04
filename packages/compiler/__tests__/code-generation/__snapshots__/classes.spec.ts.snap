@@ -24,9 +24,9 @@ entry:
   %items = alloca [3 x %class.Point*], align 4
   %array = alloca %class.Array*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call dereferenceable(16) %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 1.000000e+00, double 2.000000e+00)
-  %constructorReturnValue1 = call dereferenceable(16) %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 3.000000e+00, double 4.000000e+00)
-  %constructorReturnValue2 = call dereferenceable(16) %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double 5.000000e+00, double 6.000000e+00)
+  %constructorReturnValue = call dereferenceable(16) %class.Point* @\\"classes/array_with_objects_literal.ts$$Point$11constructordd\\"(double 1.000000e+00, double 2.000000e+00)
+  %constructorReturnValue1 = call dereferenceable(16) %class.Point* @\\"classes/array_with_objects_literal.ts$$Point$11constructordd\\"(double 3.000000e+00, double 4.000000e+00)
+  %constructorReturnValue2 = call dereferenceable(16) %class.Point* @\\"classes/array_with_objects_literal.ts$$Point$11constructordd\\"(double 5.000000e+00, double 6.000000e+00)
   %items3 = getelementptr inbounds [3 x %class.Point*], [3 x %class.Point*]* %items, i32 0, i32 0
   %0 = getelementptr inbounds [3 x %class.Point*], [3 x %class.Point*]* %items, i32 0, i32 0
   store %class.Point* %constructorReturnValue, %class.Point** %0, align 4
@@ -48,7 +48,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return6
 }
 
-define linkonce_odr %class.Point* @\\"classes/array-with-objects-literal.ts$Point$11constructordd\\"(double %x, double %y) {
+define linkonce_odr %class.Point* @\\"classes/array_with_objects_literal.ts$$Point$11constructordd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
@@ -109,7 +109,7 @@ define double @_classOnlyWithAttributes() {
 entry:
   %instance = alloca %class.ClassOnlyWithAttributes*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call dereferenceable(16) %class.ClassOnlyWithAttributes* @\\"classes/class-only-with-attributes.ts$ClassOnlyWithAttributes$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(16) %class.ClassOnlyWithAttributes* @\\"classes/class_only_with_attributes.ts$$ClassOnlyWithAttributes$11constructor\\"()
   store %class.ClassOnlyWithAttributes* %constructorReturnValue, %class.ClassOnlyWithAttributes** %instance, align 4
   %instance1 = load %class.ClassOnlyWithAttributes*, %class.ClassOnlyWithAttributes** %instance, align 4
   %\\"&x\\" = getelementptr inbounds %class.ClassOnlyWithAttributes, %class.ClassOnlyWithAttributes* %instance1, i32 0, i32 0
@@ -126,7 +126,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define linkonce_odr %class.ClassOnlyWithAttributes* @\\"classes/class-only-with-attributes.ts$ClassOnlyWithAttributes$11constructor\\"() {
+define linkonce_odr %class.ClassOnlyWithAttributes* @\\"classes/class_only_with_attributes.ts$$ClassOnlyWithAttributes$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassOnlyWithAttributes*
@@ -169,12 +169,12 @@ entry:
   %return = alloca double, align 8
   store double %x, double* %x.addr, align 8
   store double %y, double* %y.addr, align 8
-  %constructorReturnValue = call dereferenceable(1) %class.ClassOnlyWithMethods* @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.ClassOnlyWithMethods* @\\"classes/class_only_with_methods.ts$$ClassOnlyWithMethods$11constructor\\"()
   store %class.ClassOnlyWithMethods* %constructorReturnValue, %class.ClassOnlyWithMethods** %instance, align 4
   %x.addr1 = load double, double* %x.addr, align 8
   %y.addr2 = load double, double* %y.addr, align 8
   %instance3 = load %class.ClassOnlyWithMethods*, %class.ClassOnlyWithMethods** %instance, align 4
-  %addReturnValue = call double @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$3adddd\\"(%class.ClassOnlyWithMethods* %instance3, double %x.addr1, double %y.addr2)
+  %addReturnValue = call double @\\"classes/class_only_with_methods.ts$$ClassOnlyWithMethods$3adddd\\"(%class.ClassOnlyWithMethods* %instance3, double %x.addr1, double %y.addr2)
   store double %addReturnValue, double* %return, align 8
   br label %returnBlock
 
@@ -183,7 +183,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return4
 }
 
-define linkonce_odr %class.ClassOnlyWithMethods* @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$11constructor\\"() {
+define linkonce_odr %class.ClassOnlyWithMethods* @\\"classes/class_only_with_methods.ts$$ClassOnlyWithMethods$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassOnlyWithMethods*
@@ -192,7 +192,7 @@ entry:
 
 declare i8* @malloc(i32)
 
-define linkonce_odr hidden double @\\"classes/class-only-with-methods.ts$ClassOnlyWithMethods$3adddd\\"(%class.ClassOnlyWithMethods* readonly dereferenceable(1) %this1, double %x, double %y) {
+define linkonce_odr hidden double @\\"classes/class_only_with_methods.ts$$ClassOnlyWithMethods$3adddd\\"(%class.ClassOnlyWithMethods* readonly dereferenceable(1) %this1, double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
@@ -238,7 +238,7 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithAttributeInitializer*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call dereferenceable(24) %class.ClassWithAttributeInitializer* @\\"classes/class-with-access-to-constructor-defined-fields.ts$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
+  %constructorReturnValue = call dereferenceable(24) %class.ClassWithAttributeInitializer* @\\"classes/class_with_access_to_constructor_defined_fields.ts$$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
   store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
   %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
   %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 1
@@ -255,7 +255,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-access-to-constructor-defined-fields.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
+define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class_with_access_to_constructor_defined_fields.ts$$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
@@ -322,7 +322,7 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithAttributeInitializer*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call dereferenceable(16) %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
+  %constructorReturnValue = call dereferenceable(16) %class.ClassWithAttributeInitializer* @\\"classes/class_with_attribute_defined_in_constructor.ts$$ClassWithAttributeInitializer$11constructordd\\"(double 1.000000e+01, double 1.500000e+01)
   store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
   %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
   %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 0
@@ -339,7 +339,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-defined-in-constructor.ts$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
+define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class_with_attribute_defined_in_constructor.ts$$ClassWithAttributeInitializer$11constructordd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
@@ -386,7 +386,7 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithAttributeInitializer*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call dereferenceable(16) %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-initializer.ts$ClassWithAttributeInitializer$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(16) %class.ClassWithAttributeInitializer* @\\"classes/class_with_attribute_initializer.ts$$ClassWithAttributeInitializer$11constructor\\"()
   store %class.ClassWithAttributeInitializer* %constructorReturnValue, %class.ClassWithAttributeInitializer** %instance, align 4
   %instance1 = load %class.ClassWithAttributeInitializer*, %class.ClassWithAttributeInitializer** %instance, align 4
   %\\"&x\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %instance1, i32 0, i32 0
@@ -403,7 +403,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class-with-attribute-initializer.ts$ClassWithAttributeInitializer$11constructor\\"() {
+define linkonce_odr %class.ClassWithAttributeInitializer* @\\"classes/class_with_attribute_initializer.ts$$ClassWithAttributeInitializer$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 16)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.ClassWithAttributeInitializer*
@@ -442,7 +442,7 @@ define double @_classWithConstructor() {
 entry:
   %instance = alloca %class.ClassWithConstructor*, align 4
   %return = alloca double, align 8
-  %constructorReturnValue = call dereferenceable(16) %class.ClassWithConstructor* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double 1.000000e+01, double 2.000000e+01)
+  %constructorReturnValue = call dereferenceable(16) %class.ClassWithConstructor* @\\"classes/class_with_constructor.ts$$ClassWithConstructor$11constructordd\\"(double 1.000000e+01, double 2.000000e+01)
   store %class.ClassWithConstructor* %constructorReturnValue, %class.ClassWithConstructor** %instance, align 4
   %instance1 = load %class.ClassWithConstructor*, %class.ClassWithConstructor** %instance, align 4
   %\\"&x\\" = getelementptr inbounds %class.ClassWithConstructor, %class.ClassWithConstructor* %instance1, i32 0, i32 0
@@ -459,7 +459,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return3
 }
 
-define linkonce_odr %class.ClassWithConstructor* @\\"classes/class-with-constructor.ts$ClassWithConstructor$11constructordd\\"(double %x, double %y) {
+define linkonce_odr %class.ClassWithConstructor* @\\"classes/class_with_constructor.ts$$ClassWithConstructor$11constructordd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
@@ -512,19 +512,19 @@ entry:
   %x.addr = alloca double, align 8
   store double %x, double* %x.addr, align 8
   store double %y, double* %y.addr, align 8
-  %constructorReturnValue = call dereferenceable(16) %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double 0.000000e+00, double 0.000000e+00)
+  %constructorReturnValue = call dereferenceable(16) %class.Point* @\\"classes/class_with_methods.ts$$Point$11constructordd\\"(double 0.000000e+00, double 0.000000e+00)
   store %class.Point* %constructorReturnValue, %class.Point** %center, align 4
   %x.addr1 = load double, double* %x.addr, align 8
   %y.addr2 = load double, double* %y.addr, align 8
-  %constructorReturnValue3 = call dereferenceable(16) %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double %x.addr1, double %y.addr2)
+  %constructorReturnValue3 = call dereferenceable(16) %class.Point* @\\"classes/class_with_methods.ts$$Point$11constructordd\\"(double %x.addr1, double %y.addr2)
   store %class.Point* %constructorReturnValue3, %class.Point** %other, align 4
   %other4 = load %class.Point*, %class.Point** %other, align 4
   %center5 = load %class.Point*, %class.Point** %center, align 4
-  %distanceToReturnValue = call double @\\"classes/class-with-methods.ts$Point$10distanceTo5PointI\\"(%class.Point* %center5, %class.Point* %other4)
+  %distanceToReturnValue = call double @\\"classes/class_with_methods.ts$$Point$10distanceTo5PointI\\"(%class.Point* %center5, %class.Point* %other4)
   ret void
 }
 
-define linkonce_odr %class.Point* @\\"classes/class-with-methods.ts$Point$11constructordd\\"(double %x, double %y) {
+define linkonce_odr %class.Point* @\\"classes/class_with_methods.ts$$Point$11constructordd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8
@@ -547,7 +547,7 @@ entry:
 
 declare i8* @malloc(i32)
 
-define linkonce_odr hidden double @\\"classes/class-with-methods.ts$Point$10distanceTo5PointI\\"(%class.Point* readonly dereferenceable(16) %this1, %class.Point* dereferenceable(16) %to) {
+define linkonce_odr hidden double @\\"classes/class_with_methods.ts$$Point$10distanceTo5PointI\\"(%class.Point* readonly dereferenceable(16) %this1, %class.Point* dereferenceable(16) %to) {
 entry:
   %to.addr = alloca %class.Point*, align 4
   %this = alloca %class.Point*, align 4

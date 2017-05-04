@@ -99,9 +99,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
@@ -293,9 +291,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
@@ -453,9 +449,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
@@ -613,9 +607,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
@@ -772,9 +764,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
@@ -931,9 +921,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
@@ -1090,9 +1078,7 @@ function __moduleLoader(bytes, options) {
                 \\"__cxa_atexit\\": function () {
                     console.log(\\"__cxa_atexit\\", arguments);
                 },
-                \\"pow\\": function pow(x, y) {
-                    return Math.pow(x, y);
-                },
+                \\"pow\\": Math.pow,
                 \\"fmod\\": function frem(x, y) {
                     return x % y;
                 },
