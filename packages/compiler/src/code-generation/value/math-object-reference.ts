@@ -29,37 +29,22 @@ export class MathObjectReference extends BuiltInObjectReference {
         super(pointer, mathType, mathClass);
     }
 
-    /**
-     * Benchmarking results
-     * 	pow		sqrt
-     * number	int	number	int
-     * Chrome	102000	107000	96000	108000	std::pow
-     *          98500	104000	95000	113000
-     *          96680	109468	98720	109782
-     *          98162	107086	106243	113927
-     * Firefox	26613	26847	28151	28998
-     *          27080	28267	29207	28136
-     *          29638	25345	28852	28235
-     *          26202	29408	28944	27776
-     * Chrome	98312	107155			llvm.pow.f64
-     *          99762	108859
-     *
-     * Maybe using Math.pow and sqrt from the browser directly?
-     */
     protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
         assert(signatures.length === 1, "Math functions have not to be overloaded");
 
         switch (symbol.name) {
+            // use the llvm intrinsic whenever a web assembly instruction exists
+            case "pow":
+                return MathObjectReference.createPowFunction(signatures[0].getReturnType(), this.type, context);
+            case "sqrt":
+                return this.createSqrtFunction(signatures[0], context);
+            // There exists no web assembly instruction for the following methods, so use the c++ implementation.
             case "log":
             case "sin":
             case "cos":
                 const resolvedFunction = createResolvedFunctionFromSignature(signatures[0], context.compilationContext, this.type);
                 resolvedFunction.instanceMethod = false; // they are not really instance methods as this does not have to be passed
                 return ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
-            case "pow":
-                return MathObjectReference.createPowFunction(signatures[0].getReturnType(), this.type, context);
-            case "sqrt":
-                return this.createSqrtFunction(signatures[0], context);
             default:
                 throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }

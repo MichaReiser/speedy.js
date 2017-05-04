@@ -5,6 +5,7 @@
 
 extern "C" {
 
+
 ALWAYS_INLINE DLL_PUBLIC double Math_PI() {
     return M_PI;
 }
@@ -21,10 +22,10 @@ ALWAYS_INLINE DLL_PUBLIC double_t Math_logd(double value) {
     return std::log(value);
 }
 
-ALWAYS_INLINE DLL_PUBLIC double Math_maxPd(double* values, int32_t valueCount) {
+ALWAYS_INLINE DLL_PUBLIC double Math_maxPd(double* values, size_t valueCount) {
     double max = -INFINITY;
 
-    for (int32_t i = 0; i < valueCount; ++i) {
+    for (size_t i = 0; i < valueCount; ++i) {
         max = std::max(values[i], max);
     }
 

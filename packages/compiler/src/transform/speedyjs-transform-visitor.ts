@@ -72,7 +72,8 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
                 validateSpeedyJSFunction(functionDeclaration, this.compilationContext.typeChecker);
                 return this.codeGenerator.generateEntryFunction(functionDeclaration);
             } else {
-                return context.visitEachChild(functionDeclaration);
+                context.visitEachChild(functionDeclaration);
+                return ts.createNotEmittedStatement(functionDeclaration); // remove the function
             }
         } finally {
             this.inSpeedyJSFunction = false;

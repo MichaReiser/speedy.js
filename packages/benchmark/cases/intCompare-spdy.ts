@@ -1,4 +1,6 @@
-export function intCompare(value: int) {
+export async function intCompare(value: int) {
+    "use speedyjs";
+
     let sum = 0;
     for (let i = 0; i < 10000000; ++i) {
         if (i < value) {

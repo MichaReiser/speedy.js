@@ -1,5 +1,16 @@
-export function tspArrayInt() {
-    const points = [1150, 31766,
+class Point {
+    constructor(private x: int, private y: int) {
+    }
+
+    distanceTo(other: Point) {
+        return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+    }
+}
+
+export async function tspInt() {
+    "use speedyjs";
+
+    const coordinates = [1150, 31766,
         3633, 30633,
         3066, 32916,
         6166, 39300,
@@ -6118,26 +6129,26 @@ export function tspArrayInt() {
         9300, 33850,
     ];
 
+    const points = new Array<Point>(coordinates.length / 2);
+
+    for (let i = 0; i < points.length; ++i) {
+        points[i] = new Point(coordinates[i*2], coordinates[i*2+1]);
+    }
+
     const tour = computeTour(points);
     return computeCost(tour);
 }
 
-function computeTour(points: int[]) {
+function computeTour(points: Point[]) {
     "use speedyjs";
 
-    if (points.length < 2) {
-        return points;
-    }
-
-    let currentX = points[0];
-    let currentY = points[1];
-
-    for (let i = 2; i < points.length; i+=2) {
-        let shortestDistance = 2.0**31.0 - 1.0;
+    let current = points[0];
+    for (let i = 1; i < points.length; ++i) {
+        let shortestDistance = 2147483647.0;
         let nearestIndex = i;
 
-        for (let j = i; j < points.length; j += 2) {
-            const distance = euclideanDistance(currentX, currentY, points[j], points[j+1]);
+        for (let j = i; j < points.length; ++j) {
+            const distance = current.distanceTo(points[j]);
 
             if (distance < shortestDistance) {
                 shortestDistance = distance;
@@ -6145,19 +6156,17 @@ function computeTour(points: int[]) {
             }
         }
 
-        currentX = points[nearestIndex];
-        currentY = points[nearestIndex + 1];
+        current = points[nearestIndex];
 
         // move the point that was at this location before at a position larger than i to ensure this point
         // is considered in future moves
         swap(points, nearestIndex, i);
-        swap(points, nearestIndex + 1, i + 1);
     }
 
     return points;
 }
 
-function swap(array: int[], i1: int, i2: int) {
+function swap(array: Point[], i1: int, i2: int) {
     "use speedyjs";
 
     const tmp = array[i1];
@@ -6165,24 +6174,18 @@ function swap(array: int[], i1: int, i2: int) {
     array[i2] = tmp;
 }
 
-function computeCost(tour: int[]) {
+function computeCost(tour: Point[]) {
     "use speedyjs";
-
     let total = 0.0;
 
-    for (let i = 0; i < tour.length - 3; i += 2) {
-        total += euclideanDistance(tour[i], tour[i + 1], tour[i + 2], tour[i + 3]);
+
+    for (let i = 0; i < tour.length - 1; ++i) {
+        total += tour[i].distanceTo(tour[i + 1]);
     }
 
-    if (tour.length >= 4) {
-        total += euclideanDistance(tour[tour.length - 2], tour[tour.length - 1], tour[0], tour[1]);
+    if (tour.length >= 2) {
+        total += tour[tour.length - 1].distanceTo(tour[0]);
     }
 
     return total;
-}
-
-function euclideanDistance(x1: int, y1: int, x2: int, y2: int) {
-    "use speedyjs";
-
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }

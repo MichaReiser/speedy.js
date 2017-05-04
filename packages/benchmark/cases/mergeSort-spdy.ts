@@ -1,32 +1,7 @@
-export function arrayReverse() {
-    const array = createArray();
+export async function mergeSort() {
+    "use speedyjs";
 
-    for (let round = 0; round < 1000; ++round) {
-        for (let i = 0; i < array.length; ++i) {
-            swap(array, i, array.length - i - 1);
-        }
-    }
-
-    return computeCheckSum(array);
-}
-
-function swap(array: number[], i1: int, i2: int) {
-    const tmp = array[i1];
-    array[i1] = array[i1];
-    array[i2] = tmp;
-}
-
-function computeCheckSum(array: number[]) {
-    let result = 0.0;
-    for (let i = 0; i < array.length - 1; i+=2) {
-        result += array[i] * array[i + 1];
-    }
-
-    return result;
-}
-
-function createArray() {
-    return [
+    const array = [
         0.9128269605006514,
         0.24067088901581557,
         0.8602593509493526,
@@ -10028,4 +10003,52 @@ function createArray() {
         0.16813445539637795,
         0.15010735535582342
     ];
+    const sorted = array.slice();
+    splitAndMerge(array, 0, array.length, sorted);
+    return computeCheckSum(sorted);
 }
+
+function computeCheckSum(array: number[]) {
+    "use speedyjs";
+
+    let result = 0.0;
+    for (let i = 0; i < array.length - 1; i+=2) {
+        result += array[i] * array[i + 1];
+    }
+
+    return result;
+}
+
+function splitAndMerge(array: number[], lower: int, upper: int, sorted: number[]) {
+    "use speedyjs";
+
+    if (upper - lower < 2) {
+        return;
+    }
+
+    const middle = (((upper - lower) / 2) | 0) + lower;
+
+    splitAndMerge(sorted, lower, middle, array);
+    splitAndMerge(sorted, middle, upper, array);
+
+    merge(array, lower, middle, upper, sorted);
+}
+
+function merge(array: number[], lower: int, middle: int, upper: int, sorted: number[]): void {
+    "use speedyjs";
+
+    let i = lower;
+    let j = middle;
+
+    for (let k = i; k < upper; ++k) {
+        if (i < middle && (j >= upper || array[i] <= array[j])) {
+            sorted[k] = array[i];
+            ++i;
+        } else {
+            // j element is smaller or i has reached the middle
+            sorted[k] = array[j];
+            ++j;
+        }
+    }
+}
+

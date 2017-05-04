@@ -26,7 +26,7 @@ export class DefaultNameMangler extends BaseNameMangler {
         if (sourceFile) {
             const relativePath = path.relative(this.compilationContext.rootDir, sourceFile.fileName);
             const normalized = path.normalize(relativePath);
-            return normalized.replace("$", "$$");
+            return normalized.replace(/$/g, "$$").replace(/_/g, "__").replace(/-/g, "_");
         }
         return "";
     }
