@@ -1,12 +1,4 @@
-export async function mergeSort() {
-    "use speedyjs";
-
-    return mergeSortSync();
-}
-
-export function mergeSortSync() {
-    "use speedyjs";
-
+export function mergeSort() {
     const array = [
         0.9128269605006514,
         0.24067088901581557,

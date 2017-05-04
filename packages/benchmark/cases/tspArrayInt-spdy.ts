@@ -1,4 +1,6 @@
-export function tspArrayInt() {
+export async function tspArrayInt() {
+    "use speedyjs";
+
     const points = [1150, 31766,
         3633, 30633,
         3066, 32916,

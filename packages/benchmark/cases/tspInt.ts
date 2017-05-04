@@ -7,16 +7,7 @@ class Point {
     }
 }
 
-export async function tspInt() {
-    "use speedyjs";
-
-    return tspIntSync();
-}
-
-
-function tspIntSync() {
-    "use speedyjs";
-
+export function tspInt() {
     const coordinates = [1150, 31766,
         3633, 30633,
         3066, 32916,
@@ -6150,13 +6141,11 @@ function computeTour(points: Point[]) {
     "use speedyjs";
 
     let current = points[0];
-    const tourSize = points.length;
-
-    for (let i = 1; i < tourSize; ++i) {
+    for (let i = 1; i < points.length; ++i) {
         let shortestDistance = 2147483647.0;
         let nearestIndex = i;
 
-        for (let j = i; j < tourSize; ++j) {
+        for (let j = i; j < points.length; ++j) {
             const distance = current.distanceTo(points[j]);
 
             if (distance < shortestDistance) {

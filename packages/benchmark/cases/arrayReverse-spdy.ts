@@ -1,4 +1,6 @@
-export function arrayReverse() {
+export async function arrayReverse() {
+    "use speedyjs";
+
     const array = createArray();
 
     for (let round = 0; round < 1000; ++round) {
@@ -11,12 +13,16 @@ export function arrayReverse() {
 }
 
 function swap(array: number[], i1: int, i2: int) {
+    "use speedyjs";
+
     const tmp = array[i1];
     array[i1] = array[i1];
     array[i2] = tmp;
 }
 
 function computeCheckSum(array: number[]) {
+    "use speedyjs";
+
     let result = 0.0;
     for (let i = 0; i < array.length - 1; i+=2) {
         result += array[i] * array[i + 1];
@@ -26,6 +32,8 @@ function computeCheckSum(array: number[]) {
 }
 
 function createArray() {
+    "use speedyjs";
+
     return [
         0.9128269605006514,
         0.24067088901581557,

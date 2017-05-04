@@ -1,4 +1,6 @@
-export function mergeSortInt() {
+export async function mergeSortInt() {
+    "use speedyjs";
+
     const array = [
         268574091,
         2014460287,

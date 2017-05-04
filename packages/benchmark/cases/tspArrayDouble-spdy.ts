@@ -1,4 +1,6 @@
-export function tspArrayDouble() {
+export async function tspArrayDouble() {
+    "use speedyjs";
+
     const points = [
         1150.0000, 31766.6667,
         3633.3333, 30633.3333,

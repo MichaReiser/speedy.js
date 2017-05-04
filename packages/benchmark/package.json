@@ -4,8 +4,7 @@
   "description": "Speedy.js Benchmark",
   "main": "index.js",
   "scripts": {
-    "start": "./cases/compile-emcc && webpack-dev-server",
-    "benchmark": "karma start"
+    "start": "./cases/compile-emcc && webpack-dev-server"
   },
   "repository": {
     "type": "git",

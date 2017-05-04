@@ -7,6 +7,10 @@ const platform = require("platform");
 const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
 
 const TEST_CASES = {
+    "tspInt": {
+        args: [],
+        result: 500074.11491760757
+    },
     "simjs": {
         args: [10, 1000],
         result: 969.1866817441974
@@ -18,10 +22,6 @@ const TEST_CASES = {
     "tspArrayDouble": {
         args: [],
         result: 500016.6164722443
-    },
-    "tspInt": {
-        args: [],
-        result: 500074.11491760757
     },
     "tspDouble": {
         args: [],
@@ -76,7 +76,7 @@ function getJsFunctionForTestCase(caseName) {
     const fn = require("ts-loader!./cases/" + caseName + ".ts")[fnName];
 
     function jsFunctionWrapper() {
-        return fn.apply(undefined, testCase.args);
+        return Promise.resolve(fn.apply(undefined, testCase.args));
     }
 
     return jsFunctionWrapper;
@@ -86,7 +86,7 @@ function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("!speedyjs-loader?{speedyJS:{unsafe: true, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + ".ts");
+    const wasmModule = require("!speedyjs-loader?{speedyJS:{unsafe: true, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + "-spdy.ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 
