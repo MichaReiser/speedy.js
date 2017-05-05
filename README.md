@@ -84,3 +84,7 @@ To compile all files in the current directory omit any file names or pass multip
 ## WebPack Loader
 
 The package `loader` contains a webpack loader implementation. See `packages/benchmark/webpack.config.js` for more details.
+
+## Benchmark
+
+![Benchmark](./doc/benchmark.png)

@@ -29,7 +29,8 @@ function createChart(svgElementQuery) {
 
     const margin = { top: 20, right: 20, bottom: 30, left: 40 },
         width = +target.attr("width") - margin.left - margin.right,
-        height = +target.attr("height") - margin.top - margin.bottom;
+        height = +target.attr("height") - margin.top - margin.bottom,
+        innerHeight = height - 30;
 
     target.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -47,7 +48,7 @@ function createChart(svgElementQuery) {
         .padding(0.05);
 
     const y = d3.scaleLinear()
-        .rangeRound([height, 0]);
+        .rangeRound([innerHeight, 0]);
 
     const yAxis = d3.axisLeft(y)
         .ticks(10, "%");
@@ -126,7 +127,7 @@ function createChart(svgElementQuery) {
         function renderXAxis() {
             container.append("g")
                 .attr("class", "axis x-axis")
-                .attr("transform", "translate(0," + height + ")");
+                .attr("transform", "translate(0," + innerHeight + ")");
         }
 
         container.append("g")
@@ -136,8 +137,8 @@ function createChart(svgElementQuery) {
             .attr("class", "hundred-percent")
             .attr("x1", x.range()[0])
             .attr("x2", x.range()[1])
-            .attr("y1", height)
-            .attr("y2", height)
+            .attr("y1", innerHeight)
+            .attr("y2", innerHeight)
             .attr("stroke-width", 1.5)
             .attr("stroke", "black");
 
@@ -204,10 +205,19 @@ function createChart(svgElementQuery) {
             y.domain([0, d3.max(data.testCases, testCase => d3.max(data.browsers, browser => testCase.results[browser.id].wasm / testCase.results[browser.id].js))]).nice();
 
             // update the x-axis
-            container.select("g.x-axis")
+            const xAxis = container.select("g.x-axis")
                 .transition()
                 .duration(TRANSITION_DURATION)
                 .call(d3.axisBottom(x));
+            xAxis
+                .selectAll("text")
+                .attr("y", 10)
+                .attr("x", 5)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(45)")
+                .style("text-anchor", "start");
+
+            xAxis.select(".domain").remove();
 
             container.select("g.y-axis")
                 .transition()
@@ -246,7 +256,7 @@ function createChart(svgElementQuery) {
         barsEnter
             .append("rect")
             .attr("class", "bar")
-            .attr("y", height)
+            .attr("y", innerHeight)
             .attr("height", 0);
 
         barsMerged.select("rect")
@@ -257,7 +267,7 @@ function createChart(svgElementQuery) {
             .attr("fill", wasmResult => z(wasmResult.browserId))
             .attr("y", wasmResult => y(wasmResult.percentage))
             .attr("width", xPerCase.bandwidth())
-            .attr("height", wasmResult => height - y(wasmResult.percentage));
+            .attr("height", wasmResult => innerHeight - y(wasmResult.percentage));
 
         const percentFormat = d3.format(".0%");
 
@@ -266,10 +276,10 @@ function createChart(svgElementQuery) {
             .attr("class", "bar-label")
             .attr("fill", "white")
             .attr("text-anchor", "middle")
-            .attr("font-size", "11px")
+            .attr("font-size", 9)
             .attr("transform", "rotate(-90)")
             .text(percentFormat(0))
-            .attr("x", wasmResult => -height + 20)
+            .attr("x", wasmResult => -innerHeight + 15)
             .attr("y", wasmResult => xPerCase.bandwidth() / 2 + 2.5);
 
         barsMerged.select("text")
@@ -285,7 +295,7 @@ function createChart(svgElementQuery) {
             .attr("class", "emcc")
             .attr("d", d3Shape.symbol().size(38).type(d3Shape.symbolCross)())
             .attr("fill", "black")
-            .attr("transform", "translate(" +  xPerCase.bandwidth() / 2 + "," + height + "), rotate(45)");
+            .attr("transform", "translate(" +  xPerCase.bandwidth() / 2 + "," + innerHeight + "), rotate(45)");
 
         emcc.merge(emccEnter)
             .transition()
