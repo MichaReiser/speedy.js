@@ -70,10 +70,12 @@ const TEST_CASES = {
     }
 };
 
+const jsModules = require.context("ts-loader!./cases", false, /.*^(?:(?!-spdy\.ts$).)*\.ts$/);
+
 function getJsFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = TEST_CASES[caseName].fnName || caseName;
-    const fn = require("ts-loader!./cases/" + caseName + ".ts")[fnName];
+    const fn = jsModules("./" + caseName + ".ts")[fnName];
 
     function jsFunctionWrapper() {
         return Promise.resolve(fn.apply(undefined, testCase.args));
@@ -82,11 +84,12 @@ function getJsFunctionForTestCase(caseName) {
     return jsFunctionWrapper;
 }
 
+const wasmModules = require.context("!speedyjs-loader?{speedyJS:{unsafe: false, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases", false, /.*-spdy\.ts/);
 function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const wasmModule = require("!speedyjs-loader?{speedyJS:{unsafe: true, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases/" + caseName + "-spdy.ts");
+    const wasmModule = wasmModules("./" + caseName + "-spdy.ts");
     const fn = wasmModule[fnName];
     const gc = wasmModule["speedyJsGc"];
 
@@ -97,11 +100,12 @@ function getWasmFunctionForTestCase(caseName) {
     return { fn: wasmFunctionWrapper, gc: gc };
 }
 
+const emccModules = require.context("exports-loader?Module!./cases", false, /.*-emcc\.js$/);
 async function getEmccFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;
 
-    const emccModule = require("exports-loader?Module!./cases/" + caseName + "-emcc.js");
+    const emccModule = emccModules("./" + caseName + "-emcc.js");
     await emccModule.initialized;
 
     const fn = emccModule["_" + fnName];

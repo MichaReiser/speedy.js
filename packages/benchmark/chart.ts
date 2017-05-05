@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import * as d3Tip from "d3-tip";
+import * as d3Shape from "d3-shape";
 
 interface Measurement {
     js: number;
@@ -87,6 +88,39 @@ function createChart(svgElementQuery) {
                 .attr("font-family", "sans-serif")
                 .attr("font-size", 10)
                 .attr("text-anchor", "end");
+
+            const jsLegend = legend.append("g")
+                .attr("class", "legend-js");
+
+            jsLegend.append("line")
+                .attr("x1", width)
+                .attr("y1", 9.5)
+                .attr("x2", width - 19)
+                .attr("y2", 9.5)
+                .attr("stroke", "black");
+
+            jsLegend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9.5)
+                .attr("dy", "0.32em")
+                .text("JS");
+
+            const emccLegend = legend
+                .append("g")
+                .attr("class", "legend-emcc")
+                .attr("transform", "translate(0, 20)");
+
+            emccLegend
+                .append("path")
+                .attr("d", d3Shape.symbol().size(70).type(d3Shape.symbolCross)())
+                .attr("fill", "black")
+                .attr("transform", "translate(" + (width - 19 / 2) + "," + 9.5 + "), rotate(45)");
+
+            emccLegend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9.5)
+                .attr("dy", "0.32em")
+                .text("Emscripten");
         }
 
         function renderXAxis() {
@@ -127,11 +161,11 @@ function createChart(svgElementQuery) {
                 .enter()
                 .append("g")
                 .attr("class", "legend")
-                .attr("transform", (browser, i) => "translate(" + width + "," + i * 20 + ")");
+                .attr("transform", (browser, i) => "translate(" + width + "," + (i + 2) * 20 + ")");
 
             // enter and update
             const legendsMerged = legends.merge(legendsEnter).transition().duration(TRANSITION_DURATION);
-            legendsMerged.attr("transform", (browser, i) => "translate(0," + i * 20 + ")");
+            legendsMerged.attr("transform", (browser, i) => "translate(0," + (i + 2) * 20 + ")");
 
             legendsEnter.append("rect")
                 .attr("x", width - 19)
@@ -243,25 +277,20 @@ function createChart(svgElementQuery) {
             .duration(TRANSITION_DURATION)
             .text(wasmResult => percentFormat(wasmResult.percentage));
 
-        const emcc = barsMerged.selectAll("line")
+        const emcc = barsMerged.selectAll("path.emcc")
             .data(wasmResult => wasmResult.emccPercentage ? [wasmResult] : []);
 
         const emccEnter = emcc.enter()
-            .append("line")
+            .append("path")
             .attr("class", "emcc")
-            .attr("stroke", z("emcc"))
-            .attr("stroke-width", 2)
-            .attr("x1", 0)
-            .attr("x2", xPerCase.bandwidth())
-            .attr("y1", height)
-            .attr("y2", height);
+            .attr("d", d3Shape.symbol().size(38).type(d3Shape.symbolCross)())
+            .attr("fill", "black")
+            .attr("transform", "translate(" +  xPerCase.bandwidth() / 2 + "," + height + "), rotate(45)");
 
         emcc.merge(emccEnter)
             .transition()
             .duration(TRANSITION_DURATION)
-            .attr("y1", wasmResult => y(wasmResult.emccPercentage))
-            .attr("x2", xPerCase.bandwidth())
-            .attr("y2", wasmResult => y(wasmResult.emccPercentage));
+            .attr("transform", wasmResult => "translate(" +  xPerCase.bandwidth() / 2 + "," + y(wasmResult.emccPercentage) + "), rotate(45)");
 
         emcc.exit().remove();
         bars.exit().remove();
