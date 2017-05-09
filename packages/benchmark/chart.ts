@@ -11,11 +11,12 @@ interface Measurement {
 interface TestCase {
     name: string;
     results: { [browserId: string ]: Measurement };
+    visible?: boolean;
 }
 
 interface BarChartData {
     testCases: TestCase[];
-    browsers: { name: string, id: string, version: string }[];
+    browsers: { name: string, id: string, version: string, visible?: boolean }[];
 }
 
 const TRANSITION_DURATION = 300;
@@ -115,7 +116,7 @@ function createChart(svgElementQuery) {
                 .append("path")
                 .attr("d", d3Shape.symbol().size(70).type(d3Shape.symbolCross)())
                 .attr("fill", "black")
-                .attr("transform", "translate(" + (width - 19 / 2) + "," + 9.5 + "), rotate(45)");
+                .attr("transform", "translate(" + (width - 19 / 2) + "," + 9.5 + ") rotate(45)");
 
             emccLegend.append("text")
                 .attr("x", width - 24)
@@ -151,12 +152,14 @@ function createChart(svgElementQuery) {
 
     function renderData(data: BarChartData) {
         const container = target.select("g");
+        const visibleBrowsers = data.browsers.filter(browser => browser.visible !== false);
+        const visibleTestCases = data.testCases.filter(testCase => testCase.visible !== false);
 
         function updateLegend() {
             let legends = container
                 .select("g.legend-box")
                 .selectAll("g.legend")
-                .data(data.browsers);
+                .data(visibleBrowsers);
 
             const legendsEnter = legends
                 .enter()
@@ -187,7 +190,7 @@ function createChart(svgElementQuery) {
         }
 
         function testCaseToResults(testCase: TestCase) {
-            return data.browsers.map(browser => {
+            return visibleBrowsers.map(browser => {
                 return {
                     browserId: browser.id,
                     percentage: testCase.results[browser.id].wasm / testCase.results[browser.id].js,
@@ -198,11 +201,11 @@ function createChart(svgElementQuery) {
         }
 
         function updateAxises() {
-            x.domain(data.testCases.map(testCase => testCase.name));
-            xPerCase.domain(data.browsers.map(browser => browser.id))
+            x.domain(visibleTestCases.map(testCase => testCase.name));
+            xPerCase.domain(visibleBrowsers.map(browser => browser.id))
                 .rangeRound([0, x.bandwidth()]);
 
-            y.domain([0, d3.max(data.testCases, testCase => d3.max(data.browsers, browser => testCase.results[browser.id].wasm / testCase.results[browser.id].js))]).nice();
+            y.domain([0, d3.max(visibleTestCases, testCase => d3.max(visibleBrowsers, browser => testCase.results[browser.id].wasm / testCase.results[browser.id].js))]).nice();
 
             // update the x-axis
             const xAxis = container.select("g.x-axis")
@@ -231,7 +234,8 @@ function createChart(svgElementQuery) {
         let cases =  container
             .select("g.cases")
             .selectAll("g.test-case")
-            .data(data.testCases);
+            .data(visibleTestCases);
+        cases.exit().remove();
 
         const casesEnter = cases.enter()
             .append("g")
@@ -245,6 +249,7 @@ function createChart(svgElementQuery) {
             .selectAll("g.bar")
             .data(testCaseToResults);
 
+        bars.exit().remove();
         const barsEnter = bars
             .enter()
             .append("g")
@@ -285,10 +290,12 @@ function createChart(svgElementQuery) {
         barsMerged.select("text")
             .transition()
             .duration(TRANSITION_DURATION)
+            .attr("y", wasmResult => xPerCase.bandwidth() / 2 + 2.5)
             .text(wasmResult => percentFormat(wasmResult.percentage));
 
         const emcc = barsMerged.selectAll("path.emcc")
             .data(wasmResult => wasmResult.emccPercentage ? [wasmResult] : []);
+        emcc.exit().remove();
 
         const emccEnter = emcc.enter()
             .append("path")
@@ -301,10 +308,6 @@ function createChart(svgElementQuery) {
             .transition()
             .duration(TRANSITION_DURATION)
             .attr("transform", wasmResult => "translate(" +  xPerCase.bandwidth() / 2 + "," + y(wasmResult.emccPercentage) + "), rotate(45)");
-
-        emcc.exit().remove();
-        bars.exit().remove();
-        cases.exit().remove();
 
         updateLegend();
 

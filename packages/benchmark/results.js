@@ -17,9 +17,100 @@ function populateWithFileNames(selection) {
     }
 }
 
+function populateBrowserNames(data) {
+    const browsers = document.querySelector("#browsers");
+    let last;
+    while (last = browsers.lastChild) {
+        browsers.removeChild(last);
+    }
+
+    for (const browser of data.browsers) {
+        const label = document.createElement("label");
+        label.className = "form-check-label";
+
+        const check = document.createElement("input");
+        check.setAttribute("type", "checkbox");
+        check.setAttribute("id", browser.id);
+        check.setAttribute("value", browser.id);
+        check.setAttribute("name", "browser");
+        check.setAttribute("checked", "checked");
+        check.className = "form-check-input";
+
+        label.appendChild(check);
+        label.appendChild(document.createTextNode(browser.name + " " + browser.version));
+
+        const div = document.createElement("div");
+        div.className = "form-check";
+        div.appendChild(label);
+
+        check.addEventListener("change", function (event) {
+            changeBrowserSelection(event, data);
+        });
+
+        browsers.appendChild(div);
+    }
+}
+
+function populateTestCases(data) {
+    const testCases = document.querySelector("#testCases");
+    let last;
+    while (last = testCases.lastChild) {
+        testCases.removeChild(last);
+    }
+
+    for (const testCase of data.testCases) {
+        const label = document.createElement("label");
+        label.className = "form-check-label";
+
+        const check = document.createElement("input");
+        check.setAttribute("type", "checkbox");
+        check.setAttribute("id", testCase.name);
+        check.setAttribute("value", testCase.name);
+        check.setAttribute("name", "testCase");
+        check.setAttribute("checked", "checked");
+        check.className = "form-check-input";
+
+        label.appendChild(check);
+        label.appendChild(document.createTextNode(testCase.name));
+
+        const div = document.createElement("div");
+        div.className = "form-check";
+        div.appendChild(label);
+
+        check.addEventListener("change", function (event) {
+            changeTestCaseSelection(event, data);
+        });
+
+        testCases.appendChild(div);
+    }
+}
+
+function changeTestCaseSelection(event, data) {
+    const testCase = data.testCases.find(function (data) {
+        return data.name === event.target.value;
+    });
+
+    testCase.visible = event.target.checked;
+
+    chart.render(data);
+}
+
+function changeBrowserSelection(event, data) {
+    const browser = data.browsers.find(function (data) {
+        return data.id === event.target.value;
+    });
+
+    browser.visible = event.target.checked;
+
+    chart.render(data);
+}
+
 function renderChartWithDataFromFile(file) {
     const fileContent = resultsContext(file);
     const chartData = transformResultToChartData(fileContent);
+
+    populateBrowserNames(chartData);
+    populateTestCases(chartData);
 
     chart.render(chartData);
 }
