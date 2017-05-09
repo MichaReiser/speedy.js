@@ -9,8 +9,7 @@ function buildEmscripten(directory) {
     console.log("Build Emscripten");
     const emscriptenDirectory = path.join(directory, "emscripten");
     dependencyUtils.gitCloneOrPull(EMSCRIPTEN_GIT_URL, emscriptenDirectory);
-    // dependencyUtils.exec("git -C %s checkout incoming", emscriptenDirectory);
-    dependencyUtils.exec("git -C %s checkout d1a1fc121b7d6aab9adcb0c418453d48be318754", emscriptenDirectory); // use last working until #23 is fixed
+    dependencyUtils.exec("git -C %s checkout incoming", emscriptenDirectory);
 
     return emscriptenDirectory;
 }
