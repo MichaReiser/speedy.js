@@ -19,7 +19,7 @@ function buildLLVM(directory) {
         fs.mkdirSync(llvmBuildDirectory);
     }
 
-    dependencyUtils.exec('cmake -E chdir %s cmake -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_BUILD_TYPE=Debug -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_TESTS=OFF -DCMAKE_INSTALL_PREFIX=%s %s', llvmBuildDirectory, targetDirectory, llvmDirectory);
+    dependencyUtils.exec('cmake -E chdir %s cmake -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_TESTS=OFF -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_INSTALL_PREFIX=%s %s', llvmBuildDirectory, targetDirectory, llvmDirectory);
     dependencyUtils.make(llvmBuildDirectory, true);
 
     return path.join(targetDirectory, "bin");

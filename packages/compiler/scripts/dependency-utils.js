@@ -25,7 +25,7 @@ function make(directory, install = false) {
         command += " --target install";
     }
 
-    exec('%s -- -j%d', command, os.cpus().length - 1);
+    exec('%s -- -j%d', command, os.cpus().length);
 }
 
 module.exports = {
