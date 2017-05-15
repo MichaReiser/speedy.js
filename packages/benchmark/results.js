@@ -4,6 +4,13 @@ const barChart = require("./chart");
 const chart = barChart("#chart");
 const resultsContext = require.context("./results", false, /.*\.json/);
 
+function removeChildNodes(node) {
+    let last;
+    while (last = node.lastChild) {
+        node.removeChild(last);
+    }
+}
+
 function populateWithFileNames(selection) {
     const fileNames = resultsContext.keys().sort();
     for (let i = 0; i < fileNames.length; ++i) {
@@ -19,10 +26,7 @@ function populateWithFileNames(selection) {
 
 function populateBrowserNames(data) {
     const browsers = document.querySelector("#browsers");
-    let last;
-    while (last = browsers.lastChild) {
-        browsers.removeChild(last);
-    }
+    removeChildNodes(browsers);
 
     for (const browser of data.browsers) {
         const label = document.createElement("label");
@@ -53,10 +57,7 @@ function populateBrowserNames(data) {
 
 function populateTestCases(data) {
     const testCases = document.querySelector("#testCases");
-    let last;
-    while (last = testCases.lastChild) {
-        testCases.removeChild(last);
-    }
+    removeChildNodes(testCases);
 
     for (const testCase of data.testCases) {
         const label = document.createElement("label");
@@ -92,7 +93,7 @@ function changeTestCaseSelection(event, data) {
 
     testCase.visible = event.target.checked;
 
-    chart.render(data);
+    renderChart(data);
 }
 
 function changeBrowserSelection(event, data) {
@@ -102,6 +103,12 @@ function changeBrowserSelection(event, data) {
 
     browser.visible = event.target.checked;
 
+    renderChart(data);
+}
+
+function renderChart(data) {
+    document.querySelector("#json").innerText = JSON.stringify(toMathematicaData(data), undefined, "  ");
+    renderTable(data);
     chart.render(data);
 }
 
@@ -112,7 +119,7 @@ function renderChartWithDataFromFile(file) {
     populateBrowserNames(chartData);
     populateTestCases(chartData);
 
-    chart.render(chartData);
+    renderChart(chartData);
 }
 
 function onSelectedFileChanged(event) {
@@ -131,6 +138,96 @@ function stringComparator(x, y) {
     }
 
     return x < y ? -1 : 1;
+}
+
+function toMathematicaData(chartData) {
+    const visibleBrowsers = chartData.browsers.filter(browser => browser.visible !== false);
+    const result = {
+        browserNames: visibleBrowsers.map(browser => browser.name + " " + browser.version),
+        caseNames: [],
+        values: []
+    };
+
+    for (const testCase of chartData.testCases) {
+        if (testCase.visible === false) {
+            continue;
+        }
+
+        const caseResult = [];
+        let min = Number.MAX_SAFE_INTEGER;
+        let max = Number.MIN_SAFE_INTEGER;
+
+        for (const browser of visibleBrowsers) {
+            const value = testCase.results[browser.id].wasm / testCase.results[browser.id].js * 100;
+            min = Math.min(value, min);
+            max = Math.max(value, max);
+        }
+
+        result.caseNames.push(testCase.name);
+        result.values.push([min, max - min]);
+    }
+
+    return result;
+}
+
+function renderTable(chartData) {
+    const visibleBrowsers= chartData.browsers.filter(browser => browser.visible !== false);
+    const visibleTestCases = chartData.testCases.filter(testCase => testCase.visible !== false);
+
+    const table = document.querySelector("#results-table");
+    removeChildNodes(table);
+
+    const headerRow = document.createElement("tr");
+    const subtitleRow = document.createElement("tr");
+    const titles = ["Test Case", ...visibleBrowsers.map(browser => browser.name + " " + browser.version)];
+
+    for (const title of titles) {
+        const titleCell = document.createElement("th");
+        titleCell.innerText = title;
+
+        headerRow.appendChild(titleCell);
+        if (title !== titles[0]) {
+            titleCell.colSpan = 2;
+
+            for (const subTitle of ["Speedy.js", "JS"]) {
+                const langCell = document.createElement("th");
+                langCell.innerText = subTitle;
+                subtitleRow.appendChild(langCell);
+            }
+        } else {
+            subtitleRow.appendChild(document.createElement("th"));
+            titleCell.colSpan = 1;
+        }
+    }
+
+    const header = document.createElement("thead");
+    header.appendChild(headerRow);
+    header.appendChild(subtitleRow);
+    table.appendChild(header);
+
+    const body = document.createElement("tbody");
+
+    for (const testCase of visibleTestCases) {
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.innerText = testCase.name;
+        row.appendChild(nameCell);
+
+        for (const browser of visibleBrowsers) {
+            const speedyJsCell = document.createElement("td");
+            speedyJsCell.innerText = testCase.results[browser.id].wasm.toFixed(2);
+            row.append(speedyJsCell);
+
+            const jsCell = document.createElement("td");
+            jsCell.innerText = testCase.results[browser.id].js.toFixed(2);
+            row.append(jsCell);
+        }
+
+        body.appendChild(row);
+    }
+
+    table.appendChild(body);
 }
 
 function transformResultToChartData(browserResults) {
