@@ -28,13 +28,13 @@ TEST_F(ArrayTests, new_creates_array_of_the_given_size) {
     array = new Array<double>(1024);
 
     ASSERT_NE(array, nullptr);
-    EXPECT_EQ(array->size(), 1024);
+    EXPECT_EQ(array->length(), 1024);
 }
 
 TEST_F(ArrayTests, new_creates_an_empty_array) {
     array = new Array<double>();
 
-    EXPECT_EQ(array->size(), 0);
+    EXPECT_EQ(array->length(), 0);
 }
 
 TEST_F(ArrayTests, new_initializes_the_array_with_the_given_elements) {
@@ -46,7 +46,7 @@ TEST_F(ArrayTests, new_initializes_the_array_with_the_given_elements) {
     array = new Array<double>(elements, 1024);
 
     ASSERT_NE(array, nullptr);
-    EXPECT_EQ(array->size(), 1024);
+    EXPECT_EQ(array->length(), 1024);
     EXPECT_EQ(array->get(0), 0);
     EXPECT_EQ(array->get(1023), 1023);
 }
@@ -92,7 +92,7 @@ TEST_F(ArrayTests, get_for_object_array) {
     void* elements[3] = { array1, array2, array3 };
     auto* voidArray = new Array<void*>(elements, 3);
 
-    EXPECT_EQ(voidArray->size(), 3);
+    EXPECT_EQ(voidArray->length(), 3);
     EXPECT_EQ(voidArray->get(0), array1);
     EXPECT_EQ(voidArray->get(1), array2);
     EXPECT_EQ(voidArray->get(2), array3);
@@ -122,7 +122,7 @@ TEST_F(ArrayTests, set_throws_if_the_index_is_out_of_range) {
 
     EXPECT_THROW(array->set(999, 1000), std::out_of_range);
 
-    EXPECT_EQ(array->size(), 100);
+    EXPECT_EQ(array->length(), 100);
 }
 
 TEST_F(ArrayTests, set_throws_if_the_index_is_negative) {
@@ -143,7 +143,7 @@ TEST_F(ArrayTests, resize_changes_the_length_of_the_array) {
     array->resize(20);
 
     // assert
-    EXPECT_EQ(array->size(), 20);
+    EXPECT_EQ(array->length(), 20);
     EXPECT_EQ(array->get(19), 0);
 }
 
@@ -154,7 +154,7 @@ TEST_F(ArrayTests, resize_resizes_an_empty_array) {
     array->resize(10);
 
     // assert
-    EXPECT_EQ(array->size(), 10);
+    EXPECT_EQ(array->length(), 10);
     EXPECT_EQ(array->get(9), 0);
 }
 
@@ -285,7 +285,7 @@ TEST_F(ArrayTests, push_adds_the_new_element_at_the_end_of_the_array) {
     array->push(elements, 1);
 
     // assert
-    EXPECT_EQ(array->size(), 6);
+    EXPECT_EQ(array->length(), 6);
     EXPECT_EQ(array->get(5), 10);
 }
 
@@ -297,7 +297,7 @@ TEST_F(ArrayTests, push_adds_the_elements_at_the_end_of_the_array) {
     array->push(elements, 3);
 
     // assert
-    EXPECT_EQ(array->size(), 8);
+    EXPECT_EQ(array->length(), 8);
     EXPECT_EQ(array->get(5), 1);
     EXPECT_EQ(array->get(6), 2);
     EXPECT_EQ(array->get(7), 3);
@@ -311,7 +311,7 @@ TEST_F(ArrayTests, push_resizes_if_the_new_length_exceeds_the_capacity) {
     array->push(elements, 1);
 
     // assert
-    EXPECT_EQ(array->size(), 1);
+    EXPECT_EQ(array->length(), 1);
     EXPECT_EQ(array->get(0), 1);
 }
 
@@ -335,7 +335,7 @@ TEST_F(ArrayTests, unshift_adds_the_element_to_the_beginning_of_the_array) {
     array->unshift(toAdd, 1);
 
     // assert
-    EXPECT_EQ(array->size(), 6);
+    EXPECT_EQ(array->length(), 6);
     EXPECT_EQ(array->get(0), 1);
 }
 
@@ -376,7 +376,7 @@ TEST_F(ArrayTests, unshift_resizes_the_container_if_necessary) {
     // act
     array->unshift(toAdd, 1);
 
-    EXPECT_EQ(array->size(), 1);
+    EXPECT_EQ(array->length(), 1);
     EXPECT_EQ(array->get(0), 1);
 }
 
@@ -394,7 +394,7 @@ TEST_F(ArrayTests, pop_returns_and_removes_the_last_element) {
 
     // assert
     EXPECT_EQ(result, 5);
-    EXPECT_EQ(array->size(), 4);
+    EXPECT_EQ(array->length(), 4);
     EXPECT_EQ(array->get(3), 4);
 }
 
@@ -417,7 +417,7 @@ TEST_F(ArrayTests, shift_returns_and_removes_the_first_element) {
 
     // assert
     EXPECT_EQ(result, 1);
-    EXPECT_EQ(4, array->size());
+    EXPECT_EQ(4, array->length());
 }
 
 TEST_F(ArrayTests, shift_moves_the_remaining_elements_in_front) {
@@ -455,7 +455,7 @@ TEST_F(ArrayTests, slice_returns_a_copy_of_the_array) {
     Array<double>* copy = array->slice();
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 5);
+    EXPECT_EQ(copy->length(), 5);
     EXPECT_EQ(copy->get(0), 1);
     EXPECT_EQ(copy->get(1), 2);
     EXPECT_EQ(copy->get(2), 3);
@@ -473,7 +473,7 @@ TEST_F(ArrayTests, slice_returns_a_subset_starting_from_the_specified_start) {
     Array<double>* copy = array->slice(2);
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 3);
+    EXPECT_EQ(copy->length(), 3);
     EXPECT_EQ(copy->get(0), 3);
     EXPECT_EQ(copy->get(1), 4);
     EXPECT_EQ(copy->get(2), 5);
@@ -489,7 +489,7 @@ TEST_F(ArrayTests, slice_returns_the_subset_in_between_start_and_end) {
     Array<double>* copy = array->slice(1, 3);
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 2);
+    EXPECT_EQ(copy->length(), 2);
     EXPECT_EQ(copy->get(0), 2);
     EXPECT_EQ(copy->get(1), 3);
 
@@ -504,7 +504,7 @@ TEST_F(ArrayTests, slice_with_a_start_larger_than_the_array_returns_an_empty_arr
     Array<double>* copy = array->slice(10, 15);
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 0);
+    EXPECT_EQ(copy->length(), 0);
 
     delete copy;
 }
@@ -517,7 +517,7 @@ TEST_F(ArrayTests, slice_with_a_negative_start_computes_the_start_from_the_end) 
     Array<double>* copy = array->slice(-2);
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 2);
+    EXPECT_EQ(copy->length(), 2);
     EXPECT_EQ(copy->get(0), 4);
     EXPECT_EQ(copy->get(1), 5);
 
@@ -532,7 +532,7 @@ TEST_F(ArrayTests, slice_with_a_negative_end_computes_the_end_from_the_end) {
     Array<double>* copy = array->slice(2, -1);
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 2);
+    EXPECT_EQ(copy->length(), 2);
     EXPECT_EQ(copy->get(0), 3);
     EXPECT_EQ(copy->get(1), 4);
 
@@ -547,7 +547,7 @@ TEST_F(ArrayTests, slice_returns_an_empty_array_if_start_is_larger_than_the_end)
     Array<double>* copy = array->slice(3, 1);
 
     EXPECT_NE(&copy, &array);
-    EXPECT_EQ(copy->size(), 0);
+    EXPECT_EQ(copy->length(), 0);
 
     delete copy;
 }
@@ -564,7 +564,7 @@ TEST_F(ArrayTests, splice_removes_the_number_of_elements) {
     delete deleted;
 
     // assert
-    EXPECT_EQ(3, array->size());
+    EXPECT_EQ(3, array->length());
     EXPECT_EQ(array->get(0), 1);
     EXPECT_EQ(array->get(1), 2);
     EXPECT_EQ(array->get(2), 5);
@@ -578,7 +578,7 @@ TEST_F(ArrayTests, splice_returns_an_array_containing_the_deleted_elements) {
     Array<double>* deleted = array->splice(2, 2);
 
     // assert
-    EXPECT_EQ(2, deleted->size());
+    EXPECT_EQ(2, deleted->length());
     EXPECT_EQ(deleted->get(0), 3);
     EXPECT_EQ(deleted->get(1), 4);
 
@@ -596,7 +596,7 @@ TEST_F(ArrayTests, splice_removes_the_elements_and_inserts_the_new_ones) {
     delete deleted;
 
     // assert
-    EXPECT_EQ(4, array->size());
+    EXPECT_EQ(4, array->length());
     EXPECT_EQ(array->get(0), 1);
     EXPECT_EQ(array->get(1), 2);
     EXPECT_EQ(array->get(2), 2.5);
@@ -614,7 +614,7 @@ TEST_F(ArrayTests, splice_shifts_the_new_elements_to_the_back_if_more_elements_a
     delete deleted;
 
     // assert
-    EXPECT_EQ(6, array->size());
+    EXPECT_EQ(6, array->length());
     EXPECT_EQ(array->get(0), 1);
     EXPECT_EQ(array->get(1), 2);
     EXPECT_EQ(array->get(2), 2.25);
@@ -632,7 +632,7 @@ TEST_F(ArrayTests, splice_removes_all_elements_from_the_index_if_deleteCount_is_
     delete deleted;
 
     // assert
-    EXPECT_EQ(2, array->size());
+    EXPECT_EQ(2, array->length());
     EXPECT_EQ(array->get(0), 1);
     EXPECT_EQ(array->get(1), 2);
 }
@@ -646,7 +646,7 @@ TEST_F(ArrayTests, splices_inserts_from_the_back_if_the_index_is_negative) {
     delete deleted;
 
     // assert
-    EXPECT_EQ(3, array->size());
+    EXPECT_EQ(3, array->length());
     EXPECT_EQ(array->get(0), 1);
     EXPECT_EQ(array->get(1), 2);
     EXPECT_EQ(array->get(2), 5);
@@ -658,7 +658,7 @@ TEST_F(ArrayTests, splice_returns_an_empty_array_if_delete_count_is_negative) {
 
     // act
     auto* deleted = array->splice(2, -3);
-    EXPECT_EQ(deleted->size(), 0);
+    EXPECT_EQ(deleted->length(), 0);
 
     delete deleted;
 }
@@ -669,7 +669,7 @@ TEST_F(ArrayTests, splice_returns_an_empty_array_if_the_index_is_out_of_range) {
 
     // act
     auto* deleted = array->splice(10, 2);
-    EXPECT_EQ(deleted->size(), 0);
+    EXPECT_EQ(deleted->length(), 0);
 
     delete deleted;
 }
@@ -681,7 +681,7 @@ TEST_F(ArrayTests, splice_returns_an_empty_array_if_the_index_is_out_of_range) {
 TEST_F(ArrayTests, size_returns_the_size_of_the_array) {
     array = new Array<double>(5);
 
-    EXPECT_EQ(array->size(), 5);
+    EXPECT_EQ(array->length(), 5);
 }
 
 // -----------------------------------------
@@ -694,7 +694,7 @@ TEST_F(ArrayTests, resize_increases_the_size_of_the_array_if_the_new_size_is_lar
     array->resize(20);
 
     // expect
-    EXPECT_EQ(array->size(), 20);
+    EXPECT_EQ(array->length(), 20);
 }
 
 TEST_F(ArrayTests, resize_new_elements_are_initialized_with_zero) {
@@ -715,5 +715,5 @@ TEST_F(ArrayTests, resize_decreases_the_size_of_the_array_if_the_new_size_is_sma
     array->resize(10);
 
     // expect
-    EXPECT_EQ(array->size(), 10);
+    EXPECT_EQ(array->length(), 10);
 }
