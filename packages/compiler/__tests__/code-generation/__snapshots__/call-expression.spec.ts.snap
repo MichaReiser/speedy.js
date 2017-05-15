@@ -74,15 +74,15 @@ returnBlock:                                      ; preds = %entry
   ret double %return7
 }
 
-; Function Attrs: nounwind readnone
+; Function Attrs: nounwind readnone speculatable
 declare double @llvm.sqrt.f64(double) #2
 
-; Function Attrs: nounwind readnone
+; Function Attrs: nounwind readnone speculatable
 declare double @llvm.pow.f64(double, double) #2
 
 attributes #0 = { alwaysinline norecurse nounwind readonly }
 attributes #1 = { alwaysinline }
-attributes #2 = { nounwind readnone }
+attributes #2 = { nounwind readnone speculatable }
 "
 `;
 
