@@ -3,29 +3,28 @@ The web assembly backend is not yet included in the prebuild llvm versions. Ther
 
 !!! Requires at least 80GB of free disk space !!!
 
-```sh
- docker run -it ubuntu:precise bin/bash
- ```
+Uses Ubuntu trusty.
  
 Install Dependencies
 
 ```sh
 apt-get update
 apt-get install python-software-properties wget nano
-add-apt-repository ppa:ubuntu-toolchain-r/test -y
+apt-get source llvm-toolchain-snapshot
+sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
 wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-echo "deb http://apt.llvm.org/precise/ llvm-toolchain-precise main" | tee -a /etc/apt/sources.list
-echo "deb-src http://apt.llvm.org/precise/ llvm-toolchain-precise main" | tee -a /etc/apt/sources.list
+echo "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main" | tee -a /etc/apt/sources.list
+echo "deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty main" | tee -a /etc/apt/sources.list
 apt-get update
-apt-get install devscripts fakeroot g++-4.9 dh-make dh-ocaml checkinstall libffi-dev python-sphinx python-dev swig libjsoncpp-dev help-man subversion rsync quilt help2man chrpath lftp git ocaml -y
+apt-get install devscripts fakeroot g++ dh-make dh-ocaml checkinstall libffi-dev python-sphinx python-dev swig libjsoncpp-dev help2man subversion rsync quilt help2man chrpath lftp git ocaml -y
 ```
 
 Install up to date cmake
 
 ```sh
-wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz
-tar -xf cmake-3.7.2.tar.gz
-cd cmake-3.7.2
+wget https://cmake.org/files/v3.8/cmake-3.8.1.tar.gz
+tar -xf cmake-3.8.1.tar.gz
+cd cmake-3.8.1
 ./configure
 make -j2
 checkinstall -y 

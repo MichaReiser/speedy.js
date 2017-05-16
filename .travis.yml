@@ -1,5 +1,5 @@
 sudo: required
-dist: precise # TODO Update in near future, requires new LLVM build
+dist: trusty # TODO Update in near future, requires new LLVM build
 language: node_js
 node_js:
 - node
@@ -11,13 +11,14 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - libgcc-4.9-dev
-    - libstdc++-4.9-dev
-    - libobjc-4.9-dev
+    - libgcc-4.8-dev
+    - libstdc++-4.8-dev
+    - libobjc-4.8-dev
     - libjsoncpp0
-    - libobjc-4.9-dev
+    - libobjc-4.8-dev
     - libstdc++6
     - checkinstall
+
   sauce_connect: true
 env:
   global:
@@ -27,12 +28,12 @@ env:
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
   && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
-- wget http://famreiser.ch/llvm/llvm-5.0-20042017-webassembly.tar.gz
-- mkdir llvm && tar -xzf llvm-5.0-20042017-webassembly.tar.gz -C llvm
-- cd llvm && sudo dpkg -i clang-5.0_5.0~svn300824-1~exp1_amd64.deb libclang1-5.0_5.0~svn300824-1~exp1_amd64.deb
-  libclang-5.0-dev_5.0~svn300824-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn300824-1~exp1_amd64.deb
-  libllvm5.0_5.0~svn300824-1~exp1_amd64.deb llvm-5.0_5.0~svn300824-1~exp1_amd64.deb
-  llvm-5.0-runtime_5.0~svn300824-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn300824-1~exp1_amd64.deb
+- wget http://famreiser.ch/llvm/llvm-5.0-303148-webassembly.tar.gz
+- mkdir llvm && tar -xzf llvm-5.0-303148-webassembly.tar.gz -C llvm
+- cd llvm && sudo dpkg -i clang-5.0_5.0~svn303148-1~exp1_amd64.deb libclang1-5.0_5.0~svn303148-1~exp1_amd64.deb
+  libclang-5.0-dev_5.0~svn303148-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn303148-1~exp1_amd64.deb
+  libllvm5.0_5.0~svn303148-1~exp1_amd64.deb llvm-5.0_5.0~svn303148-1~exp1_amd64.deb
+  llvm-5.0-runtime_5.0~svn303148-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn303148-1~exp1_amd64.deb
   && cd ..
 - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 50
 - sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang-5.0 50
