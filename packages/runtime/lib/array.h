@@ -95,13 +95,14 @@ public:
      * @return the element at the given index or the default value for T if the index is out of bound (only in safe mode)
      */
     inline T get(int32_t index) const {
+        auto const position = &begin[index];
  #ifdef SAFE
-        if (index < 0 || static_cast<size_t>(index) >= size()) {
+        if (position < begin || position >= back) {
             return T {};
         }
  #endif
 
-        return begin[index];
+        return *position;
     }
 
     /**
@@ -110,8 +111,9 @@ public:
      * @param value the value to set at the given index
      */
     inline void set(int32_t index, T value) const {
+        auto const position = &begin[index];
  #ifdef SAFE
-        if (index < 0 || static_cast<size_t>(index) >= size()) {
+        if (position < begin || position >= back) {
             // Throw instead of resizing the array if the index is out of bound. Resizing has the disadvantage that the optimizer
             // might not always be capable to prove that all array accesses are in bound (e.g. merge sort) and therefore
             // cannot optimize the begin ptr load out of the loop. This can be avoided by throwing instead (no resizing,
@@ -120,7 +122,7 @@ public:
         }
  #endif
 
-        begin[index] = value;
+        *position = value;
     }
 
     inline void fill(const T value, int32_t start=0) const {
@@ -219,7 +221,7 @@ public:
      * Returns a copy of the array containing the elements from start to end
      * @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
      */
-    inline Array<T>* slice(int32_t startIndex, int32_t endIndex) const  __attribute__((returns_nonnull)) {
+    Array<T>* slice(int32_t startIndex, int32_t endIndex) const  __attribute__((returns_nonnull)) {
         T* start = startIndex < 0 ? &back[startIndex] : &begin[startIndex];
         T* end = endIndex < 0 ? &back[endIndex] : &begin[endIndex];
 
@@ -231,7 +233,7 @@ public:
         return new Array<T>(start, end - start);
     }
 
-    inline Array<T>* splice(int32_t index, int32_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
+    Array<T>* splice(int32_t index, int32_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
 #ifdef SAFE
         if (index < 0) {
             index = length() + index;
@@ -244,7 +246,7 @@ public:
         return splice(static_cast<size_t>(index), static_cast<size_t>(deleteCount), elementsToAdd, elementsCount);
     }
 
-    inline Array<T>* splice(size_t index, size_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
+    Array<T>* splice(size_t index, size_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
         if (deleteCount < elementsCount) {
             // Make place for the new items
             ensureCapacity(size() + elementsCount - deleteCount);
@@ -286,7 +288,7 @@ public:
      * Resizes the array to the new size.
      * @param newSize the new size
      */
-    inline void resize(int32_t newSize) {
+    void resize(int32_t newSize) {
 #ifdef SAFE
         if (newSize < 0) {
             throw std::out_of_range("Invalid array length");
@@ -296,11 +298,11 @@ public:
        resize(static_cast<size_t>(newSize));
     }
 
-    inline void resize(size_t newSize) {
+    void resize(size_t newSize) {
         ensureCapacity(newSize);
 
-        // No reduce
 #ifdef SAFE
+        // No reduce
         if (size() < newSize) {
             std::fill_n(back, newSize - size(), T {}); // Default initialize values
         }
@@ -314,7 +316,7 @@ private:
      * Ensures that the capacity of the array is at lest of the given size
      * @param min the minimal required capacity
      */
-    inline void ensureCapacity(size_t min) {
+    void ensureCapacity(size_t min) {
         if (min < capacity) {
             return;
         }

@@ -105,7 +105,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
             const transforms = PerFileCodeGenerator.createTransformationChain(context);
             const transformationContext = { sourceFile, codeGenerationContext: context, buildDirectory, plainFileName, sourceFileRewriter: state.sourceFileRewriter };
 
-            const biteCodeFileName = buildDirectory.getTempFileName(`${plainFileName}.o`);
+            const biteCodeFileName = buildDirectory.getTempFileName(`${plainFileName}.bc`);
             llvm.writeBitcodeToFile(context.module, biteCodeFileName);
 
             transforms.reduce((inputFileName, transformation) => transformation.transform(inputFileName, transformationContext), biteCodeFileName);

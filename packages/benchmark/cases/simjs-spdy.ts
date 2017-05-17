@@ -262,7 +262,7 @@ class Random {
     normal(mu: number, sigma: number) {
         let z = this.lastNormal;
         this.lastNormal = NaN;
-        if (!z) {
+        if (isNaN(z)) {
             const a = this.random() * 2.0 * Math.PI;
             const b = Math.sqrt(-2.0 * Math.log(1.0 - this.random()));
             z = Math.cos(a) * b;

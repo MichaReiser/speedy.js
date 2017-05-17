@@ -3,7 +3,7 @@
 template<size_t length>
 void swap(std::array<double, length>& array, size_t i1, size_t i2) {
     double tmp = array[i1];
-    array[i1] = array[i1];
+    array[i1] = array[i2];
     array[i2] = tmp;
 }
 

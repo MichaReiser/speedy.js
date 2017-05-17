@@ -824,7 +824,7 @@ declare i32 @ArrayIPv_length(%class.Array* nocapture readonly dereferenceable(12
 ; Function Attrs: alwaysinline
 declare void @ArrayIPv_lengthi(%class.Array* dereferenceable(12), i32) #0
 
-; Function Attrs: nounwind readnone
+; Function Attrs: nounwind readnone speculatable
 declare double @llvm.pow.f64(double, double) #2
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
@@ -868,7 +868,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return12
 }
 
-; Function Attrs: nounwind readnone
+; Function Attrs: nounwind readnone speculatable
 declare double @llvm.sqrt.f64(double) #2
 
 ; Function Attrs: alwaysinline
@@ -940,7 +940,7 @@ declare void @speedyJsGc()
 
 attributes #0 = { alwaysinline }
 attributes #1 = { alwaysinline nounwind readonly }
-attributes #2 = { nounwind readnone }
+attributes #2 = { nounwind readnone speculatable }
 attributes #3 = { alwaysinline norecurse nounwind readonly }
 "
 `;

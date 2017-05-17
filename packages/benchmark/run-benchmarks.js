@@ -66,7 +66,7 @@ const TEST_CASES = {
     },
     "arrayReverse": {
         args: [],
-        result: 1222.1247886583424
+        result: 1248.9035770674511
     }
 };
 
@@ -84,7 +84,7 @@ function getJsFunctionForTestCase(caseName) {
     return jsFunctionWrapper;
 }
 
-const wasmModules = require.context("!speedyjs-loader?{speedyJS:{unsafe: false, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases", false, /.*-spdy\.ts/);
+const wasmModules = require.context("!speedyjs-loader?{speedyJS:{unsafe: true, exportGc: true, disableHeapNukeOnExit: true, optimizationLevel: 3, binaryenOpt: true}}!./cases", false, /.*-spdy\.ts/);
 function getWasmFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
     const fnName = testCase.fnName || caseName;

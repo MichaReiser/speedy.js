@@ -154,10 +154,10 @@ entry:
   ret void
 }
 
-; Function Attrs: nounwind readnone
+; Function Attrs: nounwind readnone speculatable
 declare double @llvm.pow.f64(double, double) #0
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { nounwind readnone speculatable }
 "
 `;
 
