@@ -5,6 +5,7 @@
  */
 
 declare function fetch(url: string): Promise<any>;
+declare var window: any;
 
 enum Allocation {
     /**
@@ -100,7 +101,12 @@ function __moduleLoader(this: any, wasmUri: string, options: { totalStack: numbe
         let instance: WebAssemblyInstance;
 
         let wasmLoaded: Promise<ArrayBuffer>;
-        if (typeof fetch ==="function") {
+        // browser
+        if (typeof window !== "undefined") {
+            if (typeof fetch !=="function") {
+                throw new Error("Your browser does not support the fetch API. Include a fetch polyfill to load the WASM module");
+            }
+
             wasmLoaded = fetch(wasmUri).then(function (response: any) {
                 if (response.ok) {
                     return response.arrayBuffer();
@@ -108,10 +114,13 @@ function __moduleLoader(this: any, wasmUri: string, options: { totalStack: numbe
 
                 throw new Error("Failed to load WASM module from " + wasmUri + " (" + response.statusText + ").");
             });
-        } else if (typeof module !== 'undefined' && module.exports && typeof (require) === "function") {
+        } else if (typeof module !== 'undefined' && module.exports) { // Node.js
             wasmLoaded = new Promise(function (resolve, reject) {
-                const fs = require("fs");
-                const path = require("path");
+                // trick webpack to not detect the require call. Webpack should not include the required files as we only
+                // want to execute this code if we are in node and use the fetch api in the browser.
+                const req = (module as any)["require"] as NodeRequire;
+                const fs = req("fs");
+                const path = req("path");
                 fs.readFile(path.join(__dirname, wasmUri), function (error: any, data: Buffer) {
                     if (error) {
                         reject(error);
@@ -121,7 +130,7 @@ function __moduleLoader(this: any, wasmUri: string, options: { totalStack: numbe
                 });
             });
         } else {
-            throw new Error("Unknown environment, failed to laod WASM module");
+            throw new Error("Unknown environment, can not load WASM module");
         }
 
         return wasmLoaded.then(function (buffer) {
