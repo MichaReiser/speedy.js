@@ -51,7 +51,7 @@ function parseCommandLine(): CommandLineArguments {
         .option("--binaryen-opt", "Optimize using Binaryen opt")
         .option("--expose-gc", "Exposes the speedy js garbage collector in the module as speedyJsGc")
         .option("--export-gc", "Exposes and exports the speedy js garbage collector as the symbol speedyJsGc")
-        .option("--disable-heap-nuke-on-exit", "Disables nuking of the heap prior to the exit of the entry function (its your responsible to call the gc in this case!)")
+        .option("--disable-heap-nuke-on-exit", "Disables nuking of the heap before to the exit of the entry function (it's your responsible for calling the GC in this case!)")
         .option("--optimization-level [value]", "The optimization level to use. One of the following values: '0, 1, 2, 3, s or z'")
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);

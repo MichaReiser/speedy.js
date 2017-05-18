@@ -29,7 +29,9 @@ module.exports = {
         ]
     },
     node: {
-        fs: "empty" // mock fs as empty module. Needed for EMCC modules
+        fs: "empty",
+        path: "empty",
+        Buffer: false
     },
     devServer: {
         compress: true

@@ -13,7 +13,7 @@ import {TypeChecker} from "../../type-checker";
 export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFileRewirter {
 
     private loadWasmFunctionIdentifier: ts.Identifier | undefined;
-    private wasmOutput: Buffer | undefined;
+    private wasmUrl: string | undefined;
     private wastMetaData: Partial<WastMetaData> = {};
 
     constructor(private typeChecker: TypeChecker, private compilerOptions: SpeedyJSCompilerOptions) {}
@@ -22,8 +22,8 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         this.wastMetaData = metadata;
     }
 
-    setWasmOutput(output: Buffer): void {
-        this.wasmOutput = output;
+    setWasmUrl(wasmUrl: string): void {
+        this.wasmUrl = wasmUrl;
     }
 
     /**
@@ -83,6 +83,8 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
     }
 
     rewriteSourceFile(sourceFile: ts.SourceFile, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.SourceFile {
+        assert (this.wasmUrl, `No wasm fetch expression set but requested to transform the source file`);
+
         if (!this.loadWasmFunctionIdentifier) {
             return sourceFile;
         }
@@ -98,7 +100,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         ], true);
 
         const initializer = ts.createCall(ts.createIdentifier(MODULE_LOADER_FACTORY_NAME), [], [
-            this.getWasmBinary(),
+            ts.createLiteral(this.wasmUrl!),
             options
         ]);
 
@@ -118,19 +120,6 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const statements = sourceFile.statements;
         statements.unshift(...statementsToInsert);
         return ts.updateSourceFileNode(sourceFile, statements);
-    }
-
-    private getWasmBinary(): ts.Expression {
-        assert (this.wasmOutput, `No wasm output set but requested to transform the source file`);
-        const buffer = this.wasmOutput!;
-
-        let elements: ts.Expression[] = new Array<ts.Expression>(buffer.length);
-        for (let i = 0; i < buffer.length; ++i) {
-            elements[i] = ts.createNumericLiteral(buffer[i] + "");
-        }
-
-        const uint8From = ts.createPropertyAccess(ts.createIdentifier("Uint8Array"), ts.createIdentifier("from"));
-        return ts.createCall(uint8From, [], [ts.createArrayLiteral(elements)]);
     }
 
     private castReturnValue(returnValue: ts.Expression, type: ts.Type): ts.Expression {

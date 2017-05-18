@@ -13,10 +13,10 @@ export interface PerFileSourceFileRewirter {
     setWastMetaData(metadata: WastMetaData): void;
 
     /**
-     * Sets the output for this source file
-     * @param output the output
+     * Sets the url to the wasm file
+     * @param wasmUrl the url to the wasm file
      */
-    setWasmOutput(output: Buffer): void;
+    setWasmUrl(wasmUrl: string): void;
 
     /**
      * Rewrites a SpeedyJS entry function

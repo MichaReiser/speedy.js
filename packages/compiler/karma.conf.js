@@ -48,7 +48,12 @@ module.exports = function (config) {
                         }
                     }
                 ]
-            }
+            },
+            node: {
+                fs: "empty",
+                path: "empty",
+                Buffer: false
+            },
         },
         webpackMiddleware: {
             stats: {

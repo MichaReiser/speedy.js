@@ -21,6 +21,19 @@ function parseConfigFile(configFileName) {
 function speedyJSLoader(source) {
     const loader = this;
 
+
+    const wasmFileWriter = {
+        writeWasmFile(fileName, content, codeGenerationContext) {
+            const relativeFileName = path.relative(fileName, loader.resourcePath);
+
+            const baseName = path.basename(fileName);
+            const resourceName = loaderUtils.getHashDigest(content, "md5", "hex", 10) + "." + baseName;
+            loader.emitFile(resourceName, content);
+
+            return (loader.options.output.publicPath || "") + resourceName;
+        }
+    };
+
     function getCompilerOptions(options) {
         const configFile = options.configFileName || ts.findConfigFile(path.dirname(loader.resourcePath), ts.sys.fileExists);
         let compilerOptions;
@@ -40,6 +53,8 @@ function speedyJSLoader(source) {
             compilerOptions[key] = options.speedyJS[key];
         }
 
+        compilerOptions.wasmFileWriter = wasmFileWriter;
+
         return { compilerOptions: compilerOptions };
     }
 
@@ -55,6 +70,7 @@ function speedyJSLoader(source) {
         errors = result.diagnostics;
     }
 
+    const callback = this.async();
     if (errors && errors.length !== 0) {
         const message = speedyjs.formatDiagnostics(errors);
         const error = {
@@ -62,11 +78,11 @@ function speedyJSLoader(source) {
             message: message,
             loaderSource: "speedyjs-loader"
         };
-        this.callback(error);
+        callback(error);
     } else {
         const output = makeSourceMap(result.sourceMapText, result.outputText, this.resourcePath + ".ts", source, this);
 
-        this.callback(null, output.source, output.sourceMap);
+        callback(null, output.source, output.sourceMap);
     }
 
 }
