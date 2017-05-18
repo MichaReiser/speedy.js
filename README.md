@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/MichaReiser/speedy.js.svg?token=zNrpU9MqErk5Uafzosnz&branch=master)](https://travis-ci.com/MichaReiser/speedy.js)
 
-Speedy.js is a compiler for a well considered, performance pitfalls free subset of JavaScript targeting WebAssembly. Because WebAssembly is statically-typed, the project uses TypeScript as type-checker and to resolve the types of the program symbols. 
+Speedy.js is a compiler for a well considered, performance pitfalls free [subset of JavaScript](https://github.com/MichaReiser/speedy.js/wiki/Language-Reference) targeting WebAssembly. Because WebAssembly is statically-typed, the project uses TypeScript as type-checker and to resolve the types of the program symbols. 
 
 The project is very experimental and still far away from being production ready. 
  
