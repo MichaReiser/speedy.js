@@ -1,4 +1,6 @@
 import {CompilerOptions} from "typescript";
+import {WasmFileWriter} from "./wasm-file-writer";
+import {DefaultWasmFileWriter} from "./default-wasm-file-writer";
 
 export type OptimizationLevel = "0" | "1" | "2" | "3" | "z" | "s";
 
@@ -6,6 +8,7 @@ export type OptimizationLevel = "0" | "1" | "2" | "3" | "z" | "s";
  * Speedy JS Compiler Options
  */
 export interface SpeedyJSCompilerOptions extends CompilerOptions {
+    [option: string]: any;
 
     /**
      * Indicator if the emitted code and runtime should be memory safe or unsafe (truthy)
@@ -81,6 +84,11 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
      * @default "3"
      */
     optimizationLevel: OptimizationLevel;
+
+    /**
+     * The implementation that writes the wasm file
+     */
+    wasmFileWriter: WasmFileWriter;
 }
 
 /**
@@ -103,12 +111,13 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         binaryenOpt: false,
         initialMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,
-        globalBase: 1024,
+        globalBase: 8,
         saveBc: false,
         disableHeapNukeOnExit: false,
         exposeGc: false,
         exportGc: false,
-        optimizationLevel: "2"
+        optimizationLevel: "2",
+        wasmFileWriter: new DefaultWasmFileWriter()
     };
 
     for (const key of Object.keys(defaults)) {
@@ -118,6 +127,7 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
     compilerOptions.strictNullChecks = true;
     compilerOptions.noImplicitAny = true; // speedy js cannot handle any
     compilerOptions.noImplicitReturns = true;
+    compilerOptions.lib = compilerOptions.lib || ["lib.es2015.d.ts" ];
 
     return compilerOptions as SpeedyJSCompilerOptions;
 }

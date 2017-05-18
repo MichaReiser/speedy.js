@@ -4,6 +4,8 @@
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
 
+declare function fetch(url: string): Promise<any>;
+
 enum Allocation {
     /**
      * Tries to use _malloc()
@@ -36,7 +38,7 @@ interface ModuleLoader {
     gc(): void;
 }
 
-function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: number, initialMemory: number, globalBase: number, staticBump: number }): ModuleLoader {
+function __moduleLoader(this: any, wasmUri: string, options: { totalStack: number, initialMemory: number, globalBase: number, staticBump: number }): ModuleLoader {
     const TOTAL_STACK = options.totalStack;
     const INITIAL_MEMORY = options.initialMemory;
     let totalMemory = INITIAL_MEMORY;
@@ -97,53 +99,81 @@ function __moduleLoader(this: any, bytes: Uint8Array, options: { totalStack: num
     function loadInstance(): Promise<WebAssemblyInstance> {
         let instance: WebAssemblyInstance;
 
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                "__cxa_allocate_exception": function () {
-                    console.log("__cxa_allocate_exception", arguments);
-                },
-                "__cxa_throw": function () {
-                    console.log("__cxa_throw", arguments);
-                },
-                "__cxa_find_matching_catch_2": function () {
-                    console.log("__cxa_find_matching_catch_2", arguments);
-                },
-                "__cxa_free_exception": function () {
-                    console.log("__cxa_free_exception", arguments);
-                },
-                "__resumeException": function () {
-                    console.log("__resumeException", arguments);
-                },
-                "__cxa_atexit": function () {
-                    console.log("__cxa_atexit", arguments);
-                },
-                "pow": Math.pow,
-                "fmod": function frem(x: number, y: number) {
-                    return x % y;
-                },
-                "abort": function (what: any) {
-                    console.error("Abort WASM for reason: " + what);
-                },
-                "invoke_ii": function (index: number, a1: number) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                "invoke_iii": function (index: number, a1: number, a2: number) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                "invoke_iiii": function (index: number, a1: number, a2: number, a3: number) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                "invoke_iiiii": function (index: number, a1: number, a2: number, a3: number, a4: number) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                "invoke_viii": function (index: void, a1: number, a2: number, a3: number) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                "sbrk": sbrk
-            }
+        let wasmLoaded: Promise<ArrayBuffer>;
+        if (typeof fetch ==="function") {
+            wasmLoaded = fetch(wasmUri).then(function (response: any) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+
+                throw new Error("Failed to load WASM module from " + wasmUri + " (" + response.statusText + ").");
+            });
+        } else if (typeof module !== 'undefined' && module.exports && typeof (require) === "function") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                const fs = require("fs");
+                const path = require("path");
+                fs.readFile(path.join(__dirname, wasmUri), function (error: any, data: Buffer) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        } else {
+            throw new Error("Unknown environment, failed to laod WASM module");
+        }
+
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    "__cxa_allocate_exception": function () {
+                        console.log("__cxa_allocate_exception", arguments);
+                    },
+                    "__cxa_throw": function () {
+                        console.log("__cxa_throw", arguments);
+                    },
+                    "__cxa_find_matching_catch_2": function () {
+                        console.log("__cxa_find_matching_catch_2", arguments);
+                    },
+                    "__cxa_free_exception": function () {
+                        console.log("__cxa_free_exception", arguments);
+                    },
+                    "__resumeException": function () {
+                        console.log("__resumeException", arguments);
+                    },
+                    "__cxa_atexit": function () {
+                        console.log("__cxa_atexit", arguments);
+                    },
+                    "pow": Math.pow,
+                    "fmod": function frem(x: number, y: number) {
+                        return x % y;
+                    },
+                    "abort": function (what: any) {
+                        console.error("Abort WASM for reason: " + what);
+                    },
+                    "invoke_ii": function (index: number, a1: number) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    "invoke_iii": function (index: number, a1: number, a2: number) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    "invoke_iiii": function (index: number, a1: number, a2: number, a3: number) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    "invoke_iiiii": function (index: number, a1: number, a2: number, a3: number, a4: number) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    "invoke_viii": function (index: void, a1: number, a2: number, a3: number) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    "sbrk": sbrk
+                }
+        });
+
         }).then(result => instance = result.instance);
     }
 

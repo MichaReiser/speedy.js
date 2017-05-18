@@ -286,12 +286,14 @@ class BinaryenOptTransformationStep implements TransformationStep {
 }
 
 class WasmToAsTransformationStep implements TransformationStep {
-    transform(inputFileName: string, { buildDirectory, plainFileName, sourceFileRewriter}: TransformationContext): string {
+    transform(inputFileName: string, { buildDirectory, plainFileName, sourceFileRewriter, sourceFile, codeGenerationContext}: TransformationContext): string {
         const wasmFileName = buildDirectory.getTempFileName(`${plainFileName}.wasm`);
         wasmAs(inputFileName, wasmFileName);
 
-        const buffer = fs.readFileSync(wasmFileName);
-        sourceFileRewriter.setWasmOutput(buffer);
+        const wasmFileWriter = codeGenerationContext.compilationContext.compilerOptions.wasmFileWriter;
+        const finalWasmFileName = getOutputFileName(sourceFile, codeGenerationContext);
+        const wasmFetchExpression = wasmFileWriter.writeWasmFile(finalWasmFileName, fs.readFileSync(wasmFileName), codeGenerationContext);
+        sourceFileRewriter.setWasmUrl(wasmFetchExpression);
 
         return wasmFileName;
     }

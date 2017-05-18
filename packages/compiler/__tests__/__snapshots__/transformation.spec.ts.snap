@@ -29,7 +29,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -76,53 +76,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -146,10 +174,10 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 141, 128, 128, 128, 0, 1, 9, 95, 105, 115, 84, 114, 117, 116, 104, 121, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 139, 128, 128, 128, 0, 1, 133, 128, 128, 128, 0, 0, 32, 0, 69, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./istruthy.wasm\\", {
     totalStack: 532480,
     initialMemory: 16777216,
-    globalBase: 1024,
+    globalBase: 8,
     staticBump: 8,
     exposeGc: false
 });
@@ -221,7 +249,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -268,53 +296,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -338,10 +394,10 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
     totalStack: 532480,
     initialMemory: 16777216,
-    globalBase: 1024,
+    globalBase: 8,
     staticBump: 8,
     exposeGc: true
 });
@@ -379,7 +435,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -426,53 +482,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -496,10 +580,10 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
     totalStack: 532480,
     initialMemory: 16777216,
-    globalBase: 1024,
+    globalBase: 8,
     staticBump: 8,
     exposeGc: true
 });
@@ -537,7 +621,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -584,53 +668,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -654,7 +766,7 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
     totalStack: 532480,
     initialMemory: 16777216,
     globalBase: 4000,
@@ -694,7 +806,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -741,53 +853,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -811,10 +951,10 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 160, 1, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
     totalStack: 532480,
     initialMemory: 10485760,
-    globalBase: 1024,
+    globalBase: 8,
     staticBump: 8,
     exposeGc: false
 });
@@ -851,7 +991,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -898,53 +1038,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -968,10 +1136,10 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
     totalStack: 1048576,
     initialMemory: 16777216,
-    globalBase: 1024,
+    globalBase: 8,
     staticBump: 8,
     exposeGc: false
 });
@@ -1008,7 +1176,7 @@ var Allocation;
      */
     Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
 })(Allocation || (Allocation = {}));
-function __moduleLoader(bytes, options) {
+function __moduleLoader(wasmUri, options) {
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -1055,53 +1223,81 @@ function __moduleLoader(bytes, options) {
     }
     function loadInstance() {
         var instance;
-        return WebAssembly.instantiate(bytes.buffer, {
-            env: {
-                memory: memory,
-                STACKTOP: STACK_TOP,
-                __dso_handle: 0,
-                \\"__cxa_allocate_exception\\": function () {
-                    console.log(\\"__cxa_allocate_exception\\", arguments);
-                },
-                \\"__cxa_throw\\": function () {
-                    console.log(\\"__cxa_throw\\", arguments);
-                },
-                \\"__cxa_find_matching_catch_2\\": function () {
-                    console.log(\\"__cxa_find_matching_catch_2\\", arguments);
-                },
-                \\"__cxa_free_exception\\": function () {
-                    console.log(\\"__cxa_free_exception\\", arguments);
-                },
-                \\"__resumeException\\": function () {
-                    console.log(\\"__resumeException\\", arguments);
-                },
-                \\"__cxa_atexit\\": function () {
-                    console.log(\\"__cxa_atexit\\", arguments);
-                },
-                \\"pow\\": Math.pow,
-                \\"fmod\\": function frem(x, y) {
-                    return x % y;
-                },
-                \\"abort\\": function (what) {
-                    console.error(\\"Abort WASM for reason: \\" + what);
-                },
-                \\"invoke_ii\\": function (index, a1) {
-                    return instance.exports.dynCall_ii(index, a1);
-                },
-                \\"invoke_iii\\": function (index, a1, a2) {
-                    return instance.exports.dynCall_iii(index, a1, a2);
-                },
-                \\"invoke_iiii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_iiii(index, a1, a2, a3);
-                },
-                \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
-                    return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
-                },
-                \\"invoke_viii\\": function (index, a1, a2, a3) {
-                    return instance.exports.dynCall_viii(index, a1, a2, a3);
-                },
-                \\"sbrk\\": sbrk
-            }
+        var wasmLoaded;
+        if (typeof fetch === \\"function\\") {
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports && typeof (require) === \\"function\\") {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                var fs = require(\\"fs\\");
+                var path = require(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, failed to laod WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function () {
+                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        console.log(\\"__cxa_throw\\", arguments);
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                    },
+                    \\"__cxa_free_exception\\": function () {
+                        console.log(\\"__cxa_free_exception\\", arguments);
+                    },
+                    \\"__resumeException\\": function () {
+                        console.log(\\"__resumeException\\", arguments);
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        console.log(\\"__cxa_atexit\\", arguments);
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
         }).then(function (result) { return instance = result.instance; });
     }
     var speedyJsGc;
@@ -1125,10 +1321,10 @@ function __moduleLoader(bytes, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(Uint8Array.from([0, 97, 115, 109, 1, 0, 0, 0, 1, 134, 128, 128, 128, 0, 1, 96, 1, 127, 1, 127, 2, 144, 128, 128, 128, 0, 1, 3, 101, 110, 118, 6, 109, 101, 109, 111, 114, 121, 2, 0, 128, 2, 3, 130, 128, 128, 128, 0, 1, 0, 4, 132, 128, 128, 128, 0, 1, 112, 0, 0, 7, 136, 128, 128, 128, 0, 1, 4, 95, 102, 105, 98, 0, 0, 9, 129, 128, 128, 128, 0, 0, 10, 195, 128, 128, 128, 0, 1, 189, 128, 128, 128, 0, 1, 1, 127, 2, 127, 65, 1, 33, 1, 2, 64, 32, 0, 65, 3, 72, 13, 0, 65, 1, 33, 1, 32, 0, 65, 1, 106, 33, 0, 3, 64, 32, 0, 65, 125, 106, 16, 0, 32, 1, 106, 33, 1, 32, 0, 65, 127, 106, 34, 0, 65, 3, 74, 13, 0, 11, 11, 32, 1, 11, 11]), {
+const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
     totalStack: 532480,
     initialMemory: 16777216,
-    globalBase: 1024,
+    globalBase: 8,
     staticBump: 8,
     exposeGc: false
 });

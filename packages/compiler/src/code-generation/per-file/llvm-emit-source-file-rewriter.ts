@@ -9,7 +9,7 @@ export class NoopSourceFileRewriter implements PerFileSourceFileRewirter {
     setWastMetaData(metadata: WastMetaData): void {
         // noop
     }
-    setWasmOutput(output: Buffer): void {
+    setWasmUrl(wasmUrl: string): void {
         // noop
     }
 

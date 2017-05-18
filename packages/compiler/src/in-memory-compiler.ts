@@ -87,11 +87,11 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
             if (name.endsWith(".map")) {
                 assert(sourceMapText === undefined, `Unexpected multiple source map outputs for the file '${name}'`);
                 sourceMapText = text;
-            }
-            else {
+            } else if (name.endsWith(".js")) {
                 assert(outputText === undefined, `Unexpected multiple outputs for the file: '${name}'`);
                 outputText = text;
             }
+            // not interested in wasm file
         }
     };
 
