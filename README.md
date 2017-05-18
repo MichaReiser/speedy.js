@@ -64,7 +64,7 @@ function fibSync(value: int): int {
 }
 
 async function main() {
-	console.log(await fib(40));
+    console.log(await fib(40));
 }
 ```
 
