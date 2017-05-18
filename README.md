@@ -78,7 +78,7 @@ node packages/compiler/cli.js fib.ts
 
 which outputs the `fib.js` file. 
 
-To compile all files in the current directory omit any file names or pass multiple file names to the CLI.
+To compile all files in the current directory omit any file names or pass multiple file names to the CLI. More details about how to use the CLI is documented in [the wiki](https://github.com/MichaReiser/speedy.js/wiki/CLI).
 
 ## WebPack Loader
 
