@@ -234,11 +234,11 @@ public:
     }
 
     Array<T>* splice(int32_t index, int32_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {
-#ifdef SAFE
         if (index < 0) {
             index = length() + index;
         }
 
+#ifdef SAFE
         index = std::max(std::min(index, length()), 0);
         deleteCount = std::min(std::max(deleteCount, 0), length() - index);
 #endif
