@@ -4,7 +4,6 @@ import * as tmp from "tmp";
 import * as ts from "typescript";
 import {Compiler} from "../../src/compiler";
 import {initializeCompilerOptions, SpeedyJSCompilerOptions} from "../../src/speedyjs-compiler-options";
-import {dir} from "tmp";
 
 const CASE_REGEX = /\.ts$/;
 const TEST_CASES_DIR = path.resolve(__dirname, "./cases");
@@ -32,6 +31,7 @@ export function runCases(name: string, directory: string) {
 
             const options = ts.parseJsonConfigFileContent(optionsAsJson, ts.sys, __dirname, ts.getDefaultCompilerOptions(), tsConfigName).options as SpeedyJSCompilerOptions;
             options.emitLLVM = true;
+            options.unsafe = false;
             options.rootDir = TEST_CASES_DIR;
             options.outDir = OUT_DIR;
             compilerOptions = initializeCompilerOptions(options);

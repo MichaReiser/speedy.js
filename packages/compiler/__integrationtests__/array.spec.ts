@@ -7,23 +7,36 @@ class Point {
     }
 }
 
-async function emptyArrayLiteral(): Promise<int> {
+async function emptyArrayLiteral(): Promise<int[]> {
     "use speedyjs";
 
-    const array: int[] = [];
-    return array.length;
+    return [];
 }
 
-async function arrayFromLiteral(index: int) {
+async function arrayFromLiteral() {
     "use speedyjs";
-    const array = [1, 2, 3, 4, 5];
-    return array[index];
+    return [1, 2, 3, 4, 5];
+}
+
+async function boolArrayJS2Wasm(array: boolean[]) {
+    "use speedyjs";
+    return array;
+}
+
+async function intArrayJS2Wasm(array: int[]) {
+    "use speedyjs";
+    return array;
+}
+
+async function numberArrayJS2Wasm(array: number[]) {
+    "use speedyjs";
+    return array;
 }
 
 async function newEmptyArray() {
     "use speedyjs";
 
-    return new Array<boolean>().length;
+    return new Array<boolean>();
 }
 
 async function newArrayOfObjects(x: number) {
@@ -41,21 +54,26 @@ async function newArrayOfObjects(x: number) {
 async function newArrayOfSize(size: int) {
     "use speedyjs";
 
-    return new Array<number>(size).length;
+    return new Array<number>(size);
 }
 
 async function newArrayWithElements(a: int, b: int, c: int) {
     "use speedyjs";
 
-    return new Array<int>(a, b, c).length;
+    return new Array<int>(a, b, c);
 }
 
-async function arrayElementAccess(index: int, value: number) {
+async function arrayGet(array: number[], index: int) {
     "use speedyjs";
 
-    const array = new Array<number>(index * 2);
-    array[index] = value;
     return array[index];
+}
+
+async function arraySet(array: number[], index: int, value: number) {
+    "use speedyjs";
+
+    array[index] = value;
+    return array;
 }
 
 async function objectArrayElementAccess(x: number) {
@@ -71,72 +89,60 @@ async function objectArrayElementAccess(x: number) {
     return tmp.x;
 }
 
-async function arrayFill(size: int, value: number) {
+async function arrayFill(array: number[], value: number) {
     "use speedyjs";
 
-    const array = new Array<number>(size);
     array.fill(value);
 
-    return array[0] + array[array.length - 1];
+    return array;
 }
 
-async function arrayFillFromStart(size: int, value: int, start: int) {
+async function arrayFillFromStart(array: number[], value: number, start: int) {
     "use speedyjs";
 
-    const array = new Array<int>(size);
     array.fill(value, start);
 
-    return array[0] + array[start - 1] + array[start] + array[array.length - 1];
+    return array;
 }
 
-async function arrayFillInBetween(size: int, value: number, start: int, end: int) {
+async function arrayFillInBetween(array: number[], value: number, start: int, end: int) {
     "use speedyjs";
 
-    const array = new Array<number>(size);
     array.fill(value, start, end);
 
-    return array[0] + array[start - 1] + array[start] + array[end - 1] + array[end];
+    return array;
 }
 
-async function arrayPush(value: boolean) {
+async function arrayPush(array: boolean[], value: boolean) {
     "use speedyjs";
 
-    const array = new Array<boolean>(10);
-    const previousLength = array.length;
     array.push(value);
-    return array[previousLength];
+    return array;
 }
 
-async function arrayPushMultiple(a: boolean, b: boolean, c: boolean) {
+async function arrayPushMultiple(array: boolean[], a: boolean, b: boolean, c: boolean) {
     "use speedyjs";
 
-    const array = new Array<boolean>(10);
-    const previousLength = array.length;
     array.push(a, b, c);
-    return array.length - previousLength;
+    return array;
 }
 
-async function arrayUnshift(value: int) {
+async function arrayUnshift(array: int[], value: int) {
     "use speedyjs";
 
-    const array = new Array<int>(10);
     array.unshift(value);
-    return array[0];
+    return array;
 }
 
-async function arrayUnshiftMultiple(a: int, b: int, c: int) {
+async function arrayUnshiftMultiple(array: int[], a: int, b: int, c: int) {
     "use speedyjs";
-
-    const array = new Array<int>(10);
-    const previousLength = array.length;
     array.unshift(a, b, c);
-    return array.length - previousLength;
+    return array;
 }
 
-async function arrayPop() {
+async function arrayPop(array: int[]) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4];
     return array.length - array.pop()!;
 }
 
@@ -147,91 +153,81 @@ async function arrayShift() {
     return array.length - array.shift()!;
 }
 
-async function arraySplice() {
+async function arraySplice(array: int[], start: int) {
     "use speedyjs";
+
+    array.splice(start);
     
-    const array = [1, 2, 3, 4, 5];
-    array.splice(2);
-    
-    return array.length;
+    return array;
 }
 
-async function arraySpliceWithDeleteCount() {
+async function arraySpliceWithDeleteCount(array: int[], start: int, deleteCount: int) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4, 5];
-    array.splice(2, 2);
+    array.splice(start, deleteCount);
 
-    return array.length;
+    return array;
 }
 
-async function arraySpliceInsertingNewElements() {
+async function arraySpliceInsertingNewElements(array: int[], start: int, deleteCount: int, a: int, b: int, c: int, d: int) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4, 5];
-    array.splice(2, 2, 10, 11, 12, 13, 14);
+    array.splice(start, deleteCount, a, b, c, d);
 
-    return array.length;
+    return array;
 }
 
-async function arraySpliceReturnedArray() {
+async function arraySpliceReturnedArray(array: int[]) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4, 5];
-    return array.splice(2).length;
+    return array.splice(2);
 }
 
-async function arraySliceCompleteArray() {
+async function arraySliceCompleteArray(array: int[]) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4, 5];
-    return array.slice().length;
+    return array.slice();
 }
 
-async function arraySliceFrom(start: int) {
+async function arraySliceFrom(array: int[], start: int) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4, 5];
-    return array.slice(start).length;
+    return array.slice(start);
 }
 
-async function arraySliceInBetween(start: int, end: int) {
+async function arraySliceInBetween(array: int[], start: int, end: int) {
     "use speedyjs";
 
-    const array = [1, 2, 3, 4, 5];
-    return array.slice(start, end).length;
+    return array.slice(start, end);
 }
 
 describe("Array", () => {
+
     describe("[]", () => {
         it("creates an empty array", async (cb) => {
-            expect(await emptyArrayLiteral()).toBe(0);
+            expect(await emptyArrayLiteral()).toEqual([] as int[]);
             cb();
         });
 
         it("creates an array with the elements specified in the array literal", async (cb) => {
-            expect(await arrayFromLiteral(0)).toBe(1);
-            expect(await arrayFromLiteral(1)).toBe(2);
-            expect(await arrayFromLiteral(2)).toBe(3);
-            expect(await arrayFromLiteral(3)).toBe(4);
-            expect(await arrayFromLiteral(4)).toBe(5);
+            expect(await arrayFromLiteral()).toEqual([1, 2, 3, 4, 5]);
             cb();
         });
     });
 
     describe("new Array", () => {
         it("creates an empty array if called without any arguments", async (cb) => {
-            expect(await newEmptyArray()).toBe(0);
+            expect(await newEmptyArray()).toEqual([]);
             cb();
         });
 
         it("creates an array with the specified length", async (cb) => {
-            expect(await newArrayOfSize(10000)).toBe(10000);
+            expect(await newArrayOfSize(10)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             cb();
         });
 
         it("creates an array containing the specified elements", async (cb) => {
-            expect(await newArrayWithElements(10, 20, 30)).toBe(3);
+            expect(await newArrayWithElements(10, 20, 30)).toEqual([10, 20, 30]);
             cb();
         });
 
@@ -242,8 +238,13 @@ describe("Array", () => {
     });
 
     describe("array[x]", () => {
-        it("sets and returns the value at the given index", async (cb) => {
-            expect(await arrayElementAccess(40, 1000)).toBe(1000);
+        it("gets the value at the given index", async (cb) => {
+            expect(await arrayGet([1, 2, 3, 4], 2)).toBe(3);
+            cb();
+        });
+
+        it("sets the value at the given index", async (cb) => {
+            expect(await arraySet([1, 2, 3, 4], 2, 10)).toEqual([1, 2, 10, 4]);
             cb();
         });
 
@@ -253,50 +254,73 @@ describe("Array", () => {
         });
     });
 
-    describe("fill", () => {
-        it("fills the array with the specified value from 0 to end", async (cb) => {
-            expect(await arrayFill(100, 1.5)).toBe(3);
+    describe("wasm2js conversion", () => {
+        it("converts the JS boolean array to a WASM boolean array and vice versa", async (cb) => {
+            expect(await boolArrayJS2Wasm([true, false, true, true, false])).toEqual([true, false, true, true, false]);
             cb();
         });
 
-        it("fills the array with the specified value from the specified start to the end", async (cb) => {
-            expect(await arrayFillFromStart(100, 10, 30)).toBe(0 + 0 + 10 + 10);
+        it("converts the JS int array to a WASM int array and vice versa", async (cb) => {
+            expect(await intArrayJS2Wasm([1, 2, 3, 4, 5])).toEqual([1, 2, 3, 4, 5]);
+            cb();
+        });
+
+        it("converts the JS number array to a WASM double array and vice versa", async (cb) => {
+            expect(await numberArrayJS2Wasm([1.1, 2.2, 3.3, 4.4, 5.5])).toEqual([1.1, 2.2, 3.3, 4.4, 5.5]);
+            cb();
+        });
+    });
+
+    describe("fill", () => {
+        it("fills the array with the specified value from 0 to end", async (cb) => {
+            expect(await arrayFill(new Array<number>(10), 1.5)).toEqual([1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]);
+            cb();
+        });
+
+        it("fills the array with the specified value from the specified start up to the array end", async (cb) => {
+            expect(await arrayFillFromStart(new Array<number>(10), 2.0, 3)).toEqual([NaN, NaN, NaN, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
             cb();
         });
 
         it("fills the array with the specified value between the defined start and end positions", async (cb) => {
-            expect(await arrayFillInBetween(100, 10, 30, 80)).toBe(0 + 0 + 10 + 10 + 0);
+            expect(await arrayFillInBetween(new Array<number>(10), 2.0, 3, 8)).toEqual([NaN, NaN, NaN, 2.0, 2.0, 2.0, 2.0, 2.0, NaN, NaN]);
             cb();
         });
     });
 
     describe("push", () => {
         it("inserts the new element at the end of the array", async (cb) => {
-            expect(await arrayPush(true)).toBe(true);
+            const pushed = await arrayPush([true, false], true);
+            expect(pushed).toEqual([true, false, true]);
             cb();
         });
 
         it("inserts all elements at the end of the array", async (cb) => {
-            expect(await arrayPushMultiple(true, false, true)).toBe(3);
+            const pushed = await arrayPushMultiple([true, false], true, false, true);
+            expect(pushed).toEqual([true, false, true, false, true]);
             cb();
         });
     });
 
     describe("unshift", () => {
         it("inserts the element at the start of the array", async (cb) => {
-            expect(await arrayUnshift(10)).toBe(10);
+            const array = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const unshifted = await arrayUnshift(array, 0);
+            expect(unshifted).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
             cb();
         });
 
-        it("inserts all the elements at the begining of the array", async (cb) => {
-            expect(await arrayUnshiftMultiple(1, 2, 3)).toBe(3);
+        it("inserts all the elements at the beginning of the array", async (cb) => {
+            const array = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const unshifted = await arrayUnshiftMultiple(array, -2, -1, 0);
+            expect(unshifted).toEqual([-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
             cb();
         });
     });
 
     describe("pop", () => {
         it("removes and returns the last element", async (cb) => {
-            expect(await arrayPop()).toBe(0);
+            expect(await arrayPop([1, 2, 3, 4])).toBe(0);
             cb();
         });
     });
@@ -310,43 +334,43 @@ describe("Array", () => {
     
     describe("splice", () => {
         it("removes all elements from the given start index if delete count is not defined", async (cb) => {
-            expect(await arraySplice()).toBe(2);
+            expect(await arraySplice([1, 2, 3, 4, 5], 2)).toEqual([1, 2]);
             cb();
         });
 
         it("removes deleteCount num elements from the specified start index", async (cb) => {
-            expect(await arraySpliceWithDeleteCount()).toBe(3);
+            expect(await arraySpliceWithDeleteCount([1, 2, 3, 4, 5], 2, 2)).toEqual([1, 2, 5]);
             cb();
         });
 
         it("inserts the new elements", async (cb) => {
-            expect(await arraySpliceInsertingNewElements()).toBe(8);
+            expect(await arraySpliceInsertingNewElements([1, 2, 3, 4, 5], 2, 2, 10, 11, 12, 13)).toEqual([1, 2, 10, 11, 12, 13, 5]);
             cb();
         });
 
         it("returns an array containing the removed elements", async (cb) => {
-            expect(await arraySpliceReturnedArray()).toBe(3);
+            expect(await arraySpliceReturnedArray([1, 2, 3, 4, 5])).toEqual([3, 4, 5]);
             cb();
         });
     });
 
     describe("slice", () => {
         it("returns an array containing all elements if called without any arguments", async (cb) => {
-            expect(await arraySliceCompleteArray()).toBe(5);
+            expect(await arraySliceCompleteArray([1, 2, 3, 4, 5])).toEqual([1, 2, 3, 4, 5]);
             cb();
         });
 
         it("returns a subset of the array containing the elements from the specified start", async (cb) => {
-            expect(await arraySliceFrom(2)).toBe(3);
-            expect(await arraySliceFrom(-2)).toBe(2);
-            expect(await arraySliceFrom(5)).toBe(0);
+            expect(await arraySliceFrom([1, 2, 3, 4, 5], 2)).toEqual([3, 4, 5]);
+            expect(await arraySliceFrom([1, 2, 3, 4, 5], -2)).toEqual([4, 5]);
+            expect(await arraySliceFrom([1, 2, 3, 4, 5], 5)).toEqual([]);
             cb();
         });
 
         it("returns the elements in between the specified start and end", async (cb) => {
-            expect(await arraySliceInBetween(2, 4)).toBe(2);
-            expect(await arraySliceInBetween(2, -1)).toBe(2);
-            expect(await arraySliceInBetween(5, 1)).toBe(0);
+            expect(await arraySliceInBetween([1, 2, 3, 4, 5], 2, 4)).toEqual([3, 4]);
+            expect(await arraySliceInBetween([1, 2, 3, 4, 5], 2, -1)).toEqual([3, 4]);
+            expect(await arraySliceInBetween([1, 2, 3, 4, 5], 5, 1)).toEqual([]);
             cb();
         });
     });

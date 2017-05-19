@@ -4,8 +4,8 @@ import * as assert from "assert";
 import {MODULE_LOADER_FACTORY_NAME, PerFileWasmLoaderEmitHelper} from "./per-file-wasm-loader-emit-helper";
 import {PerFileSourceFileRewirter} from "./per-file-source-file-rewriter";
 import {WastMetaData} from "./wast-meta-data";
-import {SpeedyJSCompilerOptions} from "../../speedyjs-compiler-options";
-import {TypeChecker} from "../../type-checker";
+import {getArrayElementType, toLLVMType} from "../util/types";
+import {CodeGenerationContext} from "../code-generation-context";
 
 /**
  * Inserts a wasm module loader function, the wasm byte code and rewrites the entry functions to call the wasm module.
@@ -16,7 +16,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
     private wasmUrl: string | undefined;
     private wastMetaData: Partial<WastMetaData> = {};
 
-    constructor(private typeChecker: TypeChecker, private compilerOptions: SpeedyJSCompilerOptions) {}
+    constructor(private context: CodeGenerationContext) {}
 
     setWastMetaData(metadata: WastMetaData): void {
         this.wastMetaData = metadata;
@@ -43,19 +43,19 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
      */
     rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
         this.loadWasmFunctionIdentifier = this.loadWasmFunctionIdentifier || ts.createUniqueName("loadWasmModule");
-        const signature = this.typeChecker.getSignatureFromDeclaration(functionDeclaration);
+        const signature = this.context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
 
         const bodyStatements: ts.Statement[] = [];
         // const result = instance.exports.fn(args)
         const wasmExports = ts.createPropertyAccess(ts.createIdentifier("instance"), "exports");
         const targetFunction = ts.createPropertyAccess(wasmExports, name);
-        const args = signature.parameters.map(parameter => ts.createIdentifier(parameter.name));
+        const args = signature.declaration.parameters.map(parameter => this.toRuntimeArgument(parameter, this.loadWasmFunctionIdentifier!));
         const functionCall = ts.createCall(targetFunction, [], args);
-        const castedResult = this.castReturnValue(functionCall, (signature.getReturnType() as ts.TypeReference).typeArguments[0]);
+        const castedResult = this.castReturnValue(functionCall, (signature.getReturnType() as ts.TypeReference).typeArguments[0], this.loadWasmFunctionIdentifier!);
         const resultVariable = ts.createVariableDeclaration("result", undefined, castedResult);
         bodyStatements.push(ts.createVariableStatement(undefined, [resultVariable]));
 
-        if (!this.compilerOptions.disableHeapNukeOnExit) {
+        if (!this.context.compilationContext.compilerOptions.disableHeapNukeOnExit) {
             // speedyJsGc();
             bodyStatements.push(ts.createStatement(ts.createCall(ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"), [], [])));
         }
@@ -91,12 +91,14 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         requestEmitHelper(new PerFileWasmLoaderEmitHelper());
 
+        const compilerOptions = this.context.compilationContext.compilerOptions;
+
         const options = ts.createObjectLiteral([
-            ts.createPropertyAssignment("totalStack", ts.createLiteral(this.compilerOptions.totalStack)),
-            ts.createPropertyAssignment("initialMemory", ts.createLiteral(this.compilerOptions.initialMemory)),
-            ts.createPropertyAssignment("globalBase", ts.createLiteral(this.compilerOptions.globalBase)),
+            ts.createPropertyAssignment("totalStack", ts.createLiteral(compilerOptions.totalStack)),
+            ts.createPropertyAssignment("initialMemory", ts.createLiteral(compilerOptions.initialMemory)),
+            ts.createPropertyAssignment("globalBase", ts.createLiteral(compilerOptions.globalBase)),
             ts.createPropertyAssignment("staticBump", ts.createLiteral(this.wastMetaData.staticBump || 0)),
-            ts.createPropertyAssignment("exposeGc", ts.createLiteral(this.compilerOptions.exportGc || this.compilerOptions.exposeGc))
+            ts.createPropertyAssignment("exposeGc", ts.createLiteral(compilerOptions.exportGc || compilerOptions.exposeGc))
         ], true);
 
         const initializer = ts.createCall(ts.createIdentifier(MODULE_LOADER_FACTORY_NAME), [], [
@@ -106,14 +108,14 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         const statementsToInsert: ts.Statement[] = [];
 
-        // loadWasmModule = __moduleLoader(Uint8Array.from...., options }
+        // loadWasmModule = __moduleLoader(filename, options }
         const loaderDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(this.loadWasmFunctionIdentifier, undefined, initializer)], ts.NodeFlags.Const);
         statementsToInsert.push(ts.createVariableStatement([], loaderDeclaration));
 
         // export let speedyJsGc = loadWasmModule_1.gc; or without export if only expose
-        if (this.compilerOptions.exposeGc || this.compilerOptions.exportGc) {
+        if (compilerOptions.exposeGc || compilerOptions.exportGc) {
             const speedyJsGcDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"))], ts.NodeFlags.Const);
-            const modifiers = this.compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
+            const modifiers = compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
             statementsToInsert.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
         }
 
@@ -122,12 +124,37 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         return ts.updateSourceFileNode(sourceFile, statements);
     }
 
-    private castReturnValue(returnValue: ts.Expression, type: ts.Type): ts.Expression {
+    private castReturnValue(returnValue: ts.Expression, type: ts.Type, loadWasmFunctionIdentifier: ts.Identifier): ts.Expression {
         // wasm code returns 1 for true and zero for false. Cast it to a boolean
         if (type.flags & ts.TypeFlags.BooleanLike) {
             return ts.createBinary(returnValue, ts.SyntaxKind.EqualsEqualsEqualsToken, ts.createNumericLiteral("1"));
         }
 
+        if (type.flags & ts.TypeFlags.Object) {
+            if (this.context.compilationContext.builtIns.get("Array") === type.symbol) {
+                return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toNativeArray"), undefined, [
+                    returnValue,
+                    ts.createLiteral(toLLVMType(getArrayElementType(type), this.context).toString())
+                ]);
+            }
+        }
+
         return returnValue;
+    }
+
+    private toRuntimeArgument(parameterDeclaration: ts.ParameterDeclaration, loadWasmFunctionIdentifier: ts.Identifier): ts.Expression {
+        const parameterType = this.context.typeChecker.getTypeAtLocation(parameterDeclaration);
+        const symbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
+
+        if (parameterType.flags & ts.TypeFlags.Object) {
+            if (this.context.compilationContext.builtIns.get("Array") === parameterType.symbol) {
+                return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toRuntimeArray"), undefined, [
+                    ts.createIdentifier(symbol.name),
+                    ts.createLiteral(toLLVMType(getArrayElementType(parameterType), this.context).toString())
+                ]);
+            }
+        }
+
+        return ts.createIdentifier(symbol.name);
     }
 }

@@ -1,6 +1,6 @@
 #/bin/bash
 
-BINARYEN_PASSES=duplicate-function-elimination,dce,remove-unused-brs,remove-unused-names,optimize-instructions,pick-load-signs,precompute,code-pushing,simplify-locals-nostructure,vacuum,reorder-locals,remove-unused-brs,coalesce-locals,simplify-locals,vacuum,reorder-locals,remove-unused-brs,merge-blocks,optimize-instructions,precompute,local-cse,coalesce-locals,vacuum,duplicate-function-elimination,remove-unused-module-elements,memory-packing #EQUALS -O3
+BINARYEN_PASSES=post-emscripten
 
 for i in ./cases/*.cc; do
     # Process $i

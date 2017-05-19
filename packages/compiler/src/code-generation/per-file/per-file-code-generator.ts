@@ -47,7 +47,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         this.sourceFileStates.set(sourceFile.fileName, {
             context,
             requestEmitHelper,
-            sourceFileRewriter: emitsWasm ? new PerFileCodeGeneratorSourceFileRewriter(context.typeChecker, compilationContext.compilerOptions) : new NoopSourceFileRewriter()
+            sourceFileRewriter: emitsWasm ? new PerFileCodeGeneratorSourceFileRewriter(context) : new NoopSourceFileRewriter()
         });
     }
 
@@ -115,12 +115,19 @@ export class PerFileCodeGenerator implements CodeGenerator {
     }
 
     private static createTransformationChain(context: CodeGenerationContext) {
-        const transforms = [
-            LinkTransformationStep.createRuntimeLinking(),
-            new OptimizationTransformationStep(),
-            LinkTransformationStep.createSharedLibsLinking(),
-            new LinkTimeOptimizationTransformationStep()
+        const optimizationLevel = context.compilationContext.compilerOptions.optimizationLevel;
+
+        const transforms: TransformationStep[] = [
+            LinkTransformationStep.createRuntimeLinking()
         ];
+
+        if (optimizationLevel !== "0") {
+            transforms.push(new OptimizationTransformationStep());
+        }
+
+        transforms.push(
+            LinkTransformationStep.createSharedLibsLinking(),
+            new LinkTimeOptimizationTransformationStep());
 
         if (context.compilationContext.compilerOptions.saveBc) {
             transforms.push(new CopyFileToOutputDirectoryTransformationStep(".bc", true));
@@ -131,7 +138,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
             new S2WasmTransformationStep()
         );
 
-        if (context.compilationContext.compilerOptions.binaryenOpt) {
+        if (context.compilationContext.compilerOptions.binaryenOpt && optimizationLevel !== "0") {
             transforms.push(new BinaryenOptTransformationStep());
         }
 
@@ -280,8 +287,9 @@ class S2WasmTransformationStep implements TransformationStep {
 }
 
 class BinaryenOptTransformationStep implements TransformationStep {
-    transform(inputFileName: string, { buildDirectory, plainFileName, sourceFileRewriter }: TransformationContext): string {
-        return wasmOpt(inputFileName, buildDirectory.getTempFileName(`${plainFileName}-opt.wast`));
+    transform(inputFileName: string, { buildDirectory, plainFileName, codeGenerationContext }: TransformationContext): string {
+        const outputFile = buildDirectory.getTempFileName(`${plainFileName}-opt.wast`);
+        return wasmOpt(inputFileName, outputFile);
     }
 }
 
