@@ -12,7 +12,7 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
 
     /**
      * Indicator if the emitted code and runtime should be memory safe or unsafe (truthy)
-     * @default false
+     * @default true
      */
     unsafe: boolean;
 
@@ -37,7 +37,7 @@ export interface SpeedyJSCompilerOptions extends CompilerOptions {
 
     /**
      * Indicator if the Binaryen Optimizer should be used on top of the LLVM optimizer
-     * @default false
+     * @default true
      */
     binaryenOpt: boolean;
 
@@ -105,10 +105,10 @@ export type UninitializedSpeedyJSCompilerOptions = {
  */
 export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJSCompilerOptions): SpeedyJSCompilerOptions {
     const defaults = {
-        unsafe: false,
+        unsafe: true,
         emitLLVM: false,
         saveWast: false,
-        binaryenOpt: false,
+        binaryenOpt: true,
         initialMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,
         globalBase: 8,
