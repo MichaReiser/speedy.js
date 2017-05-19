@@ -229,8 +229,8 @@ public:
         start = std::min(start, back);
         end = std::max(start, std::min(end, back));
 #endif
-        const int32_t elementsCount = static_cast<int32_t>(end - start);
-        return new Array<T>(start, end - start);
+        const size_t elementsCount = end - start;
+        return new Array<T>(start, elementsCount);
     }
 
     Array<T>* splice(int32_t index, int32_t deleteCount, T* elementsToAdd = nullptr, size_t elementsCount = 0)  __attribute__((returns_nonnull)) {

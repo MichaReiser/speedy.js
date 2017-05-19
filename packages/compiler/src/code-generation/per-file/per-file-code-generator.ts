@@ -47,7 +47,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         this.sourceFileStates.set(sourceFile.fileName, {
             context,
             requestEmitHelper,
-            sourceFileRewriter: emitsWasm ? new PerFileCodeGeneratorSourceFileRewriter(context.typeChecker, compilationContext.compilerOptions) : new NoopSourceFileRewriter()
+            sourceFileRewriter: emitsWasm ? new PerFileCodeGeneratorSourceFileRewriter(context) : new NoopSourceFileRewriter()
         });
     }
 

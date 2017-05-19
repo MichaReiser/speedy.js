@@ -6,30 +6,114 @@ exports[`Transformation casts the return value for boolean functions to a bool v
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -37,29 +121,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -67,7 +153,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -115,23 +201,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -158,7 +249,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -178,6 +274,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
@@ -233,30 +338,114 @@ exports[`Transformation exports the gc function if exportGc is set 1`] = `
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -264,29 +453,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -294,7 +485,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -342,23 +533,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -385,7 +581,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -405,6 +606,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
@@ -426,30 +636,114 @@ exports[`Transformation exposes the gc function if exposeGc is set 1`] = `
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -457,29 +751,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -487,7 +783,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -535,23 +831,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -578,7 +879,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -598,6 +904,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
@@ -619,30 +934,114 @@ exports[`Transformation passes the configured global base to the module loader 1
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -650,29 +1049,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -680,7 +1081,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -728,23 +1129,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -771,7 +1177,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -791,6 +1202,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
@@ -811,30 +1231,114 @@ exports[`Transformation passes the configured initial memory to the module loade
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -842,29 +1346,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -872,7 +1378,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -920,23 +1426,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -963,7 +1474,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -983,6 +1499,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
@@ -1003,30 +1528,114 @@ exports[`Transformation passes the configured total stack to the module loader 1
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -1034,29 +1643,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -1064,7 +1675,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -1112,23 +1723,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -1155,7 +1771,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -1175,6 +1796,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
@@ -1195,30 +1825,114 @@ exports[`Transformation rewrites the speedyjs function to call into the web asse
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-var Allocation;
-(function (Allocation) {
-    /**
-     * Tries to use _malloc()
-     */
-    Allocation[Allocation[\\"NORMAL\\"] = 0] = \\"NORMAL\\";
-    /**
-     * Lives for the duration of the current function call
-     */
-    Allocation[Allocation[\\"STACK\\"] = 1] = \\"STACK\\";
-    /**
-     * Cannot be freed
-     */
-    Allocation[Allocation[\\"STATIC\\"] = 2] = \\"STATIC\\";
-    /**
-     * Cannot be freed except through sbrk
-     */
-    Allocation[Allocation[\\"DYNAMIC\\"] = 3] = \\"DYNAMIC\\";
-    /**
-     * Do not allocate
-     */
-    Allocation[Allocation[\\"NONE\\"] = 4] = \\"NONE\\";
-})(Allocation || (Allocation = {}));
 function __moduleLoader(wasmUri, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                if (type.endsWith(\\"*\\")) {
+                    return 4;
+                }
+                throw new Error(\\"Unknown type \\" + type);
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                // TODO support i8*
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    throw new Error(\\"Unsupported type \\" + elementType);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function () {
+            switch (this.elementType) {
+                case \\"i1\\":
+                    // Elements need to be converted to bool
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                // TODO support i8*
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    throw new Error(\\"Unsupported type \\" + this.elementType);
+            }
+        };
+        return RuntimeArray;
+    }());
     var TOTAL_STACK = options.totalStack;
     var INITIAL_MEMORY = options.initialMemory;
     var totalMemory = INITIAL_MEMORY;
@@ -1226,29 +1940,31 @@ function __moduleLoader(wasmUri, options) {
     var STATIC_BUMP = options.staticBump;
     var WASM_PAGE_SIZE = 64 * 1024;
     var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
-    var HEAP32 = new Int32Array(memory.buffer);
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
     var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
     var STACK_BASE = alignMemory(STATIC_TOP);
     var STACK_TOP = STACK_BASE + TOTAL_STACK;
     var STACK_MAX = STACK_BASE + TOTAL_STACK;
-    HEAP32[GLOBAL_BASE >> 2] = STACK_TOP;
-    // where does the dynamic heap memory start
     var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
     var DYNAMIC_TOP_PTR = STATIC_TOP;
-    HEAP32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
         var newDynamicTop = 0;
         increment = ((increment + 15) & -16) | 0;
-        oldDynamicTop = HEAP32[DYNAMIC_TOP_PTR >> 2] | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
-        HEAP32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
             var pagesToAdd = 0;
             while ((newDynamicTop | 0) > (totalMemory | 0)) {
@@ -1256,7 +1972,7 @@ function __moduleLoader(wasmUri, options) {
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
             memory.grow(pagesToAdd);
-            HEAP32 = new Int32Array(memory.buffer);
+            updateHeap(memory.buffer);
         }
         return oldDynamicTop | 0;
     }
@@ -1304,23 +2020,28 @@ function __moduleLoader(wasmUri, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function () {
-                        console.log(\\"__cxa_allocate_exception\\", arguments);
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
                     },
                     \\"__cxa_throw\\": function () {
-                        console.log(\\"__cxa_throw\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_find_matching_catch_2\\": function () {
-                        console.log(\\"__cxa_find_matching_catch_2\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function () {
-                        console.log(\\"__cxa_free_exception\\", arguments);
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
                     },
                     \\"__resumeException\\": function () {
-                        console.log(\\"__resumeException\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"__cxa_atexit\\": function () {
-                        console.log(\\"__cxa_atexit\\", arguments);
+                        throw new Error(\\"Exceptions not yet supported\\");
                     },
                     \\"pow\\": Math.pow,
                     \\"fmod\\": function frem(x, y) {
@@ -1347,7 +2068,12 @@ function __moduleLoader(wasmUri, options) {
                     \\"sbrk\\": sbrk
                 }
             });
-        }).then(function (result) { return instance = result.instance; });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
     }
     var speedyJsGc;
     function gc() {
@@ -1367,6 +2093,15 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
+    loader.toRuntimeArray = function () {
+        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    };
+    loader.toNativeArray = function (ptr, elementType) {
+        if (ptr === 0) {
+            return undefined;
+        }
+        return new RuntimeArray(ptr, elementType).toArray();
+    };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map

@@ -43,7 +43,8 @@ module.exports = function (config) {
                         options: {
                             tsconfig: path.resolve(__dirname, "__integrationtests__/tsconfig.json"),
                             speedyJS: {
-                                optimizationLevel: 2
+                                optimizationLevel: 2,
+                                unsafe: false
                             }
                         }
                     }
