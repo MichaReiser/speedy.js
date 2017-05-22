@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostfixUnaryExpression minusMinus 1`] = `
+"; ModuleID = 'postfix-unary-expression/minusMinus.ts'
+source_filename = \\"postfix-unary-expression/minusMinus.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_minusMinus() {
+entry:
+  %doublePostfixResult = alloca double, align 8
+  %postfixResult = alloca i32, align 4
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
+  store i32 10, i32* %intValue, align 4
+  store double 1.000000e+01, double* %doubleValue, align 8
+  %intValue1 = load i32, i32* %intValue, align 4
+  %dec = add i32 %intValue1, -1
+  store i32 %dec, i32* %intValue, align 4
+  store i32 %intValue1, i32* %postfixResult, align 4
+  %doubleValue2 = load double, double* %doubleValue, align 8
+  %dec3 = fadd double %doubleValue2, -1.000000e+00
+  store double %dec3, double* %doubleValue, align 8
+  store double %doubleValue2, double* %doublePostfixResult, align 8
+  ret void
+}
+"
+`;
+
+exports[`PostfixUnaryExpression plusPlus 1`] = `
+"; ModuleID = 'postfix-unary-expression/plusPlus.ts'
+source_filename = \\"postfix-unary-expression/plusPlus.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_plusPlus() {
+entry:
+  %doublePostfixResult = alloca double, align 8
+  %postfixResult = alloca i32, align 4
+  %doubleValue = alloca double, align 8
+  %intValue = alloca i32, align 4
+  store i32 10, i32* %intValue, align 4
+  store double 1.000000e+01, double* %doubleValue, align 8
+  %intValue1 = load i32, i32* %intValue, align 4
+  %inc = add i32 %intValue1, 1
+  store i32 %inc, i32* %intValue, align 4
+  store i32 %intValue1, i32* %postfixResult, align 4
+  %doubleValue2 = load double, double* %doubleValue, align 8
+  %inc3 = fadd double %doubleValue2, 1.000000e+00
+  store double %inc3, double* %doubleValue, align 8
+  store double %doubleValue2, double* %doublePostfixResult, align 8
+  ret void
+}
+"
+`;
