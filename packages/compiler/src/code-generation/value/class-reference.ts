@@ -8,6 +8,12 @@ import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 
 import {Value} from "./value";
+import {toLLVMType} from "../util/types";
+
+export interface Field {
+    name: string;
+    type: ts.Type;
+}
 
 /**
  * Reference to a class (or in JS, to the constructor function)
@@ -98,7 +104,7 @@ export abstract class ClassReference implements Value {
      * @param context the code generation context
      * @returns the type of the object fields
      */
-    protected abstract getFields(type: ts.ObjectType, context: CodeGenerationContext): llvm.Type[];
+    abstract getFields(type: ts.ObjectType, context: CodeGenerationContext): Field[];
 
     /**
      * Returns the reference to the constructor function
@@ -123,7 +129,16 @@ export abstract class ClassReference implements Value {
      */
     protected getObjectType(type: ts.ObjectType, context: CodeGenerationContext) {
         if (!this.llvmType) {
-            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, this.getFields(type, context),
+            const fieldTypes = this.getFields(type, context).map(field => toLLVMType(field.type, context));
+
+            if (fieldTypes.length === 0) {
+                // LLVM doesn't seem to like empty structs, at least when marked as dereferencaeble (throws value out of range as size is 0).
+                // Therefore, add a boolean fake field. Seems to be the same as clang is doing?!
+                // TODO this can be removed when a reference to the type descriptor is added to each object
+                fieldTypes.push(llvm.Type.getInt1Ty(context.llvmContext));
+            }
+
+            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, fieldTypes,
                 `class.${this.symbol.name}`
             );
         }

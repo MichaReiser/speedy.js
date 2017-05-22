@@ -41,14 +41,12 @@ async function newEmptyArray() {
 
 async function newArrayOfObjects(x: number) {
     "use speedyjs";
-    const array = [
+    return [
         new Point(x, x),
         new Point(2.0*x, 2.0*x),
         new Point(3.0*x, 3.0*x),
         new Point(4.0*x, 4.0*x)
     ];
-
-    return array.length;
 }
 
 async function newArrayOfSize(size: int) {
@@ -232,7 +230,13 @@ describe("Array", () => {
         });
 
         it("creates an array containing objects", async(cb) => {
-            expect(await newArrayOfObjects(10)).toBe(4);
+            expect(await newArrayOfObjects(10)).toEqual([
+                new Point(10, 10),
+                new Point(20, 20),
+                new Point(30, 30),
+                new Point(40, 40)
+            ]);
+
             cb();
         });
     });

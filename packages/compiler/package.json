@@ -60,7 +60,7 @@
       "js"
     ],
     "modulePathIgnorePatterns": [
-      "<rootDir>/__tests__/cases/.*\\.(js|ll)$"
+      "<rootDir>/__tests__/code-generation/tmp/.*\\.(js|ll)$"
     ]
   }
 }

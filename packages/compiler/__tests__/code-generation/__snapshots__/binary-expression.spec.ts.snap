@@ -6,13 +6,13 @@ source_filename = \\"binary-expression/ampersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_ampersand() {
@@ -43,13 +43,13 @@ source_filename = \\"binary-expression/ampersandAmpersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_ampersandAmpersand() {
@@ -96,13 +96,13 @@ source_filename = \\"binary-expression/asterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_asterisk() {
@@ -128,13 +128,13 @@ source_filename = \\"binary-expression/asteriskAsterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_asteriskAsterisk() {
@@ -167,13 +167,13 @@ source_filename = \\"binary-expression/bar.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_bar() {
@@ -204,13 +204,13 @@ source_filename = \\"binary-expression/barBar.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_barBar() {
@@ -261,13 +261,13 @@ source_filename = \\"binary-expression/caret.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_caret() {
@@ -298,13 +298,13 @@ source_filename = \\"binary-expression/equalsEqualsEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_equalsEqualsEqualsToken() {
@@ -332,13 +332,13 @@ source_filename = \\"binary-expression/exclamationEqualsEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_exclamationEqualsEqualsToken() {
@@ -366,13 +366,13 @@ source_filename = \\"binary-expression/greaterThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_greaterThan() {
@@ -401,13 +401,13 @@ source_filename = \\"binary-expression/greaterThanEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_greaterThanEquals() {
@@ -436,13 +436,13 @@ source_filename = \\"binary-expression/greaterThanGreaterThanGreaterThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_greaterThanGreaterThanGreaterThan() {
@@ -472,13 +472,13 @@ source_filename = \\"binary-expression/lessThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_lessThan() {
@@ -507,13 +507,13 @@ source_filename = \\"binary-expression/lessThanEquals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_lessThanEquals() {
@@ -542,13 +542,13 @@ source_filename = \\"binary-expression/lessThanLessThan.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_lessThanLessThan() {
@@ -578,13 +578,13 @@ source_filename = \\"binary-expression/minus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_minus() {
@@ -614,13 +614,13 @@ source_filename = \\"binary-expression/percent.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_percent() {
@@ -644,13 +644,13 @@ source_filename = \\"binary-expression/plus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_plus() {
@@ -680,13 +680,13 @@ source_filename = \\"binary-expression/slash.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_slash() {

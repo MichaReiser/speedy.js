@@ -6,13 +6,13 @@ source_filename = \\"math/math.PI.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathPI() {
@@ -25,7 +25,7 @@ entry:
 }
 
 ; Function Attrs: alwaysinline nounwind readonly
-declare double @Math_PI(%class.Math* nocapture readonly dereferenceable(4)) #0
+declare double @Math_PI(%class.Math* nocapture readonly dereferenceable(1)) #0
 
 attributes #0 = { alwaysinline nounwind readonly }
 "
@@ -37,13 +37,13 @@ source_filename = \\"math/math.cos.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathCos() {
@@ -66,13 +66,13 @@ source_filename = \\"math/math.log.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathLog() {
@@ -95,13 +95,13 @@ source_filename = \\"math/math.pow.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathPow() {
@@ -124,13 +124,13 @@ source_filename = \\"math/math.sin.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathSin() {
@@ -153,13 +153,13 @@ source_filename = \\"math/math.sqrt.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
 define void @_mathSqrt() {

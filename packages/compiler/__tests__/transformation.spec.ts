@@ -66,6 +66,59 @@ describe("Transformation", () => {
         `, "transform/istruthy.ts");
     });
 
+    it("converts Array and Objects to WASM arrays and Objects", () => {
+        expectCompiledJSOutputMatchesSnapshot(`
+        class Test {
+            updated: boolean;
+            value: number;
+        }
+        
+        async function update(instance: Test, values: number[]) {
+            "use speedyjs";
+            
+            instance.updated = true;
+            instance.value = 0.0;
+            for (let i = 0; i < values.length; ++i) {
+                instance.value += values[i];
+            }
+            
+            return instance.value;
+        }
+        `, "transform/converts-arrays-and-object.ts");
+    });
+
+    it("converts a returned WASM array to a JS array", () => {
+        expectCompiledJSOutputMatchesSnapshot(`
+        async function update() {
+            "use speedyjs";
+            
+            return [1, 2, 3, 4];
+        }
+        `, "transform/converts-returned-arrays.ts");
+    });
+
+    it("converts the returned WASM Object to a JS Object", () => {
+        expectCompiledJSOutputMatchesSnapshot(`
+        class Test {
+            updated: boolean;
+            value: number;
+        }
+        
+        async function update(values: number[]) {
+            "use speedyjs";
+            
+            const instance = new Test();
+            instance.updated = true;
+            instance.value = 0.0;
+            for (let i = 0; i < values.length; ++i) {
+                instance.value += values[i];
+            }
+            
+            return instance.value;
+        }
+        `, "transform/converts-arrays-and-object.ts");
+    });
+
     it("emits a diagnostic if a non entry speedyjs function is referenced from normal JavaScriptCode", () => {
         const compilerOptions = createCompilerOptions();
         const source = `

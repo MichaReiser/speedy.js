@@ -40,7 +40,7 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
 
         const symbol = this.compilationContext.typeChecker.getSymbolAtLocation(identifier);
 
-        if (symbol.flags & ts.SymbolFlags.Function) {
+        if (typeof symbol !== "undefined" && symbol.flags & ts.SymbolFlags.Function) {
             for (const declaration of symbol.getDeclarations() as ts.FunctionLikeDeclaration[]) {
                 if (isSpeedyJSFunction(declaration) && !isSpeedyJSEntryFunction(declaration)) {
                     throw CodeGenerationError.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
