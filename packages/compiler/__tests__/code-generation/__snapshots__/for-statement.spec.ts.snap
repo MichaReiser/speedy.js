@@ -1,5 +1,330 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ForStatement for-break 1`] = `
+"; ModuleID = 'for/for-break.ts'
+source_filename = \\"for/for-break.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define i32 @_forBreak() {
+entry:
+  %i = alloca i32, align 4
+  %result = alloca i32, align 4
+  %return = alloca i32, align 4
+  store i32 0, i32* %result, align 4
+  store i32 0, i32* %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %entry
+  %i1 = load i32, i32* %i, align 4
+  %cmpLT = icmp slt i32 %i1, 1000
+  br i1 %cmpLT, label %for.body, label %for.end
+
+for.body:                                         ; preds = %for.cond
+  %result2 = load i32, i32* %result, align 4
+  %cmpGT = icmp sgt i32 %result2, 8000
+  br i1 %cmpGT, label %if.then, label %if.end
+
+if.then:                                          ; preds = %for.body
+  br label %for.end
+
+if.end:                                           ; preds = %for.body
+  %result3 = load i32, i32* %result, align 4
+  %i4 = load i32, i32* %i, align 4
+  %mul = mul i32 %result3, %i4
+  store i32 %mul, i32* %result, align 4
+  br label %for.inc
+
+for.inc:                                          ; preds = %if.end
+  %i5 = load i32, i32* %i, align 4
+  %add = add i32 %i5, 1
+  store i32 %add, i32* %i, align 4
+  br label %for.cond
+
+for.end:                                          ; preds = %if.then, %for.cond
+  %result6 = load i32, i32* %result, align 4
+  store i32 %result6, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %for.end
+  %return7 = load i32, i32* %return, align 4
+  ret i32 %return7
+}
+"
+`;
+
+exports[`ForStatement for-break-to-label 1`] = `
+"; ModuleID = 'for/for-break-to-label.ts'
+source_filename = \\"for/for-break-to-label.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_forBreakToLabel() {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %result = alloca i32, align 4
+  store i32 0, i32* %result, align 4
+  store i32 0, i32* %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc13, %entry
+  %i1 = load i32, i32* %i, align 4
+  %cmpLT = icmp slt i32 %i1, 3
+  br i1 %cmpLT, label %for.body, label %for.end16
+
+for.body:                                         ; preds = %for.cond
+  store i32 0, i32* %j, align 4
+  br label %for.cond2
+
+for.cond2:                                        ; preds = %for.inc, %for.body
+  %j3 = load i32, i32* %j, align 4
+  %cmpLT4 = icmp slt i32 %j3, 3
+  br i1 %cmpLT4, label %for.body5, label %for.end
+
+for.body5:                                        ; preds = %for.cond2
+  %i6 = load i32, i32* %i, align 4
+  %cmpEQ = icmp eq i32 %i6, 1
+  br i1 %cmpEQ, label %land.lhs.true, label %if.end
+
+land.lhs.true:                                    ; preds = %for.body5
+  %j7 = load i32, i32* %j, align 4
+  %cmpEQ8 = icmp eq i32 %j7, 1
+  br i1 %cmpEQ8, label %if.then, label %if.end
+
+if.then:                                          ; preds = %land.lhs.true
+  br label %for.end16
+
+if.end:                                           ; preds = %for.body5, %land.lhs.true
+  %result9 = load i32, i32* %result, align 4
+  %j10 = load i32, i32* %j, align 4
+  %add = add i32 %result9, %j10
+  store i32 %add, i32* %result, align 4
+  br label %for.inc
+
+for.inc:                                          ; preds = %if.end
+  %j11 = load i32, i32* %j, align 4
+  %add12 = add i32 %j11, 1
+  store i32 %add12, i32* %j, align 4
+  br label %for.cond2
+
+for.end:                                          ; preds = %for.cond2
+  br label %for.inc13
+
+for.inc13:                                        ; preds = %for.end
+  %i14 = load i32, i32* %i, align 4
+  %add15 = add i32 %i14, 1
+  store i32 %add15, i32* %i, align 4
+  br label %for.cond
+
+for.end16:                                        ; preds = %if.then, %for.cond
+  ret void
+}
+"
+`;
+
+exports[`ForStatement for-continue 1`] = `
+"; ModuleID = 'for/for-continue.ts'
+source_filename = \\"for/for-continue.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define i32 @_forContinue() {
+entry:
+  %i = alloca i32, align 4
+  %result = alloca i32, align 4
+  %return = alloca i32, align 4
+  store i32 0, i32* %result, align 4
+  store i32 0, i32* %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %entry
+  %i1 = load i32, i32* %i, align 4
+  %cmpLT = icmp slt i32 %i1, 1000
+  br i1 %cmpLT, label %for.body, label %for.end
+
+for.body:                                         ; preds = %for.cond
+  %i2 = load i32, i32* %i, align 4
+  %srem = srem i32 %i2, 2
+  %cmpEQ = icmp eq i32 %srem, 1
+  br i1 %cmpEQ, label %if.then, label %if.end
+
+if.then:                                          ; preds = %for.body
+  br label %for.inc
+
+if.end:                                           ; preds = %for.body
+  %result3 = load i32, i32* %result, align 4
+  %i4 = load i32, i32* %i, align 4
+  %mul = mul i32 %result3, %i4
+  store i32 %mul, i32* %result, align 4
+  br label %for.inc
+
+for.inc:                                          ; preds = %if.end, %if.then
+  %i5 = load i32, i32* %i, align 4
+  %add = add i32 %i5, 1
+  store i32 %add, i32* %i, align 4
+  br label %for.cond
+
+for.end:                                          ; preds = %for.cond
+  %result6 = load i32, i32* %result, align 4
+  store i32 %result6, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %for.end
+  %return7 = load i32, i32* %return, align 4
+  ret i32 %return7
+}
+"
+`;
+
+exports[`ForStatement for-continue-to-label 1`] = `
+"; ModuleID = 'for/for-continue-to-label.ts'
+source_filename = \\"for/for-continue-to-label.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_forContinueToLabel() {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  store i32 0, i32* %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc8, %entry
+  %i1 = load i32, i32* %i, align 4
+  %cmpLT = icmp slt i32 %i1, 4
+  br i1 %cmpLT, label %for.body, label %for.end10
+
+for.body:                                         ; preds = %for.cond
+  store i32 8, i32* %j, align 4
+  br label %for.cond2
+
+for.cond2:                                        ; preds = %for.inc, %for.body
+  %j3 = load i32, i32* %j, align 4
+  %cmpGT = icmp sgt i32 %j3, 4
+  br i1 %cmpGT, label %for.body4, label %for.end
+
+for.body4:                                        ; preds = %for.cond2
+  %j5 = load i32, i32* %j, align 4
+  %i6 = load i32, i32* %i, align 4
+  %srem = srem i32 %j5, %i6
+  %cmpEQ = icmp eq i32 %srem, 0
+  br i1 %cmpEQ, label %if.then, label %if.end
+
+if.then:                                          ; preds = %for.body4
+  br label %for.inc8
+
+if.end:                                           ; preds = %for.body4
+  br label %for.inc
+
+for.inc:                                          ; preds = %if.end
+  %j7 = load i32, i32* %j, align 4
+  %sub = sub i32 %j7, 1
+  store i32 %sub, i32* %j, align 4
+  br label %for.cond2
+
+for.end:                                          ; preds = %for.cond2
+  br label %for.inc8
+
+for.inc8:                                         ; preds = %for.end, %if.then
+  %i9 = load i32, i32* %i, align 4
+  %add = add i32 %i9, 1
+  store i32 %add, i32* %i, align 4
+  br label %for.cond
+
+for.end10:                                        ; preds = %for.cond
+  ret void
+}
+"
+`;
+
+exports[`ForStatement for-continue-without-cond 1`] = `
+"; ModuleID = 'for/for-continue-without-cond.ts'
+source_filename = \\"for/for-continue-without-cond.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_forContinueWithoutCond() {
+entry:
+  %i = alloca i32, align 4
+  %result = alloca i32, align 4
+  store i32 0, i32* %result, align 4
+  store i32 0, i32* %i, align 4
+  br label %for.body
+
+for.body:                                         ; preds = %for.inc, %entry
+  %i1 = load i32, i32* %i, align 4
+  %srem = srem i32 %i1, 2
+  %cmpEQ = icmp eq i32 %srem, 1
+  br i1 %cmpEQ, label %if.then, label %if.end
+
+if.then:                                          ; preds = %for.body
+  br label %for.inc
+
+if.end:                                           ; preds = %for.body
+  %result2 = load i32, i32* %result, align 4
+  %i3 = load i32, i32* %i, align 4
+  %mul = mul i32 %result2, %i3
+  store i32 %mul, i32* %result, align 4
+  br label %for.inc
+
+for.inc:                                          ; preds = %if.end, %if.then
+  %i4 = load i32, i32* %i, align 4
+  %add = add i32 %i4, 1
+  store i32 %add, i32* %i, align 4
+  br label %for.body
+
+for.end:                                          ; No predecessors!
+  ret void
+}
+"
+`;
+
 exports[`ForStatement for-empty 1`] = `
 "; ModuleID = 'for/for-empty.ts'
 source_filename = \\"for/for-empty.ts\\"

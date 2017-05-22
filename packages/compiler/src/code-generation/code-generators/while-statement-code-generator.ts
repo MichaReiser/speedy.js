@@ -12,6 +12,11 @@ class WhileStatementCodeGenerator implements SyntaxCodeGenerator<ts.WhileStateme
         let body = llvm.BasicBlock.create(context.llvmContext, "while.body");
         let end = llvm.BasicBlock.create(context.llvmContext, "while.end");
 
+        context.scope.setContinueBlock(condition);
+        context.scope.setBreakBlock(end);
+
+        this.setContinueAndBreakLabels(whileStatement.parent, context, condition, end);
+
         context.builder.createBr(condition);
         context.builder.setInsertionPoint(condition);
         generateCondition(whileStatement.expression, body, end, context);
@@ -27,6 +32,20 @@ class WhileStatementCodeGenerator implements SyntaxCodeGenerator<ts.WhileStateme
 
         context.scope.enclosingFunction.addBasicBlock(end);
         context.builder.setInsertionPoint(end);
+    }
+
+    private setContinueAndBreakLabels(parent: ts.Node | undefined, context: CodeGenerationContext, condition: llvm.BasicBlock, end: llvm.BasicBlock) {
+        context.scope.setContinueBlock(condition);
+        context.scope.setBreakBlock(end);
+
+        if (parent && parent.kind === ts.SyntaxKind.LabeledStatement) {
+            const labeledStatement = parent as ts.LabeledStatement;
+
+            if (labeledStatement.label) {
+                context.scope.setContinueBlock(condition, labeledStatement.label.text);
+                context.scope.setBreakBlock(end, labeledStatement.label.text);
+            }
+        }
     }
 }
 
