@@ -31,6 +31,11 @@ async function notNumber(value: number) {
     return !value;
 }
 
+async function notObject(value: IntResultTuple) {
+    "use speedyjs";
+    return !value;
+}
+
 async function negInt(value: int) {
     "use speedyjs";
 
@@ -98,6 +103,11 @@ describe("PrefixUnaryExpression", () => {
             expect(await notNumber(0.0)).toBe(!0.0);
             expect(await notNumber(0.1)).toBe(!0.1);
             expect(await notNumber(-0.1)).toBe(!-0.1);
+            cb();
+        });
+
+        it("returns for false for non null object reference", async (cb) => {
+            expect(await notObject(new IntResultTuple(1, 1))).toBe(false);
             cb();
         });
     });
