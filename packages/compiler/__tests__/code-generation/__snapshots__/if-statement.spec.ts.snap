@@ -172,8 +172,7 @@ entry:
   store %class.TestClass* %x, %class.TestClass** %x.addr, align 4
   store %class.TestClass* %y, %class.TestClass** %y.addr, align 4
   %x.addr1 = load %class.TestClass*, %class.TestClass** %x.addr, align 4
-  %ptrAsInt = ptrtoint %class.TestClass* %x.addr1 to i32
-  %x.addr1AsBool = icmp ne i32 %ptrAsInt, 0
+  %x.addr1AsBool = icmp ne %class.TestClass* %x.addr1, null
   br i1 %x.addr1AsBool, label %lor.end, label %lor.lhs.false
 
 lor.lhs.false:                                    ; preds = %entry

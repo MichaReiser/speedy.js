@@ -17,6 +17,8 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_minusMinus() {
 entry:
+  %doublePrefixResult = alloca double, align 8
+  %prefixResult = alloca i32, align 4
   %doubleValue = alloca double, align 8
   %intValue = alloca i32, align 4
   store i32 10, i32* %intValue, align 4
@@ -24,9 +26,11 @@ entry:
   %intValue1 = load i32, i32* %intValue, align 4
   %sub = sub i32 %intValue1, 1
   store i32 %sub, i32* %intValue, align 4
+  store i32 %sub, i32* %prefixResult, align 4
   %doubleValue2 = load double, double* %doubleValue, align 8
   %fsub = fsub double %doubleValue2, 1.000000e+00
   store double %fsub, double* %doubleValue, align 8
+  store double %fsub, double* %doublePrefixResult, align 8
   ret void
 }
 "
@@ -115,6 +119,8 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_plusPlus() {
 entry:
+  %doublePrefixResult = alloca double, align 8
+  %prefixResult = alloca i32, align 4
   %doubleValue = alloca double, align 8
   %intValue = alloca i32, align 4
   store i32 10, i32* %intValue, align 4
@@ -122,9 +128,11 @@ entry:
   %intValue1 = load i32, i32* %intValue, align 4
   %add = add i32 %intValue1, 1
   store i32 %add, i32* %intValue, align 4
+  store i32 %add, i32* %prefixResult, align 4
   %doubleValue2 = load double, double* %doubleValue, align 8
   %fadd = fadd double %doubleValue2, 1.000000e+00
   store double %fadd, double* %doubleValue, align 8
+  store double %fadd, double* %doublePrefixResult, align 8
   ret void
 }
 "

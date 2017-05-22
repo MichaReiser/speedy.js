@@ -62,9 +62,7 @@ export class Primitive implements Value {
         }
 
         if (valueType.flags & ts.TypeFlags.Object) {
-            const intPtrType = context.module.dataLayout.getIntPtrType(context.llvmContext, 0);
-            const pointerAsInt = context.builder.createPtrToInt(llvmValue, intPtrType, "ptrAsInt");
-            return context.builder.createICmpNE(pointerAsInt, llvm.Constant.getNullValue(intPtrType), `${llvmValue.name}AsBool`);
+            return context.builder.createICmpNE(llvmValue, llvm.Constant.getNullValue(llvmValue.type), `${llvmValue.name}AsBool`);
         }
 
         throw new Error(`value of type ${context.typeChecker.typeToString(valueType)} cannot be converted to bool`);

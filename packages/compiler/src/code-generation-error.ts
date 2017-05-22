@@ -61,7 +61,7 @@ export class CodeGenerationError extends Error {
         return CodeGenerationError.createException(binaryExpression, diagnostics.UnsupportedBinaryOperation, ts.SyntaxKind[binaryExpression.operatorToken.kind], leftType, rightType);
     }
 
-    static unsupportedUnaryOperation(node: ts.PrefixUnaryExpression, type: string) {
+    static unsupportedUnaryOperation(node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, type: string) {
         return CodeGenerationError.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operand.kind], type);
     }
 

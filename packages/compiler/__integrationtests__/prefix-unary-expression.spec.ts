@@ -1,3 +1,19 @@
+class IntResultTuple {
+    /**
+     * @param result The result of the postfix operation
+     * @param value the updated value
+     */
+    constructor(public result: int, public value: int) {}
+}
+
+class NumberResultTuple {
+    /**
+     * @param result The result of the postfix operation
+     * @param value the updated value
+     */
+    constructor(public result: number, public value: number) {}
+}
+
 async function notBoolean(value: boolean) {
     "use speedyjs";
     return !value;
@@ -15,6 +31,11 @@ async function notNumber(value: number) {
     return !value;
 }
 
+async function notObject(value: IntResultTuple) {
+    "use speedyjs";
+    return !value;
+}
+
 async function negInt(value: int) {
     "use speedyjs";
 
@@ -29,27 +50,22 @@ async function negNumber(value: number): Promise<number> {
 
 async function minusMinusInt(value: int) {
     "use speedyjs";
-    --value;
-    return value;
+    return new IntResultTuple(--value, value);
 }
 
 async function minusMinusNumber(value: number) {
     "use speedyjs";
-    --value;
-    return value;
+    return new NumberResultTuple(--value, value);
 }
 
 async function plusPlusInt(value: int) {
     "use speedyjs";
-    ++value;
-    return value;
+    return new IntResultTuple(++value, value);
 }
 
 async function plusPlusNumber(value: number) {
     "use speedyjs";
-
-    ++value;
-    return value;
+    return new NumberResultTuple(++value, value);
 }
 
 async function tildeBoolean(value: boolean) {
@@ -89,6 +105,11 @@ describe("PrefixUnaryExpression", () => {
             expect(await notNumber(-0.1)).toBe(!-0.1);
             cb();
         });
+
+        it("returns for false for non null object reference", async (cb) => {
+            expect(await notObject(new IntResultTuple(1, 1))).toBe(false);
+            cb();
+        });
     });
 
     describe("-x", () => {
@@ -108,29 +129,37 @@ describe("PrefixUnaryExpression", () => {
     });
 
     describe("--x", () => {
-        it("subtracts one from the value of the int variable and returns the difference", async (cb) => {
-            expect(await minusMinusInt(10)).toBe(9);
-            expect(await minusMinusInt(-10)).toBe(-11);
+        it("subtracts one from the value of the int variable and returns the value of the variable", async (cb) => {
+            const returnValue = await minusMinusInt(10);
+
+            expect(returnValue.result).toBe(9);
+            expect(returnValue.value).toBe(9);
             cb();
         });
 
-        it("subtracts one from the value of the number variable and returns the difference", async (cb) => {
-            expect(await minusMinusNumber(10.5)).toBe(9.5);
-            expect(await minusMinusNumber(-9.5)).toBe(-10.5);
+        it("subtracts one from the value of the number variable and returns the value of the variable", async (cb) => {
+            const returnValue = await minusMinusNumber(10.5);
+
+            expect(returnValue.result).toBe(9.5);
+            expect(returnValue.value).toBe(9.5);
             cb();
         });
     });
 
     describe("++x", () => {
-        it("adds one to the int variable and returns the sum", async (cb) => {
-            expect(await plusPlusInt(10)).toBe(11);
-            expect(await plusPlusInt(-10)).toBe(-9);
+        it("adds one to the int variable and returns the value of the variable", async (cb) => {
+            const returnValue = await plusPlusInt(10);
+
+            expect(returnValue.result).toBe(11);
+            expect(returnValue.value).toBe(11);
             cb();
         });
 
-        it("adds one to the number variable and returns the sum", async (cb) => {
-            expect(await plusPlusNumber(10.5)).toBe(11.5);
-            expect(await plusPlusNumber(-10.5)).toBe(-9.5);
+        it("adds one to the number variable and returns the value of the variable", async (cb) => {
+            const returnValue = await plusPlusNumber(10.5);
+
+            expect(returnValue.result).toBe(11.5);
+            expect(returnValue.value).toBe(11.5);
             cb();
         });
     });
