@@ -14,7 +14,7 @@ export class Scope {
     private functions: Map<ts.Symbol, FunctionReference>;
     private classes: Map<ts.Symbol, ClassReference>;
     private returnAlloca: Allocation | undefined;
-    private retBlock: llvm.BasicBlock | undefined;
+    private labels: Map<string | Symbol, llvm.BasicBlock> = new Map();
     private children: Scope[] = [];
 
     constructor(private parent?: Scope, private fn?: llvm.Function) {
@@ -34,15 +34,59 @@ export class Scope {
     }
 
     /**
+     * Returns the block that is the target of a continue statement
+     * @param label the name of the label or undefined for the default continue target
+     * @return the basic block that is the target of the continue statement or undefined
+     */
+    getContinueBlock(label?: string): llvm.BasicBlock | undefined {
+        return this.getLabel(typeof(label) === "undefined" ? "continue" : `${label}-continue`);
+    }
+
+    /**
+     * Sets the target block for the continue statement
+     * @param block the target block
+     * @param label the name of the label or undefined for the continue statement without a label
+     */
+    setContinueBlock(block: llvm.BasicBlock, label?: string) {
+        this.labels.set(typeof(label) === "undefined" ? "continue" : `${label}-continue`, block);
+    }
+
+    /**
+     * Returns the block that is the target of a break statement
+     * @param label the name of the label or undefined for the default break target
+     * @return the basic block that is the target of the break statement or undefined
+     */
+    getBreakBlock(label?: string): llvm.BasicBlock | undefined {
+        return this.getLabel(typeof(label) === "undefined" ? "break" : `${label}-break`);
+    }
+
+    /**
+     * Sets the target block for the break statement
+     * @param block the target block
+     * @param label the name of the label or undefined for the break statement without a label
+     */
+    setBreakBlock(block: llvm.BasicBlock, label?: string) {
+        this.labels.set(typeof(label) === "undefined" ? "break" : `${label}-break`, block);
+    }
+
+    private getLabel(label: string | Symbol): llvm.BasicBlock | undefined {
+        return this.labels.get(label) || (this.parent ? this.parent.getLabel(label) : undefined);
+    }
+
+    /**
      * Block that is the terminator of a function. All return statements need to jump directly to this return block
      * to ensure that no succeeding statements are executed. Only present inside of a function (also void function, as these might return void);
      */
     get returnBlock(): llvm.BasicBlock | undefined {
-        return this.retBlock|| (this.parent ? this.parent.returnBlock: undefined);
+        return this.getLabel("return") || (this.parent ? this.parent.returnBlock : undefined);
     }
 
     set returnBlock(returnBlock: llvm.BasicBlock | undefined) {
-        this.retBlock = returnBlock;
+        if (returnBlock) {
+            this.labels.set("return", returnBlock);
+        } else {
+            this.labels.delete("return");
+        }
     }
 
     /**

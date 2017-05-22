@@ -16,6 +16,7 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
         const fun = context.scope.enclosingFunction;
         const end = llvm.BasicBlock.create(context.llvmContext, "for.end");
         let body = llvm.BasicBlock.create(context.llvmContext, "for.body");
+        const incrementer = llvm.BasicBlock.create(context.llvmContext, "for.inc");
 
         if (forStatement.condition) {
             const forBlock = llvm.BasicBlock.create(context.llvmContext, "for.cond", fun);
@@ -29,19 +30,20 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
             head = body;
         }
 
+        this.setContinueAndBreakLabels(forStatement.parent, context, incrementer, end);
+
         fun.addBasicBlock(body);
         context.builder.setInsertionPoint(body);
 
         context.generate(forStatement.statement);
         body = context.builder.getInsertBlock();
-        const incrementor = llvm.BasicBlock.create(context.llvmContext, "for.inc");
 
         if (!body.getTerminator()) {
-            context.builder.createBr(incrementor);
+            context.builder.createBr(incrementer);
         }
 
-        fun.addBasicBlock(incrementor);
-        context.builder.setInsertionPoint(incrementor);
+        fun.addBasicBlock(incrementer);
+        context.builder.setInsertionPoint(incrementer);
         if (forStatement.incrementor) {
             context.generate(forStatement.incrementor);
         }
@@ -50,6 +52,20 @@ class ForStatementCodeGenerator implements SyntaxCodeGenerator<ts.ForStatement, 
 
         fun.addBasicBlock(end);
         context.builder.setInsertionPoint(end);
+    }
+
+    private setContinueAndBreakLabels(parent: ts.Node | undefined, context: CodeGenerationContext, incrementer: llvm.BasicBlock, end: llvm.BasicBlock) {
+        context.scope.setContinueBlock(incrementer);
+        context.scope.setBreakBlock(end);
+
+        if (parent && parent.kind === ts.SyntaxKind.LabeledStatement) {
+            const labeledStatement = parent as ts.LabeledStatement;
+
+            if (labeledStatement.label) {
+                context.scope.setContinueBlock(incrementer, labeledStatement.label.text);
+                context.scope.setBreakBlock(end, labeledStatement.label.text);
+            }
+        }
     }
 }
 
