@@ -29,7 +29,7 @@ export class MathClassReference extends ClassReference {
     createGlobalVariable(symbol: ts.Symbol, context: CodeGenerationContext) {
         const mathType = context.typeChecker.getDeclaredTypeOfSymbol(symbol) as ts.ObjectType;
         const structType = this.getObjectType(mathType, context);
-        const struct = llvm.ConstantStruct.get(structType, [this.typeInformation]);
+        const struct = llvm.ConstantStruct.get(structType, [ llvm.ConstantInt.get(context.llvmContext, 0, 1) ]);
 
         const storage = new llvm.GlobalVariable(context.module, structType, true, llvm.LinkageTypes.PrivateLinkage, struct, "Math_object");
         const ptr = new llvm.GlobalVariable(context.module, structType.getPointerTo(), true, llvm.LinkageTypes.PrivateLinkage, storage, "Math_ptr");
@@ -38,7 +38,7 @@ export class MathClassReference extends ClassReference {
     }
 
     getFields() {
-        return [this.typeInformation.type]; // llvm doesn't seem to like empty structs that much... so at least put in the type information pointer
+        return [];
     }
 
     getConstructor(): FunctionReference {

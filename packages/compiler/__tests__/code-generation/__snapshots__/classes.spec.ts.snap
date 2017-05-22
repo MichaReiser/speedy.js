@@ -6,7 +6,7 @@ source_filename = \\"classes/array-with-objects-literal.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.Point = type { double, double }
 %class.Array = type { i8**, i32, i32 }
 
@@ -14,7 +14,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @Point_name = private unnamed_addr constant [6 x i8] c\\"Point\\\\00\\"
 @Point_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Point_name }
@@ -93,14 +93,14 @@ source_filename = \\"classes/class-only-with-attributes.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.ClassOnlyWithAttributes = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @ClassOnlyWithAttributes_name = private unnamed_addr constant [24 x i8] c\\"ClassOnlyWithAttributes\\\\00\\"
 @ClassOnlyWithAttributes_type_descriptor = private constant { [24 x i8]* } { [24 x i8]* @ClassOnlyWithAttributes_name }
@@ -149,14 +149,14 @@ source_filename = \\"classes/class-only-with-methods.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.ClassOnlyWithMethods = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @ClassOnlyWithMethods_name = private unnamed_addr constant [21 x i8] c\\"ClassOnlyWithMethods\\\\00\\"
 @ClassOnlyWithMethods_type_descriptor = private constant { [21 x i8]* } { [21 x i8]* @ClassOnlyWithMethods_name }
@@ -222,14 +222,14 @@ source_filename = \\"classes/class-with-access-to-constructor-defined-fields.ts\
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.ClassWithAttributeInitializer = type { double, double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @ClassWithAttributeInitializer_name = private unnamed_addr constant [30 x i8] c\\"ClassWithAttributeInitializer\\\\00\\"
 @ClassWithAttributeInitializer_type_descriptor = private constant { [30 x i8]* } { [30 x i8]* @ClassWithAttributeInitializer_name }
@@ -306,14 +306,14 @@ source_filename = \\"classes/class-with-attribute-defined-in-constructor.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.ClassWithAttributeInitializer = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @ClassWithAttributeInitializer_name = private unnamed_addr constant [30 x i8] c\\"ClassWithAttributeInitializer\\\\00\\"
 @ClassWithAttributeInitializer_type_descriptor = private constant { [30 x i8]* } { [30 x i8]* @ClassWithAttributeInitializer_name }
@@ -370,14 +370,14 @@ source_filename = \\"classes/class-with-attribute-initializer.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.ClassWithAttributeInitializer = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @ClassWithAttributeInitializer_name = private unnamed_addr constant [30 x i8] c\\"ClassWithAttributeInitializer\\\\00\\"
 @ClassWithAttributeInitializer_type_descriptor = private constant { [30 x i8]* } { [30 x i8]* @ClassWithAttributeInitializer_name }
@@ -426,14 +426,14 @@ source_filename = \\"classes/class-with-constructor.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.ClassWithConstructor = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @ClassWithConstructor_name = private unnamed_addr constant [21 x i8] c\\"ClassWithConstructor\\\\00\\"
 @ClassWithConstructor_type_descriptor = private constant { [21 x i8]* } { [21 x i8]* @ClassWithConstructor_name }
@@ -492,14 +492,14 @@ source_filename = \\"classes/class-with-methods.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
-%class.Math = type { { [5 x i8]* }* }
+%class.Math = type { i1 }
 %class.Point = type { double, double }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
 @Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math { { [5 x i8]* }* @Math_type_descriptor }
+@Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 @Point_name = private unnamed_addr constant [6 x i8] c\\"Point\\\\00\\"
 @Point_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Point_name }

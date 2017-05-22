@@ -6,7 +6,7 @@ exports[`Transformation casts the return value for boolean functions to a bool v
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -19,22 +19,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -47,7 +167,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -66,7 +186,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -74,7 +193,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -94,22 +213,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -274,26 +393,1246 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./istruthy.wasm\\", {
-    totalStack: 532480,
-    initialMemory: 16777216,
-    globalBase: 8,
-    staticBump: 8,
-    exposeGc: false
-});
-function isTruthy(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._isTruthy(value) === 1; loadWasmModule_1.gc(); return result; }); }
+let loadWasmModule_1;
+function isTruthy(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._isTruthy(value) === 1; loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./istruthy.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] }, \\"i1\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
+"
+`;
+
+exports[`Transformation converts Array and Objects to WASM arrays and Objects 1`] = `
+"/**
+ * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
+ * speedyjs-transformer to generate the code to load the wasm module.
+ * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
+ */
+function __moduleLoader(wasmUri, types, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType, objectReferences) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
+            switch (this.elementType) {
+                case \\"i1\\":
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
+            }
+        };
+        return RuntimeArray;
+    }());
+    var TOTAL_STACK = options.totalStack;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
+    var WASM_PAGE_SIZE = 64 * 1024;
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
+    var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
+    var STACK_BASE = alignMemory(STATIC_TOP);
+    var STACK_TOP = STACK_BASE + TOTAL_STACK;
+    var STACK_MAX = STACK_BASE + TOTAL_STACK;
+    var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
+    var DYNAMIC_TOP_PTR = STATIC_TOP;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function sbrk(increment) {
+        increment = increment | 0;
+        var oldDynamicTop = 0;
+        var newDynamicTop = 0;
+        increment = ((increment + 15) & -16) | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
+        newDynamicTop = oldDynamicTop + increment | 0;
+        if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
+            || (newDynamicTop | 0) < 0) {
+            console.error(\\"Signed 32 wrap around detected\\");
+            return -1;
+        }
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        if ((newDynamicTop | 0) > (totalMemory | 0)) {
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            updateHeap(memory.buffer);
+        }
+        return oldDynamicTop | 0;
+    }
+    function alignMemory(size, quantum) {
+        return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function loadInstance() {
+        var instance;
+        var wasmLoaded;
+        // browser
+        if (typeof window !== \\"undefined\\") {
+            if (typeof fetch !== \\"function\\") {
+                throw new Error(\\"Your browser does not support the fetch API. Include a fetch polyfill to load the WASM module\\");
+            }
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports) {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                // trick webpack to not detect the require call. Webpack should not include the required files as we only
+                // want to execute this code if we are in node and use the fetch api in the browser.
+                var req = module[\\"require\\"];
+                var fs = req(\\"fs\\");
+                var path = req(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, can not load WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
+                    },
+                    \\"__resumeException\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
+    }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
+    var loaded = undefined;
+    var loader = function loader() {
+        if (loaded) {
+            return loaded;
+        }
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
+        return loaded;
+    };
+    loader.gc = gc;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
+    };
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
+    };
+    return loader;
+}
+//# sourceMappingURL=get-wasm-module-function.js.map
+let loadWasmModule_1;
+class Test {
+}
+function update(instance, values) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var argumentObjects_1 = new Map(); var result_1 = instance_1.exports._update(loadWasmModule_1.toWASM(instance, \\"Test\\", argumentObjects_1), loadWasmModule_1.toWASM(values, \\"Array<double>\\", argumentObjects_1)); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./converts-arrays-and-object.wasm\\", { \\"Array<double>\\": { \\"primitive\\": false, \\"fields\\": [], \\"constructor\\": Array, \\"typeArguments\\": [\\"double\\"] }, \\"double\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] }, \\"Test\\": { \\"primitive\\": false, \\"fields\\": [{ \\"name\\": \\"updated\\", \\"type\\": \\"i1\\" }, { \\"name\\": \\"value\\", \\"type\\": \\"double\\" }], \\"constructor\\": Test, \\"typeArguments\\": [] }, \\"i1\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1228, \\"exposeGc\\": false });
+"
+`;
+
+exports[`Transformation converts a returned WASM array to a JS array 1`] = `
+"/**
+ * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
+ * speedyjs-transformer to generate the code to load the wasm module.
+ * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
+ */
+function __moduleLoader(wasmUri, types, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType, objectReferences) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
+            switch (this.elementType) {
+                case \\"i1\\":
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
+            }
+        };
+        return RuntimeArray;
+    }());
+    var TOTAL_STACK = options.totalStack;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
+    var WASM_PAGE_SIZE = 64 * 1024;
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
+    var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
+    var STACK_BASE = alignMemory(STATIC_TOP);
+    var STACK_TOP = STACK_BASE + TOTAL_STACK;
+    var STACK_MAX = STACK_BASE + TOTAL_STACK;
+    var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
+    var DYNAMIC_TOP_PTR = STATIC_TOP;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function sbrk(increment) {
+        increment = increment | 0;
+        var oldDynamicTop = 0;
+        var newDynamicTop = 0;
+        increment = ((increment + 15) & -16) | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
+        newDynamicTop = oldDynamicTop + increment | 0;
+        if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
+            || (newDynamicTop | 0) < 0) {
+            console.error(\\"Signed 32 wrap around detected\\");
+            return -1;
+        }
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        if ((newDynamicTop | 0) > (totalMemory | 0)) {
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            updateHeap(memory.buffer);
+        }
+        return oldDynamicTop | 0;
+    }
+    function alignMemory(size, quantum) {
+        return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function loadInstance() {
+        var instance;
+        var wasmLoaded;
+        // browser
+        if (typeof window !== \\"undefined\\") {
+            if (typeof fetch !== \\"function\\") {
+                throw new Error(\\"Your browser does not support the fetch API. Include a fetch polyfill to load the WASM module\\");
+            }
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports) {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                // trick webpack to not detect the require call. Webpack should not include the required files as we only
+                // want to execute this code if we are in node and use the fetch api in the browser.
+                var req = module[\\"require\\"];
+                var fs = req(\\"fs\\");
+                var path = req(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, can not load WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
+                    },
+                    \\"__resumeException\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
+    }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
+    var loaded = undefined;
+    var loader = function loader() {
+        if (loaded) {
+            return loaded;
+        }
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
+        return loaded;
+    };
+    loader.gc = gc;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
+    };
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
+    };
+    return loader;
+}
+//# sourceMappingURL=get-wasm-module-function.js.map
+let loadWasmModule_1;
+function update() { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = loadWasmModule_1.toJSObject(instance_1.exports._update(), \\"Array<i32>\\"); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./converts-returned-arrays.wasm\\", { \\"Array<i32>\\": { \\"primitive\\": false, \\"fields\\": [], \\"constructor\\": Array, \\"typeArguments\\": [\\"i32\\"] }, \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1368, \\"exposeGc\\": false });
+"
+`;
+
+exports[`Transformation converts the returned WASM Object to a JS Object 1`] = `
+"/**
+ * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
+ * speedyjs-transformer to generate the code to load the wasm module.
+ * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
+ */
+function __moduleLoader(wasmUri, types, options) {
+    var PTR_SIZE = 4;
+    var PTR_SHIFT = Math.log2(PTR_SIZE);
+    function sizeOf(type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return 1;
+            case \\"i32\\":
+                return 4;
+            case \\"double\\":
+                return 8;
+            default:
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
+        }
+    }
+    var heap8;
+    var heap32;
+    var heapPtr;
+    var heap64;
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
+    var free = function () { return void 0; };
+    function updateHeap(buffer) {
+        heap8 = new Int8Array(buffer);
+        heap32 = heapPtr = new Int32Array(buffer);
+        heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
+    }
+    var RuntimeArray = (function () {
+        function RuntimeArray(ptr, elementType) {
+            this.ptr = ptr;
+            this.elementType = elementType;
+        }
+        /**
+         * Allocates a Speedy.js array for the given JS array
+         * @param native the js array
+         * @param elementType the element type
+         * @return {RuntimeArray} the Speedy.js Array
+         */
+        RuntimeArray.from = function (native, elementType, objectReferences) {
+            // begin, back, capacity
+            var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
+            var arrayPtr = malloc(size);
+            var elementSize = sizeOf(elementType);
+            var elementsPtr = malloc(elementSize * native.length);
+            if (arrayPtr === 0 || elementsPtr === 0) {
+                throw new Error(\\"Failed to allocate array\\");
+            }
+            var begin = elementsPtr;
+            var back = elementsPtr + (elementSize * native.length);
+            heapPtr[arrayPtr >> PTR_SHIFT] = begin;
+            heapPtr[(arrayPtr + PTR_SIZE) >> PTR_SHIFT] = back;
+            heap32[(arrayPtr + 2 * PTR_SIZE) >> 2] = native.length | 0;
+            switch (elementType) {
+                case \\"i1\\":
+                case \\"i8\\":
+                    heap8.set(native, begin);
+                    break;
+                case \\"i32\\":
+                    heap32.set(native, begin >> 2);
+                    break;
+                case \\"double\\":
+                    heap64.set(native, begin >> 3);
+                    break;
+                default:
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
+            }
+            return new RuntimeArray(arrayPtr, elementType);
+        };
+        Object.defineProperty(RuntimeArray.prototype, \\"begin\\", {
+            get: function () {
+                return heapPtr[this.ptr >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RuntimeArray.prototype, \\"back\\", {
+            get: function () {
+                return heapPtr[(this.ptr + PTR_SIZE) >> PTR_SHIFT] | 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
+         * @return {Array} the native JS Array
+         */
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
+            switch (this.elementType) {
+                case \\"i1\\":
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
+                case \\"i8\\":
+                    return Array.from(heap8.subarray(this.begin, this.back));
+                case \\"i32\\":
+                    return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
+                case \\"double\\":
+                    return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
+                default:
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
+            }
+        };
+        return RuntimeArray;
+    }());
+    var TOTAL_STACK = options.totalStack;
+    var INITIAL_MEMORY = options.initialMemory;
+    var totalMemory = INITIAL_MEMORY;
+    var GLOBAL_BASE = options.globalBase;
+    var STATIC_BUMP = options.staticBump;
+    var WASM_PAGE_SIZE = 64 * 1024;
+    var memory = new WebAssembly.Memory({ initial: INITIAL_MEMORY / WASM_PAGE_SIZE });
+    heap8 = new Int8Array(memory.buffer);
+    heap32 = heapPtr = new Int32Array(memory.buffer);
+    heap64 = new Float64Array(memory.buffer);
+    var STATIC_TOP = GLOBAL_BASE + STATIC_BUMP;
+    var STACK_BASE = alignMemory(STATIC_TOP);
+    var STACK_TOP = STACK_BASE + TOTAL_STACK;
+    var STACK_MAX = STACK_BASE + TOTAL_STACK;
+    var DYNAMIC_BASE = alignMemory(STACK_MAX);
+    // the top of the heap
+    var DYNAMIC_TOP_PTR = STATIC_TOP;
+    heap32[GLOBAL_BASE >> 2] = STACK_TOP;
+    heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function sbrk(increment) {
+        increment = increment | 0;
+        var oldDynamicTop = 0;
+        var newDynamicTop = 0;
+        increment = ((increment + 15) & -16) | 0;
+        oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
+        newDynamicTop = oldDynamicTop + increment | 0;
+        if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
+            || (newDynamicTop | 0) < 0) {
+            console.error(\\"Signed 32 wrap around detected\\");
+            return -1;
+        }
+        heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
+        if ((newDynamicTop | 0) > (totalMemory | 0)) {
+            var pagesToAdd = 0;
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
+                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
+                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
+            }
+            memory.grow(pagesToAdd);
+            updateHeap(memory.buffer);
+        }
+        return oldDynamicTop | 0;
+    }
+    function alignMemory(size, quantum) {
+        return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function loadInstance() {
+        var instance;
+        var wasmLoaded;
+        // browser
+        if (typeof window !== \\"undefined\\") {
+            if (typeof fetch !== \\"function\\") {
+                throw new Error(\\"Your browser does not support the fetch API. Include a fetch polyfill to load the WASM module\\");
+            }
+            wasmLoaded = fetch(wasmUri).then(function (response) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+                throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
+            });
+        }
+        else if (typeof module !== 'undefined' && module.exports) {
+            wasmLoaded = new Promise(function (resolve, reject) {
+                // trick webpack to not detect the require call. Webpack should not include the required files as we only
+                // want to execute this code if we are in node and use the fetch api in the browser.
+                var req = module[\\"require\\"];
+                var fs = req(\\"fs\\");
+                var path = req(\\"path\\");
+                fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(data.buffer);
+                    }
+                });
+            });
+        }
+        else {
+            throw new Error(\\"Unknown environment, can not load WASM module\\");
+        }
+        return wasmLoaded.then(function (buffer) {
+            return WebAssembly.instantiate(buffer, {
+                env: {
+                    memory: memory,
+                    STACKTOP: STACK_TOP,
+                    __dso_handle: 0,
+                    \\"__cxa_allocate_exception\\": function (size) {
+                        return malloc(size);
+                    },
+                    \\"__cxa_throw\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_find_matching_catch_2\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_free_exception\\": function (ptr) {
+                        try {
+                            return free(ptr);
+                        }
+                        catch (e) {
+                            console.error('exception during cxa_free_exception: ' + e);
+                        }
+                    },
+                    \\"__resumeException\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"__cxa_atexit\\": function () {
+                        throw new Error(\\"Exceptions not yet supported\\");
+                    },
+                    \\"pow\\": Math.pow,
+                    \\"fmod\\": function frem(x, y) {
+                        return x % y;
+                    },
+                    \\"abort\\": function (what) {
+                        console.error(\\"Abort WASM for reason: \\" + what);
+                    },
+                    \\"invoke_ii\\": function (index, a1) {
+                        return instance.exports.dynCall_ii(index, a1);
+                    },
+                    \\"invoke_iii\\": function (index, a1, a2) {
+                        return instance.exports.dynCall_iii(index, a1, a2);
+                    },
+                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_iiii(index, a1, a2, a3);
+                    },
+                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                        return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
+                    },
+                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                        return instance.exports.dynCall_viii(index, a1, a2, a3);
+                    },
+                    \\"sbrk\\": sbrk
+                }
+            });
+        }).then(function (result) {
+            instance = result.instance;
+            free = instance.exports.free || free;
+            malloc = instance.exports.malloc || malloc;
+            return instance;
+        });
+    }
+    var speedyJsGc;
+    function gc() {
+        if (speedyJsGc) {
+            speedyJsGc();
+        }
+    }
+    var loaded = undefined;
+    var loader = function loader() {
+        if (loaded) {
+            return loaded;
+        }
+        loaded = loadInstance().then(function (instance) {
+            speedyJsGc = instance.exports.speedyJsGc;
+            return instance;
+        });
+        return loaded;
+    };
+    loader.gc = gc;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
+    };
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
+    };
+    return loader;
+}
+//# sourceMappingURL=get-wasm-module-function.js.map
+let loadWasmModule_1;
+class Test {
+}
+function update(values) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var argumentObjects_1 = new Map(); var result_1 = instance_1.exports._update(loadWasmModule_1.toWASM(values, \\"Array<double>\\", argumentObjects_1)); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./converts-arrays-and-object.wasm\\", { \\"Array<double>\\": { \\"primitive\\": false, \\"fields\\": [], \\"constructor\\": Array, \\"typeArguments\\": [\\"double\\"] }, \\"double\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1228, \\"exposeGc\\": false });
 "
 `;
 
@@ -338,7 +1677,7 @@ exports[`Transformation exports the gc function if exportGc is set 1`] = `
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -351,22 +1690,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -379,7 +1838,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -398,7 +1857,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -406,7 +1864,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -426,22 +1884,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -606,27 +2064,19 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
-    totalStack: 532480,
-    initialMemory: 16777216,
-    globalBase: 8,
-    staticBump: 8,
-    exposeGc: true
-});
+let loadWasmModule_1;
 export const speedyJsGc = loadWasmModule_1.gc;
-function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": true });
 "
 `;
 
@@ -636,7 +2086,7 @@ exports[`Transformation exposes the gc function if exposeGc is set 1`] = `
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -649,22 +2099,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -677,7 +2247,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -696,7 +2266,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -704,7 +2273,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -724,22 +2293,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -904,27 +2473,19 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
-    totalStack: 532480,
-    initialMemory: 16777216,
-    globalBase: 8,
-    staticBump: 8,
-    exposeGc: true
-});
+let loadWasmModule_1;
 const speedyJsGc = loadWasmModule_1.gc;
-function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": true });
 "
 `;
 
@@ -934,7 +2495,7 @@ exports[`Transformation passes the configured global base to the module loader 1
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -947,22 +2508,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -975,7 +2656,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -994,7 +2675,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -1002,7 +2682,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -1022,22 +2702,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -1202,26 +2882,18 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
-    totalStack: 532480,
-    initialMemory: 16777216,
-    globalBase: 4000,
-    staticBump: 8,
-    exposeGc: false
-});
-function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
+let loadWasmModule_1;
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 4000, \\"staticBump\\": 8, \\"exposeGc\\": false });
 "
 `;
 
@@ -1231,7 +2903,7 @@ exports[`Transformation passes the configured initial memory to the module loade
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -1244,22 +2916,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -1272,7 +3064,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -1291,7 +3083,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -1299,7 +3090,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -1319,22 +3110,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -1499,26 +3290,18 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
-    totalStack: 532480,
-    initialMemory: 10485760,
-    globalBase: 8,
-    staticBump: 8,
-    exposeGc: false
-});
-function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
+let loadWasmModule_1;
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 10485760, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
 "
 `;
 
@@ -1528,7 +3311,7 @@ exports[`Transformation passes the configured total stack to the module loader 1
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -1541,22 +3324,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -1569,7 +3472,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -1588,7 +3491,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -1596,7 +3498,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -1616,22 +3518,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -1796,26 +3698,18 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
-    totalStack: 1048576,
-    initialMemory: 16777216,
-    globalBase: 8,
-    staticBump: 8,
-    exposeGc: false
-});
-function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
+let loadWasmModule_1;
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 1048576, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
 "
 `;
 
@@ -1825,7 +3719,7 @@ exports[`Transformation rewrites the speedyjs function to call into the web asse
  * speedyjs-transformer to generate the code to load the wasm module.
  * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
-function __moduleLoader(wasmUri, options) {
+function __moduleLoader(wasmUri, types, options) {
     var PTR_SIZE = 4;
     var PTR_SHIFT = Math.log2(PTR_SIZE);
     function sizeOf(type) {
@@ -1838,22 +3732,142 @@ function __moduleLoader(wasmUri, options) {
             case \\"double\\":
                 return 8;
             default:
-                if (type.endsWith(\\"*\\")) {
-                    return 4;
-                }
-                throw new Error(\\"Unknown type \\" + type);
+                return PTR_SIZE;
+        }
+    }
+    function getHeapValue(ptr, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                return heap8[ptr];
+            case \\"i32\\":
+                return heap32[ptr >> 2] | 0;
+            case \\"double\\":
+                return heap64[ptr >> 3];
+            default:
+                return heapPtr[ptr >> PTR_SHIFT] | 0;
+        }
+    }
+    function setHeapValue(ptr, value, type) {
+        switch (type) {
+            case \\"i1\\":
+            case \\"i8\\":
+                heap8[ptr] = value;
+                break;
+            case \\"i32\\":
+                heap32[ptr >> 2] = value;
+                break;
+            case \\"double\\":
+                heap64[ptr >> 3] = value;
+                break;
+            default:
+                heapPtr[ptr >> PTR_SHIFT] = value;
         }
     }
     var heap8;
     var heap32;
     var heapPtr;
     var heap64;
-    var malloc = function () { throw new Error(\\"malloc not defiend\\"); };
+    var malloc = function () { throw new Error(\\"malloc not defined\\"); };
     var free = function () { return void 0; };
     function updateHeap(buffer) {
         heap8 = new Int8Array(buffer);
         heap32 = heapPtr = new Int32Array(buffer);
         heap64 = new Float64Array(buffer);
+    }
+    /**
+     * Computes the size of a not packed object
+     */
+    function computeObjectSize(type) {
+        return type.fields.reduce(function (memo, field) {
+            var fieldSize = sizeOf(field.type);
+            return alignMemory(memo + fieldSize, fieldSize);
+        }, 0);
+    }
+    function jsToWasm(jsValue, typeName, objectReferences) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            return jsValue;
+        }
+        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+            throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        var ptr = objectReferences.get(jsValue);
+        if (typeof (ptr) !== \\"undefined\\") {
+            return ptr;
+        }
+        if (type.constructor === Array) {
+            if (!Array.isArray(jsValue)) {
+                throw new Error(\\"Expected argument of type Array\\");
+            }
+            ptr = RuntimeArray.from(jsValue, type.typeArguments[0], objectReferences).ptr;
+        }
+        else {
+            // Object
+            if (typeof (jsValue) !== \\"object\\") {
+                throw new Error(\\"Expected argument of type object but was typeof \\" + typeof (jsValue) + \\".\\");
+            }
+            if (jsValue.constructor !== type.constructor) {
+                throw new Error(\\"Expected object of type \\" + type.constructor + \\" but was \\" + jsValue.constructor + \\" (inheritance is not supported).\\");
+            }
+            var size = computeObjectSize(type);
+            var objPtr = malloc(size);
+            if (objPtr === 0) {
+                throw new Error(\\"Failed to allocate object\\");
+            }
+            var offset = 0;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                offset = alignMemory(offset, fieldSize);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                offset += fieldSize;
+            }
+            ptr = objPtr;
+        }
+        objectReferences.set(jsValue, ptr);
+        return ptr;
+    }
+    function wasmToJs(wasmValue, typeName, returnedObjects) {
+        var type = types[typeName];
+        if (!type) {
+            throw new Error(\\"Unknown type \\" + typeName);
+        }
+        if (type.primitive) {
+            if (typeName === \\"i1\\") {
+                return wasmValue !== 0;
+            }
+            return wasmValue;
+        }
+        var ptr = wasmValue;
+        var objectReference = returnedObjects.get(ptr);
+        if (typeof objectReference !== \\"undefined\\") {
+            return objectReference;
+        }
+        if (ptr === 0) {
+            return undefined;
+        }
+        else if (type.constructor === Array) {
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+        }
+        else {
+            // Object
+            var obj = Object.create(type.constructor.prototype); // ensure it is an instance of the class
+            var memoryOffset = wasmValue;
+            for (var _i = 0, _a = type.fields; _i < _a.length; _i++) {
+                var field = _a[_i];
+                var fieldSize = sizeOf(field.type);
+                memoryOffset = alignMemory(memoryOffset, fieldSize);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                memoryOffset += fieldSize;
+            }
+            objectReference = obj;
+        }
+        returnedObjects.set(ptr, objectReference);
+        return objectReference;
     }
     var RuntimeArray = (function () {
         function RuntimeArray(ptr, elementType) {
@@ -1866,7 +3880,7 @@ function __moduleLoader(wasmUri, options) {
          * @param elementType the element type
          * @return {RuntimeArray} the Speedy.js Array
          */
-        RuntimeArray.from = function (native, elementType) {
+        RuntimeArray.from = function (native, elementType, objectReferences) {
             // begin, back, capacity
             var size = PTR_SIZE * 2 + sizeOf(\\"i32\\");
             var arrayPtr = malloc(size);
@@ -1885,7 +3899,6 @@ function __moduleLoader(wasmUri, options) {
                 case \\"i8\\":
                     heap8.set(native, begin);
                     break;
-                // TODO support i8*
                 case \\"i32\\":
                     heap32.set(native, begin >> 2);
                     break;
@@ -1893,7 +3906,7 @@ function __moduleLoader(wasmUri, options) {
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    throw new Error(\\"Unsupported type \\" + elementType);
+                    heapPtr.set(Int32Array.from(native, function (object) { return jsToWasm(object, elementType, objectReferences); }), begin >> PTR_SHIFT);
             }
             return new RuntimeArray(arrayPtr, elementType);
         };
@@ -1913,22 +3926,22 @@ function __moduleLoader(wasmUri, options) {
         });
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        RuntimeArray.prototype.toArray = function () {
+        RuntimeArray.prototype.toArray = function (objectReferences) {
+            var _this = this;
             switch (this.elementType) {
                 case \\"i1\\":
-                    // Elements need to be converted to bool
-                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; });
+                    return Array.from(heap8.subarray(this.begin, this.back), function (value) { return value !== 0; }); // Elements need to be converted to bool
                 case \\"i8\\":
                     return Array.from(heap8.subarray(this.begin, this.back));
-                // TODO support i8*
                 case \\"i32\\":
                     return Array.from(heap32.subarray(this.begin >> 2, this.back >> 2));
                 case \\"double\\":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    throw new Error(\\"Unsupported type \\" + this.elementType);
+                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), function (objectPtr) { return wasmToJs(objectPtr, _this.elementType, objectReferences); });
             }
         };
         return RuntimeArray;
@@ -2093,25 +4106,17 @@ function __moduleLoader(wasmUri, options) {
         return loaded;
     };
     loader.gc = gc;
-    loader.toRuntimeArray = function () {
-        return RuntimeArray.from.apply(undefined, arguments).ptr;
+    loader.toWASM = function (jsObject, objectTypeName, objectReferences) {
+        return jsToWasm(jsObject, objectTypeName, objectReferences);
     };
-    loader.toNativeArray = function (ptr, elementType) {
-        if (ptr === 0) {
-            return undefined;
-        }
-        return new RuntimeArray(ptr, elementType).toArray();
+    loader.toJSObject = function (objectPointer, objectTypeName) {
+        return wasmToJs(objectPointer, objectTypeName, new Map());
     };
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-const loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", {
-    totalStack: 532480,
-    initialMemory: 16777216,
-    globalBase: 8,
-    staticBump: 8,
-    exposeGc: false
-});
-function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance) { var result = instance.exports._fib(value); loadWasmModule_1.gc(); return result; }); }
+let loadWasmModule_1;
+function fib(value) { return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
+loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }, { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
 "
 `;

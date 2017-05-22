@@ -150,7 +150,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.EqualsEqualsEqualsToken: {
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
-                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Object)) {
                     result = context.builder.createICmpEQ(leftIr, rightIr, "cmpEQ");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
                     result = context.builder.createFCmpOEQ(leftIr, rightIr, "cmpEQ");
@@ -162,7 +162,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.ExclamationEqualsEqualsToken: {
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
-                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike)) {
+                if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Object)) {
                     result = context.builder.createICmpNE(leftIr, rightIr, "cmpNE");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
                     result = context.builder.createFCmpONE(leftIr, rightIr, "cmpNE");

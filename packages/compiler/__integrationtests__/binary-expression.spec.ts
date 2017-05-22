@@ -1,3 +1,5 @@
+class SimpleClass {}
+
 async function addInts(x: int, y: int) {
     "use speedyjs";
 
@@ -239,6 +241,11 @@ async function numbersEqual(x: number, y: number) {
     return x === y;
 }
 
+async function objectsEqual(x: SimpleClass, y: SimpleClass) {
+    "use speedyjs";
+    return x === y;
+}
+
 async function boolsNotEqual(x: boolean, y: boolean) {
     "use speedyjs";
     return x !== y;
@@ -250,6 +257,11 @@ async function intsNotEqual(x: int, y: int) {
 }
 
 async function numbersNotEqual(x: number, y: number) {
+    "use speedyjs";
+    return x !== y;
+}
+
+async function objectsNotEqual(x: SimpleClass, y: SimpleClass) {
     "use speedyjs";
     return x !== y;
 }
@@ -666,6 +678,15 @@ describe("BinaryExpression", () => {
             expect(await numbersEqual(3.99, 3.98)).toBe(3.99 === 3.98 as any);
             cb();
         });
+
+        it("returns true for objects pointing to the same address and false otherwise", async (cb) => {
+            const x = new SimpleClass();
+            const y = new SimpleClass();
+            expect(await objectsEqual(x, x)).toBe(x === x);
+            expect(await objectsEqual(x, y)).toBe(x === y);
+
+            cb();
+        });
     });
 
     describe("!==", () => {
@@ -684,6 +705,15 @@ describe("BinaryExpression", () => {
         it("returns false for equal number values and true otherwise", async (cb) => {
             expect(await numbersNotEqual(3.12, 3.12)).toBe(3.12 !== 3.12);
             expect(await numbersNotEqual(3.99, 3.98)).toBe(3.99 !== 3.98 as any);
+            cb();
+        });
+
+        it("returns false for objects pointing to the same address and true otherwise", async (cb) => {
+            const x = new SimpleClass();
+            const y = new SimpleClass();
+            expect(await objectsEqual(x, x)).toBe(x === x);
+            expect(await objectsEqual(x, y)).toBe(x === y);
+
             cb();
         });
     });
