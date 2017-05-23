@@ -13,7 +13,7 @@ export interface TypeChecker {
     typeToString(type: ts.Type): string;
     getSymbolAtLocation(name: ts.Node): ts.Symbol;
     getFullyQualifiedName(symbol: ts.Symbol): string;
-    getSignatureFromDeclaration(functionDeclaration: ts.FunctionDeclaration): ts.Signature;
+    getSignatureFromDeclaration(functionDeclaration: ts.SignatureDeclaration): ts.Signature;
     getDeclaredTypeOfSymbol(symbol: ts.Symbol): ts.Type;
     getSignaturesOfType(type: ts.Type, Call: ts.SignatureKind): ts.Signature[];
     getReturnTypeOfSignature(signature: ts.Signature): ts.Type;

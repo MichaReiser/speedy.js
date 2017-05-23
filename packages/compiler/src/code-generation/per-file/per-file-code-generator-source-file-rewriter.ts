@@ -54,9 +54,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
     rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
         this.loadWasmFunctionIdentifier = this.loadWasmFunctionIdentifier || ts.createUniqueName("loadWasmModule");
         const signature = this.context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
-
-        const returnType = this.context.typeChecker.toSupportedType((signature.getReturnType() as ts.GenericType).typeArguments[0]); // Return Type is always a promise
-        this.argumentAndReturnTypes.push(returnType);
+        this.argumentAndReturnTypes.push(signature.getReturnType());
 
         const argumentTypes = signature.declaration.parameters.map(parameter => this.context.typeChecker.getTypeAtLocation(parameter));
         this.argumentAndReturnTypes.push(...argumentTypes);
@@ -78,7 +76,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const targetFunction = ts.createPropertyAccess(wasmExports, name);
         const args = signature.declaration.parameters.map(parameter => this.castToWasm(parameter, this.loadWasmFunctionIdentifier!, argumentObjects));
         const functionCall = ts.createCall(targetFunction, [], args);
-        const castedResult = this.castToJs(functionCall, (signature.getReturnType() as ts.TypeReference).typeArguments[0], this.loadWasmFunctionIdentifier!);
+        const castedResult = this.castToJs(functionCall, signature.getReturnType(), this.loadWasmFunctionIdentifier!);
         const resultIdentifier = ts.createUniqueName("result");
         const resultVariable = ts.createVariableDeclaration(resultIdentifier, undefined, castedResult);
         bodyStatements.push(ts.createVariableStatement(undefined, [resultVariable]));

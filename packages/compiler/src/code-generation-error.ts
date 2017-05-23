@@ -124,6 +124,10 @@ export class CodeGenerationError extends Error {
     static unsupportedElementAccessExpression(elementAccessExpression: ts.ElementAccessExpression, argumentExpressionType?: string) {
         return CodeGenerationError.createException(elementAccessExpression, diagnostics.UnsupportedElementAccessExpression, argumentExpressionType || "undefined");
     }
+
+    static unsupportedImplicitCastOfReturnValue(returnStatement: ts.ReturnStatement, declaredReturnType: string, returnStatementExpressionType: string) {
+        return CodeGenerationError.createException(returnStatement, diagnostics.UnsupportedImplicitCastOfReturnValue, returnStatementExpressionType, declaredReturnType, declaredReturnType);
+    }
 }
 
 const diagnostics = {
@@ -218,5 +222,9 @@ const diagnostics = {
     UnsupportedElementAccessExpression: {
         message: "Unsupported element access expression with indexer of type '%s'. Only element access expressions with an integer index are supported.",
         code: 1000022
+    },
+    UnsupportedImplicitCastOfReturnValue: {
+        message: "Unsupported immplicit cast of return value with the type '%s' to function's return type '%s'. An explicit cast of the return value to the expected return type '%s' is required.",
+        code: 1000023
     }
 };

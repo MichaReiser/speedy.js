@@ -134,7 +134,13 @@ class SignatureWrapper implements ts.Signature {
     }
 
     getReturnType(): ts.Type {
-        return toSupportedType(this.signature.getReturnType());
+        let returnType = this.signature.getReturnType();
+        if (returnType.getSymbol() && returnType.getSymbol().getName()  === "Promise" && returnType.flags & ts.TypeFlags.Object && (returnType as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) {
+            const typeReference = returnType as ts.TypeReference;
+            returnType = typeReference.typeArguments && typeReference.typeArguments.length === 1 ? typeReference.typeArguments[0] : returnType;
+        }
+
+        return toSupportedType(returnType);
     }
 
     getDocumentationComment(): ts.SymbolDisplayPart[] {
