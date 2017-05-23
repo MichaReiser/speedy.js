@@ -49,6 +49,11 @@ attributes #1 = { argmemonly nounwind }
 "
 `;
 
+exports[`Array array-literal-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/array/array-literal-implicit-cast-error.ts(6,27): error TS1000018: The array element of type '7' requires an implicit cast to the array element type 'number'. Implicit casts are not supported. Cast the element explicitly to the array type using the as expression'.
+"
+`;
+
 exports[`Array assignment 1`] = `
 "; ModuleID = 'array/assignment.ts'
 source_filename = \\"array/assignment.ts\\"

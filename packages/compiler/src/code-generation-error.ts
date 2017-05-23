@@ -104,6 +104,10 @@ export class CodeGenerationError extends Error {
     static unsupportedCast(node: ts.AsExpression, sourceType: string, targetType: string) {
         return CodeGenerationError.createException(node, diagnostics.UnsupportedCast, sourceType, targetType);
     }
+
+    static implicitArrayElementCast(element: ts.Expression, arrayElementType: string, typeOfElementRequiringImplicitCast: string) {
+        return CodeGenerationError.createException(element, diagnostics.UnsupportedImplicitArrayElementCast, typeOfElementRequiringImplicitCast, arrayElementType);
+    }
 }
 
 const diagnostics = {
@@ -178,5 +182,9 @@ const diagnostics = {
     UnsupportedCast: {
         message: "Casting from '%s' to '%s' is not yet supported",
         code: 1000017
+    },
+    UnsupportedImplicitArrayElementCast: {
+        message: "The array element of type '%s' requires an implicit cast to the array element type '%s'. Implicit casts are not supported. Cast the element explicitly to the array type using the as expression'.",
+        code: 1000018
     }
 };

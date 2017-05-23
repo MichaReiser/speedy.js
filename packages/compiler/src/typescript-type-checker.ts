@@ -7,6 +7,7 @@ import {TypeChecker} from "./type-checker";
  * of nullable types should be removed.
  */
 export class TypeScriptTypeChecker implements TypeChecker {
+
     constructor(private tsTypeChecker: ts.TypeChecker) {}
 
     getAliasedSymbol(symbol: ts.Symbol): ts.Symbol {
@@ -63,6 +64,18 @@ export class TypeScriptTypeChecker implements TypeChecker {
 
     isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean {
         return this.tsTypeChecker.isImplementationOfOverload(fun);
+    }
+
+    areEqualTypes(first: ts.Type, second: ts.Type): boolean {
+        const checker = this;
+        function getBaseType(type: ts.Type) {
+            if (type.flags & ts.TypeFlags.Literal) {
+                return checker.tsTypeChecker.getBaseTypeOfLiteralType(type);
+            }
+
+            return type;
+        }
+        return getBaseType(first) === getBaseType(second);
     }
 
     toSupportedType(type: ts.Type): ts.Type {
