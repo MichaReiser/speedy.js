@@ -9,6 +9,7 @@ import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {AssignableValue, Value} from "./value";
+import {CodeGenerationError} from "../../code-generation-error";
 
 /**
  * Base class for function references. Handles the coercion of the argument values to the expected types of the function parametes
@@ -41,7 +42,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         const resolvedSignature = callerContext.typeChecker.getResolvedSignature(callExpression);
         const resolvedFunction = this.getResolvedFunctionFromSignature(resolvedSignature, callerContext.compilationContext);
 
-        const passedArguments = this.getCoercedCallArguments(callExpression.arguments || [] as ts.Node[], resolvedFunction, callerContext);
+        const passedArguments = this.getLLVMArgumentValues(callExpression.arguments || [] as ts.Expression[], resolvedFunction, callerContext);
         return this.invokeResolvedFunction(resolvedFunction, passedArguments, callerContext);
     }
 
@@ -53,36 +54,34 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         return createResolvedFunctionFromSignature(signature, compilationContext, this.classType);
     }
 
-    protected getCoercedCallArguments(args: ts.Node[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {
+    protected getLLVMArgumentValues(args: ts.Expression[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {
         let values: llvm.Value[] = [];
         for (let i = 0; i < Math.min(args.length, resolvedFunction.parameters.length); ++i) {
             const parameter = resolvedFunction.parameters[i];
             const parameterType = parameter.type;
             const arg = args[i];
+            const argumentType = callerContext.typeChecker.getTypeAtLocation(arg);
 
             if (parameter.variadic) {
                 const varArgs = args.slice(i);
                 const elementType = getArrayElementType(parameterType);
-                values.push(...varArgs.map(varArg => this.coerceArgument(varArg, elementType, callerContext)));
+
+                const elementNotMatchingArrayElementType = varArgs.find(varArg => !callerContext.typeChecker.areEqualTypes(callerContext.typeChecker.getTypeAtLocation(varArg), elementType));
+                if (typeof elementNotMatchingArrayElementType !== "undefined") {
+                    throw CodeGenerationError.unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(elementNotMatchingArrayElementType)));
+                }
+
+                values.push(...varArgs.map(varArg => callerContext.generateValue(varArg).generateIR(callerContext)));
             } else {
-                values.push(this.coerceArgument(arg, parameterType, callerContext));
+                if (!callerContext.typeChecker.areEqualTypes(parameterType, argumentType)) {
+                    throw CodeGenerationError.unsupportedImplicitCastOfArgument(arg, callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
+                }
+
+                values.push(callerContext.generateValue(arg).generateIR(callerContext));
             }
         }
 
         return values;
-    }
-
-    private coerceArgument(arg: ts.Node, parameterType: ts.Type, callerContext: CodeGenerationContext) {
-        const argType = callerContext.typeChecker.getTypeAtLocation(arg);
-        let argValue = callerContext.generateValue(arg).generateIR(callerContext);
-
-        if (parameterType.flags & ts.TypeFlags.Number && (argType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike))) {
-            argValue = callerContext.builder.createSIToFP(argValue, llvm.Type.getDoubleTy(callerContext.llvmContext), `${argValue.name}AsDouble`);
-        } else if (parameterType.flags & ts.TypeFlags.Int && argType.flags & ts.TypeFlags.BooleanLike) {
-            argValue = callerContext.builder.createZExt(argValue, llvm.Type.getInt32Ty(callerContext.llvmContext), `${argValue.name}AsInt`);
-        }
-
-        return argValue;
     }
 
     private invokeResolvedFunction(resolvedFunction: ResolvedFunction, args: llvm.Value[], callerContext: CodeGenerationContext) {

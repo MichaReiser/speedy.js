@@ -11,7 +11,7 @@ class ClassWithConstructor {
 export async function classWithConstructor() {
     "use speedyjs";
 
-    const instance = new ClassWithConstructor(10, 20);
+    const instance = new ClassWithConstructor(10.0, 20.0);
 
     return instance.x + instance.y;
 }

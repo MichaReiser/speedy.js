@@ -23,7 +23,7 @@ class ClassWithMethod {
     }
 
     distanceTo(other: ClassWithMethod) {
-        return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+        return Math.sqrt(Math.pow(this.x - other.x, 2.0) + Math.pow(this.y - other.y, 2.0));
     }
 }
 

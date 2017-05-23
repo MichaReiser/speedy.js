@@ -83,7 +83,7 @@ export class Primitive implements Value {
         let numberValue: llvm.Value;
         const llvmValue = value.generateIR(context);
         if (llvmValue.type.isIntegerTy()) {
-            numberValue = context.builder.createSIToFP(llvmValue, llvm.Type.getDoubleTy(context.llvmContext), `${llvmValue}AsNumber`);
+            numberValue = context.builder.createSIToFP(llvmValue, llvm.Type.getDoubleTy(context.llvmContext), `${llvmValue.name}AsNumber`);
         } else if (llvmValue.type.isDoubleTy()) {
             numberValue = llvmValue;
         } else {

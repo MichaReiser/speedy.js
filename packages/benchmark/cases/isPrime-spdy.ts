@@ -5,7 +5,7 @@ export async function isPrime(value: int) {
         return false;
     }
 
-    for (let i = 2; i <= (Math.sqrt(value) as int); ++i) {
+    for (let i = 2; i <= (Math.sqrt(value as number) as int); ++i) {
         if (value % i === 0) {
             return false;
         }

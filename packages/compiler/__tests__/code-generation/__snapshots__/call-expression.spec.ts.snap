@@ -158,6 +158,11 @@ attributes #2 = { alwaysinline nounwind readonly }
 "
 `;
 
+exports[`CallExpression implicit-call-arguments-type-coercion-error 1`] = `
+"__tests__/code-generation/cases/call-expression/implicit-call-arguments-type-coercion-error.ts(4,22): error TS1000020: Unsupported implicit cast of the argument with the type 'int' to the expected parameter type 'number'. An explicit cast of the argument to the type 'number' is required.
+"
+`;
+
 exports[`CallExpression simple-function-call 1`] = `
 "; ModuleID = 'call-expression/simple-function-call.ts'
 source_filename = \\"call-expression/simple-function-call.ts\\"
@@ -216,5 +221,10 @@ returnBlock:                                      ; preds = %if.end, %if.then
   %return6 = load i32, i32* %return, align 4
   ret i32 %return6
 }
+"
+`;
+
+exports[`CallExpression varargs-implicit-type-coercion-error 1`] = `
+"__tests__/code-generation/cases/call-expression/varargs-implicit-type-coercion-error.ts(4,60): error TS1000020: Unsupported implicit cast of the argument with the type '2' to the expected parameter type 'number'. An explicit cast of the argument to the type 'number' is required.
 "
 `;

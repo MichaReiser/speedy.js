@@ -112,6 +112,10 @@ export class CodeGenerationError extends Error {
     static unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression: ts.BinaryExpression, leftOperandType: string, rightOperandType: string) {
         return CodeGenerationError.createException(binaryExpression, diagnostics.UnsupportedImplicitCastOfBinaryExpressionOperands, leftOperandType, rightOperandType);
     }
+
+    static unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType: ts.Expression, parameterType: string, argumentType: string) {
+        return CodeGenerationError.createException(elementNotMatchingArrayElementType, diagnostics.UnsupportedImplicitCastOfArgument, argumentType, parameterType, parameterType);
+    }
 }
 
 const diagnostics = {
@@ -194,5 +198,9 @@ const diagnostics = {
     UnsupportedImplicitCastOfBinaryExpressionOperands: {
         message: "Unsupported implicit cast of binary expressions operands (left: %s, right: %s). An explicit cast of either of the operands to the other's type is required.",
         code: 1000019
+    },
+    UnsupportedImplicitCastOfArgument: {
+        message: "Unsupported implicit cast of the argument with the type '%s' to the expected parameter type '%s'. An explicit cast of the argument to the type '%s' is required.",
+        code: 1000020
     }
 };
