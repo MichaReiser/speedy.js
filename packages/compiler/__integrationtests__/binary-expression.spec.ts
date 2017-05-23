@@ -572,12 +572,6 @@ describe("BinaryExpression", () => {
             expect(await binOrEqualsInts(10, 16)).toBe(10 | 16);
             cb();
         });
-
-        // TODO not yet supported, requires automatic type coercion
-        // it("converts the value of the number variable to an int", async (cb) => {
-        //     expect(await orEqualsNumbers(3.495, 0)).toBe(3.495 | 0);
-        //     cb();
-        // });
     });
 
     describe("&", () => {

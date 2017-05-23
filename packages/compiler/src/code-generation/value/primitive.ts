@@ -17,22 +17,26 @@ export class Primitive implements Value {
      * @param int32Type the int 32 type
      * @param context the context
      * @return the converted value
+     * @see https://tc39.github.io/ecma262/#sec-ecmascript-function-objects-call-thisargument-argumentslist
      */
     static toInt32(value: Value, valueType: ts.Type, int32Type: ts.Type, context: CodeGenerationContext) {
         let intValue: llvm.Value;
-        const llvmValue = value.generateIR(context);
 
         if (valueType.flags & ts.TypeFlags.IntLike) {
-            intValue = llvmValue;
+            intValue = value.generateIR(context);
         } else if (valueType.flags & ts.TypeFlags.BooleanLike) {
+            const llvmValue = value.generateIR(context);
             intValue = context.builder.createZExt(llvmValue, llvm.Type.getInt32Ty(context.llvmContext), `${llvmValue.name}AsInt32`);
         } else if (valueType.flags & (ts.TypeFlags.NumberLike)) {
+            const llvmValue = value.generateIR(context);
             const fn = FunctionDeclarationBuilder.create("toInt32d", [ { name: "value", type: valueType }], int32Type, context)
                 .withAttribute(llvm.Attribute.AttrKind.ReadNone)
                 .withAttribute(llvm.Attribute.AttrKind.AlwaysInline)
                 .externalLinkage()
                 .declareIfNotExisting();
             intValue = context.builder.createCall(fn, [llvmValue], `${llvmValue.name}AsInt32`);
+        } else if (valueType.flags & ts.TypeFlags.Object) {
+            intValue = llvm.ConstantInt.get(context.llvmContext, 0); // as long as valueOf and toString are not supported
         } else {
             throw new Error(`Unsupported conversion of ${context.typeChecker.typeToString(valueType)} to int32`);
         }

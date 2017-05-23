@@ -40,6 +40,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
 
         switch (binaryExpression.operatorToken.kind) {
 
+            // 10.12 & 0
             case ts.SyntaxKind.AmpersandToken:
             case ts.SyntaxKind.AmpersandEqualsToken: {
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
@@ -49,6 +50,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a || b
             case ts.SyntaxKind.AmpersandAmpersandToken: {
                 const lhs = context.generateValue(binaryExpression.left).generateIR(context);
                 const lhsAsBool = Primitive.toBoolean(lhs, leftType, context);
@@ -75,10 +77,14 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a * b
             case ts.SyntaxKind.AsteriskToken:
             case ts.SyntaxKind.AsteriskEqualsToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
+
                 if (leftType.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createMul(leftIr, rightIr, "mul");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
@@ -88,8 +94,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a ** b
             case ts.SyntaxKind.AsteriskAsteriskToken:
             case ts.SyntaxKind.AsteriskAsteriskEqualsToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const left = context.generateValue(binaryExpression.left);
                 const right = context.generateValue(binaryExpression.right);
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.NumberLike)) {
@@ -99,18 +108,22 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a | b
             case ts.SyntaxKind.BarToken:
             case ts.SyntaxKind.BarEqualsToken: {
                 const intType = resultType;
                 const left = context.generateValue(binaryExpression.left);
                 const lhsIntValue = Primitive.toInt32(left, leftType, intType, context).generateIR();
+
                 const right = context.generateValue(binaryExpression.right);
                 const rhsIntValue = Primitive.toInt32(right, rightType, intType, context).generateIR();
+
                 result = context.builder.createOr(lhsIntValue, rhsIntValue, "or");
 
                 break;
             }
 
+            // a || b
             case ts.SyntaxKind.BarBarToken: {
                 const lhs = context.generateValue(binaryExpression.left).generateIR(context);
                 const lhsBlock = context.builder.getInsertBlock();
@@ -137,6 +150,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a ^ b
             case ts.SyntaxKind.CaretEqualsToken:
             case ts.SyntaxKind.CaretToken: {
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
@@ -147,7 +161,18 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a, b, c
+            case ts.SyntaxKind.CommaToken: {
+                context.generateValue(binaryExpression.left).generateIR(context);
+                result = context.generateValue(binaryExpression.right).generateIR(context);
+
+                break;
+            }
+
+            // a === b
             case ts.SyntaxKind.EqualsEqualsEqualsToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Object)) {
@@ -159,7 +184,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // !==
             case ts.SyntaxKind.ExclamationEqualsEqualsToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Object)) {
@@ -171,7 +199,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a > b
             case ts.SyntaxKind.GreaterThanToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
@@ -185,7 +216,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a >= b
             case ts.SyntaxKind.GreaterThanEqualsToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
@@ -199,6 +233,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a >> b
             case ts.SyntaxKind.GreaterThanGreaterThanToken:
             case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken: {
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
@@ -210,6 +245,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a >>> b
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken: {
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
@@ -221,7 +257,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a < b
             case ts.SyntaxKind.LessThanToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
@@ -235,7 +274,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a <= b
             case ts.SyntaxKind.LessThanEqualsToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.BooleanLike) {
@@ -249,6 +291,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a << b
             case ts.SyntaxKind.LessThanLessThanToken:
             case ts.SyntaxKind.LessThanLessThanEqualsToken:
                 const leftInt = Primitive.toInt32(context.generateValue(binaryExpression.left), leftType, resultType, context).generateIR();
@@ -259,8 +302,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
 
                 break;
 
+            // a - b
             case ts.SyntaxKind.MinusEqualsToken:
             case ts.SyntaxKind.MinusToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
@@ -272,7 +318,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a % b
             case ts.SyntaxKind.PercentToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
@@ -284,8 +333,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a + b
             case ts.SyntaxKind.PlusEqualsToken:
             case ts.SyntaxKind.PlusToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
@@ -297,8 +349,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a / b
             case ts.SyntaxKind.SlashEqualsToken:
             case ts.SyntaxKind.SlashToken: {
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 const leftIr = context.generateValue(binaryExpression.left).generateIR(context);
                 const rightIr = context.generateValue(binaryExpression.right).generateIR(context);
                 if (leftType.flags & ts.TypeFlags.IntLike) {
@@ -310,7 +365,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
+            // a = b
             case ts.SyntaxKind.FirstAssignment:
+                BinaryExpressionCodeGenerator.assertOperandAreOfEqualType(binaryExpression, context);
+
                 resultValue = context.generateValue(binaryExpression.right);
         }
 
@@ -327,6 +385,15 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         }
 
         return resultValue;
+    }
+
+    private static assertOperandAreOfEqualType(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext) {
+        const leftType = context.typeChecker.getTypeAtLocation(binaryExpression.left);
+        const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
+
+        if (!context.typeChecker.areEqualTypes(leftType, rightType)) {
+            throw CodeGenerationError.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
+        }
     }
 }
 

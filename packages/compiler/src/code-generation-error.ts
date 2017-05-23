@@ -108,6 +108,10 @@ export class CodeGenerationError extends Error {
     static implicitArrayElementCast(element: ts.Expression, arrayElementType: string, typeOfElementRequiringImplicitCast: string) {
         return CodeGenerationError.createException(element, diagnostics.UnsupportedImplicitArrayElementCast, typeOfElementRequiringImplicitCast, arrayElementType);
     }
+
+    static unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression: ts.BinaryExpression, leftOperandType: string, rightOperandType: string) {
+        return CodeGenerationError.createException(binaryExpression, diagnostics.UnsupportedImplicitCastOfBinaryExpressionOperands, leftOperandType, rightOperandType);
+    }
 }
 
 const diagnostics = {
@@ -184,7 +188,11 @@ const diagnostics = {
         code: 1000017
     },
     UnsupportedImplicitArrayElementCast: {
-        message: "The array element of type '%s' requires an implicit cast to the array element type '%s'. Implicit casts are not supported. Cast the element explicitly to the array type using the as expression'.",
+        message: "The array element of type '%s' requires an implicit cast to the array element type '%s'. Implicit casts are not supported. An explicit cast of the element to the array element type is required.",
         code: 1000018
+    },
+    UnsupportedImplicitCastOfBinaryExpressionOperands: {
+        message: "Unsupported implicit cast of binary expressions operands (left: %s, right: %s). An explicit cast of either of the operands to the other's type is required.",
+        code: 1000019
     }
 };

@@ -135,25 +135,23 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             options
         ]);
 
-        const statementsToInsert: ts.Statement[] = [];
+        const statements = sourceFile.statements;
 
         // var loadWasmModule;
         const loaderDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(this.loadWasmFunctionIdentifier)], ts.NodeFlags.Let);
-        statementsToInsert.push(ts.createVariableStatement([], loaderDeclaration));
+        statements.unshift(ts.createVariableStatement([], loaderDeclaration));
 
         // loadWasmModule = __moduleLoader(...
         const loadDefinition = ts.createBinary(this.loadWasmFunctionIdentifier!, ts.SyntaxKind.EqualsToken, initializer);
+        statements.push(ts.createStatement(loadDefinition)); // Insert last to ensure that all classes are visible (entry functions need to be top level)
 
         // export let speedyJsGc = loadWasmModule_1.gc; or without export if only expose
         if (compilerOptions.exposeGc || compilerOptions.exportGc) {
             const speedyJsGcDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"))], ts.NodeFlags.Const);
             const modifiers = compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
-            statementsToInsert.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
+            statements.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
         }
 
-        const statements = sourceFile.statements;
-        statements.unshift(...statementsToInsert);
-        statements.push(ts.createStatement(loadDefinition)); // Insert last to ensure that all classes are visible (entry functions need to be top level)
         return ts.updateSourceFileNode(sourceFile, statements);
     }
 
