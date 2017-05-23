@@ -17,12 +17,13 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathCos() {
 entry:
-  %cosReturnValue = call double @Math_cosd(double 1.130000e+01)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %cosReturnValue = call double @Math_cosd(%class.Math* %mathPtr, double 1.130000e+01)
   ret void
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare double @Math_cosd(double) #0
+declare double @Math_cosd(%class.Math* readonly dereferenceable(1), double) #0
 
 attributes #0 = { alwaysinline nounwind readnone }
 "
@@ -45,12 +46,13 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathLog() {
 entry:
-  %logReturnValue = call double @Math_logd(double 1.200000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %logReturnValue = call double @Math_logd(%class.Math* %mathPtr, double 1.200000e+00)
   ret void
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare double @Math_logd(double) #0
+declare double @Math_logd(%class.Math* readonly dereferenceable(1), double) #0
 
 attributes #0 = { alwaysinline nounwind readnone }
 "
@@ -104,14 +106,15 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathPow() {
 entry:
-  %powReturnValue = call double @llvm.pow.f64(double 1.200000e+00, double 3.300000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double 1.200000e+00, double 3.300000e+00)
   ret void
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #0
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -132,12 +135,13 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathSin() {
 entry:
-  %sinReturnValue = call double @Math_sind(double 1.130000e+01)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sinReturnValue = call double @Math_sind(%class.Math* %mathPtr, double 1.130000e+01)
   ret void
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare double @Math_sind(double) #0
+declare double @Math_sind(%class.Math* readonly dereferenceable(1), double) #0
 
 attributes #0 = { alwaysinline nounwind readnone }
 "
@@ -160,13 +164,14 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathSqrt() {
 entry:
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double 3.140000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr, double 3.140000e+00)
   ret void
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #0
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;

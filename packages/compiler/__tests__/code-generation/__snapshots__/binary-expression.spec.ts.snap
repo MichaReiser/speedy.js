@@ -141,23 +141,27 @@ define void @_asteriskAsterisk() {
 entry:
   %doubleProduct = alloca double, align 8
   %intProduct = alloca double, align 8
-  %powReturnValue = call double @llvm.pow.f64(double 3.000000e+00, double 4.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double 3.000000e+00, double 4.000000e+00)
   store double %powReturnValue, double* %intProduct, align 8
   %intProduct1 = load double, double* %intProduct, align 8
-  %powReturnValue2 = call double @llvm.pow.f64(double %intProduct1, double 2.000000e+00)
-  store double %powReturnValue2, double* %intProduct, align 8
-  %powReturnValue3 = call double @llvm.pow.f64(double 3.000000e+00, double 4.000000e+00)
-  store double %powReturnValue3, double* %doubleProduct, align 8
-  %doubleProduct4 = load double, double* %doubleProduct, align 8
-  %powReturnValue5 = call double @llvm.pow.f64(double %doubleProduct4, double 1.500000e+00)
+  %mathPtr2 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue3 = call double @Math_powdd(%class.Math* %mathPtr2, double %intProduct1, double 2.000000e+00)
+  store double %powReturnValue3, double* %intProduct, align 8
+  %mathPtr4 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue5 = call double @Math_powdd(%class.Math* %mathPtr4, double 3.000000e+00, double 4.000000e+00)
   store double %powReturnValue5, double* %doubleProduct, align 8
+  %doubleProduct6 = load double, double* %doubleProduct, align 8
+  %mathPtr7 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue8 = call double @Math_powdd(%class.Math* %mathPtr7, double %doubleProduct6, double 1.500000e+00)
+  store double %powReturnValue8, double* %doubleProduct, align 8
   ret void
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #0
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 

@@ -746,7 +746,8 @@ while.cond:                                       ; preds = %for.end, %entry
   br i1 %lengthAsBool, label %while.body, label %while.end
 
 while.body:                                       ; preds = %while.cond
-  %powReturnValue = call double @llvm.pow.f64(double 2.000000e+00, double 3.100000e+01)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double 2.000000e+00, double 3.100000e+01)
   %fsub = fsub double %powReturnValue, 1.000000e+00
   store double %fsub, double* %shortestDistance, align 8
   store i32 0, i32* %nearestIndex, align 4
@@ -824,8 +825,8 @@ declare i32 @ArrayIPv_length(%class.Array* nocapture readonly dereferenceable(12
 ; Function Attrs: alwaysinline
 declare void @ArrayIPv_lengthi(%class.Array* dereferenceable(12), i32) #0
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #2
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #2
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly
 declare %class.Point* @ArrayIPv_geti(%class.Array* nocapture dereferenceable(12), i32) #3
@@ -848,7 +849,8 @@ entry:
   %x5 = load i32, i32* %\\"&x4\\", align 4
   %sub = sub i32 %x, %x5
   %subAsNumber = sitofp i32 %sub to double
-  %powReturnValue = call double @llvm.pow.f64(double %subAsNumber, double 2.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double %subAsNumber, double 2.000000e+00)
   %this6 = load %class.Point*, %class.Point** %this, align 4
   %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this6, i32 0, i32 1
   %y = load i32, i32* %\\"&y\\", align 4
@@ -857,19 +859,21 @@ entry:
   %y9 = load i32, i32* %\\"&y8\\", align 4
   %sub10 = sub i32 %y, %y9
   %sub10AsNumber = sitofp i32 %sub10 to double
-  %powReturnValue11 = call double @llvm.pow.f64(double %sub10AsNumber, double 2.000000e+00)
-  %fadd = fadd double %powReturnValue, %powReturnValue11
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double %fadd)
+  %mathPtr11 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue12 = call double @Math_powdd(%class.Math* %mathPtr11, double %sub10AsNumber, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue12
+  %mathPtr13 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr13, double %fadd)
   store double %sqrtReturnValue, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
-  %return12 = load double, double* %return, align 8
-  ret double %return12
+  %return14 = load double, double* %return, align 8
+  ret double %return14
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #2
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #2
 
 ; Function Attrs: alwaysinline
 declare dereferenceable(12) %class.Array* @ArrayIPv_spliceii(%class.Array* readonly dereferenceable(12), i32, i32) #0
@@ -940,7 +944,7 @@ declare void @speedyJsGc()
 
 attributes #0 = { alwaysinline }
 attributes #1 = { alwaysinline nounwind readonly }
-attributes #2 = { nounwind readnone speculatable }
+attributes #2 = { alwaysinline nounwind readnone }
 attributes #3 = { alwaysinline norecurse nounwind readonly }
 "
 `;

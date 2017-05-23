@@ -275,28 +275,31 @@ entry:
   store double %y, double* %\\"&y2\\", align 8
   %\\"&x3\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 1
   %x4 = load double, double* %\\"&x3\\", align 8
-  %powReturnValue = call double @llvm.pow.f64(double %x4, double 2.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double %x4, double 2.000000e+00)
   %\\"&y5\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 2
   %y6 = load double, double* %\\"&y5\\", align 8
-  %powReturnValue7 = call double @llvm.pow.f64(double %y6, double 2.000000e+00)
-  %fadd = fadd double %powReturnValue, %powReturnValue7
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double %fadd)
-  %\\"&distance8\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
-  store double %sqrtReturnValue, double* %\\"&distance8\\", align 8
+  %mathPtr7 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue8 = call double @Math_powdd(%class.Math* %mathPtr7, double %y6, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue8
+  %mathPtr9 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr9, double %fadd)
+  %\\"&distance10\\" = getelementptr inbounds %class.ClassWithAttributeInitializer, %class.ClassWithAttributeInitializer* %this, i32 0, i32 0
+  store double %sqrtReturnValue, double* %\\"&distance10\\", align 8
   ret %class.ClassWithAttributeInitializer* %this
 }
 
 declare i8* @malloc(i32)
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #0
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -561,7 +564,8 @@ entry:
   %\\"&x4\\" = getelementptr inbounds %class.Point, %class.Point* %to.addr3, i32 0, i32 0
   %x5 = load double, double* %\\"&x4\\", align 8
   %fsub = fsub double %x, %x5
-  %powReturnValue = call double @llvm.pow.f64(double %fsub, double 2.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double %fsub, double 2.000000e+00)
   %this6 = load %class.Point*, %class.Point** %this, align 4
   %\\"&y\\" = getelementptr inbounds %class.Point, %class.Point* %this6, i32 0, i32 1
   %y = load double, double* %\\"&y\\", align 8
@@ -569,25 +573,27 @@ entry:
   %\\"&y8\\" = getelementptr inbounds %class.Point, %class.Point* %to.addr7, i32 0, i32 1
   %y9 = load double, double* %\\"&y8\\", align 8
   %fsub10 = fsub double %y, %y9
-  %powReturnValue11 = call double @llvm.pow.f64(double %fsub10, double 2.000000e+00)
-  %fadd = fadd double %powReturnValue, %powReturnValue11
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double %fadd)
+  %mathPtr11 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue12 = call double @Math_powdd(%class.Math* %mathPtr11, double %fsub10, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue12
+  %mathPtr13 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr13, double %fadd)
   store double %sqrtReturnValue, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
-  %return12 = load double, double* %return, align 8
-  ret double %return12
+  %return14 = load double, double* %return, align 8
+  ret double %return14
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #0
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #0
 
 declare void @speedyJsGc()
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;

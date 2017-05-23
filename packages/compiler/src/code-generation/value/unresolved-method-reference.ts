@@ -18,11 +18,13 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
      * @param object the object
      * @param signatures the signatures of the method
      * @param context the context
+     * @param properties the function properties
      * @return {UnresolvedMethodReference} the reference to this method
      */
-    static createRuntimeMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext) {
+    static createRuntimeMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext, properties?: Partial<FunctionProperties>) {
         const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
-        return new UnresolvedMethodReference(object, signatures, functionFactory, { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true });
+        properties = Object.assign({ linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true }, properties);
+        return new UnresolvedMethodReference(object, signatures, functionFactory, properties);
     }
 
     /**

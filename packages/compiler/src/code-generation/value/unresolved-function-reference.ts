@@ -56,7 +56,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
 
         const signature = this.signatures[0];
 
-        if (signature.typeParameters.length) {
+        if (signature.typeParameters && signature.typeParameters.length) {
             throw new Error(`Cannot dereference a generic function`);
         }
 

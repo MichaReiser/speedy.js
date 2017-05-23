@@ -34,6 +34,18 @@ async function cos(value: number) {
     return Math.cos(value);
 }
 
+async function maxNumber(a: number, b: number, c: number) {
+    "use speedyjs";
+
+    return Math.max(a, b, c);
+}
+
+async function maxInt(a: int, b: int, c: int) {
+    "use speedyjs";
+
+    return Math.max(a, b, c);
+}
+
 describe("Math", () => {
     describe("PI", () => {
         it("returns the value PI", async (cb) => {
@@ -73,6 +85,18 @@ describe("Math", () => {
     describe("cos", () => {
         it("computes the cos", async (cb) => {
             expect(await cos(23.33)).toBe(Math.cos(23.33));
+            cb();
+        });
+    });
+
+    describe("max", () => {
+        it("returns the max of the passed numbers", async (cb) => {
+            expect(await maxNumber(10, 22, 100)).toBe(100);
+            cb();
+        });
+
+        it("returns the max of the passed integers", async (cb) => {
+            expect(await maxInt(11, 22, 100)).toBe(100);
             cb();
         });
     });
