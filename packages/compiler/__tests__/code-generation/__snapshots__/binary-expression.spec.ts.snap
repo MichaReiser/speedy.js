@@ -37,9 +37,9 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression ampersandAmpersand 1`] = `
-"; ModuleID = 'binary-expression/ampersandAmpersand.ts'
-source_filename = \\"binary-expression/ampersandAmpersand.ts\\"
+exports[`BinaryExpression ampersand-ampersand 1`] = `
+"; ModuleID = 'binary-expression/ampersand-ampersand.ts'
+source_filename = \\"binary-expression/ampersand-ampersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -122,9 +122,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression asteriskAsterisk 1`] = `
-"; ModuleID = 'binary-expression/asteriskAsterisk.ts'
-source_filename = \\"binary-expression/asteriskAsterisk.ts\\"
+exports[`BinaryExpression asterisk-asterisk 1`] = `
+"; ModuleID = 'binary-expression/asterisk-asterisk.ts'
+source_filename = \\"binary-expression/asterisk-asterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -198,9 +198,9 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression barBar 1`] = `
-"; ModuleID = 'binary-expression/barBar.ts'
-source_filename = \\"binary-expression/barBar.ts\\"
+exports[`BinaryExpression bar-bar 1`] = `
+"; ModuleID = 'binary-expression/bar-bar.ts'
+source_filename = \\"binary-expression/bar-bar.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -292,9 +292,9 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression equalsEqualsEquals 1`] = `
-"; ModuleID = 'binary-expression/equalsEqualsEquals.ts'
-source_filename = \\"binary-expression/equalsEqualsEquals.ts\\"
+exports[`BinaryExpression equals-equals-equals 1`] = `
+"; ModuleID = 'binary-expression/equals-equals-equals.ts'
+source_filename = \\"binary-expression/equals-equals-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -326,9 +326,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression exclamationEqualsEquals 1`] = `
-"; ModuleID = 'binary-expression/exclamationEqualsEquals.ts'
-source_filename = \\"binary-expression/exclamationEqualsEquals.ts\\"
+exports[`BinaryExpression exclamation-equals-equals 1`] = `
+"; ModuleID = 'binary-expression/exclamation-equals-equals.ts'
+source_filename = \\"binary-expression/exclamation-equals-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -360,9 +360,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greaterThan 1`] = `
-"; ModuleID = 'binary-expression/greaterThan.ts'
-source_filename = \\"binary-expression/greaterThan.ts\\"
+exports[`BinaryExpression greater-than 1`] = `
+"; ModuleID = 'binary-expression/greater-than.ts'
+source_filename = \\"binary-expression/greater-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -395,9 +395,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greaterThanEquals 1`] = `
-"; ModuleID = 'binary-expression/greaterThanEquals.ts'
-source_filename = \\"binary-expression/greaterThanEquals.ts\\"
+exports[`BinaryExpression greater-than-equals 1`] = `
+"; ModuleID = 'binary-expression/greater-than-equals.ts'
+source_filename = \\"binary-expression/greater-than-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -430,9 +430,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greaterThanGreaterThanGreaterThan 1`] = `
-"; ModuleID = 'binary-expression/greaterThanGreaterThanGreaterThan.ts'
-source_filename = \\"binary-expression/greaterThanGreaterThanGreaterThan.ts\\"
+exports[`BinaryExpression greater-than-greater-than-greater-than 1`] = `
+"; ModuleID = 'binary-expression/greater-than-greater-than-greater-than.ts'
+source_filename = \\"binary-expression/greater-than-greater-than-greater-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -466,9 +466,9 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression lessThan 1`] = `
-"; ModuleID = 'binary-expression/lessThan.ts'
-source_filename = \\"binary-expression/lessThan.ts\\"
+exports[`BinaryExpression less-than 1`] = `
+"; ModuleID = 'binary-expression/less-than.ts'
+source_filename = \\"binary-expression/less-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -501,9 +501,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression lessThanEquals 1`] = `
-"; ModuleID = 'binary-expression/lessThanEquals.ts'
-source_filename = \\"binary-expression/lessThanEquals.ts\\"
+exports[`BinaryExpression less-than-equals 1`] = `
+"; ModuleID = 'binary-expression/less-than-equals.ts'
+source_filename = \\"binary-expression/less-than-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -536,9 +536,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression lessThanLessThan 1`] = `
-"; ModuleID = 'binary-expression/lessThanLessThan.ts'
-source_filename = \\"binary-expression/lessThanLessThan.ts\\"
+exports[`BinaryExpression less-than-less-than 1`] = `
+"; ModuleID = 'binary-expression/less-than-less-than.ts'
+source_filename = \\"binary-expression/less-than-less-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 

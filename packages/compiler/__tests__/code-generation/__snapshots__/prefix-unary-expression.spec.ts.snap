@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PrefixUnaryExpression minusMinus 1`] = `
-"; ModuleID = 'prefix-unary-expression/minusMinus.ts'
-source_filename = \\"prefix-unary-expression/minusMinus.ts\\"
+exports[`PrefixUnaryExpression minus-minus 1`] = `
+"; ModuleID = 'prefix-unary-expression/minus-minus.ts'
+source_filename = \\"prefix-unary-expression/minus-minus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -102,9 +102,9 @@ entry:
 "
 `;
 
-exports[`PrefixUnaryExpression plusPlus 1`] = `
-"; ModuleID = 'prefix-unary-expression/plusPlus.ts'
-source_filename = \\"prefix-unary-expression/plusPlus.ts\\"
+exports[`PrefixUnaryExpression plus-plus 1`] = `
+"; ModuleID = 'prefix-unary-expression/plus-plus.ts'
+source_filename = \\"prefix-unary-expression/plus-plus.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 

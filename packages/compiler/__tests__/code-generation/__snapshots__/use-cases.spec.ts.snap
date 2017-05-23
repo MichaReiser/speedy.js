@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UseCases mergeSort 1`] = `
-"; ModuleID = 'use-cases/mergeSort.ts'
-source_filename = \\"use-cases/mergeSort.ts\\"
+exports[`UseCases merge-sort 1`] = `
+"; ModuleID = 'use-cases/merge-sort.ts'
+source_filename = \\"use-cases/merge-sort.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -20,7 +20,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 define double @_mergeSort() {
 entry:
   %return = alloca double, align 8
-  %mergeSortSyncReturnValue = call double @\\"use_cases/mergeSort.ts$$13mergeSortSync\\"()
+  %mergeSortSyncReturnValue = call double @\\"use_cases/merge_sort.ts$$13mergeSortSync\\"()
   store double %mergeSortSyncReturnValue, double* %return, align 8
   br label %returnBlock
 
@@ -29,7 +29,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return1
 }
 
-define linkonce_odr hidden double @\\"use_cases/mergeSort.ts$$13mergeSortSync\\"() {
+define linkonce_odr hidden double @\\"use_cases/merge_sort.ts$$13mergeSortSync\\"() {
 entry:
   %sorted = alloca %class.Array*, align 4
   %items = alloca [10000 x double], align 8
@@ -47,9 +47,9 @@ entry:
   %array4 = load %class.Array*, %class.Array** %array, align 4
   %length = call i32 @ArrayId_length(%class.Array* %array4)
   %sorted5 = load %class.Array*, %class.Array** %sorted, align 4
-  call void @\\"use_cases/mergeSort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* %array3, i32 0, i32 %length, %class.Array* %sorted5)
+  call void @\\"use_cases/merge_sort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* %array3, i32 0, i32 %length, %class.Array* %sorted5)
   %sorted6 = load %class.Array*, %class.Array** %sorted, align 4
-  %computeCheckSumReturnValue = call double @\\"use_cases/mergeSort.ts$$15computeCheckSum5ArrayId\\"(%class.Array* %sorted6)
+  %computeCheckSumReturnValue = call double @\\"use_cases/merge_sort.ts$$15computeCheckSum5ArrayId\\"(%class.Array* %sorted6)
   store double %computeCheckSumReturnValue, double* %return, align 8
   br label %returnBlock
 
@@ -73,7 +73,7 @@ declare i32 @ArrayId_length(%class.Array* nocapture readonly dereferenceable(12)
 ; Function Attrs: alwaysinline
 declare void @ArrayId_lengthi(%class.Array* dereferenceable(12), i32) #0
 
-define linkonce_odr hidden void @\\"use_cases/mergeSort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
+define linkonce_odr hidden void @\\"use_cases/merge_sort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
 entry:
   %middle = alloca i32, align 4
   %sorted.addr = alloca %class.Array*, align 4
@@ -105,25 +105,25 @@ if.end:                                           ; preds = %entry
   %lower.addr8 = load i32, i32* %lower.addr, align 4
   %middle9 = load i32, i32* %middle, align 4
   %array.addr10 = load %class.Array*, %class.Array** %array.addr, align 4
-  call void @\\"use_cases/mergeSort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* %sorted.addr7, i32 %lower.addr8, i32 %middle9, %class.Array* %array.addr10)
+  call void @\\"use_cases/merge_sort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* %sorted.addr7, i32 %lower.addr8, i32 %middle9, %class.Array* %array.addr10)
   %sorted.addr11 = load %class.Array*, %class.Array** %sorted.addr, align 4
   %middle12 = load i32, i32* %middle, align 4
   %upper.addr13 = load i32, i32* %upper.addr, align 4
   %array.addr14 = load %class.Array*, %class.Array** %array.addr, align 4
-  call void @\\"use_cases/mergeSort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* %sorted.addr11, i32 %middle12, i32 %upper.addr13, %class.Array* %array.addr14)
+  call void @\\"use_cases/merge_sort.ts$$13splitAndMerge5ArrayIdii5ArrayId\\"(%class.Array* %sorted.addr11, i32 %middle12, i32 %upper.addr13, %class.Array* %array.addr14)
   %array.addr15 = load %class.Array*, %class.Array** %array.addr, align 4
   %lower.addr16 = load i32, i32* %lower.addr, align 4
   %middle17 = load i32, i32* %middle, align 4
   %upper.addr18 = load i32, i32* %upper.addr, align 4
   %sorted.addr19 = load %class.Array*, %class.Array** %sorted.addr, align 4
-  call void @\\"use_cases/mergeSort.ts$$5merge5ArrayIdiii5ArrayId\\"(%class.Array* %array.addr15, i32 %lower.addr16, i32 %middle17, i32 %upper.addr18, %class.Array* %sorted.addr19)
+  call void @\\"use_cases/merge_sort.ts$$5merge5ArrayIdiii5ArrayId\\"(%class.Array* %array.addr15, i32 %lower.addr16, i32 %middle17, i32 %upper.addr18, %class.Array* %sorted.addr19)
   br label %returnBlock
 
 returnBlock:                                      ; preds = %if.end, %if.then
   ret void
 }
 
-define linkonce_odr hidden void @\\"use_cases/mergeSort.ts$$5merge5ArrayIdiii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %middle, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
+define linkonce_odr hidden void @\\"use_cases/merge_sort.ts$$5merge5ArrayIdiii5ArrayId\\"(%class.Array* dereferenceable(12) %array, i32 %lower, i32 %middle, i32 %upper, %class.Array* dereferenceable(12) %sorted) {
 entry:
   %k = alloca i32, align 4
   %j = alloca i32, align 4
@@ -217,7 +217,7 @@ declare double @ArrayId_geti(%class.Array* nocapture dereferenceable(12), i32) #
 ; Function Attrs: alwaysinline
 declare void @ArrayId_setid(%class.Array* nocapture dereferenceable(12), i32, double) #0
 
-define linkonce_odr hidden double @\\"use_cases/mergeSort.ts$$15computeCheckSum5ArrayId\\"(%class.Array* dereferenceable(12) %array) {
+define linkonce_odr hidden double @\\"use_cases/merge_sort.ts$$15computeCheckSum5ArrayId\\"(%class.Array* dereferenceable(12) %array) {
 entry:
   %i = alloca i32, align 4
   %result = alloca double, align 8

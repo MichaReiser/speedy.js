@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Array arrayLiteral 1`] = `
-"; ModuleID = 'array/arrayLiteral.ts'
-source_filename = \\"array/arrayLiteral.ts\\"
+exports[`Array array-literal 1`] = `
+"; ModuleID = 'array/array-literal.ts'
+source_filename = \\"array/array-literal.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -105,9 +105,9 @@ attributes #2 = { alwaysinline norecurse nounwind readonly }
 "
 `;
 
-exports[`Array elementAccess 1`] = `
-"; ModuleID = 'array/elementAccess.ts'
-source_filename = \\"array/elementAccess.ts\\"
+exports[`Array element-access 1`] = `
+"; ModuleID = 'array/element-access.ts'
+source_filename = \\"array/element-access.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
