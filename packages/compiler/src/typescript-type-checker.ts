@@ -43,7 +43,19 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getTypeAtLocation(node: ts.Node): ts.Type {
-        return this.toSupportedType(this.tsTypeChecker.getTypeAtLocation(node));
+        let type = this.toSupportedType(this.tsTypeChecker.getTypeAtLocation(node));
+
+        // e.g. when const x: int[] = [] then the type of [] is never[] that is quite unfortunate. Take the contextual
+        // type information into consideration in this case (but do not otherwise. Otherwise let x: number = 3 returns unexpected results.
+        if (type.flags & ts.TypeFlags.Object && (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) {
+            const typeReference = type as ts.TypeReference;
+
+            if (typeReference.typeArguments && typeReference.typeArguments.some(typeArgument => !!(typeArgument.flags & ts.TypeFlags.Never))) {
+                type = this.getContextualType(node as ts.Expression) || type;
+            }
+        }
+
+        return type;
     }
 
     getContextualType(node: ts.Expression): ts.Type {
@@ -84,6 +96,11 @@ export class TypeScriptTypeChecker implements TypeChecker {
 }
 
 function toSupportedType(type: ts.Type): ts.Type {
+    // should never happen but it does!, thanks typescript
+    if (typeof(type) === "undefined") {
+        return type;
+    }
+
     // getNonNullableType returns never for void?
     if (type.flags === ts.TypeFlags.Void) {
         return type;
@@ -105,8 +122,13 @@ function toSupportedType(type: ts.Type): ts.Type {
 }
 
 class SignatureWrapper implements ts.Signature {
+
     constructor(private signature: ts.Signature) {
 
+    }
+
+    getJsDocTags(): ts.JSDocTagInfo[] {
+        return this.signature.getJsDocTags();
     }
 
     get declaration() {

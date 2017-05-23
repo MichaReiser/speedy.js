@@ -128,6 +128,10 @@ export class CodeGenerationDiagnostic extends Error {
     static unsupportedImplicitCastOfReturnValue(returnStatement: ts.ReturnStatement, declaredReturnType: string, returnStatementExpressionType: string) {
         return CodeGenerationDiagnostic.createException(returnStatement, diagnostics.UnsupportedImplicitCastOfReturnValue, returnStatementExpressionType, declaredReturnType, declaredReturnType);
     }
+
+    static unsupportedImplicitCast(node: ts.Node, castTargetType: string, actualValueType: string) {
+        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedImplicitCast, actualValueType, castTargetType, castTargetType);
+    }
 }
 
 const diagnostics = {
@@ -224,7 +228,11 @@ const diagnostics = {
         code: 1000022
     },
     UnsupportedImplicitCastOfReturnValue: {
-        message: "Unsupported immplicit cast of return value with the type '%s' to function's return type '%s'. An explicit cast of the return value to the expected return type '%s' is required.",
+        message: "Unsupported implicit cast of return value with the type '%s' to function's return type '%s'. An explicit cast of the return value to the expected return type '%s' is required.",
         code: 1000023
+    },
+    UnsupportedImplicitCast: {
+        message: "Unsupported implicit cast of value with the type '%s' to the expected type '%s'. An explicit cast of the value to the type '%s' is required.",
+        code: 1000024
     }
 };

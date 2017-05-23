@@ -82,7 +82,7 @@ if.end:                                           ; preds = %if.then, %if.else
 `;
 
 exports[`FunctionDeclaration return-with-implicit-value-coercion-error 1`] = `
-"__tests__/code-generation/cases/function-declaration/return-with-implicit-value-coercion-error.ts(2,20): error TS1000023: Unsupported immplicit cast of return value with the type 'int' to function's return type 'number'. An explicit cast of the return value to the expected return type 'number' is required.
+"__tests__/code-generation/cases/function-declaration/return-with-implicit-value-coercion-error.ts(2,20): error TS1000023: Unsupported implicit cast of return value with the type 'int' to function's return type 'number'. An explicit cast of the return value to the expected return type 'number' is required.
 "
 `;
 

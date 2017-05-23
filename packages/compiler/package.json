@@ -39,7 +39,7 @@
     "lodash": "^4.17.4",
     "speedyjs-runtime": "0.x.x",
     "tmp": "0.0.31",
-    "typescript": "MichaReiser/TypeScript#release"
+    "typescript": "MichaReiser/TypeScript#2.3.3-with-int"
   },
   "scripts": {
     "preinstall": "node ./scripts/install-dependencies.js",

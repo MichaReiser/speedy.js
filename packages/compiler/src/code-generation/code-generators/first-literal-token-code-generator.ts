@@ -6,10 +6,10 @@ import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
-class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralLikeNode, Primitive> {
+class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralExpression, Primitive> {
     syntaxKind = ts.SyntaxKind.FirstLiteralToken;
 
-    generate(node: ts.LiteralLikeNode, context: CodeGenerationContext): Primitive {
+    generate(node: ts.LiteralExpression, context: CodeGenerationContext): Primitive {
         const type = context.typeChecker.getTypeAtLocation(node);
         let value: llvm.Value;
 
