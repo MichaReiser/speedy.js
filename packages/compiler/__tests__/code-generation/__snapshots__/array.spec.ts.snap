@@ -164,6 +164,11 @@ attributes #2 = { alwaysinline norecurse nounwind readonly }
 "
 `;
 
+exports[`Array element-access-with-number-error 1`] = `
+"__tests__/code-generation/cases/array/element-access-with-number-error.ts(5,15): error TS1000022: Unsupported element access expression with indexer of type '2.1'. Only element access expressions with an integer index are supported.
+"
+`;
+
 exports[`Array fill 1`] = `
 "; ModuleID = 'array/fill.ts'
 source_filename = \\"array/fill.ts\\"

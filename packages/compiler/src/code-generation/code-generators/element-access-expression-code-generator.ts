@@ -11,6 +11,15 @@ class ElementAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Ele
     syntaxKind = ts.SyntaxKind.ElementAccessExpression;
 
     generate(node: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
+        if (!node.argumentExpression) {
+            throw CodeGenerationError.unsupportedElementAccessExpression(node);
+        }
+
+        const argumentExpressionType = context.typeChecker.getTypeAtLocation(node.argumentExpression);
+        if (!(argumentExpressionType.flags & ts.TypeFlags.IntLike)) {
+            throw CodeGenerationError.unsupportedElementAccessExpression(node, context.typeChecker.typeToString(argumentExpressionType));
+        }
+
         const value = context.generateValue(node.expression).dereference(context);
 
         if (value.isObject()) {

@@ -120,6 +120,10 @@ export class CodeGenerationError extends Error {
     static unsupportedImplicitCastOfConditionalResult(conditionalResult: ts.Expression, typeOfConditional: string, typeOfConditionResult: string) {
         return CodeGenerationError.createException(conditionalResult, diagnostics.UnsupportedImplicitCastOfConditionalResult, typeOfConditionResult, typeOfConditional, typeOfConditional);
     }
+
+    static unsupportedElementAccessExpression(elementAccessExpression: ts.ElementAccessExpression, argumentExpressionType?: string) {
+        return CodeGenerationError.createException(elementAccessExpression, diagnostics.UnsupportedElementAccessExpression, argumentExpressionType || "undefined");
+    }
 }
 
 const diagnostics = {
@@ -210,5 +214,9 @@ const diagnostics = {
     UnsupportedImplicitCastOfConditionalResult: {
         message: "Unsupported implicit cast of conditional case with type '%s' to the type '%s' of the whole conditional expression. An explicit cast of the conditional case to the type '%s' is required.",
         code: 1000021
+    },
+    UnsupportedElementAccessExpression: {
+        message: "Unsupported element access expression with indexer of type '%s'. Only element access expressions with an integer index are supported.",
+        code: 1000022
     }
 };
