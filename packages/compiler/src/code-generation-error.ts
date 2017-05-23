@@ -116,6 +116,10 @@ export class CodeGenerationError extends Error {
     static unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType: ts.Expression, parameterType: string, argumentType: string) {
         return CodeGenerationError.createException(elementNotMatchingArrayElementType, diagnostics.UnsupportedImplicitCastOfArgument, argumentType, parameterType, parameterType);
     }
+
+    static unsupportedImplicitCastOfConditionalResult(conditionalResult: ts.Expression, typeOfConditional: string, typeOfConditionResult: string) {
+        return CodeGenerationError.createException(conditionalResult, diagnostics.UnsupportedImplicitCastOfConditionalResult, typeOfConditionResult, typeOfConditional, typeOfConditional);
+    }
 }
 
 const diagnostics = {
@@ -202,5 +206,9 @@ const diagnostics = {
     UnsupportedImplicitCastOfArgument: {
         message: "Unsupported implicit cast of the argument with the type '%s' to the expected parameter type '%s'. An explicit cast of the argument to the type '%s' is required.",
         code: 1000020
+    },
+    UnsupportedImplicitCastOfConditionalResult: {
+        message: "Unsupported implicit cast of conditional case with type '%s' to the type '%s' of the whole conditional expression. An explicit cast of the conditional case to the type '%s' is required.",
+        code: 1000021
     }
 };
