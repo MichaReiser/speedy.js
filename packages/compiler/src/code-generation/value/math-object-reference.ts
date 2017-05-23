@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
 import {Allocation} from "./allocation";
@@ -46,7 +46,7 @@ export class MathObjectReference extends BuiltInObjectReference {
                 resolvedFunction.instanceMethod = false; // they are not really instance methods as this does not have to be passed
                 return ResolvedFunctionReference.createRuntimeFunction(resolvedFunction, context, { readnone: true, noUnwind: true });
             default:
-                throw CodeGenerationError.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
+                throw CodeGenerationDiagnostic.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
     }
 

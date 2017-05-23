@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 /**
  * Code generators for string literals "hello world"
@@ -15,7 +15,7 @@ class StringLiteralCodeGenerator implements SyntaxCodeGenerator<ts.StringLiteral
             return;
         }
 
-        throw CodeGenerationError.unsupportedSyntaxKind(node);
+        throw CodeGenerationDiagnostic.unsupportedSyntaxKind(node);
     }
 
     /**

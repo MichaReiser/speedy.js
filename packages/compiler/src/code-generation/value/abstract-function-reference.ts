@@ -9,7 +9,7 @@ import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {AssignableValue, Value} from "./value";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 /**
  * Base class for function references. Handles the coercion of the argument values to the expected types of the function parametes
@@ -68,13 +68,13 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
                 const elementNotMatchingArrayElementType = varArgs.find(varArg => !callerContext.typeChecker.areEqualTypes(callerContext.typeChecker.getTypeAtLocation(varArg), elementType));
                 if (typeof elementNotMatchingArrayElementType !== "undefined") {
-                    throw CodeGenerationError.unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(elementNotMatchingArrayElementType)));
+                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(elementNotMatchingArrayElementType)));
                 }
 
                 values.push(...varArgs.map(varArg => callerContext.generateValue(varArg).generateIR(callerContext)));
             } else {
                 if (!callerContext.typeChecker.areEqualTypes(parameterType, argumentType)) {
-                    throw CodeGenerationError.unsupportedImplicitCastOfArgument(arg, callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
+                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(arg, callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
                 }
 
                 values.push(callerContext.generateValue(arg).generateIR(callerContext));

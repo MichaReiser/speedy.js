@@ -1,6 +1,6 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {toLLVMType} from "../util/types";
@@ -377,7 +377,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         }
 
         if (!resultValue) {
-            throw CodeGenerationError.unsupportedBinaryOperation(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(leftType));
+            throw CodeGenerationDiagnostic.unsupportedBinaryOperation(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(leftType));
         }
 
         if (isAssignment(binaryExpression.operatorToken)) {
@@ -392,7 +392,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
 
         if (!context.typeChecker.areEqualTypes(leftType, rightType)) {
-            throw CodeGenerationError.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
+            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
         }
     }
 }

@@ -3,7 +3,7 @@ import * as assert from "assert";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {TypeChecker} from "../../type-checker";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnStatement, void> {
     syntaxKind = ts.SyntaxKind.ReturnStatement;
@@ -18,7 +18,7 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
             const expressionType = context.typeChecker.getTypeAtLocation(returnStatement.expression);
 
             if (!context.typeChecker.areEqualTypes(returnType, expressionType)) {
-                throw CodeGenerationError.unsupportedImplicitCastOfReturnValue(returnStatement, context.typeChecker.typeToString(returnType), context.typeChecker.typeToString(expressionType));
+                throw CodeGenerationDiagnostic.unsupportedImplicitCastOfReturnValue(returnStatement, context.typeChecker.typeToString(returnType), context.typeChecker.typeToString(expressionType));
             }
 
             const returnValue = context.generateValue(returnStatement.expression);

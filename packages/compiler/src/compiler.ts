@@ -9,7 +9,7 @@ import {SpeedyJSTransformVisitor} from "./transform/speedyjs-transform-visitor";
 import {createTransformVisitorFactory} from "./transform/transform-visitor";
 import {BuiltInSymbols} from "./built-in-symbols";
 import {CompilationContext} from "./compilation-context";
-import {CodeGenerationError} from "./code-generation-error";
+import {CodeGenerationDiagnostic} from "./code-generation-diagnostic";
 import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
 import {TypeScriptTypeChecker} from "./typescript-type-checker";
 
@@ -90,7 +90,7 @@ export class Compiler {
 
             return { exitStatus, diagnostics: emitResult.diagnostics };
         } catch (ex) {
-            if (ex instanceof CodeGenerationError) {
+            if (ex instanceof CodeGenerationDiagnostic) {
                 return { exitStatus: ts.ExitStatus.DiagnosticsPresent_OutputsSkipped, diagnostics: [ ex.toDiagnostic() ]};
             } else {
                 LOG(`Compilation failed`, ex);

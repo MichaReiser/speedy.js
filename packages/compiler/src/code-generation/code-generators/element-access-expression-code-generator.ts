@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {ObjectIndexReference} from "../value/object-index-reference";
@@ -12,12 +12,12 @@ class ElementAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Ele
 
     generate(node: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
         if (!node.argumentExpression) {
-            throw CodeGenerationError.unsupportedElementAccessExpression(node);
+            throw CodeGenerationDiagnostic.unsupportedElementAccessExpression(node);
         }
 
         const argumentExpressionType = context.typeChecker.getTypeAtLocation(node.argumentExpression);
         if (!(argumentExpressionType.flags & ts.TypeFlags.IntLike)) {
-            throw CodeGenerationError.unsupportedElementAccessExpression(node, context.typeChecker.typeToString(argumentExpressionType));
+            throw CodeGenerationDiagnostic.unsupportedElementAccessExpression(node, context.typeChecker.typeToString(argumentExpressionType));
         }
 
         const value = context.generateValue(node.expression).dereference(context);
@@ -26,7 +26,7 @@ class ElementAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Ele
             return value.getIndexer(node, context);
         }
 
-        throw CodeGenerationError.unsupportedIndexer(node);
+        throw CodeGenerationDiagnostic.unsupportedIndexer(node);
     }
 }
 

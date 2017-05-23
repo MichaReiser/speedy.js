@@ -4,7 +4,7 @@ import {ArrayClassReference} from "../value/array-class-reference";
 import {ArrayReference} from "../value/array-reference";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {getArrayElementType} from "../util/types";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 /**
  * Code Generator for [1, 2, ...] array expressions
@@ -23,7 +23,7 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
 
         const elementRequiringCast = arrayLiteral.elements.find(element => !context.typeChecker.areEqualTypes(context.typeChecker.getTypeAtLocation(element), elementType));
         if (typeof(elementRequiringCast) !== "undefined") {
-            throw CodeGenerationError.implicitArrayElementCast(elementRequiringCast, context.typeChecker.typeToString(elementType), context.typeChecker.typeToString(context.typeChecker.getTypeAtLocation(elementRequiringCast)));
+            throw CodeGenerationDiagnostic.implicitArrayElementCast(elementRequiringCast, context.typeChecker.typeToString(elementType), context.typeChecker.typeToString(context.typeChecker.getTypeAtLocation(elementRequiringCast)));
         }
 
         const elements = arrayLiteral.elements.map(value => context.generateValue(value).generateIR(context));
