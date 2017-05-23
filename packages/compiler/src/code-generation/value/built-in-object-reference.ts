@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as ts from "typescript";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {Address} from "./address";
@@ -93,11 +93,11 @@ export abstract class BuiltInObjectReference implements ObjectReference {
 
     protected throwUnsupportedBuiltIn(node: any, symbol?: ts.Symbol): never {
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
-            throw CodeGenerationError.builtInDoesNotSupportElementAccess(node, this.typeName);
+            throw CodeGenerationDiagnostic.builtInDoesNotSupportElementAccess(node, this.typeName);
         } else if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            throw CodeGenerationError.builtInPropertyNotSupported(node, this.typeName);
+            throw CodeGenerationDiagnostic.builtInPropertyNotSupported(node, this.typeName);
         } else {
-            throw CodeGenerationError.builtInMethodNotSupported(node, this.typeName, symbol!.name);
+            throw CodeGenerationDiagnostic.builtInMethodNotSupported(node, this.typeName, symbol!.name);
         }
     }
 

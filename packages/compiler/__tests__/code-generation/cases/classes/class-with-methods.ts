@@ -8,14 +8,14 @@ export class Point {
     }
 
     distanceTo(to: Point) {
-        return Math.sqrt(Math.pow(this.x - to.x, 2) + Math.pow(this.y - to.y, 2));
+        return Math.sqrt(Math.pow(this.x - to.x, 2.0) + Math.pow(this.y - to.y, 2.0));
     }
 }
 
 export async function classWithMethods(x: number, y: number) {
     "use speedyjs";
 
-    const center = new Point(0, 0);
+    const center = new Point(0.0, 0.0);
     const other = new Point(x, y);
 
     center.distanceTo(other);

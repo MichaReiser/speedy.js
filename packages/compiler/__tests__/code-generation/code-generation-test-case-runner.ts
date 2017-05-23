@@ -17,6 +17,8 @@ const OUT_DIR = path.join(__dirname, "tmp");
 export function runCases(name: string, directory: string) {
     const absoluteDirectory = path.join(TEST_CASES_DIR, directory);
     const cases = fs.readdirSync(absoluteDirectory).filter(file => file.match(CASE_REGEX)).map(file => path.join(absoluteDirectory, file));
+    const errorCases = cases.filter(fileName => fileName.match(`/-error\.ts$`));
+    const successCases = cases.filter(fileName => errorCases.indexOf(fileName) === -1);
 
     describe(name, () => {
 
@@ -39,26 +41,35 @@ export function runCases(name: string, directory: string) {
         });
 
         for (const testCase of cases) {
+            const errorCase = !!testCase.match(/-error\.ts$/);
+
             test(path.basename(testCase).replace(".ts", ""), () => {
                 const compiler = new Compiler(compilerOptions, compilerHost);
 
                 const { diagnostics, exitStatus } = compiler.compile([testCase]);
 
-                if (diagnostics.length > 0) {
+                if (errorCase) {
+                    expect(exitStatus).toBe(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
+
                     const error = ts.formatDiagnostics(diagnostics, compilerHost);
-                    fail(`Expected Diagnostics to be empty but are\n${error}.`);
+                    expect(error).toMatchSnapshot();
+                } else {
+                    if (diagnostics.length > 0) {
+                        const error = ts.formatDiagnostics(diagnostics, compilerHost);
+                        fail(`Expected Diagnostics to be empty but are\n${error}.`);
+                    }
+                    expect(exitStatus).toBe(ts.ExitStatus.Success);
+
+                    const llFileName = path.join(OUT_DIR, directory, path.basename(testCase).replace(".ts", ".ll"));
+
+                    if (!fs.existsSync(llFileName)) {
+                        throw new Error(`No .ll file has been generated. Is the function marked with "use speedyjs"?`);
+                    }
+
+                    const ll = fs.readFileSync(llFileName, "utf-8");
+
+                    expect(ll).toMatchSnapshot();
                 }
-                expect(exitStatus).toBe(ts.ExitStatus.Success);
-
-                const llFileName = path.join(OUT_DIR, directory, path.basename(testCase).replace(".ts", ".ll"));
-
-                if (!fs.existsSync(llFileName)) {
-                    throw new Error(`No .ll file has been generated. Is the function marked with "use speedyjs"?`);
-                }
-
-                const ll = fs.readFileSync(llFileName, "utf-8");
-
-                expect(ll).toMatchSnapshot();
             });
         }
 

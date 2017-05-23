@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 /**
  * Returns the llvm type for the given typescript type
@@ -39,7 +39,7 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     }
 
     if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
-        throw CodeGenerationError.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
+        throw CodeGenerationDiagnostic.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
     }
 
     throw new Error(`Unsupported type with symbol ${context.typeChecker.typeToString(type)}`);

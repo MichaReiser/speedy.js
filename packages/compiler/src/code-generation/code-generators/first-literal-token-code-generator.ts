@@ -4,12 +4,12 @@ import * as llvm from "llvm-node";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
-class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralLikeNode, Primitive> {
+class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralExpression, Primitive> {
     syntaxKind = ts.SyntaxKind.FirstLiteralToken;
 
-    generate(node: ts.LiteralLikeNode, context: CodeGenerationContext): Primitive {
+    generate(node: ts.LiteralExpression, context: CodeGenerationContext): Primitive {
         const type = context.typeChecker.getTypeAtLocation(node);
         let value: llvm.Value;
 
@@ -18,7 +18,7 @@ class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralLi
         } else if (type.flags & ts.TypeFlags.NumberLiteral) {
             value = llvm.ConstantFP.get(context.llvmContext, +node.text);
         } else {
-            throw CodeGenerationError.unsupportedLiteralType(node, context.typeChecker.typeToString(type));
+            throw CodeGenerationDiagnostic.unsupportedLiteralType(node, context.typeChecker.typeToString(type));
         }
 
         return new Primitive(value, type);

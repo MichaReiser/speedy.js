@@ -3,7 +3,7 @@ import debug = require("debug");
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 import {CodeGenerator} from "../code-generation/code-generator";
 import {CompilationContext} from "../compilation-context";
-import {CodeGenerationError} from "../code-generation-error";
+import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
 import {TypeChecker} from "../type-checker";
 
 const LOG = debug("transform/speedyjs-transform-visitor");
@@ -43,7 +43,7 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
         if (typeof symbol !== "undefined" && symbol.flags & ts.SymbolFlags.Function) {
             for (const declaration of symbol.getDeclarations() as ts.FunctionLikeDeclaration[]) {
                 if (isSpeedyJSFunction(declaration) && !isSpeedyJSEntryFunction(declaration)) {
-                    throw CodeGenerationError.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
+                    throw CodeGenerationDiagnostic.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
                 }
             }
         }
@@ -129,20 +129,20 @@ function isSpeedyJSEntryFunction(fun: ts.FunctionLikeDeclaration) {
  */
 function validateSpeedyJSFunction(fun: ts.FunctionDeclaration, typeChecker: TypeChecker) {
     if (!fun.name) {
-        throw CodeGenerationError.anonymousEntryFunctionsNotSupported(fun);
+        throw CodeGenerationDiagnostic.anonymousEntryFunctionsNotSupported(fun);
     }
 
     const optional = fun.parameters.find(parameter => !!parameter.questionToken || !!parameter.dotDotDotToken);
     if (optional) {
-        throw CodeGenerationError.optionalParametersInEntryFunctionNotSupported(optional);
+        throw CodeGenerationDiagnostic.optionalParametersInEntryFunctionNotSupported(optional);
     }
 
     if (fun.typeParameters && fun.typeParameters.length > 0) {
-        throw CodeGenerationError.genericEntryFunctionNotSupported(fun);
+        throw CodeGenerationDiagnostic.genericEntryFunctionNotSupported(fun);
     }
 
     if (typeChecker.isImplementationOfOverload(fun)) {
-        throw CodeGenerationError.overloadedEntryFunctionNotSupported(fun);
+        throw CodeGenerationDiagnostic.overloadedEntryFunctionNotSupported(fun);
     }
 }
 

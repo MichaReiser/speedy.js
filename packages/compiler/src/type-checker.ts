@@ -13,12 +13,19 @@ export interface TypeChecker {
     typeToString(type: ts.Type): string;
     getSymbolAtLocation(name: ts.Node): ts.Symbol;
     getFullyQualifiedName(symbol: ts.Symbol): string;
-    getSignatureFromDeclaration(functionDeclaration: ts.FunctionDeclaration): ts.Signature;
+    getSignatureFromDeclaration(functionDeclaration: ts.SignatureDeclaration): ts.Signature;
     getDeclaredTypeOfSymbol(symbol: ts.Symbol): ts.Type;
     getSignaturesOfType(type: ts.Type, Call: ts.SignatureKind): ts.Signature[];
     getReturnTypeOfSignature(signature: ts.Signature): ts.Type;
     getApparentType(type: ts.Type): ts.Type;
     isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean;
+
+    /**
+     * Tests if the passed in types are are equal.
+     * @param first the first type to test
+     * @param second the second type to test
+     */
+    areEqualTypes(first: ts.Type, second: ts.Type): boolean;
 
     /**
      * Takes a type script type and converts it to a supported variant of it

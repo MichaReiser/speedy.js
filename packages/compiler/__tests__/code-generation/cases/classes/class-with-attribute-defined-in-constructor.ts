@@ -5,6 +5,6 @@ class ClassWithAttributeInitializer {
 export async function classWithConstructor() {
     "use speedyjs";
 
-    const instance = new ClassWithAttributeInitializer(10, 15);
+    const instance = new ClassWithAttributeInitializer(10.0, 15.0);
     return instance.x + instance.y;
 }

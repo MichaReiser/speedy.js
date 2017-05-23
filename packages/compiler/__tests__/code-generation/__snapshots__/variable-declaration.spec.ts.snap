@@ -1,5 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`VariableDeclaration implicit-type-coercion-error 1`] = `
+"__tests__/code-generation/cases/variable-declaration/implicit-type-coercion-error.ts(4,10): error TS1000024: Unsupported implicit cast of value with the type '10' to the expected type 'number'. An explicit cast of the value to the type 'number' is required.
+"
+`;
+
+exports[`VariableDeclaration initialize-empty-array 1`] = `
+"; ModuleID = 'variable-declaration/initialize-empty-array.ts'
+source_filename = \\"variable-declaration/initialize-empty-array.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.Array = type { i32*, i32, i32 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_initializeEmptyArray() {
+entry:
+  %x = alloca %class.Array*, align 4
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32* null, i32 0)
+  store %class.Array* %constructorReturnValue, %class.Array** %x, align 4
+  ret void
+}
+
+; Function Attrs: alwaysinline
+declare dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32*, i32) #0
+
+declare void @speedyJsGc()
+
+attributes #0 = { alwaysinline }
+"
+`;
+
 exports[`VariableDeclaration initialized 1`] = `
 "; ModuleID = 'variable-declaration/initialized.ts'
 source_filename = \\"variable-declaration/initialized.ts\\"

@@ -59,30 +59,33 @@ entry:
   %x1.addr1 = load double, double* %x1.addr, align 8
   %x2.addr2 = load double, double* %x2.addr, align 8
   %fsub = fsub double %x1.addr1, %x2.addr2
-  %powReturnValue = call double @llvm.pow.f64(double %fsub, double 2.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double %fsub, double 2.000000e+00)
   %y1.addr3 = load double, double* %y1.addr, align 8
   %y2.addr4 = load double, double* %y2.addr, align 8
   %fsub5 = fsub double %y1.addr3, %y2.addr4
-  %powReturnValue6 = call double @llvm.pow.f64(double %fsub5, double 2.000000e+00)
-  %fadd = fadd double %powReturnValue, %powReturnValue6
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double %fadd)
+  %mathPtr6 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue7 = call double @Math_powdd(%class.Math* %mathPtr6, double %fsub5, double 2.000000e+00)
+  %fadd = fadd double %powReturnValue, %powReturnValue7
+  %mathPtr8 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr8, double %fadd)
   store double %sqrtReturnValue, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
-  %return7 = load double, double* %return, align 8
-  ret double %return7
+  %return9 = load double, double* %return, align 8
+  ret double %return9
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #2
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #2
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #2
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #2
 
 attributes #0 = { alwaysinline norecurse nounwind readonly }
 attributes #1 = { alwaysinline }
-attributes #2 = { nounwind readnone speculatable }
+attributes #2 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -158,6 +161,11 @@ attributes #2 = { alwaysinline nounwind readonly }
 "
 `;
 
+exports[`CallExpression implicit-call-arguments-type-coercion-error 1`] = `
+"__tests__/code-generation/cases/call-expression/implicit-call-arguments-type-coercion-error.ts(4,22): error TS1000020: Unsupported implicit cast of the argument with the type 'int' to the expected parameter type 'number'. An explicit cast of the argument to the type 'number' is required.
+"
+`;
+
 exports[`CallExpression simple-function-call 1`] = `
 "; ModuleID = 'call-expression/simple-function-call.ts'
 source_filename = \\"call-expression/simple-function-call.ts\\"
@@ -216,5 +224,10 @@ returnBlock:                                      ; preds = %if.end, %if.then
   %return6 = load i32, i32* %return, align 4
   ret i32 %return6
 }
+"
+`;
+
+exports[`CallExpression varargs-implicit-type-coercion-error 1`] = `
+"__tests__/code-generation/cases/call-expression/varargs-implicit-type-coercion-error.ts(4,60): error TS1000020: Unsupported implicit cast of the argument with the type '2' to the expected parameter type 'number'. An explicit cast of the argument to the type 'number' is required.
 "
 `;

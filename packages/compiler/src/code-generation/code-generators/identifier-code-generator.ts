@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
@@ -28,7 +28,7 @@ class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Valu
             }
         }
 
-        throw CodeGenerationError.unsupportedIdentifier(identifier);
+        throw CodeGenerationDiagnostic.unsupportedIdentifier(identifier);
     }
 
     private static getFunction(symbol: ts.Symbol, identifier: ts.Identifier, context: CodeGenerationContext) {

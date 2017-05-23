@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {FunctionReference} from "../value/function-reference";
@@ -16,7 +16,7 @@ class PropertyAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Pr
         }
 
         // e.g. on a class / function
-        throw CodeGenerationError.unsupportedProperty(propertyExpression);
+        throw CodeGenerationDiagnostic.unsupportedProperty(propertyExpression);
     }
 }
 

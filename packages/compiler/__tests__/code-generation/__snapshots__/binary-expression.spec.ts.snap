@@ -37,9 +37,9 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression ampersandAmpersand 1`] = `
-"; ModuleID = 'binary-expression/ampersandAmpersand.ts'
-source_filename = \\"binary-expression/ampersandAmpersand.ts\\"
+exports[`BinaryExpression ampersand-ampersand 1`] = `
+"; ModuleID = 'binary-expression/ampersand-ampersand.ts'
+source_filename = \\"binary-expression/ampersand-ampersand.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -122,9 +122,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression asteriskAsterisk 1`] = `
-"; ModuleID = 'binary-expression/asteriskAsterisk.ts'
-source_filename = \\"binary-expression/asteriskAsterisk.ts\\"
+exports[`BinaryExpression asterisk-asterisk 1`] = `
+"; ModuleID = 'binary-expression/asterisk-asterisk.ts'
+source_filename = \\"binary-expression/asterisk-asterisk.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -141,23 +141,32 @@ define void @_asteriskAsterisk() {
 entry:
   %doubleProduct = alloca double, align 8
   %intProduct = alloca double, align 8
-  %powReturnValue = call double @llvm.pow.f64(double 3.000000e+00, double 4.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double 3.000000e+00, double 4.000000e+00)
   store double %powReturnValue, double* %intProduct, align 8
   %intProduct1 = load double, double* %intProduct, align 8
-  %powReturnValue2 = call double @llvm.pow.f64(double %intProduct1, double 2.000000e+00)
-  store double %powReturnValue2, double* %intProduct, align 8
-  %powReturnValue3 = call double @llvm.pow.f64(double 3.000000e+00, double 4.000000e+00)
-  store double %powReturnValue3, double* %doubleProduct, align 8
-  %doubleProduct4 = load double, double* %doubleProduct, align 8
-  %powReturnValue5 = call double @llvm.pow.f64(double %doubleProduct4, double 1.500000e+00)
+  %mathPtr2 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue3 = call double @Math_powdd(%class.Math* %mathPtr2, double %intProduct1, double 2.000000e+00)
+  store double %powReturnValue3, double* %intProduct, align 8
+  %mathPtr4 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue5 = call double @Math_powdd(%class.Math* %mathPtr4, double 3.000000e+00, double 4.000000e+00)
   store double %powReturnValue5, double* %doubleProduct, align 8
+  %doubleProduct6 = load double, double* %doubleProduct, align 8
+  %mathPtr7 = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue8 = call double @Math_powdd(%class.Math* %mathPtr7, double %doubleProduct6, double 1.500000e+00)
+  store double %powReturnValue8, double* %doubleProduct, align 8
   ret void
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #0
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
+"
+`;
+
+exports[`BinaryExpression asterisk-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/asterisk-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 3, right: 4.0). An explicit cast of either of the operands to the other's type is required.
 "
 `;
 
@@ -198,9 +207,9 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression barBar 1`] = `
-"; ModuleID = 'binary-expression/barBar.ts'
-source_filename = \\"binary-expression/barBar.ts\\"
+exports[`BinaryExpression bar-bar 1`] = `
+"; ModuleID = 'binary-expression/bar-bar.ts'
+source_filename = \\"binary-expression/bar-bar.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -292,9 +301,37 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression equalsEqualsEquals 1`] = `
-"; ModuleID = 'binary-expression/equalsEqualsEquals.ts'
-source_filename = \\"binary-expression/equalsEqualsEquals.ts\\"
+exports[`BinaryExpression comma 1`] = `
+"; ModuleID = 'binary-expression/comma.ts'
+source_filename = \\"binary-expression/comma.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_comma() {
+entry:
+  %z = alloca double, align 8
+  %y = alloca double, align 8
+  %x = alloca i32, align 4
+  store i32 10, i32* %x, align 4
+  store double 2.022000e+01, double* %y, align 8
+  store double 2.022000e+01, double* %z, align 8
+  ret void
+}
+"
+`;
+
+exports[`BinaryExpression equals-equals-equals 1`] = `
+"; ModuleID = 'binary-expression/equals-equals-equals.ts'
+source_filename = \\"binary-expression/equals-equals-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -326,9 +363,14 @@ entry:
 "
 `;
 
-exports[`BinaryExpression exclamationEqualsEquals 1`] = `
-"; ModuleID = 'binary-expression/exclamationEqualsEquals.ts'
-source_filename = \\"binary-expression/exclamationEqualsEquals.ts\\"
+exports[`BinaryExpression equals-equals-equals-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/equals-equals-equals-implicit-cast-error.ts(4,18): error TS1000019: Unsupported implicit cast of binary expressions operands (left: int, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression exclamation-equals-equals 1`] = `
+"; ModuleID = 'binary-expression/exclamation-equals-equals.ts'
+source_filename = \\"binary-expression/exclamation-equals-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -360,9 +402,59 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greaterThan 1`] = `
-"; ModuleID = 'binary-expression/greaterThan.ts'
-source_filename = \\"binary-expression/greaterThan.ts\\"
+exports[`BinaryExpression exclamation-equals-equals-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/exclamation-equals-equals-implicit-cast-error.ts(4,18): error TS1000019: Unsupported implicit cast of binary expressions operands (left: int, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression first-assignment 1`] = `
+"; ModuleID = 'binary-expression/first-assignment.ts'
+source_filename = \\"binary-expression/first-assignment.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.MyClass = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@MyClass_name = private unnamed_addr constant [8 x i8] c\\"MyClass\\\\00\\"
+@MyClass_type_descriptor = private constant { [8 x i8]* } { [8 x i8]* @MyClass_name }
+
+define void @_firstAssignment() {
+entry:
+  %objectVar = alloca %class.MyClass*, align 4
+  %numberVar = alloca double, align 8
+  %intVar = alloca i32, align 4
+  %booleanVar = alloca i1, align 1
+  store i1 true, i1* %booleanVar, align 1
+  store i32 23, i32* %intVar, align 4
+  store double 2.323000e+01, double* %numberVar, align 8
+  %constructorReturnValue = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"()
+  store %class.MyClass* %constructorReturnValue, %class.MyClass** %objectVar, align 4
+  ret void
+}
+
+define linkonce_odr %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.MyClass*
+  ret %class.MyClass* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`BinaryExpression greater-than 1`] = `
+"; ModuleID = 'binary-expression/greater-than.ts'
+source_filename = \\"binary-expression/greater-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -395,9 +487,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greaterThanEquals 1`] = `
-"; ModuleID = 'binary-expression/greaterThanEquals.ts'
-source_filename = \\"binary-expression/greaterThanEquals.ts\\"
+exports[`BinaryExpression greater-than-equals 1`] = `
+"; ModuleID = 'binary-expression/greater-than-equals.ts'
+source_filename = \\"binary-expression/greater-than-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -430,9 +522,14 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greaterThanGreaterThanGreaterThan 1`] = `
-"; ModuleID = 'binary-expression/greaterThanGreaterThanGreaterThan.ts'
-source_filename = \\"binary-expression/greaterThanGreaterThanGreaterThan.ts\\"
+exports[`BinaryExpression greater-than-equals-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/greater-than-equals-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression greater-than-greater-than-greater-than 1`] = `
+"; ModuleID = 'binary-expression/greater-than-greater-than-greater-than.ts'
+source_filename = \\"binary-expression/greater-than-greater-than-greater-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -466,9 +563,14 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression lessThan 1`] = `
-"; ModuleID = 'binary-expression/lessThan.ts'
-source_filename = \\"binary-expression/lessThan.ts\\"
+exports[`BinaryExpression greater-than-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/greater-than-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression less-than 1`] = `
+"; ModuleID = 'binary-expression/less-than.ts'
+source_filename = \\"binary-expression/less-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -501,9 +603,9 @@ entry:
 "
 `;
 
-exports[`BinaryExpression lessThanEquals 1`] = `
-"; ModuleID = 'binary-expression/lessThanEquals.ts'
-source_filename = \\"binary-expression/lessThanEquals.ts\\"
+exports[`BinaryExpression less-than-equals 1`] = `
+"; ModuleID = 'binary-expression/less-than-equals.ts'
+source_filename = \\"binary-expression/less-than-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -536,9 +638,19 @@ entry:
 "
 `;
 
-exports[`BinaryExpression lessThanLessThan 1`] = `
-"; ModuleID = 'binary-expression/lessThanLessThan.ts'
-source_filename = \\"binary-expression/lessThanLessThan.ts\\"
+exports[`BinaryExpression less-than-equals-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/less-than-equals-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2.0, right: 4). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression less-than-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/less-than-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression less-than-less-than 1`] = `
+"; ModuleID = 'binary-expression/less-than-less-than.ts'
+source_filename = \\"binary-expression/less-than-less-than.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -608,6 +720,11 @@ entry:
 "
 `;
 
+exports[`BinaryExpression minus-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/minus-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
 exports[`BinaryExpression percent 1`] = `
 "; ModuleID = 'binary-expression/percent.ts'
 source_filename = \\"binary-expression/percent.ts\\"
@@ -635,6 +752,11 @@ entry:
   %frem = frem double 8.000000e+00, %sixDouble2
   ret void
 }
+"
+`;
+
+exports[`BinaryExpression percent-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/percent-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 8, right: 2.0). An explicit cast of either of the operands to the other's type is required.
 "
 `;
 
@@ -674,6 +796,11 @@ entry:
 "
 `;
 
+exports[`BinaryExpression plus-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/plus-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 12, right: 3.0). An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
 exports[`BinaryExpression slash 1`] = `
 "; ModuleID = 'binary-expression/slash.ts'
 source_filename = \\"binary-expression/slash.ts\\"
@@ -703,5 +830,10 @@ entry:
   store double %div, double* %doubleProduct, align 8
   ret void
 }
+"
+`;
+
+exports[`BinaryExpression slash-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/slash-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 4, right: 12.0). An explicit cast of either of the operands to the other's type is required.
 "
 `;

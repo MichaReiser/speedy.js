@@ -14,6 +14,10 @@ extern "C" {
  */
 DLL_PUBLIC ALWAYS_INLINE int32_t toInt32d(double value) {
 #ifdef SAFE
+    if (std::isnan(value) || std::isinf(value)) {
+        return 0;
+    }
+
     int64_t posInt = static_cast<int64_t>(std::copysign(std::floor(std::abs(value)), value));
     uint32_t int32bit = static_cast<uint32_t>(posInt - (TWO_TO_THE_POWER_OF_32 * (posInt/TWO_TO_THE_POWER_OF_32)));
 

@@ -30,6 +30,16 @@ entry:
 "
 `;
 
+exports[`ConditionalExpression implicit-cast-of-when-false-error 1`] = `
+"__tests__/code-generation/cases/conditional-expression/implicit-cast-of-when-false-error.ts(4,16): error TS1000021: Unsupported implicit cast of conditional case with type '1' to the type '2.0' of the whole conditional expression. An explicit cast of the conditional case to the type '2.0' is required.
+"
+`;
+
+exports[`ConditionalExpression implicit-cast-of-when-true-error 1`] = `
+"__tests__/code-generation/cases/conditional-expression/implicit-cast-of-when-true-error.ts(4,23): error TS1000021: Unsupported implicit cast of conditional case with type '2.0' to the type '1' of the whole conditional expression. An explicit cast of the conditional case to the type '1' is required.
+"
+`;
+
 exports[`ConditionalExpression int-condition 1`] = `
 "; ModuleID = 'conditional-expression/int-condition.ts'
 source_filename = \\"conditional-expression/int-condition.ts\\"
@@ -93,5 +103,54 @@ entry:
   %cond5 = select i1 %condition.addr4AsBool, double 1.000000e+00, double 2.000000e+00
   ret void
 }
+"
+`;
+
+exports[`ConditionalExpression object-condition 1`] = `
+"; ModuleID = 'conditional-expression/object-condition.ts'
+source_filename = \\"conditional-expression/object-condition.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.Test = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@Test_name = private unnamed_addr constant [5 x i8] c\\"Test\\\\00\\"
+@Test_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Test_name }
+
+define void @_objectConditionalExpression(%class.Test* %condition) {
+entry:
+  %y = alloca %class.Test*, align 4
+  %x = alloca %class.Test*, align 4
+  %condition.addr = alloca %class.Test*, align 4
+  store %class.Test* %condition, %class.Test** %condition.addr, align 4
+  %constructorReturnValue = call dereferenceable(1) %class.Test* @\\"conditional_expression/object_condition.ts$$Test$11constructor\\"()
+  store %class.Test* %constructorReturnValue, %class.Test** %x, align 4
+  %constructorReturnValue1 = call dereferenceable(1) %class.Test* @\\"conditional_expression/object_condition.ts$$Test$11constructor\\"()
+  store %class.Test* %constructorReturnValue1, %class.Test** %y, align 4
+  %condition.addr2 = load %class.Test*, %class.Test** %condition.addr, align 4
+  %condition.addr2AsBool = icmp ne %class.Test* %condition.addr2, null
+  %x3 = load %class.Test*, %class.Test** %x, align 4
+  %y4 = load %class.Test*, %class.Test** %y, align 4
+  %cond = select i1 %condition.addr2AsBool, %class.Test* %x3, %class.Test* %y4
+  ret void
+}
+
+define linkonce_odr %class.Test* @\\"conditional_expression/object_condition.ts$$Test$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.Test*
+  ret %class.Test* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;

@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "speedyjs-compiler": "0.0.1",
-    "typescript": "MichaReiser/TypeScript#release"
+    "typescript": "MichaReiser/TypeScript#2.3.3-with-int"
   },
   "dependencies": {
     "loader-utils": "^1.1.0"

@@ -7,6 +7,7 @@ import {TypeChecker} from "./type-checker";
  * of nullable types should be removed.
  */
 export class TypeScriptTypeChecker implements TypeChecker {
+
     constructor(private tsTypeChecker: ts.TypeChecker) {}
 
     getAliasedSymbol(symbol: ts.Symbol): ts.Symbol {
@@ -42,7 +43,19 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getTypeAtLocation(node: ts.Node): ts.Type {
-        return this.toSupportedType(this.tsTypeChecker.getTypeAtLocation(node));
+        let type = this.toSupportedType(this.tsTypeChecker.getTypeAtLocation(node));
+
+        // e.g. when const x: int[] = [] then the type of [] is never[] that is quite unfortunate. Take the contextual
+        // type information into consideration in this case (but do not otherwise. Otherwise let x: number = 3 returns unexpected results.
+        if (type.flags & ts.TypeFlags.Object && (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) {
+            const typeReference = type as ts.TypeReference;
+
+            if (typeReference.typeArguments && typeReference.typeArguments.some(typeArgument => !!(typeArgument.flags & ts.TypeFlags.Never))) {
+                type = this.getContextualType(node as ts.Expression) || type;
+            }
+        }
+
+        return type;
     }
 
     getContextualType(node: ts.Expression): ts.Type {
@@ -65,12 +78,29 @@ export class TypeScriptTypeChecker implements TypeChecker {
         return this.tsTypeChecker.isImplementationOfOverload(fun);
     }
 
+    areEqualTypes(first: ts.Type, second: ts.Type): boolean {
+        const checker = this;
+        function getBaseType(type: ts.Type) {
+            if (type.flags & ts.TypeFlags.Literal) {
+                return checker.tsTypeChecker.getBaseTypeOfLiteralType(type);
+            }
+
+            return type;
+        }
+        return getBaseType(first) === getBaseType(second);
+    }
+
     toSupportedType(type: ts.Type): ts.Type {
         return toSupportedType(type);
     }
 }
 
 function toSupportedType(type: ts.Type): ts.Type {
+    // should never happen but it does!, thanks typescript
+    if (typeof(type) === "undefined") {
+        return type;
+    }
+
     // getNonNullableType returns never for void?
     if (type.flags === ts.TypeFlags.Void) {
         return type;
@@ -92,8 +122,13 @@ function toSupportedType(type: ts.Type): ts.Type {
 }
 
 class SignatureWrapper implements ts.Signature {
+
     constructor(private signature: ts.Signature) {
 
+    }
+
+    getJsDocTags(): ts.JSDocTagInfo[] {
+        return this.signature.getJsDocTags();
     }
 
     get declaration() {
@@ -121,7 +156,13 @@ class SignatureWrapper implements ts.Signature {
     }
 
     getReturnType(): ts.Type {
-        return toSupportedType(this.signature.getReturnType());
+        let returnType = this.signature.getReturnType();
+        if (returnType.getSymbol() && returnType.getSymbol().getName()  === "Promise" && returnType.flags & ts.TypeFlags.Object && (returnType as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) {
+            const typeReference = returnType as ts.TypeReference;
+            returnType = typeReference.typeArguments && typeReference.typeArguments.length === 1 ? typeReference.typeArguments[0] : returnType;
+        }
+
+        return toSupportedType(returnType);
     }
 
     getDocumentationComment(): ts.SymbolDisplayPart[] {

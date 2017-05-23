@@ -127,9 +127,6 @@ export function createResolvedParameter(name: string, type: ts.Type, optional = 
  */
 export function createResolvedFunctionFromSignature(signature: ts.Signature, compilationContext: CompilationContext, classType?: ts.ObjectType): ResolvedFunction {
     let returnType = signature.getReturnType();
-    if (returnType.getSymbol() === compilationContext.builtIns.get("Promise")) {
-        returnType = compilationContext.typeChecker.toSupportedType((returnType as ts.GenericType).typeArguments[0]);
-    }
 
     return {
         async: !!signature.declaration.modifiers && !!signature.declaration.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword),

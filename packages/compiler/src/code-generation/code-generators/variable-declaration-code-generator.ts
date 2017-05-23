@@ -3,6 +3,7 @@ import * as llvm from "llvm-node";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Allocation} from "../value/allocation";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclaration, void> {
     syntaxKind = ts.SyntaxKind.VariableDeclaration;
@@ -15,13 +16,17 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         let initializer: llvm.Value | undefined;
 
         if (variableDeclaration.initializer) {
-            initializer = context.generateValue(variableDeclaration.initializer).generateIR(context);
-        }
-        // otherwise no initialization is needed. Typescript complains if variable is accessed before assignment
+            let initializerType = context.typeChecker.getTypeAtLocation(variableDeclaration.initializer);
 
-        if (initializer) {
+            if (!context.typeChecker.areEqualTypes(type, initializerType)) {
+                throw CodeGenerationDiagnostic.unsupportedImplicitCast(variableDeclaration, context.typeChecker.typeToString(type), context.typeChecker.typeToString(initializerType));
+            }
+
+            initializer = context.generateValue(variableDeclaration.initializer).generateIR(context);
             allocation.generateAssignmentIR(initializer, context);
         }
+
+        // otherwise no initialization is needed. Typescript complains if variable is accessed before assignment
 
         context.scope.addVariable(symbol, allocation);
     }

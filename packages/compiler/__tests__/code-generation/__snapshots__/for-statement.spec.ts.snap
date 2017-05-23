@@ -463,8 +463,9 @@ if.end:                                           ; preds = %entry
 for.cond:                                         ; preds = %for.inc, %if.end
   %i2 = load i32, i32* %i, align 4
   %x.addr3 = load i32, i32* %x.addr, align 4
-  %x.addr3AsDouble = sitofp i32 %x.addr3 to double
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double %x.addr3AsDouble)
+  %x.addr3AsNumber = sitofp i32 %x.addr3 to double
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr, double %x.addr3AsNumber)
   %sqrtReturnValueAsInt32 = call i32 @toInt32d(double %sqrtReturnValue)
   %cmpLT = icmp slt i32 %i2, %sqrtReturnValueAsInt32
   br i1 %cmpLT, label %for.body, label %for.end
@@ -498,13 +499,13 @@ returnBlock:                                      ; preds = %for.end, %if.then6,
   ret i1 %return9
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #0
 
 ; Function Attrs: alwaysinline readnone
 declare i32 @toInt32d(double) #1
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 attributes #1 = { alwaysinline readnone }
 "
 `;

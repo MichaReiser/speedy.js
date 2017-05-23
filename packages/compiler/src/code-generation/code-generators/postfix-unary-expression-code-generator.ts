@@ -3,7 +3,7 @@ import * as ts from "typescript";
 
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {Value} from "../value/value";
 
 class PostfixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PostfixUnaryExpression, Value> {
@@ -34,7 +34,7 @@ class PostfixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Post
         }
 
         if (!updated) {
-            throw CodeGenerationError.unsupportedUnaryOperation(postfixUnaryExpression, context.typeChecker.typeToString(operandType));
+            throw CodeGenerationDiagnostic.unsupportedUnaryOperation(postfixUnaryExpression, context.typeChecker.typeToString(operandType));
         }
 
         context.assignValue(left, context.value(updated, operandType));

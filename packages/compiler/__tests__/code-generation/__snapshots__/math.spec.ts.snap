@@ -1,8 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Math math.PI 1`] = `
-"; ModuleID = 'math/math.PI.ts'
-source_filename = \\"math/math.PI.ts\\"
+exports[`Math math-cos 1`] = `
+"; ModuleID = 'math/math-cos.ts'
+source_filename = \\"math/math-cos.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_mathCos() {
+entry:
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %cosReturnValue = call double @Math_cosd(%class.Math* %mathPtr, double 1.130000e+01)
+  ret void
+}
+
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_cosd(%class.Math* readonly dereferenceable(1), double) #0
+
+attributes #0 = { alwaysinline nounwind readnone }
+"
+`;
+
+exports[`Math math-log 1`] = `
+"; ModuleID = 'math/math-log.ts'
+source_filename = \\"math/math-log.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_mathLog() {
+entry:
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %logReturnValue = call double @Math_logd(%class.Math* %mathPtr, double 1.200000e+00)
+  ret void
+}
+
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_logd(%class.Math* readonly dereferenceable(1), double) #0
+
+attributes #0 = { alwaysinline nounwind readnone }
+"
+`;
+
+exports[`Math math-pi 1`] = `
+"; ModuleID = 'math/math-pi.ts'
+source_filename = \\"math/math-pi.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -31,67 +89,9 @@ attributes #0 = { alwaysinline nounwind readonly }
 "
 `;
 
-exports[`Math math.cos 1`] = `
-"; ModuleID = 'math/math.cos.ts'
-source_filename = \\"math/math.cos.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-%class.Math = type { i1 }
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math zeroinitializer
-@Math_ptr = private constant %class.Math* @Math_object
-
-define void @_mathCos() {
-entry:
-  %cosReturnValue = call double @Math_cosd(double 1.130000e+01)
-  %cosReturnValue1 = call double @Math_cosd(double 2.000000e+00)
-  ret void
-}
-
-; Function Attrs: alwaysinline nounwind readnone
-declare double @Math_cosd(double) #0
-
-attributes #0 = { alwaysinline nounwind readnone }
-"
-`;
-
-exports[`Math math.log 1`] = `
-"; ModuleID = 'math/math.log.ts'
-source_filename = \\"math/math.log.ts\\"
-target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
-target triple = \\"wasm32-unknown-unknown\\"
-
-%class.Math = type { i1 }
-
-@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
-@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
-@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
-@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
-@Math_object = private constant %class.Math zeroinitializer
-@Math_ptr = private constant %class.Math* @Math_object
-
-define void @_mathLog() {
-entry:
-  %logReturnValue = call double @Math_logd(double 1.200000e+00)
-  %logReturnValue1 = call double @Math_logd(double 4.000000e+00)
-  ret void
-}
-
-; Function Attrs: alwaysinline nounwind readnone
-declare double @Math_logd(double) #0
-
-attributes #0 = { alwaysinline nounwind readnone }
-"
-`;
-
-exports[`Math math.pow 1`] = `
-"; ModuleID = 'math/math.pow.ts'
-source_filename = \\"math/math.pow.ts\\"
+exports[`Math math-pow 1`] = `
+"; ModuleID = 'math/math-pow.ts'
+source_filename = \\"math/math-pow.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -106,21 +106,21 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathPow() {
 entry:
-  %powReturnValue = call double @llvm.pow.f64(double 1.200000e+00, double 3.300000e+00)
-  %powReturnValue1 = call double @llvm.pow.f64(double 4.000000e+00, double 3.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %powReturnValue = call double @Math_powdd(%class.Math* %mathPtr, double 1.200000e+00, double 3.300000e+00)
   ret void
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.pow.f64(double, double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_powdd(%class.Math* readonly dereferenceable(1), double, double) #0
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
-exports[`Math math.sin 1`] = `
-"; ModuleID = 'math/math.sin.ts'
-source_filename = \\"math/math.sin.ts\\"
+exports[`Math math-sin 1`] = `
+"; ModuleID = 'math/math-sin.ts'
+source_filename = \\"math/math-sin.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -135,21 +135,21 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathSin() {
 entry:
-  %sinReturnValue = call double @Math_sind(double 1.130000e+01)
-  %sinReturnValue1 = call double @Math_sind(double 2.000000e+00)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sinReturnValue = call double @Math_sind(%class.Math* %mathPtr, double 1.130000e+01)
   ret void
 }
 
 ; Function Attrs: alwaysinline nounwind readnone
-declare double @Math_sind(double) #0
+declare double @Math_sind(%class.Math* readonly dereferenceable(1), double) #0
 
 attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
-exports[`Math math.sqrt 1`] = `
-"; ModuleID = 'math/math.sqrt.ts'
-source_filename = \\"math/math.sqrt.ts\\"
+exports[`Math math-sqrt 1`] = `
+"; ModuleID = 'math/math-sqrt.ts'
+source_filename = \\"math/math-sqrt.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -164,18 +164,14 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_mathSqrt() {
 entry:
-  %intValue = alloca i32, align 4
-  %sqrtReturnValue = call double @llvm.sqrt.f64(double 3.140000e+00)
-  store i32 4, i32* %intValue, align 4
-  %intValue1 = load i32, i32* %intValue, align 4
-  %intValue1AsDouble = sitofp i32 %intValue1 to double
-  %sqrtReturnValue2 = call double @llvm.sqrt.f64(double %intValue1AsDouble)
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr, double 3.140000e+00)
   ret void
 }
 
-; Function Attrs: nounwind readnone speculatable
-declare double @llvm.sqrt.f64(double) #0
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #0
 
-attributes #0 = { nounwind readnone speculatable }
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;

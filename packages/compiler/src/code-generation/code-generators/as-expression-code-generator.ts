@@ -3,7 +3,7 @@ import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Value} from "../value/value";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Primitive} from "../value/primitive";
-import {CodeGenerationError} from "../../code-generation-error";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 class AsExpressionCodeGenerator implements SyntaxCodeGenerator<ts.AsExpression, Value | void> {
     syntaxKind = ts.SyntaxKind.AsExpression;
@@ -21,7 +21,7 @@ class AsExpressionCodeGenerator implements SyntaxCodeGenerator<ts.AsExpression, 
         } else if (targetType.flags & ts.TypeFlags.NumberLike) {
             castedValue = Primitive.toNumber(value, targetType, context);
         } else {
-            throw CodeGenerationError.unsupportedCast(node, context.typeChecker.typeToString(sourceType), context.typeChecker.typeToString(targetType));
+            throw CodeGenerationDiagnostic.unsupportedCast(node, context.typeChecker.typeToString(sourceType), context.typeChecker.typeToString(targetType));
         }
 
         return castedValue;

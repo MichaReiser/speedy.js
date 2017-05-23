@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty # TODO Update in near future, requires new LLVM build
+dist: trusty
 language: node_js
 node_js:
 - node

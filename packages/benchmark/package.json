@@ -29,7 +29,7 @@
     "file-loader": "^0.11.1",
     "speedyjs-loader": "0.x.x",
     "ts-loader": "^2.0.3",
-    "typescript": "MichaReiser/TypeScript#release",
+    "typescript": "MichaReiser/TypeScript#2.3.3-with-int",
     "webpack-dev-server": "^2.4.5"
   },
   "devDependencies": {
