@@ -139,6 +139,6 @@ class ConstructorFunctionBuilder {
         FunctionDefinitionBuilder.create(fn, this.resolvedFunction, this.context)
             .returnValue(objectReference)
             .self(objectReference)
-            .define(this.resolvedFunction.declaration as ts.MethodDeclaration);
+            .define();
     }
 }

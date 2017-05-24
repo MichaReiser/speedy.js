@@ -391,7 +391,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         const leftType = context.typeChecker.getTypeAtLocation(binaryExpression.left);
         const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
 
-        if (!context.typeChecker.areEqualTypes(leftType, rightType)) {
+        if (!context.typeChecker.isAssignableTo(leftType, rightType)) {
             throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
         }
     }

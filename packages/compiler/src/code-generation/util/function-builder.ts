@@ -8,6 +8,7 @@ import {ResolvedFunction} from "../value/resolved-function";
 import {ResolvedFunctionReference} from "../value/resolved-function-reference";
 import {FunctionDeclarationBuilder} from "./function-declaration-builder";
 import {FunctionDefinitionBuilder} from "./function-definition-builder";
+import {UnresolvedFunctionReference} from "../value/unresolved-function-reference";
 
 /**
  * Builder for declaring and defining llvm functions
@@ -77,12 +78,19 @@ export class FunctionBuilder {
         const fun = this.declarationBuilder.name(this._name).declare();
         const functionReference = ResolvedFunctionReference.create(fun, this.resolvedFunction);
 
-        if (this.resolvedFunction.symbol) {
-            this.context.scope.addFunction(this.resolvedFunction.symbol, functionReference);
-        }
+        FunctionDefinitionBuilder.create(fun, this.resolvedFunction, this.context).define();
 
-        FunctionDefinitionBuilder.create(fun, this.resolvedFunction, this.context)
-            .define(declaration);
+        if (this.resolvedFunction.symbol) {
+            // Function is overloaded, determine overload when function is dereferenced
+            const declarations = this.resolvedFunction.symbol.declarations as ts.FunctionLikeDeclaration[] | undefined;
+            if (declarations && declarations.length > 1) {
+                const signatures = declarations.map(declaration => this.context.typeChecker.getSignatureFromDeclaration(declaration));
+                this.context.scope.addFunction(this.resolvedFunction.symbol, UnresolvedFunctionReference.createFunction(signatures, this.context, this.resolvedFunction.classType));
+            } else {
+                // optimization for not overloaded functions
+                this.context.scope.addFunction(this.resolvedFunction.symbol, functionReference);
+            }
+        }
 
         return functionReference;
     }

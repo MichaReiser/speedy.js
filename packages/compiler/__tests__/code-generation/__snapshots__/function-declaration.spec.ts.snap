@@ -81,13 +81,90 @@ if.end:                                           ; preds = %if.then, %if.else
 "
 `;
 
-exports[`FunctionDeclaration overloaded-entry-function-error 1`] = `
-"__tests__/code-generation/cases/function-declaration/overloaded-entry-function-error.ts(2,51): error TS100013: SpeedyJS entry function cannot be overloaded
+exports[`FunctionDeclaration closures-error 1`] = `
+"__tests__/code-generation/cases/function-declaration/closures-error.ts(2,20): error TS1000027: Functions nested inside of other functions that potentially make use of a closure are not yet supported
 "
 `;
 
-exports[`FunctionDeclaration overloaded-function-error 1`] = `
-"__tests__/code-generation/cases/function-declaration/overloaded-function-error.ts(14,11): error TS100006: Unsupported type or kind of identifier 'arg'
+exports[`FunctionDeclaration generic-entry-function-error 1`] = `
+"__tests__/code-generation/cases/function-declaration/generic-entry-function-error.ts(1,1): error TS100012: Generic SpeedyJS entry functions are not supported.
+"
+`;
+
+exports[`FunctionDeclaration generic-function-error 1`] = `
+"__tests__/code-generation/cases/function-declaration/generic-function-error.ts(5,2): error TS1000025: Generic functions and methods are not yet supported.
+"
+`;
+
+exports[`FunctionDeclaration overloaded-entry-function-error 1`] = `
+"__tests__/code-generation/cases/function-declaration/overloaded-entry-function-error.ts(2,51): error TS100013: SpeedyJS entry function cannot be overloaded.
+"
+`;
+
+exports[`FunctionDeclaration overloaded-function 1`] = `
+"; ModuleID = 'function-declaration/overloaded-function.ts'
+source_filename = \\"function-declaration/overloaded-function.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define i32 @_entry() {
+entry:
+  %booleanResult = alloca i1, align 1
+  %numberResult = alloca double, align 8
+  %return = alloca i32, align 4
+  %identityReturnValue = call double @\\"function_declaration/overloaded_function.ts$$8identityd\\"(double 1.000000e+01)
+  store double %identityReturnValue, double* %numberResult, align 8
+  %identityReturnValue1 = call i1 @\\"function_declaration/overloaded_function.ts$$8identityb\\"(i1 true)
+  store i1 %identityReturnValue1, i1* %booleanResult, align 1
+  store i32 10, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return2 = load i32, i32* %return, align 4
+  ret i32 %return2
+}
+
+define linkonce_odr hidden double @\\"function_declaration/overloaded_function.ts$$8identityd\\"(double %arg) {
+entry:
+  %arg.addr = alloca double, align 8
+  %return = alloca double, align 8
+  store double %arg, double* %arg.addr, align 8
+  %arg.addr1 = load double, double* %arg.addr, align 8
+  store double %arg.addr1, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return2 = load double, double* %return, align 8
+  ret double %return2
+}
+
+define linkonce_odr hidden i1 @\\"function_declaration/overloaded_function.ts$$8identityb\\"(i1 %arg) {
+entry:
+  %arg.addr = alloca i1, align 1
+  %return = alloca i1, align 1
+  store i1 %arg, i1* %arg.addr, align 1
+  %arg.addr1 = load i1, i1* %arg.addr, align 1
+  store i1 %arg.addr1, i1* %return, align 1
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return2 = load i1, i1* %return, align 1
+  ret i1 %return2
+}
+"
+`;
+
+exports[`FunctionDeclaration overloaded-with-operations-in-body-error 1`] = `
+"__tests__/code-generation/cases/function-declaration/overloaded-with-operations-in-body-error.ts(13,11): error TS100007: The binary operator PlusToken is not supported for the left and right hand side types 'number | int' and 'number | int'.
 "
 `;
 

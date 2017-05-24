@@ -1657,17 +1657,17 @@ exports[`Transformation emits a diagnostic if a non entry speedyjs function is r
 `;
 
 exports[`Transformation emits a diagnostic if the entry function has optional parameters 1`] = `
-"test.ts(2,51): error TS100011: Optional parameters or variadic parameters are not supported for SpeedyJS entry functions
+"test.ts(2,51): error TS100011: Optional parameters or variadic parameters are not supported for SpeedyJS entry functions.
 "
 `;
 
 exports[`Transformation emits a diagnostic if the entry function is generic 1`] = `
-"test.ts(1,1): error TS100012: Generic SpeedyJS entry functions are not supported
+"test.ts(1,1): error TS100012: Generic SpeedyJS entry functions are not supported.
 "
 `;
 
 exports[`Transformation emits a diagnostic if the entry function is overloaded 1`] = `
-"test.ts(3,67): error TS100013: SpeedyJS entry function cannot be overloaded
+"test.ts(3,67): error TS100013: SpeedyJS entry function cannot be overloaded.
 "
 `;
 

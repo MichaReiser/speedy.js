@@ -25,7 +25,7 @@ export interface TypeChecker {
      * @param first the first type to test
      * @param second the second type to test
      */
-    areEqualTypes(first: ts.Type, second: ts.Type): boolean;
+    isAssignableTo(first: ts.Type, second: ts.Type): boolean;
 
     /**
      * Takes a type script type and converts it to a supported variant of it

@@ -1,12 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AsExpression as-int 1`] = `
-"; ModuleID = 'as-expression/as-int.ts'
-source_filename = \\"as-expression/as-int.ts\\"
+exports[`AsExpression as-boolean 1`] = `
+"; ModuleID = 'as-expression/as-boolean.ts'
+source_filename = \\"as-expression/as-boolean.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
+%class.AsBooleanObject = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -14,17 +15,77 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
 @Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
+@AsBooleanObject_name = private unnamed_addr constant [16 x i8] c\\"AsBooleanObject\\\\00\\"
+@AsBooleanObject_type_descriptor = private constant { [16 x i8]* } { [16 x i8]* @AsBooleanObject_name }
+
+define void @_asBoolean() {
+entry:
+  %objectAsBoolean = alloca i1, align 1
+  %booleanAsBool = alloca i1, align 1
+  store i1 true, i1* %booleanAsBool, align 1
+  %constructorReturnValue = call dereferenceable(1) %class.AsBooleanObject* @\\"as_expression/as_boolean.ts$$AsBooleanObject$11constructor\\"()
+  %constructorReturnValueAsBool = icmp ne %class.AsBooleanObject* %constructorReturnValue, null
+  store i1 %constructorReturnValueAsBool, i1* %objectAsBoolean, align 1
+  ret void
+}
+
+define linkonce_odr %class.AsBooleanObject* @\\"as_expression/as_boolean.ts$$AsBooleanObject$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.AsBooleanObject*
+  ret %class.AsBooleanObject* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`AsExpression as-int 1`] = `
+"; ModuleID = 'as-expression/as-int.ts'
+source_filename = \\"as-expression/as-int.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.AsIntObject = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@AsIntObject_name = private unnamed_addr constant [12 x i8] c\\"AsIntObject\\\\00\\"
+@AsIntObject_type_descriptor = private constant { [12 x i8]* } { [12 x i8]* @AsIntObject_name }
 
 define void @_asInt() {
 entry:
+  %objectAsInt = alloca i32, align 4
   %intValue = alloca i32, align 4
+  %intAsInt = alloca i32, align 4
+  store i32 2, i32* %intAsInt, align 4
   %AsInt32 = call i32 @toInt32d(double 3.212000e+00)
   store i32 %AsInt32, i32* %intValue, align 4
+  %constructorReturnValue = call dereferenceable(1) %class.AsIntObject* @\\"as_expression/as_int.ts$$AsIntObject$11constructor\\"()
+  store i32 0, i32* %objectAsInt, align 4
   ret void
 }
 
 ; Function Attrs: alwaysinline readnone
 declare i32 @toInt32d(double) #0
+
+define linkonce_odr %class.AsIntObject* @\\"as_expression/as_int.ts$$AsIntObject$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.AsIntObject*
+  ret %class.AsIntObject* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 
 attributes #0 = { alwaysinline readnone }
 "
@@ -51,5 +112,10 @@ entry:
   store double 3.000000e+00, double* %numberValue, align 8
   ret void
 }
+"
+`;
+
+exports[`AsExpression unsupported-cast-error 1`] = `
+"__tests__/code-generation/cases/as-expression/unsupported-cast-error.ts(7,11): error TS1000017: Casting from 'ObjectToCast' to 'CastTarget' is not yet supported
 "
 `;

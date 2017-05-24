@@ -87,6 +87,11 @@ export interface ResolvedFunction {
      * The declaration
      */
     declaration?: ts.SignatureDeclaration;
+
+    /**
+     * The definition of the function (if any)
+     */
+    definition?: ts.FunctionLikeDeclaration & { body: ts.Block | ts.Expression };
 }
 
 /**
@@ -128,39 +133,48 @@ export function createResolvedParameter(name: string, type: ts.Type, optional = 
 export function createResolvedFunctionFromSignature(signature: ts.Signature, compilationContext: CompilationContext, classType?: ts.ObjectType): ResolvedFunction {
     let returnType = signature.getReturnType();
 
+    let definition = (signature.declaration as ts.FunctionLikeDeclaration).body ? signature.declaration as ts.FunctionLikeDeclaration : undefined;
+    const symbol =  signature.declaration.name ? compilationContext.typeChecker.getSymbolAtLocation(signature.declaration.name) : undefined;
+
+    if (symbol && symbol.declarations && symbol.declarations.length > 1) {
+        definition = (symbol.declarations as ts.FunctionLikeDeclaration[]).find(decl => compilationContext.typeChecker.isImplementationOfOverload(decl)) || definition;
+    }
+
     return {
         async: !!signature.declaration.modifiers && !!signature.declaration.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword),
         classType: classType || getClassType(signature, compilationContext.typeChecker),
         declaration: signature.declaration,
+        definition: definition as ts.FunctionLikeDeclaration & { body: ts.Block | ts.Expression },
         functionName: getDeclaredFunctionName(signature.declaration, compilationContext.typeChecker),
-        instanceMethod: isInstanceMethod(signature),
+        instanceMethod: isInstanceMethod(signature.declaration),
         parameters: getResolvedParameters(signature, compilationContext.typeChecker),
         returnType: returnType,
         sourceFile: signature.declaration.getSourceFile(),
-        symbol: signature.declaration.name ? compilationContext.typeChecker.getSymbolAtLocation(signature.declaration.name) : undefined,
+        symbol: symbol,
         typeParameters: signature.typeParameters || []
     };
 }
 
 function getClassType(signature: ts.Signature, typeChecker: TypeChecker): ts.ObjectType | undefined {
-    if (signature.declaration.kind === ts.SyntaxKind.ConstructSignature) {
+    const declaration = signature.getDeclaration();
+    if (declaration.kind === ts.SyntaxKind.ConstructSignature) {
         return signature.getReturnType() as ts.ObjectType;
     }
 
-    if (signature.getDeclaration().kind === ts.SyntaxKind.MethodSignature) {
-        return typeChecker.getTypeAtLocation(signature.getDeclaration().parent!) as ts.ObjectType;
+    if (declaration.kind === ts.SyntaxKind.MethodSignature) {
+        return typeChecker.getTypeAtLocation(declaration.parent!) as ts.ObjectType;
     }
 
     return undefined;
 }
 
-function isInstanceMethod(signature: ts.Signature) {
-    if (signature.declaration.kind === ts.SyntaxKind.ConstructSignature) {
+function isInstanceMethod(declaration: ts.SignatureDeclaration) {
+    if (declaration.kind === ts.SyntaxKind.ConstructSignature) {
         return false;
     }
 
-    if (signature.getDeclaration().kind === ts.SyntaxKind.MethodSignature || signature.getDeclaration().kind === ts.SyntaxKind.MethodDeclaration) {
-        const modifiers = signature.declaration.modifiers || [] as ts.Modifier[];
+    if (declaration.kind === ts.SyntaxKind.MethodSignature || declaration.kind === ts.SyntaxKind.MethodDeclaration) {
+        const modifiers = declaration.modifiers || [] as ts.Modifier[];
         return !modifiers.find(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword);
     }
 
@@ -177,10 +191,11 @@ function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeCheck
 }
 
 function getResolvedParameters(signature: ts.Signature, typeChecker: TypeChecker) {
+    const declaration = signature.getDeclaration();
     let parameters: ResolvedFunctionParameter[] = [];
 
-    for (let i = 0; i < signature.declaration.parameters.length; ++i) {
-        const parameter = signature.declaration.parameters[i];
+    for (let i = 0; i < declaration.parameters.length; ++i) {
+        const parameter = declaration.parameters[i];
         const parameterSymbol = signature.parameters[i];
         const parameterType = typeChecker.getTypeOfSymbolAtLocation(parameterSymbol, parameter);
 
