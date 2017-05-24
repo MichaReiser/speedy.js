@@ -112,16 +112,15 @@ export class FunctionDefinitionBuilder {
             const declaredParameterSymbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
             const allocation = Allocation.create(parameter.type, this.context, `${parameter.name}.addr`);
 
-            assert(!parameter.variadic, "Variadic arguments are only supported for runtime functions but not speedyJS functions");
-            allocation.generateAssignmentIR(args[i], this.context);
+            args[i].name = parameter.name;
 
-            if (!parameter.symbol || parameter.symbol.flags & ts.SymbolFlags.Transient) {
-                this.context.scope.addVariable(declaredParameterSymbol, allocation);
+            if (parameter.variadic) {
+                allocation.generateAssignmentIR(ArrayClassReference.fromCArray(parameter.type as ts.ObjectType, args[i], args[++i], this.context), this.context);
             } else {
-                this.context.scope.addVariable(parameter.symbol, allocation);
+                allocation.generateAssignmentIR(args[i], this.context);
             }
 
-            args[i].name = parameter.name;
+            this.context.scope.addVariable(declaredParameterSymbol, allocation);
 
             // a field in a constructor that is marked with private, protected or public. Set the argument value on the field.
             if (this._this && declaredParameterSymbol.flags & ts.SymbolFlags.Property) {

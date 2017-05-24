@@ -11,6 +11,7 @@ import {FunctionReference} from "./function-reference";
 import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
+import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 
 /**
  * Implements the static methods of the Array<T> class
@@ -42,6 +43,24 @@ export class ArrayClassReference extends ClassReference {
         context.requiresGc = true;
 
         return constructorFunction.invokeWith(elements, context) as ArrayReference;
+    }
+
+    static fromCArray(type: ts.ObjectType, elementsPtr: llvm.Value, length: llvm.Value, context: CodeGenerationContext): ArrayReference {
+        const constructorName = new RuntimeSystemNameMangler(context.compilationContext).mangleMethodName(type, "constructor", [type]);
+
+        let constructorFn = context.module.getFunction(constructorName);
+
+        if (!constructorFn) {
+            const elementType = toLLVMType(getArrayElementType(type), context);
+            const constructorType = llvm.FunctionType.get(toLLVMType(type, context), [llvm.PointerType.get(elementType, 0), llvm.Type.getInt32Ty(context.llvmContext)], false);
+            constructorFn = llvm.Function.create(constructorType, llvm.LinkageTypes.ExternalLinkage, constructorName, context.module);
+            constructorFn.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
+        }
+
+        const arrayPtr = context.builder.createCall(constructorFn, [elementsPtr, length]);
+
+        context.requiresGc = true;
+        return context.value(arrayPtr, type) as ArrayReference;
     }
 
     objectFor(address: Address, type: ts.ObjectType) {
