@@ -43,7 +43,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
 
     beginSourceFile(sourceFile: ts.SourceFile, compilationContext: CompilationContext, requestEmitHelper: (emitHelper: ts.EmitHelper) => void) {
         const context = this.createContext(sourceFile, compilationContext);
-        let emitsWasm = !compilationContext.compilerOptions.emitLLVM;
+        const emitsWasm = !compilationContext.compilerOptions.emitLLVM;
         this.sourceFileStates.set(sourceFile.fileName, {
             context,
             requestEmitHelper,
@@ -103,7 +103,13 @@ export class PerFileCodeGenerator implements CodeGenerator {
             context.compilationContext.compilerHost.writeFile(getOutputFileName(sourceFile, context, ".ll"), llc, false);
         } else {
             const transforms = PerFileCodeGenerator.createTransformationChain(context);
-            const transformationContext = { sourceFile, codeGenerationContext: context, buildDirectory, plainFileName, sourceFileRewriter: state.sourceFileRewriter };
+            const transformationContext = {
+                sourceFile,
+                codeGenerationContext: context,
+                buildDirectory,
+                plainFileName,
+                sourceFileRewriter: state.sourceFileRewriter
+            };
 
             const biteCodeFileName = buildDirectory.getTempFileName(`${plainFileName}.bc`);
             llvm.writeBitcodeToFile(context.module, biteCodeFileName);
@@ -161,6 +167,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         const sourceFile = node.getSourceFile();
         const state = this.sourceFileStates.get(sourceFile.fileName);
 
+        // tslint:disable-next-line:max-line-length
         assert(state, `First call beginSourceFile before calling any other functions on the code generator (state missing for source file ${sourceFile.fileName}).`);
 
         return state!;
@@ -180,13 +187,13 @@ export class PerFileCodeGenerator implements CodeGenerator {
     }
 }
 
-type TransformationContext = {
+interface TransformationContext {
     plainFileName: string;
-    buildDirectory: BuildDirectory,
-    sourceFile: ts.SourceFile,
-    codeGenerationContext: CodeGenerationContext,
-    sourceFileRewriter: PerFileSourceFileRewirter
-};
+    buildDirectory: BuildDirectory;
+    sourceFile: ts.SourceFile;
+    codeGenerationContext: CodeGenerationContext;
+    sourceFileRewriter: PerFileSourceFileRewirter;
+}
 
 interface TransformationStep {
     /**
@@ -246,7 +253,7 @@ class LinkTimeOptimizationTransformationStep implements TransformationStep {
 }
 
 class CopyFileToOutputDirectoryTransformationStep implements TransformationStep {
-    constructor(private extension: string, private binary=false) {}
+    constructor(private extension: string, private binary = false) {}
 
     transform(inputFileName: string, {plainFileName, buildDirectory, sourceFile, codeGenerationContext}: TransformationContext): string {
         const outputFileName = getOutputFileName(sourceFile, codeGenerationContext, this.extension);
@@ -270,7 +277,8 @@ class LLCTransformationStep implements TransformationStep {
 
 class S2WasmTransformationStep implements TransformationStep {
     transform(inputFileName: string, {buildDirectory, plainFileName, codeGenerationContext, sourceFileRewriter}: TransformationContext): string {
-        const wastFileName = s2wasm(inputFileName, buildDirectory.getTempFileName(`${plainFileName}.wast`), codeGenerationContext.compilationContext.compilerOptions);
+        const compilerOptions = codeGenerationContext.compilationContext.compilerOptions;
+        const wastFileName = s2wasm(inputFileName, buildDirectory.getTempFileName(`${plainFileName}.wast`), compilerOptions);
         const glue = S2WasmTransformationStep.getGlueMetadata(wastFileName);
         sourceFileRewriter.setWastMetaData(glue);
         return wastFileName;
@@ -307,7 +315,7 @@ class WasmToAsTransformationStep implements TransformationStep {
     }
 }
 
-function getOutputFileName(sourceFile: ts.SourceFile, context: CodeGenerationContext, fileExtension=".wasm") {
+function getOutputFileName(sourceFile: ts.SourceFile, context: CodeGenerationContext, fileExtension = ".wasm") {
     const withNewExtension = sourceFile.fileName.replace(".ts", fileExtension);
     if (context.compilationContext.compilerOptions.outDir) {
         const relativeName = path.relative(context.compilationContext.rootDir, withNewExtension);

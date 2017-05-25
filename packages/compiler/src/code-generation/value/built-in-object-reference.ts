@@ -2,14 +2,14 @@ import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
+import {isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
+import {AddressLValue} from "./address-lvalue";
 import {ClassReference} from "./class-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectReference} from "./object-reference";
-import {isMaybeObjectType, toLLVMType} from "../util/types";
-import {AddressLValue} from "./address-lvalue";
 import {Value} from "./value";
 
 /**
@@ -89,16 +89,9 @@ export abstract class BuiltInObjectReference implements ObjectReference {
     }
 
     /**
-     * Throws an exception for a unsupported element access
+     * Throws an exception for an unsupported index or element accesss
      */
-    protected throwUnsupportedBuiltIn(node: ts.ElementAccessExpression): never;
-
-    /**
-     * Throws an exception for an unsupported index accesss
-     */
-    protected throwUnsupportedBuiltIn(node: ts.PropertyAccessExpression): never;
-
-    protected throwUnsupportedBuiltIn(node: any, symbol?: ts.Symbol): never {
+    protected throwUnsupportedBuiltIn(node: ts.PropertyAccessExpression | ts.ElementAccessExpression, symbol?: ts.Symbol): never {
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
             throw CodeGenerationDiagnostic.builtInDoesNotSupportElementAccess(node, this.typeName);
         } else if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
@@ -122,7 +115,10 @@ export abstract class BuiltInObjectReference implements ObjectReference {
      * @return the method to invoke
      * @throws if the built in method is not supported
      */
-    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext): FunctionReference {
+    protected createFunctionFor(symbol: ts.Symbol,
+                                signatures: ts.Signature[],
+                                propertyAccessExpression: ts.PropertyAccessExpression,
+                                context: CodeGenerationContext): FunctionReference {
         return this.throwUnsupportedBuiltIn(propertyAccessExpression);
     }
 

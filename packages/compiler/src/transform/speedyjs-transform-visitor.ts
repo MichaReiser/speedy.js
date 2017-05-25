@@ -1,10 +1,10 @@
 import * as ts from "typescript";
-import debug = require("debug");
-import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
+import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
 import {CodeGenerator} from "../code-generation/code-generator";
 import {CompilationContext} from "../compilation-context";
-import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
 import {TypeChecker} from "../type-checker";
+import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
+import debug = require("debug");
 
 const LOG = debug("transform/speedyjs-transform-visitor");
 

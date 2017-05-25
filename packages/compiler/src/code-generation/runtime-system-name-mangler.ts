@@ -69,4 +69,3 @@ export class RuntimeSystemNameMangler extends BaseNameMangler {
         return name;
     }
 }
-

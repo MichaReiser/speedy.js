@@ -1,6 +1,6 @@
 import * as ts from "typescript";
-import {Value} from "./value";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Value} from "./value";
 
 /**
  * Reference to a --- probably overloaded --- function.

@@ -1,16 +1,16 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Address} from "./address";
 
 import {ClassReference, Field} from "./class-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {SpeedyJSConstructorFunctionReference} from "./speedyjs-constructor-function-reference";
 import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
-import {Address} from "./address";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 export class SpeedyJSClassReference extends ClassReference {
 
@@ -33,12 +33,12 @@ export class SpeedyJSClassReference extends ClassReference {
         return new SpeedyJSClassReference(typeInformation, type, context.compilationContext);
     }
 
-    private constructor(typeInformation: llvm.GlobalVariable, private _type: ts.ObjectType, compilationContext: CompilationContext) {
-        super(typeInformation, _type.getSymbol(), compilationContext);
+    private constructor(typeInformation: llvm.GlobalVariable, private objectType: ts.ObjectType, compilationContext: CompilationContext) {
+        super(typeInformation, objectType.getSymbol(), compilationContext);
     }
 
-    public get type() {
-        return this._type;
+    get type() {
+        return this.objectType;
     }
 
     getFields(type: ts.ObjectType, context: CodeGenerationContext): Field[] {

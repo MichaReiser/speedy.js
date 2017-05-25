@@ -1,15 +1,15 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
 import {getArrayElementType, toLLVMType} from "../util/types";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
-import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
+import {createResolvedFunctionFromSignature, ResolvedFunction, ResolvedFunctionParameter} from "./resolved-function";
 import {AssignableValue, Value} from "./value";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 /**
  * Base class for function references. Handles the coercion of the argument values to the expected types of the function parametes
@@ -42,7 +42,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         const resolvedSignature = callerContext.typeChecker.getResolvedSignature(callExpression);
         const resolvedFunction = this.getResolvedFunctionFromSignature(resolvedSignature, callerContext.compilationContext);
 
-        const passedArguments = this.getLLVMArgumentValues(callExpression.arguments || [] as ts.Expression[], resolvedFunction, callerContext);
+        const passedArguments = toLlvmArgumentValues(callExpression.arguments || [] as ts.Expression[], resolvedFunction, callerContext);
         return this.invokeResolvedFunction(resolvedFunction, passedArguments, callerContext);
     }
 
@@ -52,42 +52,6 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     protected getResolvedFunctionFromSignature(signature: ts.Signature, compilationContext: CompilationContext): ResolvedFunction {
         return createResolvedFunctionFromSignature(signature, compilationContext, this.classType);
-    }
-
-    protected getLLVMArgumentValues(args: ts.Expression[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {
-        let values: llvm.Value[] = [];
-        for (let i = 0; i < Math.min(args.length, resolvedFunction.parameters.length); ++i) {
-            const parameter = resolvedFunction.parameters[i];
-            const parameterType = parameter.type;
-            const arg = args[i];
-            const argumentType = callerContext.typeChecker.getTypeAtLocation(arg);
-
-            if (parameter.variadic) {
-                const elementType = getArrayElementType(parameterType);
-                const llvmVarArgs = new Array<llvm.Value>(args.length - i);
-
-                for (let j = 0; j < args.length - i; ++j) {
-                    const varArgNode = args[i + j];
-                    const castedElement = callerContext.generateValue(varArgNode).castImplicit(elementType, callerContext);
-                    if (!castedElement) {
-                        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(varArgNode, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(varArgNode)));
-                    }
-
-                    llvmVarArgs[j] = castedElement.generateIR(callerContext);
-                }
-
-                values.push(...llvmVarArgs);
-            } else {
-                const castedElement = callerContext.generateValue(args[i]).castImplicit(parameterType, callerContext);
-                if (!castedElement) {
-                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(args[i], callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
-                }
-
-                values.push(castedElement.generateIR(callerContext));
-            }
-        }
-
-        return values;
     }
 
     private invokeResolvedFunction(resolvedFunction: ResolvedFunction, args: llvm.Value[], callerContext: CodeGenerationContext) {
@@ -117,7 +81,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
      * @return the values that are to be passed to the llvm function
      */
     protected getCallArguments(resolvedFunction: ResolvedFunction, passedArguments: llvm.Value[], callerContext: CodeGenerationContext): llvm.Value[] {
-        let result: llvm.Value[] = [];
+        const result: llvm.Value[] = [];
 
         for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
             const parameter = resolvedFunction.parameters[i];
@@ -172,4 +136,57 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     castImplicit(type: ts.Type, context: CodeGenerationContext): Value {
         throw new Error("TODO");
     }
+}
+
+function toLlvmArgumentValues(args: ts.Expression[], resolvedFunction: ResolvedFunction, callerContext: CodeGenerationContext) {
+    const values: llvm.Value[] = [];
+    for (let i = 0; i < Math.min(args.length, resolvedFunction.parameters.length); ++i) {
+        const parameter = resolvedFunction.parameters[i];
+
+        if (parameter.variadic) {
+            const llvmVarArgs = toLlvmVariadicArgument(args.slice(i), parameter, callerContext);
+            values.push(...llvmVarArgs);
+        } else {
+            const argumentValue = toLlvmArgumentValue(args[i], parameter, callerContext);
+
+            values.push(argumentValue);
+        }
+    }
+
+    return values;
+}
+
+function toLlvmVariadicArgument(varArgs: ts.Expression[], parameter: ResolvedFunctionParameter, callerContext: CodeGenerationContext) {
+    const elementType = getArrayElementType(parameter.type);
+    const llvmVarArgs = new Array<llvm.Value>(varArgs.length);
+
+    for (let j = 0; j < varArgs.length; ++j) {
+        const varArgNode = varArgs[j];
+        const castedElement = callerContext.generateValue(varArgNode).castImplicit(elementType, callerContext);
+        if (!castedElement) {
+            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(
+                varArgNode,
+                callerContext.typeChecker.typeToString(elementType),
+                callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(varArgNode))
+            );
+        }
+
+        llvmVarArgs[j] = castedElement.generateIR(callerContext);
+    }
+    return llvmVarArgs;
+}
+
+function toLlvmArgumentValue(arg: ts.Expression, parameter: ResolvedFunctionParameter, callerContext: CodeGenerationContext) {
+    const castedElement = callerContext.generateValue(arg).castImplicit(parameter.type, callerContext);
+    const argumentType = callerContext.typeChecker.getTypeAtLocation(arg);
+
+    if (!castedElement) {
+        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(
+            arg,
+            callerContext.typeChecker.typeToString(parameter.type),
+            callerContext.typeChecker.typeToString(argumentType)
+        );
+    }
+
+    return castedElement.generateIR(callerContext);
 }

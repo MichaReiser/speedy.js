@@ -1,6 +1,6 @@
-import * as ts from "typescript";
-import * as llvm from "llvm-node";
 import * as assert from "assert";
+import * as llvm from "llvm-node";
+import * as ts from "typescript";
 import {Allocation} from "./value/allocation";
 import {ClassReference} from "./value/class-reference";
 import {FunctionReference} from "./value/function-reference";

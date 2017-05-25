@@ -7,8 +7,8 @@ import {MathClassReference} from "./math-class-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {Pointer} from "./pointer";
 import {Primitive} from "./primitive";
-import {Value} from "./value";
 import {UnresolvedMethodReference} from "./unresolved-method-reference";
+import {Value} from "./value";
 
 /**
  * Wrapper for the built in Math object
@@ -21,7 +21,10 @@ export class MathObjectReference extends BuiltInObjectReference {
         super(pointer, mathType, mathClass);
     }
 
-    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
+    protected createFunctionFor(symbol: ts.Symbol,
+                                signatures: ts.Signature[],
+                                propertyAccessExpression: ts.PropertyAccessExpression,
+                                context: CodeGenerationContext) {
         switch (symbol.name) {
             // use the llvm intrinsic whenever a web assembly instruction exists
             case "pow":

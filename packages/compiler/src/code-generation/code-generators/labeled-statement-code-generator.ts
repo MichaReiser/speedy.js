@@ -1,7 +1,7 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
 /**
  * Code generator for labeled statements, e.g.

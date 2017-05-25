@@ -1,10 +1,10 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {Scope} from "./scope";
+import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
-import {Value} from "./value/value";
 import {TypeChecker} from "../type-checker";
+import {Scope} from "./scope";
 import {ClassReference} from "./value/class-reference";
+import {Value} from "./value/value";
 
 /**
  * The code generation context without extension methods
@@ -96,7 +96,6 @@ export interface CodeGenerationContext extends BaseCodeGenerationContext {
      */
     assignValue(target: Value, value: Value): void;
 
-
     /**
      * Generates the llvm code for all children of the given node
      * @param node the node for which the children should be generated
@@ -109,7 +108,6 @@ export interface CodeGenerationContext extends BaseCodeGenerationContext {
      * @throws if the given node has no return value
      */
     generateValue(node: ts.Node): Value;
-
 
     /**
      * Creates a value object for the given llvm value

@@ -1,9 +1,9 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
 
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {CodeGenerationContext} from "../code-generation-context";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {Value} from "../value/value";
 
 class PostfixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PostfixUnaryExpression, Value> {
@@ -13,7 +13,7 @@ class PostfixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Post
         const left = context.generateValue(postfixUnaryExpression.operand);
         const before = left.generateIR(context);
         let updated: llvm.Value | undefined;
-        let operandType = context.typeChecker.getTypeAtLocation(postfixUnaryExpression.operand);
+        const operandType = context.typeChecker.getTypeAtLocation(postfixUnaryExpression.operand);
 
         switch (postfixUnaryExpression.operator) {
             case ts.SyntaxKind.PlusPlusToken:

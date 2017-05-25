@@ -1,12 +1,12 @@
-import * as path from "path";
-import * as fs from "fs";
-import * as ts from "typescript";
 import * as assert from "assert";
 import * as debug from "debug";
-import { execLLVM } from "./tools";
-import { SHARED_LIBRARIES_DIRECTORY, SAFE_RUNTIME, UNSAFE_RUNTIME, COMPILER_RT_FILE } from "speedyjs-runtime";
+import * as fs from "fs";
+import * as path from "path";
+import {COMPILER_RT_FILE, SAFE_RUNTIME, SHARED_LIBRARIES_DIRECTORY, UNSAFE_RUNTIME} from "speedyjs-runtime";
+import * as ts from "typescript";
 import {BuildDirectory} from "../code-generation/build-directory";
 import {LLVMByteCodeSymbolsResolver} from "./llvm-nm";
+import {execLLVM} from "./tools";
 
 const EXECUTABLE_NAME = "llvm-link";
 const LOG = debug("external-tools/llvm-link");
@@ -42,7 +42,7 @@ export class LLVMLink {
      * Adds the files needed by the runtime
      * @param unsafe should the unsafe runtime (without safe memory guarantees) be used
      */
-    addRuntime(unsafe=false): void {
+    addRuntime(unsafe = false): void {
         if (unsafe) {
             this.addByteCodeFile(UNSAFE_RUNTIME);
         } else {
@@ -96,8 +96,8 @@ export class LLVMLink {
 
     private getObjectFilesToLink(objectFiles: string[], entrySymbols: string[]) {
         let loopAgain = true;
-        let includedObjectFiles = new Set<string>();
-        let unresolvedSymbols = new Set<string>(entrySymbols);
+        const includedObjectFiles = new Set<string>();
+        const unresolvedSymbols = new Set<string>(entrySymbols);
 
         while (loopAgain) {
             loopAgain = false;
@@ -132,7 +132,6 @@ export class LLVMLink {
         return false;
     }
 }
-
 
 /**
  * Helper function that tests if the two sets intersect (there is no such function in the API!!!!)

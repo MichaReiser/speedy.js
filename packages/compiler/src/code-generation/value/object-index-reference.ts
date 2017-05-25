@@ -1,15 +1,19 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {Value, AssignableValue} from "./value";
-import {ObjectReference} from "./object-reference";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
+import {ObjectReference} from "./object-reference";
+import {AssignableValue, Value} from "./value";
 
 /**
  * Reference to a specific object index (x[10])
  */
 export class ObjectIndexReference implements AssignableValue {
 
-    constructor(public type: ts.Type, private object: ObjectReference, private index: Value, private getter: llvm.Function | undefined, private setter: llvm.Function | undefined) {
+    constructor(public type: ts.Type,
+                private object: ObjectReference,
+                private index: Value,
+                private getter: llvm.Function | undefined,
+                private setter: llvm.Function | undefined) {
     }
 
     generateIR(context: CodeGenerationContext): llvm.Value {

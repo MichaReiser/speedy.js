@@ -17,7 +17,7 @@ export interface ObjectFileSymbols {
     /**
      * Symbols defined inside of this bc file
      */
-    readonly defined: Set<string>
+    readonly defined: Set<string>;
 }
 
 /**
@@ -59,7 +59,7 @@ export class LLVMByteCodeSymbolsResolver {
                 parts.shift();
             }
 
-            if (parts.length == 2) {
+            if (parts.length === 2) {
                 const [typeCode, symbol] = parts;
 
                 if (typeCode === "U") {
@@ -75,4 +75,3 @@ export class LLVMByteCodeSymbolsResolver {
         return symbols;
     }
 }
-

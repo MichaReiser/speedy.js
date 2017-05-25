@@ -3,12 +3,12 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {toLLVMType} from "../util/types";
 import {Address} from "./address";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 
 import {Value} from "./value";
-import {toLLVMType} from "../util/types";
 
 export interface Field {
     name: string;
@@ -46,7 +46,14 @@ export abstract class ClassReference implements Value {
         }
 
         const nameConstant = llvm.ConstantDataArray.getString(context.llvmContext, symbol.name);
-        const nameVariable = new llvm.GlobalVariable(context.module, nameConstant.type, true, llvm.LinkageTypes.PrivateLinkage, nameConstant, `${symbol.name}_name`);
+        const nameVariable = new llvm.GlobalVariable(context.module,
+            nameConstant.type,
+            true,
+            llvm.LinkageTypes.PrivateLinkage,
+            nameConstant,
+            `${symbol.name}_name`
+        );
+
         nameVariable.setUnnamedAddr(llvm.UnnamedAddr.Global);
 
         const structType = llvm.StructType.get(context.llvmContext, [ nameConstant.type.getPointerTo() ], false);

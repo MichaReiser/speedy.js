@@ -1,16 +1,16 @@
-import * as ts from "typescript";
-import * as llvm from "llvm-node";
 import * as debug from "debug";
+import * as llvm from "llvm-node";
+import * as ts from "typescript";
+import {BuiltInSymbols} from "./built-in-symbols";
+import {CodeGenerationDiagnostic} from "./code-generation-diagnostic";
 import {DefaultCodeGenerationContextFactory} from "./code-generation/default-code-generation-context-factory";
-import {PerFileCodeGenerator} from "./code-generation/per-file/per-file-code-generator";
 import {NotYetImplementedCodeGenerator} from "./code-generation/not-yet-implemented-code-generator";
+import {PerFileCodeGenerator} from "./code-generation/per-file/per-file-code-generator";
+import {CompilationContext} from "./compilation-context";
+import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
 import {LogUnknownTransformVisitor} from "./transform/log-unknown-transform-visitor";
 import {SpeedyJSTransformVisitor} from "./transform/speedyjs-transform-visitor";
 import {createTransformVisitorFactory} from "./transform/transform-visitor";
-import {BuiltInSymbols} from "./built-in-symbols";
-import {CompilationContext} from "./compilation-context";
-import {CodeGenerationDiagnostic} from "./code-generation-diagnostic";
-import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
 import {TypeScriptTypeChecker} from "./typescript-type-checker";
 
 const LOG = debug("compiler");
@@ -38,7 +38,12 @@ export class Compiler {
         LOG("Start Compiling");
         Compiler.initLLVM();
         const program: ts.Program = ts.createProgram(rootFileNames, this.compilerOptions, this.compilerHost);
-        const diagnostics = [...program.getSyntacticDiagnostics(), ...program.getOptionsDiagnostics(), ...program.getGlobalDiagnostics(), ...program.getSemanticDiagnostics() ];
+        const diagnostics = [
+            ...program.getSyntacticDiagnostics(),
+            ...program.getOptionsDiagnostics(),
+            ...program.getGlobalDiagnostics(),
+            ...program.getSemanticDiagnostics()
+        ];
 
         if (diagnostics.length > 0) {
             return { diagnostics, exitStatus: ts.ExitStatus.DiagnosticsPresent_OutputsSkipped };
@@ -67,7 +72,8 @@ export class Compiler {
     }
 
     private static emit(program: ts.Program, compilationContext: CompilationContext) {
-        const codeGenerator = new PerFileCodeGenerator(compilationContext.llvmContext, new DefaultCodeGenerationContextFactory(new NotYetImplementedCodeGenerator()));
+        const codeGenerationContextFactory = new DefaultCodeGenerationContextFactory(new NotYetImplementedCodeGenerator());
+        const codeGenerator = new PerFileCodeGenerator(compilationContext.llvmContext, codeGenerationContextFactory);
 
         const logUnknownVisitor = new LogUnknownTransformVisitor();
         const speedyJSVisitor = new SpeedyJSTransformVisitor(compilationContext, codeGenerator);

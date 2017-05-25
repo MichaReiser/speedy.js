@@ -1,7 +1,7 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
+import * as ts from "typescript";
 import {BuiltInSymbols} from "./built-in-symbols";
+import {SpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
 import {TypeChecker} from "./type-checker";
 
 /**

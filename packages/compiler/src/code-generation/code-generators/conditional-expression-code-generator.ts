@@ -1,9 +1,9 @@
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
 import {Value} from "../value/value";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 /**
  * Code Generator for condition expressions (condition ? whenTrue : whenFalse);
@@ -22,12 +22,15 @@ class ConditionalExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Condi
         const whenTrue = context.generateValue(node.whenTrue).castImplicit(conditionalType, context);
         const whenFalse = context.generateValue(node.whenFalse).castImplicit(conditionalType, context);
 
+        const conditionalTypeName = context.typeChecker.typeToString(conditionalType);
         if (!whenFalse) {
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenFalse, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenFalseType));
+            const whenFalseTypeName = context.typeChecker.typeToString(whenFalseType);
+            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenFalse, conditionalTypeName, whenFalseTypeName);
         }
 
         if (!whenTrue) {
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenTrueType));
+            const whenTrueTypeName = context.typeChecker.typeToString(whenTrueType);
+            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, conditionalTypeName, whenTrueTypeName);
         }
 
         const result = context.builder.createSelect(conditionBool, whenTrue.generateIR(context), whenFalse.generateIR(context), "cond");

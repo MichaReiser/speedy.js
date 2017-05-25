@@ -70,7 +70,7 @@ export abstract class BaseNameMangler implements NameMangler {
     protected abstract getModulePrefix(sourceFile?: ts.SourceFile): string;
 
     private mangleAccessor(name: string, node: ts.ElementAccessExpression | ts.PropertyAccessExpression, setter: boolean): string {
-        let argumentTypes: ts.Type[] = [];
+        const argumentTypes: ts.Type[] = [];
 
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
             argumentTypes.push(this.typeChecker.getTypeAtLocation(node.argumentExpression!));
@@ -85,7 +85,7 @@ export abstract class BaseNameMangler implements NameMangler {
     }
 
     private getFunctionName(name: string, argumentTypes: ts.Type[]) {
-        let parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
+        const parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
         return this.encodeName(name) + parameterPostfix;
     }
 
@@ -142,4 +142,3 @@ export abstract class BaseNameMangler implements NameMangler {
         throw new Error(`Unsupported runtime type ${this.typeChecker.typeToString(type)}`);
     }
 }
-

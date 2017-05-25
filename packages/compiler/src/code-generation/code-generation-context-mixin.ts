@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "./code-generation-context";
+import {isMaybeObjectType} from "./util/types";
 import {AddressLValue} from "./value/address-lvalue";
 import {ClassReference} from "./value/class-reference";
 import {Primitive} from "./value/primitive";
@@ -9,7 +10,6 @@ import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {SpeedyJSClassReference} from "./value/speedy-js-class-reference";
 
 import {Value} from "./value/value";
-import {isMaybeObjectType} from "./util/types";
 
 /**
  * Defines the extension methods / default implementations that do not depend on a particular code generation context implementation
@@ -25,7 +25,7 @@ export class CodeGenerationContextMixin {
 
     generateChildren(this: CodeGenerationContext, node: ts.Node): void {
         ts.forEachChild(node, child => {
-            this.generate(child)
+            this.generate(child);
         });
     }
 
@@ -102,7 +102,8 @@ function isClassDefined(type: ts.ObjectType) {
         }
 
         const declaration = declarations[0];
-        return declaration.kind === ts.SyntaxKind.MethodDeclaration || (declaration.kind === ts.SyntaxKind.Constructor && !!(declaration as ts.ConstructorDeclaration).body);
+        return declaration.kind === ts.SyntaxKind.MethodDeclaration ||
+            (declaration.kind === ts.SyntaxKind.Constructor && !!(declaration as ts.ConstructorDeclaration).body);
     });
 }
 

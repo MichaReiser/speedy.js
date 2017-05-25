@@ -1,7 +1,7 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {ObjectReference} from "./object-reference";
 import {CodeGenerationContext} from "../code-generation-context";
+import {ObjectReference} from "./object-reference";
 
 /**
  * A value

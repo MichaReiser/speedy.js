@@ -1,5 +1,5 @@
-import * as ts from "typescript";
 import * as debug from "debug";
+import * as ts from "typescript";
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 
 const LOG = debug("transform/LogUnknownTransformVisitor");
@@ -52,7 +52,8 @@ export class LogUnknownTransformVisitor implements TransformVisitor {
         return context.visitEachChild(binaryExpression);
     }
 
-    visitFirstLiteralToken(firstLiteralToken: ts.Token<ts.SyntaxKind.FirstLiteralToken>, context: TransformVisitorContext): ts.Token<ts.SyntaxKind.FirstLiteralToken> {
+    visitFirstLiteralToken(firstLiteralToken: ts.Token<ts.SyntaxKind.FirstLiteralToken>,
+                           context: TransformVisitorContext): ts.Token<ts.SyntaxKind.FirstLiteralToken> {
         return context.visitEachChild(firstLiteralToken);
     }
 

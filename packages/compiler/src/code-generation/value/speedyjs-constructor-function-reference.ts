@@ -13,8 +13,8 @@ import {AddressLValue} from "./address-lvalue";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunction, createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {SpeedyJSClassReference} from "./speedy-js-class-reference";
-import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
 import {verifyIsSupportedSpeedyJSFunction} from "./speedyjs-function-factory";
+import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
 
 export class SpeedyJSConstructorFunctionReference extends AbstractFunctionReference {
 
@@ -29,7 +29,6 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
             const sourceFile = classReference.type.getSymbol().declarations![0].getSourceFile();
             resolvedFunction = createResolvedFunction("constructor", [], [], signature.getReturnType(), sourceFile, classReference.type);
         }
-
 
         const declarationContext = context.createChildContext();
         const fn = new ConstructorFunctionBuilder(resolvedFunction, classReference, declarationContext)
@@ -57,20 +56,21 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
 }
 
 class ConstructorFunctionBuilder {
-    private _name: string;
+    private constructorName: string;
 
     constructor(private resolvedFunction: ResolvedFunction, private classReference: SpeedyJSClassReference, private context: CodeGenerationContext) {
-        this._name = resolvedFunction.functionName;
+        this.constructorName = resolvedFunction.functionName;
     }
 
     mangleName() {
         const argumentTypes = this.resolvedFunction.parameters.map(parameter => parameter.type);
-        this._name = new DefaultNameMangler(this.context.compilationContext).mangleMethodName(this.classReference.type, this._name, argumentTypes, this.resolvedFunction.sourceFile);
+        const nameMangler = new DefaultNameMangler(this.context.compilationContext);
+        this.constructorName = nameMangler.mangleMethodName(this.classReference.type, this.constructorName, argumentTypes, this.resolvedFunction.sourceFile);
         return this;
     }
 
     defineIfAbsent(): llvm.Function {
-        const existingFn = this.context.module.getFunction(this._name);
+        const existingFn = this.context.module.getFunction(this.constructorName);
         if (existingFn) {
             return existingFn;
         }
@@ -82,7 +82,7 @@ class ConstructorFunctionBuilder {
         const declaration = FunctionDeclarationBuilder
             .forResolvedFunction(this.resolvedFunction, this.context)
             .linkOnceOdrLinkage()
-            .name(this._name)
+            .name(this.constructorName)
             .declare();
 
         const entryBlock = llvm.BasicBlock.create(this.context.llvmContext, "entry", declaration);
@@ -105,7 +105,8 @@ class ConstructorFunctionBuilder {
     private allocateObjectOnHeap() {
         const objectType = this.classReference.getLLVMType(this.classReference.type, this.context);
         const pointerType = llvm.Type.getInt8PtrTy(this.context.llvmContext);
-        const malloc = this.context.module.getOrInsertFunction("malloc", llvm.FunctionType.get(pointerType, [llvm.Type.getInt32Ty(this.context.llvmContext)], false));
+        const mallocFunctionType = llvm.FunctionType.get(pointerType, [llvm.Type.getInt32Ty(this.context.llvmContext)], false);
+        const malloc = this.context.module.getOrInsertFunction("malloc", mallocFunctionType);
         const size = sizeof(objectType, this.context);
 
         const result = this.context.builder.createCall(malloc, [size], "thisVoid*");
@@ -115,8 +116,8 @@ class ConstructorFunctionBuilder {
 
     private initializeFields(objectAddress: Address) {
         const fields = this.classReference.type.getApparentProperties().filter(property => property.flags & ts.SymbolFlags.Property);
-        for (let i = 0; i < fields.length; ++i) {
-            const field = fields[i];
+
+        for (const field of fields) {
             const declaration = field.valueDeclaration as ts.PropertyDeclaration;
 
             let value: llvm.Value;
@@ -129,7 +130,8 @@ class ConstructorFunctionBuilder {
             }
 
             const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this.classReference.getFieldOffset(field));
-            const fieldPointer = this.context.builder.createInBoundsGEP(objectAddress.get(this.context), [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset], `&${field.name}`);
+            const gepFieldIndex = [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset];
+            const fieldPointer = this.context.builder.createInBoundsGEP(objectAddress.get(this.context), gepFieldIndex, `&${field.name}`);
             this.context.builder.createStore(value, fieldPointer, false);
         }
     }

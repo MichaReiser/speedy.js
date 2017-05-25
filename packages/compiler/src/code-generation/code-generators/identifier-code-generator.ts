@@ -3,9 +3,9 @@ import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {Undefined} from "../value/undefined";
 import {UnresolvedFunctionReference} from "../value/unresolved-function-reference";
 import {Value} from "../value/value";
-import {Undefined} from "../value/undefined";
 
 class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Value> {
     syntaxKind = ts.SyntaxKind.Identifier;

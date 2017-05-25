@@ -1,6 +1,9 @@
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
+import {isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
+import {AddressLValue} from "./address-lvalue";
 import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
@@ -8,8 +11,6 @@ import {ObjectReference} from "./object-reference";
 import {SpeedyJSClassReference} from "./speedy-js-class-reference";
 import {UnresolvedMethodReference} from "./unresolved-method-reference";
 import {Value} from "./value";
-import {isMaybeObjectType, toLLVMType} from "../util/types";
-import {AddressLValue} from "./address-lvalue";
 
 export class SpeedyJSObjectReference implements ObjectReference {
 
@@ -37,7 +38,7 @@ export class SpeedyJSObjectReference implements ObjectReference {
     }
 
     getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
-        throw new Error('Indexers are not supported for speedyJS objects.');
+        throw CodeGenerationDiagnostic.unsupportedIndexer(element);
     }
 
     isAssignable(): false {

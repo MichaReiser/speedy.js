@@ -1,10 +1,10 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {CodeGenerationContext} from "../code-generation-context";
-import {Value} from "../value/value";
+import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
+import {Value} from "../value/value";
 
 class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PrefixUnaryExpression, Value> {
     syntaxKind = ts.SyntaxKind.PrefixUnaryExpression;
@@ -58,7 +58,7 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
                 break;
 
             case ts.SyntaxKind.TildeToken:
-                let intValue = Primitive.toInt32(left, operandType, resultType, context).generateIR();
+                const intValue = Primitive.toInt32(left, operandType, resultType, context).generateIR();
                 result = context.builder.createNot(intValue, "not");
 
                 break;

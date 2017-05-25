@@ -101,9 +101,9 @@ function toSupportedType(type: ts.Type, typeChecker: ts.TypeChecker): ts.Type {
     // e.g. 1 | 2. We are not interested in the actual literals, just what the type is.
     if (type.flags & ts.TypeFlags.Union) {
         const unionType = type as ts.UnionType;
-        const intLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.IntLike));
-        const numberLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.NumberLike) && !(type.flags & ts.TypeFlags.IntLike));
-        const booleanLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.BooleanLike));
+        const intLiterals = unionType.types.every(t => !!(t.flags & ts.TypeFlags.IntLike));
+        const numberLiterals = unionType.types.every(t => !!(t.flags & ts.TypeFlags.NumberLike) && !(t.flags & ts.TypeFlags.IntLike));
+        const booleanLiterals = unionType.types.every(t => !!(t.flags & ts.TypeFlags.BooleanLike));
 
         if ((intLiterals || numberLiterals || booleanLiterals) && unionType.types.length > 0) {
             return toSupportedType(unionType.types[0], typeChecker);
@@ -127,7 +127,6 @@ function toSupportedType(type: ts.Type, typeChecker: ts.TypeChecker): ts.Type {
 class SignatureWrapper implements ts.Signature {
 
     constructor(private signature: ts.Signature, private typeChecker: ts.TypeChecker) {
-
     }
 
     getJsDocTags(): ts.JSDocTagInfo[] {
@@ -160,7 +159,13 @@ class SignatureWrapper implements ts.Signature {
 
     getReturnType(): ts.Type {
         let returnType = this.signature.getReturnType();
-        if (returnType.getSymbol() && returnType.getSymbol().getName()  === "Promise" && returnType.flags & ts.TypeFlags.Object && (returnType as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) {
+
+        // if is Promise<T>
+        if (returnType.getSymbol() &&
+            returnType.getSymbol().getName()  === "Promise" &&
+            returnType.flags & ts.TypeFlags.Object &&
+            (returnType as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference) {
+
             const typeReference = returnType as ts.TypeReference;
             returnType = typeReference.typeArguments && typeReference.typeArguments.length === 1 ? typeReference.typeArguments[0] : returnType;
         }

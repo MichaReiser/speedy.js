@@ -1,8 +1,8 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {Primitive} from "../value/primitive";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {Primitive} from "../value/primitive";
 
 class TrueKeywordCodeGenerator implements SyntaxCodeGenerator<ts.BooleanLiteral, Primitive> {
     syntaxKind = ts.SyntaxKind.TrueKeyword;
@@ -14,4 +14,3 @@ class TrueKeywordCodeGenerator implements SyntaxCodeGenerator<ts.BooleanLiteral,
 }
 
 export default TrueKeywordCodeGenerator;
-

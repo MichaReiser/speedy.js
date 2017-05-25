@@ -13,7 +13,7 @@ export class NoopSourceFileRewriter implements PerFileSourceFileRewirter {
         // noop
     }
 
-    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.FunctionDeclaration {
+    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
         return functionDeclaration;
     }
 

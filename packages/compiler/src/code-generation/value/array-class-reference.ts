@@ -2,6 +2,7 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {getArrayElementType, isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
 
@@ -11,7 +12,6 @@ import {FunctionReference} from "./function-reference";
 import {createResolvedFunction, createResolvedParameter} from "./resolved-function";
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
-import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 
 /**
  * Implements the static methods of the Array<T> class
@@ -52,7 +52,11 @@ export class ArrayClassReference extends ClassReference {
 
         if (!constructorFn) {
             const elementType = toLLVMType(getArrayElementType(type), context);
-            const constructorType = llvm.FunctionType.get(toLLVMType(type, context), [llvm.PointerType.get(elementType, 0), llvm.Type.getInt32Ty(context.llvmContext)], false);
+            const constructorType = llvm.FunctionType.get(toLLVMType(type, context), [
+                llvm.PointerType.get(elementType, 0),
+                llvm.Type.getInt32Ty(context.llvmContext)
+            ], false);
+
             constructorFn = llvm.Function.create(constructorType, llvm.LinkageTypes.ExternalLinkage, constructorName, context.module);
             constructorFn.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
         }
@@ -64,7 +68,7 @@ export class ArrayClassReference extends ClassReference {
     }
 
     objectFor(address: Address, type: ts.ObjectType) {
-        return new ArrayReference(address, type, this)
+        return new ArrayReference(address, type, this);
     }
 
     getFields() {

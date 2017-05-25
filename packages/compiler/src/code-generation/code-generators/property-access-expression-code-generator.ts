@@ -2,9 +2,9 @@ import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {ClassReference} from "../value/class-reference";
 import {FunctionReference} from "../value/function-reference";
 import {ObjectPropertyReference} from "../value/object-property-reference";
-import {ClassReference} from "../value/class-reference";
 
 class PropertyAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PropertyAccessExpression, ObjectPropertyReference | FunctionReference> {
     syntaxKind = ts.SyntaxKind.PropertyAccessExpression;

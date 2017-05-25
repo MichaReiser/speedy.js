@@ -1,8 +1,8 @@
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ObjectReference} from "../value/object-reference";
-import {ClassReference} from "../value/class-reference";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {ClassReference} from "../value/class-reference";
+import {ObjectReference} from "../value/object-reference";
 
 /**
  * Code Generator for new statements

@@ -4,8 +4,8 @@ import * as ts from "typescript";
 
 function createGetCanonicalFileName(useCaseSensitiveFileNames: boolean): (name: string) => string {
     return useCaseSensitiveFileNames
-        ? (function (fileName) { return fileName; })
-        : (function (fileName) { return fileName.toLowerCase(); });
+        ? fileName => fileName
+        : fileName => fileName.toLowerCase();
 }
 
 const defaultFormatDiagnosticHost: ts.FormatDiagnosticsHost = {
@@ -38,5 +38,5 @@ export function reportDiagnostics(diagnostics: ts.Diagnostic[], compilerHost?: t
  * @return {string} the diagnostics as string
  */
 export function formatDiagnostics(diagnostics: ts.Diagnostic[], compilerHost?: ts.CompilerHost): string {
-    return ts.formatDiagnostics(diagnostics, compilerHost || defaultFormatDiagnosticHost)
+    return ts.formatDiagnostics(diagnostics, compilerHost || defaultFormatDiagnosticHost);
 }

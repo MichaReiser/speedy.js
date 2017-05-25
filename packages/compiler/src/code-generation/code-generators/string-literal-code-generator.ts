@@ -1,7 +1,7 @@
 import * as ts from "typescript";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {CodeGenerationContext} from "../code-generation-context";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
 /**
  * Code generators for string literals "hello world"

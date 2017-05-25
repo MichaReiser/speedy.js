@@ -1,8 +1,8 @@
 import * as assert from "assert";
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {CodeGenerationContext} from "../code-generation-context";
+import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
 
 /**
  * Returns the llvm type for the given typescript type
@@ -62,7 +62,9 @@ export function isMaybeObjectType(type: ts.Type): type is ts.UnionType {
     if (type.flags & ts.TypeFlags.Union) {
         const unionType = type as ts.UnionType;
 
-        return unionType.types.length === 2 && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined)) && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Object));
+        return unionType.types.length === 2 &&
+            unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined)) &&
+            unionType.types.some(t => !!(t.flags & ts.TypeFlags.Object));
     }
 
     return false;
@@ -95,6 +97,7 @@ export function sizeof(type: llvm.Type, context: CodeGenerationContext) {
  * @return {Value} the offset as llvm.value
  */
 export function offset(type: llvm.PointerType, field: number, context: CodeGenerationContext) {
-    const offset = context.builder.createInBoundsGEP(llvm.ConstantPointerNull.get(type), [ llvm.ConstantInt.get(context.llvmContext, 0), llvm.ConstantInt.get(context.llvmContext, field)]);
+    const fieldIndex = [ llvm.ConstantInt.get(context.llvmContext, 0), llvm.ConstantInt.get(context.llvmContext, field)];
+    const offset = context.builder.createInBoundsGEP(llvm.ConstantPointerNull.get(type), fieldIndex);
     return context.builder.createPtrToInt(offset, llvm.Type.getInt32Ty(context.llvmContext), "offset");
 }

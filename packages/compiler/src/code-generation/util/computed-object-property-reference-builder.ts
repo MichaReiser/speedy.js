@@ -9,7 +9,7 @@ import {toLLVMType} from "./types";
 
 export class ComputedObjectPropertyReferenceBuilder {
     private runtimeFn = false;
-    private _readonly = false;
+    private readOnlyFlag = false;
 
     private constructor(private property: ts.PropertyAccessExpression, private context: CodeGenerationContext) {
     }
@@ -24,7 +24,7 @@ export class ComputedObjectPropertyReferenceBuilder {
     }
 
     readonly(isReadonly = true) {
-        this._readonly = isReadonly;
+        this.readOnlyFlag = isReadonly;
         return this;
     }
 
@@ -37,7 +37,7 @@ export class ComputedObjectPropertyReferenceBuilder {
         const getter = this.createGetter(thisLLVMType, propertyLLVMType, objectReference);
         let setter: llvm.Function | undefined;
 
-        if (!this._readonly) {
+        if (!this.readOnlyFlag) {
             setter = this.createSetter(thisLLVMType, propertyLLVMType, objectReference);
         }
 
@@ -80,7 +80,7 @@ export class ComputedObjectPropertyReferenceBuilder {
             setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
 
             const self = setter.getArguments()[0];
-            self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context))
+            self.addDereferenceableAttr(objectReference.getTypeStoreSize(this.context));
         }
 
         return setter;

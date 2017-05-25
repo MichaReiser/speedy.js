@@ -26,7 +26,6 @@ export interface WastMetaData {
      */
     asmConsts: string[];
 
-
     /**
      * Is string correct?
      */

@@ -37,7 +37,10 @@ export class FunctionFactory {
      * @param properties properties of the function to create, e.g. is the function readonly, what is the linkage
      * @return {Function} the existing function instance or the newly declared function
      */
-    getOrCreate(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties?: Partial<FunctionProperties>): llvm.Function {
+    getOrCreate(resolvedFunction: ResolvedFunction,
+                numberOfArguments: number,
+                context: CodeGenerationContext,
+                properties?: Partial<FunctionProperties>): llvm.Function {
         return this.getOrCreateStaticOrInstanceFunction(resolvedFunction, numberOfArguments, context, this.getInitializedProperties(properties));
     }
 
@@ -51,10 +54,20 @@ export class FunctionFactory {
      * @param properties properties of the function to create, e.g. is the function readonly, what is the linkage
      * @return {Function} the existing or newly declared function
      */
-    getOrCreateInstanceMethod(objectReference: ObjectReference, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties?: Partial<FunctionProperties>) {
+    getOrCreateInstanceMethod(objectReference: ObjectReference,
+                              resolvedFunction: ResolvedFunction,
+                              numberOfArguments: number,
+                              context: CodeGenerationContext,
+                              properties?: Partial<FunctionProperties>) {
         assert(resolvedFunction.instanceMethod && resolvedFunction.classType, "Resolved function needs to be an instance method");
 
-        return this.getOrCreateStaticOrInstanceFunction(resolvedFunction, numberOfArguments, context, this.getInitializedProperties(properties), objectReference);
+        return this.getOrCreateStaticOrInstanceFunction(
+            resolvedFunction,
+            numberOfArguments,
+            context,
+            this.getInitializedProperties(properties),
+            objectReference
+        );
     }
 
     private getInitializedProperties(properties?: Partial<FunctionProperties>): FunctionProperties {
@@ -73,7 +86,11 @@ export class FunctionFactory {
         };
     }
 
-    private getOrCreateStaticOrInstanceFunction(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties: FunctionProperties, objectReference?: ObjectReference) {
+    private getOrCreateStaticOrInstanceFunction(resolvedFunction: ResolvedFunction,
+                                                numberOfArguments: number,
+                                                context: CodeGenerationContext,
+                                                properties: FunctionProperties,
+                                                objectReference?: ObjectReference) {
         const mangledName = this.getMangledFunctionName(resolvedFunction, numberOfArguments);
         let fn = context.module.getFunction(mangledName);
 
@@ -84,8 +101,13 @@ export class FunctionFactory {
         return fn;
     }
 
-    protected createFunction(mangledName: string, resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, properties: FunctionProperties, objectReference?: ObjectReference) {
-        const llvmArgumentTypes = this.getLLVMArgumentTypes(resolvedFunction, numberOfArguments, context, objectReference);
+    protected createFunction(mangledName: string,
+                             resolvedFunction: ResolvedFunction,
+                             numberOfArguments: number,
+                             context: CodeGenerationContext,
+                             properties: FunctionProperties,
+                             objectReference?: ObjectReference) {
+        const llvmArgumentTypes = toLlvmArgumentTypes(resolvedFunction, numberOfArguments, context, objectReference);
         const functionType = llvm.FunctionType.get(toLLVMType(resolvedFunction.returnType, context), llvmArgumentTypes, false);
         const fn = llvm.Function.create(functionType, properties.linkage, mangledName, context.module);
         fn.visibility = properties.visibility;
@@ -158,7 +180,7 @@ export class FunctionFactory {
     }
 
     private getMangledFunctionName(resolvedFunction: ResolvedFunction, numberOfArguments: number) {
-        let typesOfUsedParameters: ts.Type[] = [];
+        const typesOfUsedParameters: ts.Type[] = [];
 
         for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
             const parameter = resolvedFunction.parameters[i];
@@ -174,30 +196,35 @@ export class FunctionFactory {
 
     protected mangleFunctionName(resolvedFunction: ResolvedFunction, typesOfUsedParameters: ts.Type[]) {
         if (resolvedFunction.classType) {
-            return this.nameMangler.mangleMethodName(resolvedFunction.classType, resolvedFunction.functionName, typesOfUsedParameters, resolvedFunction.sourceFile);
+            return this.nameMangler.mangleMethodName(
+                resolvedFunction.classType,
+                resolvedFunction.functionName,
+                typesOfUsedParameters,
+                resolvedFunction.sourceFile
+            );
         }
 
         return this.nameMangler.mangleFunctionName(resolvedFunction.functionName, typesOfUsedParameters, resolvedFunction.sourceFile);
     }
+}
 
-    private getLLVMArgumentTypes(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, objectReference?: ObjectReference) {
-        const argumentTypes = objectReference ? [toLLVMType(objectReference.type, context) ] : [];
+function toLlvmArgumentTypes(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, objectReference?: ObjectReference) {
+    const argumentTypes = objectReference ? [toLLVMType(objectReference.type, context) ] : [];
 
-        for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
-            const parameter = resolvedFunction.parameters[i];
+    for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
+        const parameter = resolvedFunction.parameters[i];
 
-            if (parameter.variadic) {
-                const elementType = (parameter.type as ts.GenericType).typeArguments[0];
-                argumentTypes.push(toLLVMType(elementType, context).getPointerTo(), llvm.Type.getInt32Ty(context.llvmContext));
-                break;
-            } else if (parameter.optional && !parameter.initializer && numberOfArguments <= i) {
-                // optional argument that is not set, skip
-                break;
-            } else {
-                argumentTypes.push(toLLVMType(parameter.type, context));
-            }
+        if (parameter.variadic) {
+            const elementType = (parameter.type as ts.GenericType).typeArguments[0];
+            argumentTypes.push(toLLVMType(elementType, context).getPointerTo(), llvm.Type.getInt32Ty(context.llvmContext));
+            break;
+        } else if (parameter.optional && !parameter.initializer && numberOfArguments <= i) {
+            // optional argument that is not set, skip
+            break;
+        } else {
+            argumentTypes.push(toLLVMType(parameter.type, context));
         }
-
-        return argumentTypes;
     }
+
+    return argumentTypes;
 }

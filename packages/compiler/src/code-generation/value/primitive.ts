@@ -2,9 +2,9 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {FunctionDeclarationBuilder} from "../util/function-declaration-builder";
+import {isMaybeObjectType} from "../util/types";
 import {ObjectReference} from "./object-reference";
 import {Value} from "./value";
-import {isMaybeObjectType} from "../util/types";
 
 /**
  * Represents a primitive, stack allocated value.

@@ -1,8 +1,8 @@
 import * as ts from "typescript";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {CodeGenerationContext} from "../code-generation-context";
-import {Allocation} from "../value/allocation";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {Allocation} from "../value/allocation";
 
 class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.VariableDeclaration, void> {
     syntaxKind = ts.SyntaxKind.VariableDeclaration;
@@ -14,12 +14,16 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         const allocation = Allocation.create(type, context, symbol.name);
 
         if (variableDeclaration.initializer) {
-            let initializerType = context.typeChecker.getTypeAtLocation(variableDeclaration.initializer);
+            const initializerType = context.typeChecker.getTypeAtLocation(variableDeclaration.initializer);
             const initializer = context.generateValue(variableDeclaration.initializer);
             const castedInitializer = initializer.castImplicit(type, context);
 
             if (!castedInitializer) {
-                throw CodeGenerationDiagnostic.unsupportedImplicitCast(variableDeclaration, context.typeChecker.typeToString(type), context.typeChecker.typeToString(initializerType));
+                throw CodeGenerationDiagnostic.unsupportedImplicitCast(
+                    variableDeclaration,
+                    context.typeChecker.typeToString(type),
+                    context.typeChecker.typeToString(initializerType)
+                );
             }
 
             allocation.generateAssignmentIR(castedInitializer, context);

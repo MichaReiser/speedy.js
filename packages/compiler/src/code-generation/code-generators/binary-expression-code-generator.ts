@@ -176,6 +176,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.left, binaryExpression, context).generateIR(context);
                 const rightIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.right, binaryExpression, context).generateIR(context);
 
+                // tslint:disable-next-line: max-line-length
                 if (unifiedType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Object | ts.TypeFlags.Undefined) || isMaybeObjectType(unifiedType)) {
                     result = context.builder.createICmpEQ(leftIr, rightIr, "cmpEQ");
                 } else if (unifiedType.flags & ts.TypeFlags.NumberLike) {
@@ -192,6 +193,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.left, binaryExpression, context).generateIR(context);
                 const rightIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.right, binaryExpression, context).generateIR(context);
 
+                // tslint:disable-next-line: max-line-length
                 if (unifiedType.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Object | ts.TypeFlags.Undefined) || isMaybeObjectType(unifiedType)) {
                     result = context.builder.createICmpNE(leftIr, rightIr, "cmpNE");
                 } else if (leftType.flags & ts.TypeFlags.NumberLike) {
@@ -208,7 +210,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.left, binaryExpression, context).generateIR(context);
                 const rightIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.right, binaryExpression, context).generateIR(context);
                 if (unifiedType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSGT(context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext)), "cmpGT");
+                    const leftInt = context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext));
+                    const rightInt = context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext));
+                    result = context.builder.createICmpSGT(leftInt, rightInt, "cmpGT");
                 } else if (unifiedType.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createICmpSGT(leftIr, rightIr, "cmpGT");
                 } else if (unifiedType.flags & ts.TypeFlags.NumberLike) {
@@ -225,7 +229,9 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.left, binaryExpression, context).generateIR(context);
                 const rightIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.right, binaryExpression, context).generateIR(context);
                 if (unifiedType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSGE(context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext)), "cmpGE");
+                    const leftInt = context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext));
+                    const rightInt = context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext));
+                    result = context.builder.createICmpSGE(leftInt, rightInt, "cmpGE");
                 } else if (unifiedType.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createICmpSGE(leftIr, rightIr, "cmpGE");
                 } else if (unifiedType.flags & ts.TypeFlags.NumberLike) {
@@ -266,7 +272,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.left, binaryExpression, context).generateIR(context);
                 const rightIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.right, binaryExpression, context).generateIR(context);
                 if (unifiedType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSLT(context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext)), "cmpLT");
+                    const leftInt = context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext));
+                    const rightInt = context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext));
+
+                    result = context.builder.createICmpSLT(leftInt, rightInt, "cmpLT");
                 } else if (unifiedType.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createICmpSLT(leftIr, rightIr, "cmpLT");
                 } else if (unifiedType.flags & ts.TypeFlags.NumberLike) {
@@ -283,7 +292,10 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 const leftIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.left, binaryExpression, context).generateIR(context);
                 const rightIr = BinaryExpressionCodeGenerator.toUnified(binaryExpression.right, binaryExpression, context).generateIR(context);
                 if (unifiedType.flags & ts.TypeFlags.BooleanLike) {
-                    result = context.builder.createICmpSLE(context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext)), context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext)), "cmpLE");
+                    const leftInt = context.builder.createZExt(leftIr, llvm.Type.getInt32Ty(context.llvmContext));
+                    const rightInt = context.builder.createZExt(rightIr, llvm.Type.getInt32Ty(context.llvmContext));
+
+                    result = context.builder.createICmpSLE(leftInt, rightInt, "cmpLE");
                 } else if (unifiedType.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createICmpSLE(leftIr, rightIr, "cmpLE");
                 } else if (unifiedType.flags & ts.TypeFlags.NumberLike) {
@@ -372,7 +384,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             case ts.SyntaxKind.FirstAssignment:
                 resultValue = context.generateValue(binaryExpression.right).castImplicit(leftType, context);
                 if (!resultValue) {
-                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
+                    BinaryExpressionCodeGenerator.throwUnsupportedImplicitCast(binaryExpression, context);
                 }
         }
 
@@ -381,7 +393,11 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         }
 
         if (!resultValue) {
-            throw CodeGenerationDiagnostic.unsupportedBinaryOperation(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(leftType));
+            throw CodeGenerationDiagnostic.unsupportedBinaryOperation(
+                binaryExpression,
+                context.typeChecker.typeToString(leftType),
+                context.typeChecker.typeToString(leftType)
+            );
         }
 
         if (isAssignment(binaryExpression.operatorToken)) {
@@ -391,21 +407,19 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         return resultValue;
     }
 
-    private static toUnified(node: ts.Node, binaryExpression: ts.BinaryExpression, context: CodeGenerationContext) {
+    private static toUnified(node: ts.Node, binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): Value {
         const unifiedType = this.unifyTypes(binaryExpression, context);
 
         const casted = context.generateValue(node).castImplicit(unifiedType, context);
 
         if (!casted) {
-            const leftType = context.typeChecker.getTypeAtLocation(binaryExpression.left);
-            const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
+            return this.throwUnsupportedImplicitCast(binaryExpression, context);
         }
 
         return casted;
     }
 
-    private static unifyTypes(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext) {
+    private static unifyTypes(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): ts.Type {
         function unify(left: ts.Type, right: ts.Type) {
             if (left === right) {
                 return left;
@@ -432,7 +446,18 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
             return unified;
         }
 
-        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression, context.typeChecker.typeToString(leftType), context.typeChecker.typeToString(rightType));
+        return this.throwUnsupportedImplicitCast(binaryExpression, context);
+    }
+
+    private static throwUnsupportedImplicitCast(binaryExpression: ts.BinaryExpression, context: CodeGenerationContext): never {
+        const leftType = context.typeChecker.getTypeAtLocation(binaryExpression.left);
+        const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
+
+        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(
+            binaryExpression,
+            context.typeChecker.typeToString(leftType),
+            context.typeChecker.typeToString(rightType)
+        );
     }
 }
 

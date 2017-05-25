@@ -264,6 +264,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -297,11 +298,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -323,52 +324,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -384,7 +387,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -675,6 +678,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -708,11 +712,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -734,52 +738,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -795,7 +801,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -1088,6 +1094,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -1121,11 +1128,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -1147,52 +1154,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -1208,7 +1217,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -1499,6 +1508,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -1532,11 +1542,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -1558,52 +1568,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -1619,7 +1631,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -1947,6 +1959,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -1980,11 +1993,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -2006,52 +2019,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -2067,7 +2082,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -2359,6 +2374,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -2392,11 +2408,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -2418,52 +2434,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -2479,7 +2497,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -2771,6 +2789,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -2804,11 +2823,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -2830,52 +2849,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -2891,7 +2912,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -3182,6 +3203,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -3215,11 +3237,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -3241,52 +3263,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -3302,7 +3326,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -3593,6 +3617,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -3626,11 +3651,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -3652,52 +3677,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -3713,7 +3740,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;
@@ -4004,6 +4031,7 @@ function __moduleLoader(wasmUri, types, options) {
         newDynamicTop = oldDynamicTop + increment | 0;
         if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
             || (newDynamicTop | 0) < 0) {
+            // tslint:disable-next-line:no-console
             console.error(\\"Signed 32 wrap around detected\\");
             return -1;
         }
@@ -4037,11 +4065,11 @@ function __moduleLoader(wasmUri, types, options) {
                 throw new Error(\\"Failed to load WASM module from \\" + wasmUri + \\" (\\" + response.statusText + \\").\\");
             });
         }
-        else if (typeof module !== 'undefined' && module.exports) {
+        else if (typeof module !== \\"undefined\\" && module.exports) {
             wasmLoaded = new Promise(function (resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                var req = module[\\"require\\"];
+                var req = module.require;
                 var fs = req(\\"fs\\");
                 var path = req(\\"path\\");
                 fs.readFile(path.join(__dirname, wasmUri), function (error, data) {
@@ -4063,52 +4091,54 @@ function __moduleLoader(wasmUri, types, options) {
                     memory: memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    \\"__cxa_allocate_exception\\": function (size) {
+                    __cxa_allocate_exception: function (size) {
                         return malloc(size);
                     },
-                    \\"__cxa_throw\\": function () {
+                    __cxa_throw: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_find_matching_catch_2\\": function () {
+                    __cxa_find_matching_catch_2: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_free_exception\\": function (ptr) {
+                    __cxa_free_exception: function (ptr) {
                         try {
                             return free(ptr);
                         }
                         catch (e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                            // tslint:disable-next-line:no-console
+                            console.error(\\"exception during cxa_free_exception: \\" + e);
                         }
                     },
-                    \\"__resumeException\\": function () {
+                    __resumeException: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"__cxa_atexit\\": function () {
+                    __cxa_atexit: function () {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
-                    \\"pow\\": Math.pow,
-                    \\"fmod\\": function frem(x, y) {
+                    pow: Math.pow,
+                    fmod: function (x, y) {
                         return x % y;
                     },
-                    \\"abort\\": function (what) {
+                    abort: function (what) {
+                        // tslint:disable-next-line:no-console
                         console.error(\\"Abort WASM for reason: \\" + what);
                     },
-                    \\"invoke_ii\\": function (index, a1) {
+                    invoke_ii: function (index, a1) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    \\"invoke_iii\\": function (index, a1, a2) {
+                    invoke_iii: function (index, a1, a2) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    \\"invoke_iiii\\": function (index, a1, a2, a3) {
+                    invoke_iiii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    \\"invoke_iiiii\\": function (index, a1, a2, a3, a4) {
+                    invoke_iiiii: function (index, a1, a2, a3, a4) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    \\"invoke_viii\\": function (index, a1, a2, a3) {
+                    invoke_viii: function (index, a1, a2, a3) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    \\"sbrk\\": sbrk
+                    sbrk: sbrk
                 }
             });
         }).then(function (result) {
@@ -4124,7 +4154,7 @@ function __moduleLoader(wasmUri, types, options) {
             speedyJsGc();
         }
     }
-    var loaded = undefined;
+    var loaded;
     var loader = function loader() {
         if (loaded) {
             return loaded;

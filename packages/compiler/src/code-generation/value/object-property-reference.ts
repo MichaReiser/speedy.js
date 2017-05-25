@@ -1,9 +1,9 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {Value, AssignableValue} from "./value";
-import {ObjectReference} from "./object-reference";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Allocation} from "./allocation";
+import {ObjectReference} from "./object-reference";
+import {AssignableValue, Value} from "./value";
 
 /**
  * Reference to an object property (x.name)
@@ -19,7 +19,11 @@ export abstract class ObjectPropertyReference implements AssignableValue {
      * @param setter the setter to change the value of the property
      * @return the property reference
      */
-    static createComputedPropertyReference(propertyType: ts.Type, object: ObjectReference, property: ts.Symbol, getter: llvm.Function | undefined, setter: llvm.Function | undefined) {
+    static createComputedPropertyReference(propertyType: ts.Type,
+                                           object: ObjectReference,
+                                           property: ts.Symbol,
+                                           getter: llvm.Function | undefined,
+                                           setter: llvm.Function | undefined) {
         return new ComputedObjectPropertyReference(propertyType, object, property, getter, setter);
     }
 
@@ -73,7 +77,11 @@ export abstract class ObjectPropertyReference implements AssignableValue {
  * Backs a computed property, e.g. one that is implemented using get index() or one that resits in the runtime
  */
 class ComputedObjectPropertyReference extends ObjectPropertyReference {
-    constructor(propertyType: ts.Type, object: ObjectReference, private property: ts.Symbol, private getter: llvm.Function | undefined, private setter: llvm.Function | undefined) {
+    constructor(propertyType: ts.Type,
+                object: ObjectReference,
+                private property: ts.Symbol,
+                private getter: llvm.Function | undefined,
+                private setter: llvm.Function | undefined) {
         super(propertyType, object);
     }
 
@@ -121,7 +129,11 @@ class ObjectFieldPropertyReference extends ObjectPropertyReference {
     }
 
     private getFieldAddress(context: CodeGenerationContext) {
-        const fieldIndex = llvm.ConstantInt.get(context.llvmContext, this.object.clazz.getFieldOffset(this.property));
-        return context.builder.createInBoundsGEP(this.object.generateIR(context), [ llvm.ConstantInt.get(context.llvmContext, 0), fieldIndex ], `&${this.property.name}`);
+        const fieldIndex = [
+            llvm.ConstantInt.get(context.llvmContext, 0),
+            llvm.ConstantInt.get(context.llvmContext, this.object.clazz.getFieldOffset(this.property))
+        ];
+
+        return context.builder.createInBoundsGEP(this.object.generateIR(context), fieldIndex, `&${this.property.name}`);
     }
 }

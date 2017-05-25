@@ -1,10 +1,10 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {AssignableValue, Value} from "./value";
-import {ObjectReference} from "./object-reference";
 import {CodeGenerationContext} from "../code-generation-context";
 import {isMaybeObjectType, toLLVMType} from "../util/types";
+import {ObjectReference} from "./object-reference";
 import {Primitive} from "./primitive";
+import {AssignableValue, Value} from "./value";
 
 /**
  * Represents the undefined value.

@@ -31,12 +31,14 @@ export class ArrayReference extends BuiltInObjectReference {
         this.elementType = getArrayElementType(arrayType);
     }
 
-
     protected get typeName(): string {
         return "Array";
     }
 
-    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccess: ts.PropertyAccessExpression, context: CodeGenerationContext): FunctionReference {
+    protected createFunctionFor(symbol: ts.Symbol,
+                                signatures: ts.Signature[],
+                                propertyAccess: ts.PropertyAccessExpression,
+                                context: CodeGenerationContext): FunctionReference {
         switch (symbol.name) {
             case "fill":
             case "unshift":
@@ -64,7 +66,7 @@ export class ArrayReference extends BuiltInObjectReference {
         }
     }
 
-    public getIndexer(elementAccessExpression: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
+    getIndexer(elementAccessExpression: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
         return ObjectIndexReferenceBuilder
             .forElement(elementAccessExpression, context)
             .fromRuntime()

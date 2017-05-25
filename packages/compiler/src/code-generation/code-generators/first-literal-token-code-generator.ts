@@ -1,10 +1,10 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralExpression, Primitive> {
     syntaxKind = ts.SyntaxKind.FirstLiteralToken;
