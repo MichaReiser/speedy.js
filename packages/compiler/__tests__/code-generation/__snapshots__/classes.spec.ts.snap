@@ -597,3 +597,8 @@ declare void @speedyJsGc()
 attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
+
+exports[`Classes class-with-static-method-error 1`] = `
+"__tests__/code-generation/cases/classes/class-with-static-method-error.ts(15,11): error TS1000026: Static methods and properties are not yet supported.
+"
+`;

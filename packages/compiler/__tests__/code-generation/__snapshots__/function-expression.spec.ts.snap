@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FunctionExpression function-expression-error 1`] = `
+"__tests__/code-generation/cases/function-expression/function-expression-error.ts(4,16): error TS100005: The type '(x: number, y: number) => number' is not supported.
+"
+`;

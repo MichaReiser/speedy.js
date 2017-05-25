@@ -84,3 +84,8 @@ entry:
 }
 "
 `;
+
+exports[`VariableDeclaration unsupported-var-declaration-error 1`] = `
+"__tests__/code-generation/cases/variable-declaration/unsupported-var-declaration-error.ts(2,20): error TS1000029: Unsupported 'var' declaration of variable. Only variables with block scope ('let' and 'const') are supported.
+"
+`;

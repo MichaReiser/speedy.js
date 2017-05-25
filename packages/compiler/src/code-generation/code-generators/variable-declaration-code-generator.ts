@@ -18,7 +18,7 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
         if (variableDeclaration.initializer) {
             let initializerType = context.typeChecker.getTypeAtLocation(variableDeclaration.initializer);
 
-            if (!context.typeChecker.areEqualTypes(type, initializerType)) {
+            if (!context.typeChecker.isAssignableTo(type, initializerType)) {
                 throw CodeGenerationDiagnostic.unsupportedImplicitCast(variableDeclaration, context.typeChecker.typeToString(type), context.typeChecker.typeToString(initializerType));
             }
 

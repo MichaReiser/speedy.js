@@ -66,14 +66,14 @@ export abstract class AbstractFunctionReference implements FunctionReference {
                 const varArgs = args.slice(i);
                 const elementType = getArrayElementType(parameterType);
 
-                const elementNotMatchingArrayElementType = varArgs.find(varArg => !callerContext.typeChecker.areEqualTypes(callerContext.typeChecker.getTypeAtLocation(varArg), elementType));
+                const elementNotMatchingArrayElementType = varArgs.find(varArg => !callerContext.typeChecker.isAssignableTo(callerContext.typeChecker.getTypeAtLocation(varArg), elementType));
                 if (typeof elementNotMatchingArrayElementType !== "undefined") {
                     throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(elementNotMatchingArrayElementType)));
                 }
 
                 values.push(...varArgs.map(varArg => callerContext.generateValue(varArg).generateIR(callerContext)));
             } else {
-                if (!callerContext.typeChecker.areEqualTypes(parameterType, argumentType)) {
+                if (!callerContext.typeChecker.isAssignableTo(argumentType, parameterType)) {
                     throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(arg, callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
                 }
 

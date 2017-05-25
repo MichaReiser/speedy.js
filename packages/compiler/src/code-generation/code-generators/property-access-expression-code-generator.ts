@@ -4,6 +4,7 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {FunctionReference} from "../value/function-reference";
 import {ObjectPropertyReference} from "../value/object-property-reference";
+import {ClassReference} from "../value/class-reference";
 
 class PropertyAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.PropertyAccessExpression, ObjectPropertyReference | FunctionReference> {
     syntaxKind = ts.SyntaxKind.PropertyAccessExpression;
@@ -15,7 +16,11 @@ class PropertyAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Pr
             return object.getProperty(propertyExpression, context);
         }
 
-        // e.g. on a class / function
+        if (object instanceof ClassReference) {
+            throw CodeGenerationDiagnostic.unsupportedStaticProperties(propertyExpression);
+        }
+
+        // e.g. on function
         throw CodeGenerationDiagnostic.unsupportedProperty(propertyExpression);
     }
 }

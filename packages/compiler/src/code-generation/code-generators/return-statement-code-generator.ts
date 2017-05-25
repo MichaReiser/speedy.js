@@ -17,7 +17,7 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
             const returnType = getExpectedReturnType(returnStatement, context.typeChecker);
             const expressionType = context.typeChecker.getTypeAtLocation(returnStatement.expression);
 
-            if (!context.typeChecker.areEqualTypes(returnType, expressionType)) {
+            if (!context.typeChecker.isAssignableTo(returnType, expressionType)) {
                 throw CodeGenerationDiagnostic.unsupportedImplicitCastOfReturnValue(returnStatement, context.typeChecker.typeToString(returnType), context.typeChecker.typeToString(expressionType));
             }
 

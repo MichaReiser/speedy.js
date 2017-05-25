@@ -78,16 +78,35 @@ export class TypeScriptTypeChecker implements TypeChecker {
         return this.tsTypeChecker.isImplementationOfOverload(fun);
     }
 
-    areEqualTypes(first: ts.Type, second: ts.Type): boolean {
-        const checker = this;
-        function getBaseType(type: ts.Type) {
-            if (type.flags & ts.TypeFlags.Literal) {
-                return checker.tsTypeChecker.getBaseTypeOfLiteralType(type);
-            }
-
-            return type;
+    isAssignableTo(source: ts.Type, target: ts.Type): boolean {
+        if (source.flags & ts.TypeFlags.Literal) {
+            source = this.tsTypeChecker.getBaseTypeOfLiteralType(source);
         }
-        return getBaseType(first) === getBaseType(second);
+
+        if (target.flags & ts.TypeFlags.Literal) {
+            target = this.tsTypeChecker.getBaseTypeOfLiteralType(target);
+        }
+
+        if (source === target) {
+            return true;
+        }
+        if (source.flags & ts.TypeFlags.Union) {
+            return (source as ts.UnionType).types.every(t => this.isAssignableTo(t, target));
+        }
+
+        if (target.flags & ts.TypeFlags.Union) {
+            return (target as ts.UnionType).types.some(t => this.isAssignableTo(source, t));
+        }
+
+        if (source.flags & ts.TypeFlags.Intersection) {
+            return (source as ts.IntersectionType).types.some(t => this.isAssignableTo(t, target));
+        }
+
+        if (target.flags & ts.TypeFlags.Intersection) {
+            return (target as ts.IntersectionType).types.every(t => this.isAssignableTo(source, t));
+        }
+
+        return false;
     }
 
     toSupportedType(type: ts.Type): ts.Type {
@@ -110,10 +129,10 @@ function toSupportedType(type: ts.Type): ts.Type {
     if (type.flags & ts.TypeFlags.Union) {
         const unionType = type as ts.UnionType;
         const intLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.IntLike));
-        const numberLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.NumberLike));
+        const numberLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.NumberLike) && !(type.flags & ts.TypeFlags.IntLike));
         const booleanLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.BooleanLike));
 
-        if (intLiterals || numberLiterals || booleanLiterals && unionType.types.length > 0) {
+        if ((intLiterals || numberLiterals || booleanLiterals) && unionType.types.length > 0) {
             return toSupportedType(unionType.types[0]);
         }
     }

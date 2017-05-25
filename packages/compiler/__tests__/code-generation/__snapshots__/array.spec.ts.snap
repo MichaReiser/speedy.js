@@ -669,3 +669,8 @@ attributes #0 = { alwaysinline }
 attributes #1 = { argmemonly nounwind }
 "
 `;
+
+exports[`Array unsuppported-method-error 1`] = `
+"__tests__/code-generation/cases/array/unsuppported-method-error.ts(5,11): error TS100001: The property 'indexOf' of the built in object 'Array' is not supported.
+"
+`;

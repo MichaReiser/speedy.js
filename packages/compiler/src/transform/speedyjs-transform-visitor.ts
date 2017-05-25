@@ -58,7 +58,7 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
     visitFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration, context: TransformVisitorContext) {
         const speedyJSFunction = isSpeedyJSFunction(functionDeclaration);
 
-        if (!speedyJSFunction) {
+        if (!speedyJSFunction && functionDeclaration.body) {
             return context.visitEachChild(functionDeclaration);
         }
 

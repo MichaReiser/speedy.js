@@ -63,7 +63,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
             .name(mangledName)
             .externalLinkage();
 
-        builder.define(functionDeclaration);
+        builder.define(resolvedFunction.definition!);
         context.addEntryFunction(mangledName);
 
         return state.sourceFileRewriter.rewriteEntryFunction(mangledName, functionDeclaration, state.requestEmitHelper);

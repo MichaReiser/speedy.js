@@ -1,5 +1,5 @@
-async function implicitCastOfWhenFalse(condition: boolean) {
+async function implicitCastOfWhenFalse(condition: boolean): Promise<number> {
     "use speedyjs";
 
-    condition ? 2.0 : 1;
+    return condition ? 2.0 : 1;
 }

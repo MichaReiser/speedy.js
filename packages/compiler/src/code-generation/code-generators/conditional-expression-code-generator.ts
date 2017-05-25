@@ -16,11 +16,11 @@ class ConditionalExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Condi
         const whenFalseType = context.typeChecker.getTypeAtLocation(node.whenFalse);
         const conditionalType = context.typeChecker.getTypeAtLocation(node);
 
-        if (!context.typeChecker.areEqualTypes(conditionalType, whenTrueType)) {
+        if (!context.typeChecker.isAssignableTo(conditionalType, whenTrueType)) {
             throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenTrueType));
         }
 
-        if (!context.typeChecker.areEqualTypes(conditionalType, whenFalseType)) {
+        if (!context.typeChecker.isAssignableTo(conditionalType, whenFalseType)) {
             throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenFalseType));
         }
 

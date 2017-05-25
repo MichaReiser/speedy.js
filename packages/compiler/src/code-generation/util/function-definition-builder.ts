@@ -7,6 +7,7 @@ import {Allocation} from "../value/allocation";
 import {ResolvedFunction} from "../value/resolved-function";
 import {Value} from "../value/value";
 import {ObjectReference} from "../value/object-reference";
+import {ArrayClassReference} from "../value/array-class-reference";
 
 export class FunctionDefinitionBuilder {
     private _returnValue: Value | undefined = undefined;
@@ -16,7 +17,17 @@ export class FunctionDefinitionBuilder {
     }
 
     static create(fn: llvm.Function, resolvedFunction: ResolvedFunction, context: CodeGenerationContext) {
+        assert(resolvedFunction.declaration, "Resolved function misses declaration and, therefore, cannot be defined.");
+        assert(resolvedFunction.definition, "Resolved function misses definition and, therefore, cannot be defined.");
         return new FunctionDefinitionBuilder(fn, resolvedFunction, context);
+    }
+
+    get definition() {
+        return this.resolvedFunction.definition!;
+    }
+
+    get declaration() {
+        return this.resolvedFunction.declaration!;
     }
 
     /**
@@ -39,10 +50,9 @@ export class FunctionDefinitionBuilder {
     }
 
     /**
-     * Builds / Generates the llvm.Function for the given function declaration
-     * @param declaration the function declaration
+     * Builds / Generates the llvm.Function for the function definition of the resolved function
      */
-    define(declaration: ts.FunctionLikeDeclaration): void {
+    define(): void {
         this.context.enterChildScope(this.fn);
 
         let entryBlock = this.fn.getEntryBlock() || llvm.BasicBlock.create(this.context.llvmContext, "entry", this.fn);
@@ -54,8 +64,8 @@ export class FunctionDefinitionBuilder {
             this.context.scope.returnAllocation = Allocation.create(this.resolvedFunction.returnType, this.context, "return");
         }
 
-        this.allocateArguments(declaration);
-        this.context.generate(declaration.body!);
+        this.allocateArguments();
+        this.context.generate(this.definition.body);
 
         this.setBuilderToReturnBlock(returnBlock);
         this.generateReturnStatement();
@@ -92,7 +102,7 @@ export class FunctionDefinitionBuilder {
         }
     }
 
-    private allocateArguments(declaration: ts.FunctionLikeDeclaration) {
+    private allocateArguments() {
         const args = this.fn.getArguments().slice();
 
         // The this object is passed as first argument
@@ -108,20 +118,19 @@ export class FunctionDefinitionBuilder {
 
         for (let i = 0; i < this.resolvedFunction.parameters.length; ++i) {
             const parameter = this.resolvedFunction.parameters[i];
-            const parameterDeclaration = declaration.parameters[i];
-            const declaredParameterSymbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
+            const parameterDefinition = this.definition.parameters[i];
+            const declaredParameterSymbol = this.context.typeChecker.getSymbolAtLocation(parameterDefinition.name);
             const allocation = Allocation.create(parameter.type, this.context, `${parameter.name}.addr`);
 
-            assert(!parameter.variadic, "Variadic arguments are only supported for runtime functions but not speedyJS functions");
-            allocation.generateAssignmentIR(args[i], this.context);
+            args[i].name = parameter.name;
 
-            if (!parameter.symbol || parameter.symbol.flags & ts.SymbolFlags.Transient) {
-                this.context.scope.addVariable(declaredParameterSymbol, allocation);
+            if (parameter.variadic) {
+                allocation.generateAssignmentIR(ArrayClassReference.fromCArray(parameter.type as ts.ObjectType, args[i], args[++i], this.context), this.context);
             } else {
-                this.context.scope.addVariable(parameter.symbol, allocation);
+                allocation.generateAssignmentIR(args[i], this.context);
             }
 
-            args[i].name = parameter.name;
+            this.context.scope.addVariable(declaredParameterSymbol, allocation);
 
             // a field in a constructor that is marked with private, protected or public. Set the argument value on the field.
             if (this._this && declaredParameterSymbol.flags & ts.SymbolFlags.Property) {

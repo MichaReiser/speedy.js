@@ -132,47 +132,67 @@ export class CodeGenerationDiagnostic extends Error {
     static unsupportedImplicitCast(node: ts.Node, castTargetType: string, actualValueType: string) {
         return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedImplicitCast, actualValueType, castTargetType, castTargetType);
     }
+
+    static unsupportedFunctionDeclaration(declaration: ts.Declaration) {
+        throw CodeGenerationDiagnostic.createException(declaration, diagnostics.UnsupportedFunctionDeclaration);
+    }
+
+    static unsupportedGenericFunction(functionDeclaration: ts.FunctionLikeDeclaration) {
+        return CodeGenerationDiagnostic.createException(functionDeclaration, diagnostics.UnsupportedGenericFunction);
+    }
+
+    static unsupportedStaticProperties(propertyExpression: ts.PropertyAccessExpression) {
+        return CodeGenerationDiagnostic.createException(propertyExpression, diagnostics.UnsupportedStaticProperty);
+    }
+
+    static unsupportedNestedFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration | ts.MethodDeclaration) {
+        return CodeGenerationDiagnostic.createException(functionDeclaration, diagnostics.UnsupportedNestedFunctionDeclaration);
+    }
+
+    static variableDeclarationList(variableDeclarationList: ts.VariableDeclarationList) {
+        return CodeGenerationDiagnostic.createException(variableDeclarationList, diagnostics.UnsupportedVarDeclaration);
+    }
 }
 
 const diagnostics = {
     "BuiltInMethodNotSupported": {
-        message: "The method '%s' of the built in object '%s' is not supported",
+        message: "The method '%s' of the built in object '%s' is not supported.",
         code: 100000
     },
     "BuiltInPropertyNotSupported": {
-        message: "The property '%s' of the built in object '%s' is not supported",
+        message: "The property '%s' of the built in object '%s' is not supported.",
         code: 100001
     },
     "BuiltInObjectDoesNotSupportElementAccess": {
-        message: "The built in object '%s' does not support element access (%s[index] or $s[index]=value)",
+        message: "The built in object '%s' does not support element access (%s[index] or $s[index]=value).",
         code: 100002
     },
     UnsupportedBuiltInClass: {
-        message: "The class referenced by this identifier is not supported",
+        message: "The class referenced by this identifier is not supported.",
         code: 100003,
     },
     "UnsupportedLiteralType": {
-        message: "The literal type '%s' is not supported",
+        message: "The literal type '%s' is not supported.",
         code: 100004
     },
     "UnsupportedType": {
-        message: "The type '%s' is not supported",
+        message: "The type '%s' is not supported.",
         code: 100005
     },
     "UnsupportedIdentifier": {
-        message: "Unsupported type or kind of identifier '%s'",
+        message: "Unsupported type or kind of identifier '%s'.",
         code: 100006
     },
     "UnsupportedBinaryOperation": {
-        message: "The binary operator %s is not supported for the left and right hand side types '%s' '%s'",
+        message: "The binary operator %s is not supported for the left and right hand side types '%s' and '%s'.",
         code: 100007
     },
     UnsupportedUnaryOperation: {
-        message: "The unary operator %s is not supported for the type '%s'",
+        message: "The unary operator %s is not supported for the type '%s'.",
         code: 100008
     },
     AnonymousEntryFunctionsUnsupported: {
-        message: "SpeedyJS entry functions need to have a name",
+        message: "SpeedyJS entry functions need to have a name.",
         code: 100009
     },
     ReferenceToNonEntrySpeedyJSFunctionFromJS: {
@@ -180,15 +200,15 @@ const diagnostics = {
         code: 100010
     },
     OptionalParametersNotSupportedForEntryFunction: {
-        message: "Optional parameters or variadic parameters are not supported for SpeedyJS entry functions",
+        message: "Optional parameters or variadic parameters are not supported for SpeedyJS entry functions.",
         code: 100011
     },
     GenericEntryFunctionNotSuppoorted: {
-        message: "Generic SpeedyJS entry functions are not supported",
+        message: "Generic SpeedyJS entry functions are not supported.",
         code: 100012
     },
     OverloadedEntryFunctionNotSupported: {
-        message: "SpeedyJS entry function cannot be overloaded",
+        message: "SpeedyJS entry function cannot be overloaded.",
         code: 100013
     },
     UnsupportedSyntaxKind: {
@@ -196,7 +216,7 @@ const diagnostics = {
         code: 100014
     },
     UnsupportedProperty: {
-        message: "The kind of property is not yet supported",
+        message: "The kind of property is not yet supported, only object properties are supported.",
         code: 1000015
     },
     UnsupportedIndexer: {
@@ -234,5 +254,25 @@ const diagnostics = {
     UnsupportedImplicitCast: {
         message: "Unsupported implicit cast of value with the type '%s' to the expected type '%s'. An explicit cast of the value to the type '%s' is required.",
         code: 1000024
+    },
+    UnsupportedGenericFunction: {
+        message: "Generic functions and methods are not yet supported.",
+        code: 1000025
+    },
+    UnsupportedStaticProperty: {
+        message: "Static methods and properties are not yet supported.",
+        code: 1000026
+    },
+    UnsupportedNestedFunctionDeclaration: {
+        message: "Functions nested inside of other functions that potentially make use of a closure are not yet supported",
+        code: 1000027
+    },
+    UnsupportedFunctionDeclaration: {
+        message: "Unsupported function declaration. Only function and method declarations are supported.",
+        code: 1000028
+    },
+    UnsupportedVarDeclaration: {
+        message: "Unsupported 'var' declaration of variable. Only variables with block scope ('let' and 'const') are supported.",
+        code: 1000029
     }
 };

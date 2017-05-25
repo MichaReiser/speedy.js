@@ -31,12 +31,12 @@ entry:
 `;
 
 exports[`ConditionalExpression implicit-cast-of-when-false-error 1`] = `
-"__tests__/code-generation/cases/conditional-expression/implicit-cast-of-when-false-error.ts(4,16): error TS1000021: Unsupported implicit cast of conditional case with type '1' to the type '2.0' of the whole conditional expression. An explicit cast of the conditional case to the type '2.0' is required.
+"__tests__/code-generation/cases/conditional-expression/implicit-cast-of-when-false-error.ts(4,23): error TS1000021: Unsupported implicit cast of conditional case with type '2.0' to the type '2.0 | 1' of the whole conditional expression. An explicit cast of the conditional case to the type '2.0 | 1' is required.
 "
 `;
 
 exports[`ConditionalExpression implicit-cast-of-when-true-error 1`] = `
-"__tests__/code-generation/cases/conditional-expression/implicit-cast-of-when-true-error.ts(4,23): error TS1000021: Unsupported implicit cast of conditional case with type '2.0' to the type '1' of the whole conditional expression. An explicit cast of the conditional case to the type '1' is required.
+"__tests__/code-generation/cases/conditional-expression/implicit-cast-of-when-true-error.ts(4,24): error TS1000021: Unsupported implicit cast of conditional case with type '1' to the type '1 | 2.0' of the whole conditional expression. An explicit cast of the conditional case to the type '1 | 2.0' is required.
 "
 `;
 
