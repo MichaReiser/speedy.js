@@ -1,6 +1,8 @@
 # Speedy.js
 
 [![Build Status](https://travis-ci.com/MichaReiser/speedy.js.svg?token=zNrpU9MqErk5Uafzosnz&branch=master)](https://travis-ci.com/MichaReiser/speedy.js)
+[![Code Climate](https://codeclimate.com/github/MichaReiser/speedy.js/badges/gpa.svg)](https://codeclimate.com/github/MichaReiser/speedy.js)
+<a href="https://codeclimate.com/github/MichaReiser/speedy.js/coverage"><img src="https://codeclimate.com/github/MichaReiser/speedy.js/badges/coverage.svg" /></a>
 
 Speedy.js is a compiler for a well considered, performance pitfalls free [subset of JavaScript](https://github.com/MichaReiser/speedy.js/wiki/Language-Reference) targeting WebAssembly. Because WebAssembly is statically-typed, the project uses TypeScript as type-checker and to resolve the types of the program symbols. 
 

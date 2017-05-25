@@ -134,7 +134,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     }
 
     castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
-        // casting functions is not yet supportede
+        // casting functions is not yet supported
         return undefined;
     }
 }
