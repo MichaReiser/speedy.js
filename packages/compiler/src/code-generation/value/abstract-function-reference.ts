@@ -133,8 +133,9 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         return this.getLLVMFunction(this.getResolvedFunction(context), context);
     }
 
-    castImplicit(type: ts.Type, context: CodeGenerationContext): Value {
-        throw new Error("TODO");
+    castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
+        // casting functions is not yet supportede
+        return undefined;
     }
 }
 
