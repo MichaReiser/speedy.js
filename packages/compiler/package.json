@@ -15,7 +15,7 @@
     "env-cmd": "^5.1.0",
     "gulp": "^3.9.1",
     "jasmine-core": "^2.6.2",
-    "jest": "^20.0.3",
+    "jest": "^20.0.4",
     "karma": "^1.7.0",
     "karma-chrome-launcher": "^2.1.1",
     "karma-firefox-launcher": "^1.0.1",
@@ -28,13 +28,13 @@
     "speedyjs-loader": "0.x.x",
     "ts-jest": "^20.0.4",
     "tslint": "^5.3.2",
-    "webpack": "^2.5.1"
+    "webpack": "^2.6.1"
   },
   "dependencies": {
     "@types/commander": "^2.9.0",
     "@types/debug": "^0.0.29",
     "@types/lodash": "^4.14.64",
-    "@types/node": "^7.0.18",
+    "@types/node": "^7.0.22",
     "@types/tmp": "0.0.33",
     "commander": "^2.9.0",
     "debug": "^2.6.8",

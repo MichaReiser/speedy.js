@@ -28,11 +28,11 @@
     "exports-loader": "^0.6.4",
     "file-loader": "^0.11.1",
     "speedyjs-loader": "0.x.x",
-    "ts-loader": "^2.0.3",
+    "ts-loader": "^2.1.0",
     "typescript": "MichaReiser/TypeScript#2.3.3-with-int",
     "webpack-dev-server": "^2.4.5"
   },
   "devDependencies": {
-    "webpack": "^2.5.1"
+    "webpack": "^2.6.1"
   }
 }

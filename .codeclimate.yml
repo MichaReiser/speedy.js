@@ -10,11 +10,10 @@ engines:
     enabled: true
 ratings:
   paths:
-  - "packages/compiler/src/**/*"
-  - "packages/compiler/*.ts"
-  - "packages/compiler/__integrationtests__/**/*"
+  - "packages/compiler/**/*.ts"
   - "packages/loader/**/*"
   - "packages/runtime/lib/**/*"
 exclude_paths:
 - packages/benchmark
+- packages/compiler/__tests__
 - node_modules/
