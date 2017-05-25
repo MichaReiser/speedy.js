@@ -27,6 +27,7 @@
     "merge-stream": "^1.0.1",
     "speedyjs-loader": "0.x.x",
     "ts-jest": "^20.0.4",
+    "tslint": "^5.3.2",
     "webpack": "^2.5.1"
   },
   "dependencies": {
