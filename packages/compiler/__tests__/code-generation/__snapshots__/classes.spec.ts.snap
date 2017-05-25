@@ -678,6 +678,72 @@ declare void @speedyJsGc()
 "
 `;
 
+exports[`Classes returning-this 1`] = `
+"; ModuleID = 'classes/returning-this.ts'
+source_filename = \\"classes/returning-this.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.TestBuilder = type { double }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@TestBuilder_name = private unnamed_addr constant [12 x i8] c\\"TestBuilder\\\\00\\"
+@TestBuilder_type_descriptor = private constant { [12 x i8]* } { [12 x i8]* @TestBuilder_name }
+
+define %class.TestBuilder* @_createDefaultBuilder() {
+entry:
+  %return = alloca %class.TestBuilder*, align 4
+  %constructorReturnValue = call dereferenceable(8) %class.TestBuilder* @\\"classes/returning_this.ts$$TestBuilder$11constructor\\"()
+  %sizeReturnValue = call dereferenceable(8) %class.TestBuilder* @\\"classes/returning_this.ts$$TestBuilder$4sized\\"(%class.TestBuilder* %constructorReturnValue, double 4.000000e+00)
+  store %class.TestBuilder* %sizeReturnValue, %class.TestBuilder** %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return1 = load %class.TestBuilder*, %class.TestBuilder** %return, align 4
+  ret %class.TestBuilder* %return1
+}
+
+define linkonce_odr %class.TestBuilder* @\\"classes/returning_this.ts$$TestBuilder$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 8)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.TestBuilder*
+  %\\"&_size\\" = getelementptr inbounds %class.TestBuilder, %class.TestBuilder* %this, i32 0, i32 0
+  store double 0.000000e+00, double* %\\"&_size\\"
+  ret %class.TestBuilder* %this
+}
+
+declare i8* @malloc(i32)
+
+define linkonce_odr hidden dereferenceable(8) %class.TestBuilder* @\\"classes/returning_this.ts$$TestBuilder$4sized\\"(%class.TestBuilder* readonly dereferenceable(8) %this1, double %value) {
+entry:
+  %value.addr = alloca double, align 8
+  %this = alloca %class.TestBuilder*, align 4
+  %return = alloca %class.TestBuilder*, align 4
+  store %class.TestBuilder* %this1, %class.TestBuilder** %this, align 4
+  store double %value, double* %value.addr, align 8
+  %value.addr2 = load double, double* %value.addr, align 8
+  %this3 = load %class.TestBuilder*, %class.TestBuilder** %this, align 4
+  %\\"&_size\\" = getelementptr inbounds %class.TestBuilder, %class.TestBuilder* %this3, i32 0, i32 0
+  store double %value.addr2, double* %\\"&_size\\", align 8
+  %this4 = load %class.TestBuilder*, %class.TestBuilder** %this, align 4
+  store %class.TestBuilder* %this4, %class.TestBuilder** %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return5 = load %class.TestBuilder*, %class.TestBuilder** %return, align 4
+  ret %class.TestBuilder* %return5
+}
+
+declare void @speedyJsGc()
+"
+`;
+
 exports[`Classes undefined-object-member 1`] = `
 "; ModuleID = 'classes/undefined-object-member.ts'
 source_filename = \\"classes/undefined-object-member.ts\\"

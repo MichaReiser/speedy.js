@@ -56,24 +56,35 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
      * generation for the given declaration.
      */
     visitFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration, context: TransformVisitorContext) {
-        const speedyJSFunction = isSpeedyJSFunction(functionDeclaration);
+        return this.visitFunctionLikeDeclaration(functionDeclaration, context);
+    }
 
-        if (!speedyJSFunction && functionDeclaration.body) {
-            return context.visitEachChild(functionDeclaration);
+    visitMethodDeclaration(methodDeclaration: ts.MethodDeclaration, context: TransformVisitorContext) {
+        return this.visitFunctionLikeDeclaration(methodDeclaration, context);
+    }
+
+    visitConstructorDeclaration(constructorDeclaration: ts.ConstructorDeclaration, context: TransformVisitorContext) {
+        return this.visitFunctionLikeDeclaration(constructorDeclaration, context);
+    }
+
+    visitFunctionLikeDeclaration(functionLikeDeclaration: ts.FunctionLikeDeclaration, context: TransformVisitorContext) {
+        const speedyJSFunction = isSpeedyJSFunction(functionLikeDeclaration);
+
+        if (!speedyJSFunction && functionLikeDeclaration.body) {
+            return context.visitEachChild(functionLikeDeclaration);
         }
 
-        const entryFunction = isSpeedyJSEntryFunction(functionDeclaration);
         this.inSpeedyJSFunction = true;
 
         try {
-            if (entryFunction) {
-                const name = getName(functionDeclaration, this.compilationContext.typeChecker);
+            if (isSpeedyJSEntryFunction(functionLikeDeclaration)) {
+                const name = getName(functionLikeDeclaration, this.compilationContext.typeChecker);
                 LOG(`Found SpeedyJS entry function ${name}`);
-                validateSpeedyJSFunction(functionDeclaration, this.compilationContext.typeChecker);
-                return this.codeGenerator.generateEntryFunction(functionDeclaration);
+                validateSpeedyJSFunction(functionLikeDeclaration, this.compilationContext.typeChecker);
+                return this.codeGenerator.generateEntryFunction(functionLikeDeclaration);
             } else {
-                context.visitEachChild(functionDeclaration);
-                return ts.createNotEmittedStatement(functionDeclaration); // remove the function
+                context.visitEachChild(functionLikeDeclaration);
+                return ts.createNotEmittedStatement(functionLikeDeclaration); // remove the function
             }
         } finally {
             this.inSpeedyJSFunction = false;
@@ -112,8 +123,11 @@ function isSpeedyJSFunction(fun: ts.FunctionLikeDeclaration) {
  * @param fun the function to test
  * @return {boolean} true if it is a speedy js entry function
  */
-function isSpeedyJSEntryFunction(fun: ts.FunctionLikeDeclaration) {
-    return isSpeedyJSFunction(fun) && !!fun.modifiers && !!fun.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+function isSpeedyJSEntryFunction(fun: ts.FunctionLikeDeclaration): fun is ts.FunctionDeclaration {
+    return isSpeedyJSFunction(fun) &&
+            fun.kind === ts.SyntaxKind.FunctionDeclaration &&
+            !!fun.modifiers &&
+            !!fun.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
 }
 
 /**
@@ -127,7 +141,7 @@ function isSpeedyJSEntryFunction(fun: ts.FunctionLikeDeclaration) {
  * @param typeChecker the type checker
  * @throws if the function is not valid
  */
-function validateSpeedyJSFunction(fun: ts.FunctionDeclaration, typeChecker: TypeChecker) {
+function validateSpeedyJSFunction(fun: ts.FunctionLikeDeclaration, typeChecker: TypeChecker) {
     if (!fun.name) {
         throw CodeGenerationDiagnostic.anonymousEntryFunctionsNotSupported(fun);
     }
@@ -146,7 +160,7 @@ function validateSpeedyJSFunction(fun: ts.FunctionDeclaration, typeChecker: Type
     }
 }
 
-function getName(functionDeclaration: ts.FunctionDeclaration, typeChecker: TypeChecker) {
+function getName(functionDeclaration: ts.FunctionLikeDeclaration, typeChecker: TypeChecker) {
     if (!functionDeclaration.name) {
         return "**anonymous**";
     }

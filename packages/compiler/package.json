@@ -43,7 +43,7 @@
     "typescript": "MichaReiser/TypeScript#2.3.3-with-int"
   },
   "scripts": {
-    "coverage": "codeclimate-test-reporter > ./coverage/lcov.info",
+    "coverage": "codeclimate-test-reporter < ./coverage/lcov.info",
     "preinstall": "node ./scripts/install-dependencies.js",
     "postinstall": "env-cmd ./env.js npm install llvm-node@^2.0.0",
     "prepublish": "tsc && tslint -c ./tslint.json 'src/**/*.ts'",

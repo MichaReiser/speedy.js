@@ -71,7 +71,7 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operator], type);
     }
 
-    static anonymousEntryFunctionsNotSupported(fun: ts.FunctionDeclaration) {
+    static anonymousEntryFunctionsNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.AnonymousEntryFunctionsUnsupported);
     }
 
@@ -79,7 +79,7 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(optionalParameter, diagnostics.OptionalParametersNotSupportedForEntryFunction);
     }
 
-    static genericEntryFunctionNotSupported(fun: ts.FunctionDeclaration) {
+    static genericEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.GenericEntryFunctionNotSuppoorted);
     }
 
@@ -91,7 +91,7 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(identifier, diagnostics.ReferenceToNonEntrySpeedyJSFunctionFromJS, speedyJSFunctionSymbol.name);
     }
 
-    static overloadedEntryFunctionNotSupported(fun: ts.FunctionDeclaration) {
+    static overloadedEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
     }
 

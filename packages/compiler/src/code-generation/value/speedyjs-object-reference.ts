@@ -54,10 +54,19 @@ export class SpeedyJSObjectReference implements ObjectReference {
             return this;
         }
 
-        // casting it to undefined. Casts to other types is not yet supported
+        // casting it to undefined. Casts to other types are not yet supported
         if (type.flags & ts.TypeFlags.Undefined) {
             const castedPtr = context.builder.createBitCast(this.generateIR(context), toLLVMType(type, context));
             return this.clazz.objectFor(new AddressLValue(castedPtr, type), this.type, context);
+        }
+
+        if (type.flags & ts.TypeFlags.TypeParameter) {
+            const typeParameter = type as ts.TypeParameter;
+
+            // e.g. function with return type this
+            if (typeParameter.constraint === this.type) {
+                return this;
+            }
         }
 
         return undefined;
