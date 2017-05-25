@@ -15,7 +15,8 @@
     "object-literal-sort-keys": false,
     "ban-types": false,
     "max-classes-per-file": false,
-    "member-ordering": false
+    "member-ordering": false,
+    "array-type": false
   },
   "rulesDirectory": []
 }

@@ -1,7 +1,7 @@
 async function forEmpty() {
     "use speedyjs";
 
-    for(;;) {
+    for (; ; ) {
         return;
     }
 }

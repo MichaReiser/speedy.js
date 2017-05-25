@@ -1,4 +1,6 @@
 engines:
+  eslint:
+    enabled: true
   tslint:
     enabled: true
     channel: beta
@@ -9,10 +11,10 @@ engines:
 ratings:
   paths:
   - "packages/compiler/src/**/*"
+  - "packages/compiler/*.ts"
+  - "packages/compiler/__integrationtests__/**/*"
   - "packages/loader/**/*"
   - "packages/runtime/lib/**/*"
-  - "**.ts"
-  - "**.tsx"
 exclude_paths:
 - packages/benchmark
 - node_modules/

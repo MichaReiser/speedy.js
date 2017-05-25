@@ -3,7 +3,7 @@ async function simpleFor() {
 
     let x = 0;
 
-    for(let i = 0; i < 10; ++i) {
+    for (let i = 0; i < 10; ++i) {
         x = i;
     }
     return x;
@@ -28,7 +28,7 @@ async function forContinueToLabel() {
 
     let result = 0;
 
-    myLabel: for (let i=0; i < 4; ++i) {
+    myLabel: for (let i = 0; i < 4; ++i) {
         for (let j = 8; j > 4; --j) {
             if (j % i === 0) {
                 continue myLabel;

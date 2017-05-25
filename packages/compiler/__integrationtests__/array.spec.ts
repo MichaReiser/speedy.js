@@ -43,9 +43,9 @@ async function newArrayOfObjects(x: number) {
     "use speedyjs";
     return [
         new Point(x, x),
-        new Point(2.0*x, 2.0*x),
-        new Point(3.0*x, 3.0*x),
-        new Point(4.0*x, 4.0*x)
+        new Point(2.0 * x, 2.0 * x),
+        new Point(3.0 * x, 3.0 * x),
+        new Point(4.0 * x, 4.0 * x)
     ];
 }
 
@@ -78,9 +78,9 @@ async function objectArrayElementAccess(x: number) {
     "use speedyjs";
     const array = [
         new Point(x, x),
-        new Point(2.0*x, 2.0*x),
-        new Point(3.0*x, 3.0*x),
-        new Point(4.0*x, 4.0*x)
+        new Point(2.0 * x, 2.0 * x),
+        new Point(3.0 * x, 3.0 * x),
+        new Point(4.0 * x, 4.0 * x)
     ];
 
     const tmp = array[0];
@@ -155,7 +155,7 @@ async function arraySplice(array: int[], start: int) {
     "use speedyjs";
 
     array.splice(start);
-    
+
     return array;
 }
 
@@ -229,7 +229,7 @@ describe("Array", () => {
             cb();
         });
 
-        it("creates an array containing objects", async(cb) => {
+        it("creates an array containing objects", async (cb) => {
             expect(await newArrayOfObjects(10)).toEqual([
                 new Point(10, 10),
                 new Point(20, 20),
@@ -252,7 +252,7 @@ describe("Array", () => {
             cb();
         });
 
-        it("returns the object at the given address", async(cb) => {
+        it("returns the object at the given address", async (cb) => {
             expect(await objectArrayElementAccess(10)).toBe(10);
             cb();
         });
@@ -335,7 +335,7 @@ describe("Array", () => {
             cb();
         });
     });
-    
+
     describe("splice", () => {
         it("removes all elements from the given start index if delete count is not defined", async (cb) => {
             expect(await arraySplice([1, 2, 3, 4, 5], 2)).toEqual([1, 2]);

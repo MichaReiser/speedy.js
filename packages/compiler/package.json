@@ -45,10 +45,11 @@
   },
   "scripts": {
     "coverage": "codeclimate-test-reporter < ./coverage/lcov.info",
+    "lint": "tslint -c ../../tslint.json 'src/**/*.ts' '*.ts' '__integrationtests__/**/*.ts'",
     "preinstall": "node ./scripts/install-dependencies.js",
     "postinstall": "env-cmd ./env.js npm install llvm-node@^2.0.0",
-    "prepublish": "tsc && tslint -c ../../tslint.json 'src/**/*.ts'",
     "start": "tsc --watch",
+    "prepublish": "tsc && npm run lint",
     "test": "jest --coverage && karma start karma.conf.js --single-run",
     "test:watch": "jest --watch",
     "test:integration:watch": "karma start karma.conf.js"

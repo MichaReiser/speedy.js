@@ -213,8 +213,8 @@ describe("PrefixUnaryExpression", () => {
 
         it("returns the bitwise complement for a number value", async (cb) => {
             expect(await tildeNumber(0.0)).toBe(~0);
-            expect(await tildeNumber(2**31 - 1)).toBe(~(2**31 - 1));
-            expect(await tildeNumber(-(2**31-1))).toBe(~-(2**31-1));
+            expect(await tildeNumber(2 ** 31 - 1)).toBe(~(2 ** 31 - 1));
+            expect(await tildeNumber(-(2 ** 31 - 1))).toBe(~-(2 ** 31 - 1));
 
             expect(await tildeNumber(Number.MAX_SAFE_INTEGER)).toBe(~Number.MAX_SAFE_INTEGER);
             expect(await tildeNumber(Number.MIN_SAFE_INTEGER)).toBe(~Number.MIN_SAFE_INTEGER);

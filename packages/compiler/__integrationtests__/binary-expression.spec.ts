@@ -112,116 +112,112 @@ async function powEqualsNumbers(base: number, exponent: number) {
     return base;
 }
 
-async function binOrInts(x:  int, y: int) {
+async function binOrInts(x: int, y: int) {
     "use speedyjs";
     return x | y;
 }
 
-async function binOrNumbers(x:  number, y: number) {
+async function binOrNumbers(x: number, y: number) {
     "use speedyjs";
     return x | y;
 }
 
-async function binOrEqualsInts(x:  int, y: int) {
+async function binOrEqualsInts(x: int, y: int) {
     "use speedyjs";
     x |= y;
     return x;
 }
 
-async function binAndInts(x:  int, y: int) {
+async function binAndInts(x: int, y: int) {
     "use speedyjs";
     return x & y;
 }
 
-
-async function binAndNumbers(x:  number, y: number) {
+async function binAndNumbers(x: number, y: number) {
     "use speedyjs";
     return x & y;
 }
 
-async function binAndEqualsInts(x:  int, y: int) {
+async function binAndEqualsInts(x: int, y: int) {
     "use speedyjs";
     x &= y;
     return x;
 }
 
-async function binXorInts(x:  int, y: int) {
+async function binXorInts(x: int, y: int) {
     "use speedyjs";
     return x ^ y;
 }
 
-
-async function binXorNumbers(x:  number, y: number) {
+async function binXorNumbers(x: number, y: number) {
     "use speedyjs";
     return x ^ y;
 }
 
-async function binXorEqualsInts(x:  int, y: int) {
+async function binXorEqualsInts(x: int, y: int) {
     "use speedyjs";
     x ^= y;
     return x;
 }
 
-async function binZeroFillRightShiftInts(x:  int, y: int) {
+async function binZeroFillRightShiftInts(x: int, y: int) {
     "use speedyjs";
     return x >>> y;
 }
 
-
-async function binZeroFillRightShiftNumbers(x:  number, y: number) {
+async function binZeroFillRightShiftNumbers(x: number, y: number) {
     "use speedyjs";
     return x >>> y;
 }
 
-async function binZeroFillRightShiftEqualsInts(x:  int, y: int) {
+async function binZeroFillRightShiftEqualsInts(x: int, y: int) {
     "use speedyjs";
     x >>>= y;
     return x;
 }
 
-async function binLeftShiftInt(x:  int, y: int) {
+async function binLeftShiftInt(x: int, y: int) {
     "use speedyjs";
     return x << y;
 }
 
-
-async function binLeftShiftNumber(x:  number, y: number) {
+async function binLeftShiftNumber(x: number, y: number) {
     "use speedyjs";
     return x << y;
 }
 
-async function binLeftShiftNumberEquals(x:  int, y: int) {
+async function binLeftShiftNumberEquals(x: int, y: int) {
     "use speedyjs";
     x <<= y;
     return x;
 }
 
-async function orBooleans(x:  boolean, y: boolean) {
+async function orBooleans(x: boolean, y: boolean) {
     "use speedyjs";
     return x || y;
 }
 
-async function orInts(x:  int, y: int) {
+async function orInts(x: int, y: int) {
     "use speedyjs";
     return x || y;
 }
 
-async function orNumbers(x:  number, y: number) {
+async function orNumbers(x: number, y: number) {
     "use speedyjs";
     return x ||  y;
 }
 
-async function andBooleans(x:  boolean, y: boolean, z: boolean) {
+async function andBooleans(x: boolean, y: boolean, z: boolean) {
     "use speedyjs";
     return x && y && z;
 }
 
-async function andInts(x:  int, y: int, z: int) {
+async function andInts(x: int, y: int, z: int) {
     "use speedyjs";
     return x && y && z;
 }
 
-async function andNumbers(x:  number, y: number, z: number) {
+async function andNumbers(x: number, y: number, z: number) {
     "use speedyjs";
     return x &&  y && z;
 }
@@ -359,47 +355,55 @@ async function numberAssignment(value: number) {
 
 async function multipleBoolAssignment(value: boolean) {
     "use speedyjs";
-    let x: boolean, y: boolean, z: boolean;
+    let x: boolean;
+    let y: boolean;
+    let z: boolean;
     x = y = z = value;
     return y;
 }
 
 async function multipleIntAssignment(value: int) {
     "use speedyjs";
-    let x: int, y: int, z: int;
+    let x: int;
+    let y: int;
+    let z: int;
+
     x = y = z = value;
     return x + y + z;
 }
 
 async function multipleNumberAssignment(value: number) {
     "use speedyjs";
-    let x: number, y: number, z: number;
+    let x: number;
+    let y: number;
+    let z: number;
+
     x = y = z = value;
     return x + y + z;
 }
 
 describe("BinaryExpression", () => {
     describe("+", () => {
-       it("adds two ints", async function (cb) {
+       it("adds two ints", async function(cb) {
             const result = await addInts(3, 4);
             expect(result).toBe(3 + 4);
             cb();
        });
 
-        it("adds two numbers", async function (cb) {
+       it("adds two numbers", async function(cb) {
             const result = await addNumbers(3.0, 4.0);
             expect(result).toBe(3.0 + 4.0);
             cb();
-        });
+       });
     });
 
     describe("+=", () => {
-        it("adds x to y and returns the sum of the two integers", async function (cb) {
+        it("adds x to y and returns the sum of the two integers", async function(cb) {
             expect(await addEqualsInts(3, 4)).toBe(3 + 4);
             cb();
         });
 
-        it("adds x to y and returns the sum of the two numbers", async function (cb) {
+        it("adds x to y and returns the sum of the two numbers", async function(cb) {
             expect(await addEqualsNumbers(3.0, 4.0)).toBe(3.0 + 4.0);
             cb();
         });
@@ -420,12 +424,12 @@ describe("BinaryExpression", () => {
     });
 
     describe("-=", () => {
-        it("subtracts y from x and returns the difference of the two integers", async function (cb) {
+        it("subtracts y from x and returns the difference of the two integers", async function(cb) {
             expect(await subtractEqualsInts(3, 4)).toBe(3 - 4);
             cb();
         });
 
-        it("subtracts y from x and returns the difference of the two numbers", async function (cb) {
+        it("subtracts y from x and returns the difference of the two numbers", async function(cb) {
             expect(await subtractEqualsNumbers(3.0, 4.0)).toBe(3.0 - 4.0);
             cb();
         });
@@ -446,12 +450,12 @@ describe("BinaryExpression", () => {
     });
 
     describe("*=", () => {
-        it("multiplies x with y and returns the product of the two integers", async function (cb) {
+        it("multiplies x with y and returns the product of the two integers", async function(cb) {
             expect(await multiplyEqualsInts(3, 4)).toBe(3 * 4);
             cb();
         });
 
-        it("multiplies x with y and returns the product of the two numbers", async function (cb) {
+        it("multiplies x with y and returns the product of the two numbers", async function(cb) {
             expect(await multiplyEqualsNumbers(3.0, 4.0)).toBe(3.0 * 4.0);
             cb();
         });
@@ -472,12 +476,12 @@ describe("BinaryExpression", () => {
     });
 
     describe("/=", () => {
-        it("divides x by y and returns the quotient of the two integers", async function (cb) {
-            expect(await divideEqualsInts(10, 3)).toBe((10 / 3)| 0);
+        it("divides x by y and returns the quotient of the two integers", async function(cb) {
+            expect(await divideEqualsInts(10, 3)).toBe((10 / 3) | 0);
             cb();
         });
 
-        it("divides x by x and returns the quotient of the two numbers", async function (cb) {
+        it("divides x by x and returns the quotient of the two numbers", async function(cb) {
             expect(await divideEqualsNumbers(4, 5)).toBe(4 / 5);
             cb();
         });
@@ -498,7 +502,7 @@ describe("BinaryExpression", () => {
     });
 
     describe("**=", () => {
-        it("computes the number power of the assignee and the assigned value", async function (cb) {
+        it("computes the number power of the assignee and the assigned value", async function(cb) {
             expect(await powEqualsNumbers(1.3, 3.4)).toBe(1.3 ** 3.4);
             cb();
         });

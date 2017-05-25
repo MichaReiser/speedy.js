@@ -227,8 +227,8 @@ describe("Classes", () => {
             expect(points[0].x).toBe(1);
             expect(points[0].y).toBe(0);
             expect(points[1]).toEqual(jasmine.any(ClassWithMethod));
-            expect(points[1].x).toBe(Math.cos(1/8.0));
-            expect(points[1].y).toBe(Math.sin(1/8.0));
+            expect(points[1].x).toBe(Math.cos(1 / 8.0));
+            expect(points[1].y).toBe(Math.sin(1 / 8.0));
             cb();
         });
 
@@ -332,7 +332,7 @@ describe("Classes", () => {
             const other = new ClassWithMethod(3, 4);
 
             expect(await callsInstanceMethod(center, other)).toBe(5);
-             cb();
+            cb();
         });
     });
 
