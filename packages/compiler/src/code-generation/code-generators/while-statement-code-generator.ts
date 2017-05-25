@@ -8,9 +8,9 @@ class WhileStatementCodeGenerator implements SyntaxCodeGenerator<ts.WhileStateme
     syntaxKind = ts.SyntaxKind.WhileStatement;
 
     generate(whileStatement: ts.WhileStatement, context: CodeGenerationContext): void {
-        let condition = llvm.BasicBlock.create(context.llvmContext, "while.cond", context.scope.enclosingFunction);
+        const condition = llvm.BasicBlock.create(context.llvmContext, "while.cond", context.scope.enclosingFunction);
         let body = llvm.BasicBlock.create(context.llvmContext, "while.body");
-        let end = llvm.BasicBlock.create(context.llvmContext, "while.end");
+        const end = llvm.BasicBlock.create(context.llvmContext, "while.end");
 
         context.scope.setContinueBlock(condition);
         context.scope.setBreakBlock(end);

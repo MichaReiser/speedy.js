@@ -21,4 +21,3 @@ export interface SyntaxCodeGenerator<T extends ts.Node, R extends Value | void> 
      */
     generate(node: T, context: CodeGenerationContext): R;
 }
-

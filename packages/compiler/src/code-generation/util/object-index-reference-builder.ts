@@ -1,11 +1,11 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {ObjectReference} from "../value/object-reference";
-import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {toLLVMType} from "./types";
-import {ObjectIndexReference} from "../value/object-index-reference";
 import {DefaultNameMangler} from "../default-name-mangler";
+import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
+import {ObjectIndexReference} from "../value/object-index-reference";
+import {ObjectReference} from "../value/object-reference";
+import {toLLVMType} from "./types";
 
 export class ObjectIndexReferenceBuilder {
     private runtimeFn = false;

@@ -13,8 +13,8 @@ import {SyntaxCodeGenerator} from "./syntax-code-generator";
 import {ArrayClassReference} from "./value/array-class-reference";
 import {MathClassReference} from "./value/math-class-reference";
 import {Primitive} from "./value/primitive";
-import {Value} from "./value/value";
 import {UnresolvedFunctionReference} from "./value/unresolved-function-reference";
+import {Value} from "./value/value";
 
 const log = debug("DefaultLLVMEmitContextFactory");
 
@@ -23,7 +23,7 @@ const log = debug("DefaultLLVMEmitContextFactory");
  */
 export class DefaultCodeGenerationContextFactory implements CodeGenerationContextFactory {
 
-    private codeGenerators?: SyntaxCodeGenerator<ts.Node, Value | void>[];
+    private codeGenerators?: Array<SyntaxCodeGenerator<ts.Node, Value | void>>;
 
     constructor(private fallbackCodeGenerator?: FallbackCodeGenerator) {}
 
@@ -62,16 +62,19 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
         const nan = builtins.get("NaN");
         if (nan) {
-            context.scope.addVariable(nan, new Primitive(llvm.ConstantFP.getNaN(llvm.Type.getDoubleTy(context.llvmContext)), context.typeChecker.getTypeAtLocation(nan.valueDeclaration!)));
+            const nanValue = llvm.ConstantFP.getNaN(llvm.Type.getDoubleTy(context.llvmContext));
+            context.scope.addVariable(nan, new Primitive(nanValue, context.typeChecker.getTypeAtLocation(nan.valueDeclaration!)));
         }
 
         const isNanSymbol = builtins.get("isNaN");
         if (isNanSymbol) {
-            context.scope.addFunction(isNanSymbol, UnresolvedFunctionReference.createRuntimeFunction([context.typeChecker.getSignatureFromDeclaration(isNanSymbol.valueDeclaration as ts.FunctionDeclaration)], context));
+            context.scope.addFunction(isNanSymbol, UnresolvedFunctionReference.createRuntimeFunction([
+                context.typeChecker.getSignatureFromDeclaration(isNanSymbol.valueDeclaration as ts.FunctionDeclaration)
+            ], context));
         }
     }
 
-    private getCodeGenerators(): SyntaxCodeGenerator<ts.Node, Value | void>[] {
+    private getCodeGenerators(): Array<SyntaxCodeGenerator<ts.Node, Value | void>> {
         if (!this.codeGenerators) {
             this.codeGenerators = this.loadCodeGenerators();
         }
@@ -79,7 +82,7 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
         return this.codeGenerators;
     }
 
-    private loadCodeGenerators(): SyntaxCodeGenerator<ts.Node, Value | void>[] {
+    private loadCodeGenerators(): Array<SyntaxCodeGenerator<ts.Node, Value | void>> {
         const fileNames = fs.readdirSync(`${__dirname}/code-generators`);
         const codeGeneratorFiles = fileNames.filter(file => file.endsWith("code-generator.js"));
 
@@ -89,7 +92,8 @@ export class DefaultCodeGenerationContextFactory implements CodeGenerationContex
 
             const constructorFunction = codeGeneratorModule.default;
             assert(constructorFunction instanceof Function, `Default export of code generator module ${codeGeneratorFile} is not a constructor`);
-            assert(constructorFunction.prototype.generate, `Default exported object from module ${codeGeneratorFile} is no CodeGenerator as it lacks the generate method.`);
+            // tslint:disable-next-line: max-line-length
+            assert(constructorFunction.prototype.generate, `Default exported object from module ${codeGeneratorFile} is not a CodeGenerator as it lacks the generate method.`);
 
             log("Dynamically loaded code generator %s", codeGeneratorFile);
 

@@ -1,16 +1,16 @@
-import * as assert from "assert";
 import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
+import {isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
+import {AddressLValue} from "./address-lvalue";
 import {ClassReference} from "./class-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectReference} from "./object-reference";
 import {Value} from "./value";
-import {Pointer} from "./pointer";
 
 /**
  * Object reference to a built in object (that is part of the runtime).
@@ -40,18 +40,25 @@ export abstract class BuiltInObjectReference implements ObjectReference {
     }
 
     isAssignable(): boolean {
-        return this.objectAddress.isPointer();
+        return false;
     }
 
     dereference() {
         return this;
     }
 
-    generateAssignmentIR(value: Value, context: CodeGenerationContext) {
-        assert(value.isObject(), "Cannot assign non object to object reference");
-        assert (this.objectAddress.isPointer(), "Cannot assign to address");
+    castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
+        if (this.type === type || isMaybeObjectType(type) && type.types.indexOf(this.type) !== -1) {
+            return this;
+        }
 
-        (this.objectAddress as Pointer).set(value.generateIR(context), context);
+        // casting it to undefined. Casts to other types not yet supported
+        if (type.flags & ts.TypeFlags.Undefined) {
+            const castedPtr = context.builder.createBitCast(this.generateIR(context), toLLVMType(type, context));
+            return this.clazz.objectFor(new AddressLValue(castedPtr, type), this.type, context);
+        }
+
+        return undefined;
     }
 
     getProperty(property: ts.PropertyAccessExpression, context: CodeGenerationContext): ObjectPropertyReference | FunctionReference {
@@ -82,16 +89,9 @@ export abstract class BuiltInObjectReference implements ObjectReference {
     }
 
     /**
-     * Throws an exception for a unsupported element access
+     * Throws an exception for an unsupported index or element accesss
      */
-    protected throwUnsupportedBuiltIn(node: ts.ElementAccessExpression): never;
-
-    /**
-     * Throws an exception for an unsupported index accesss
-     */
-    protected throwUnsupportedBuiltIn(node: ts.PropertyAccessExpression): never;
-
-    protected throwUnsupportedBuiltIn(node: any, symbol?: ts.Symbol): never {
+    protected throwUnsupportedBuiltIn(node: ts.PropertyAccessExpression | ts.ElementAccessExpression, symbol?: ts.Symbol): never {
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
             throw CodeGenerationDiagnostic.builtInDoesNotSupportElementAccess(node, this.typeName);
         } else if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
@@ -115,7 +115,10 @@ export abstract class BuiltInObjectReference implements ObjectReference {
      * @return the method to invoke
      * @throws if the built in method is not supported
      */
-    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext): FunctionReference {
+    protected createFunctionFor(symbol: ts.Symbol,
+                                signatures: ts.Signature[],
+                                propertyAccessExpression: ts.PropertyAccessExpression,
+                                context: CodeGenerationContext): FunctionReference {
         return this.throwUnsupportedBuiltIn(propertyAccessExpression);
     }
 

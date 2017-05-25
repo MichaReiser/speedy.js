@@ -1,9 +1,9 @@
-import * as ts from "typescript";
 import * as assert from "assert";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {CodeGenerationContext} from "../code-generation-context";
-import {TypeChecker} from "../../type-checker";
+import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {TypeChecker} from "../../type-checker";
+import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
 class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnStatement, void> {
     syntaxKind = ts.SyntaxKind.ReturnStatement;
@@ -17,12 +17,18 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
             const returnType = getExpectedReturnType(returnStatement, context.typeChecker);
             const expressionType = context.typeChecker.getTypeAtLocation(returnStatement.expression);
 
-            if (!context.typeChecker.isAssignableTo(returnType, expressionType)) {
-                throw CodeGenerationDiagnostic.unsupportedImplicitCastOfReturnValue(returnStatement, context.typeChecker.typeToString(returnType), context.typeChecker.typeToString(expressionType));
+            const returnValue = context.generateValue(returnStatement.expression);
+            const casted = returnValue.castImplicit(returnType, context);
+
+            if (!casted) {
+                throw CodeGenerationDiagnostic.unsupportedImplicitCastOfReturnValue(
+                    returnStatement,
+                    context.typeChecker.typeToString(returnType),
+                    context.typeChecker.typeToString(expressionType)
+                );
             }
 
-            const returnValue = context.generateValue(returnStatement.expression);
-            returnAllocation!.generateAssignmentIR(returnValue, context);
+            returnAllocation!.generateAssignmentIR(casted, context);
         }
 
         assert(returnBlock, "No return block present (not inside of a function?)");
@@ -31,14 +37,15 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
 }
 
 function getExpectedReturnType(node: ts.ReturnStatement, typeChecker: TypeChecker) {
-    function findEnclosingFunction(node: ts.Node): ts.FunctionLikeDeclaration {
-        if (node.kind === ts.SyntaxKind.FunctionExpression || node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.ArrowFunction || node.kind === ts.SyntaxKind.MethodDeclaration) {
-            return node as ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration;
+    function findEnclosingFunction(current: ts.Node): ts.FunctionLikeDeclaration {
+        // tslint:disable-next-line:max-line-length
+        if (current.kind === ts.SyntaxKind.FunctionExpression || current.kind === ts.SyntaxKind.FunctionDeclaration || current.kind === ts.SyntaxKind.ArrowFunction || current.kind === ts.SyntaxKind.MethodDeclaration) {
+            return current as ts.FunctionExpression | ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration;
         }
 
-        assert(node.parent, "Node is not inside of a function");
+        assert(current.parent, "Node is not inside of a function");
 
-        return findEnclosingFunction(node.parent!);
+        return findEnclosingFunction(current.parent!);
     }
 
     const fun = findEnclosingFunction(node);

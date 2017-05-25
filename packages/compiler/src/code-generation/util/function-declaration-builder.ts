@@ -2,8 +2,8 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {toLLVMType} from "./types";
 import {ResolvedFunction} from "../value/resolved-function";
+import {toLLVMType} from "./types";
 
 /**
  * Builder for declaring llvm functions
@@ -12,7 +12,10 @@ export class FunctionDeclarationBuilder {
     private linkageType = llvm.LinkageTypes.InternalLinkage;
     private attributes: llvm.Attribute.AttrKind[] = [];
 
-    private constructor(private _name: string, private parameters: { name: string, type: ts.Type}[], private returnType: ts.Type, private context: CodeGenerationContext) {
+    private constructor(private functionName: string,
+                        private parameters: Array<{ name: string, type: ts.Type}>,
+                        private returnType: ts.Type,
+                        private context: CodeGenerationContext) {
     }
 
     /**
@@ -34,7 +37,9 @@ export class FunctionDeclarationBuilder {
      * @param context the context
      * @return the builder
      */
-    static create(name: string, parameters: { name: string, type: ts.Type}[], returnType: ts.Type, context: CodeGenerationContext): FunctionDeclarationBuilder {
+    static create(name: string,
+                  parameters: Array<{ name: string, type: ts.Type}>,
+                  returnType: ts.Type, context: CodeGenerationContext): FunctionDeclarationBuilder {
         return new FunctionDeclarationBuilder(name, parameters, returnType, context);
     }
 
@@ -44,7 +49,7 @@ export class FunctionDeclarationBuilder {
      * @return this for a fluent api
      */
     name(name: string) {
-        this._name = name;
+        this.functionName = name;
         return this;
     }
 
@@ -80,7 +85,7 @@ export class FunctionDeclarationBuilder {
      * @return this for a fluent api
      */
     linkage(linkage: llvm.LinkageTypes): this {
-        this.linkageType= linkage;
+        this.linkageType = linkage;
         return this;
     }
 
@@ -98,7 +103,7 @@ export class FunctionDeclarationBuilder {
 
         const functionType = llvm.FunctionType.get(llvmReturnType, parameters, false);
 
-        const fn = llvm.Function.create(functionType, this.linkageType, this._name, this.context.module);
+        const fn = llvm.Function.create(functionType, this.linkageType, this.functionName, this.context.module);
 
         for (const attribute of this.attributes) {
             fn.addFnAttr(attribute);
@@ -108,7 +113,7 @@ export class FunctionDeclarationBuilder {
     }
 
     declareIfNotExisting(): llvm.Function {
-        const existing = this.context.module.getFunction(this._name);
+        const existing = this.context.module.getFunction(this.functionName);
         if (existing) {
             return existing;
         }

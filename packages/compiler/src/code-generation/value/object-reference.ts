@@ -1,17 +1,17 @@
 import * as ts from "typescript";
-import {AssignableValue} from "./value";
-import {ObjectPropertyReference} from "./object-property-reference";
-import {ObjectIndexReference} from "./object-index-reference";
-import {FunctionReference} from "./function-reference";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ClassReference} from "./class-reference";
+import {FunctionReference} from "./function-reference";
+import {ObjectIndexReference} from "./object-index-reference";
+import {ObjectPropertyReference} from "./object-property-reference";
+import {Value} from "./value";
 
 /**
  * Represents an object that is stored at a specific address.
  * Does not represent a specific instance as the object is not destroyed when the
  * address is overridden with a new instance.
  */
-export interface ObjectReference extends AssignableValue {
+export interface ObjectReference extends Value {
 
     /**
      * The class reference

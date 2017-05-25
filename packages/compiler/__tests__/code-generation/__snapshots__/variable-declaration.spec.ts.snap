@@ -1,7 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`VariableDeclaration implicit-type-coercion-error 1`] = `
-"__tests__/code-generation/cases/variable-declaration/implicit-type-coercion-error.ts(4,10): error TS1000024: Unsupported implicit cast of value with the type '10' to the expected type 'number'. An explicit cast of the value to the type 'number' is required.
+exports[`VariableDeclaration implicit-type-coercion 1`] = `
+"; ModuleID = 'variable-declaration/implicit-type-coercion.ts'
+source_filename = \\"variable-declaration/implicit-type-coercion.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_initializerWithImplicitTypeCoercion() {
+entry:
+  %x = alloca double, align 8
+  store double 1.000000e+01, double* %x, align 8
+  ret void
+}
 "
 `;
 
@@ -57,6 +76,30 @@ define void @_initializedVariableDeclaration() {
 entry:
   %x = alloca i32, align 4
   store i32 10, i32* %x, align 4
+  ret void
+}
+"
+`;
+
+exports[`VariableDeclaration undefined-primitive-variable 1`] = `
+"; ModuleID = 'variable-declaration/undefined-primitive-variable.ts'
+source_filename = \\"variable-declaration/undefined-primitive-variable.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_undefinedPrimitiveVariable() {
+entry:
+  %x = alloca double, align 8
+  store double 0x7FF8000000000000, double* %x, align 8
   ret void
 }
 "

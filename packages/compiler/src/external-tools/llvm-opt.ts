@@ -1,9 +1,10 @@
 import * as debug from "debug";
-import {execLLVM} from "./tools";
 import {OptimizationLevel} from "../speedyjs-compiler-options";
+import {execLLVM} from "./tools";
 
 const LOG = debug("external-tools/llvm-opt");
 const EXECUTABLE_NAME = "opt";
+// tslint:disable-next-line:max-line-length
 const LINK_TIME_OPTIMIZATIONS = "-strip-debug -internalize -globaldce -disable-loop-vectorization -disable-slp-vectorization -vectorize-loops=false -vectorize-slp=false -vectorize-slp-aggressive=false"; // Vectorization is not yet supported by the linker backend llc
 const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,memcpy,memset,memmove,__errno_location,__cxa_can_catch,__cxa_is_pointer_type";
 
@@ -20,7 +21,6 @@ export function optimize(filename: string, optimizedFileName: string, level: Opt
     return optimizedFileName;
 }
 
-
 /**
  * Executes the link time optimizations on the given input file
  * @param filename the input file (absolute path)
@@ -31,9 +31,11 @@ export function optimize(filename: string, optimizedFileName: string, level: Opt
  */
 export function optimizeLinked(filename: string, publicFunctions: string[], optimizedFileName: string, level: OptimizationLevel) {
     const publicApi = publicFunctions.concat(DEFAULT_PUBLIC).join(",");
-    const linktTimeOpts = ["2", "3", "z", "s" ].indexOf(level) !== -1;
+    const linkTimeOpts = ["2", "3", "z", "s" ].indexOf(level) !== -1;
+    const optimizations = (linkTimeOpts ? "-std-link-opts" : "") + " " + LINK_TIME_OPTIMIZATIONS;
+    const args = `"${filename}" -o "${optimizedFileName}" ${optimizations} -internalize-public-api-list="${publicApi}"`;
 
     LOG(`Link time optimization of file ${filename}`);
-    LOG(execLLVM(EXECUTABLE_NAME, `"${filename}" -o "${optimizedFileName}" ${linktTimeOpts ? "-std-link-opts" : ""} ${LINK_TIME_OPTIMIZATIONS} -internalize-public-api-list="${publicApi}"`));
+    LOG(execLLVM(EXECUTABLE_NAME, args));
     return optimizedFileName;
 }

@@ -1,9 +1,9 @@
 import * as ts from "typescript";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {Value} from "../value/value";
-import {CodeGenerationContext} from "../code-generation-context";
-import {Primitive} from "../value/primitive";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import {Primitive} from "../value/primitive";
+import {Value} from "../value/value";
 
 class AsExpressionCodeGenerator implements SyntaxCodeGenerator<ts.AsExpression, Value | void> {
     syntaxKind = ts.SyntaxKind.AsExpression;
@@ -19,7 +19,7 @@ class AsExpressionCodeGenerator implements SyntaxCodeGenerator<ts.AsExpression, 
         } else if (targetType.flags & ts.TypeFlags.IntLike) {
             castedValue = Primitive.toInt32(value, sourceType, targetType, context);
         } else if (targetType.flags & ts.TypeFlags.NumberLike) {
-            castedValue = Primitive.toNumber(value, targetType, context);
+            castedValue = Primitive.toNumber(value, sourceType, targetType, context);
         } else {
             throw CodeGenerationDiagnostic.unsupportedCast(node, context.typeChecker.typeToString(sourceType), context.typeChecker.typeToString(targetType));
         }

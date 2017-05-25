@@ -23,7 +23,7 @@ export class BuiltInSymbols {
      * @param name the name of the desired symbol
      * @return {undefined|ts.Symbol} the symbol with the given name if defined, undefined otherwise
      */
-    get(name: string): ts.Symbol | undefined{
+    get(name: string): ts.Symbol | undefined {
         return this.stdLibSymbols.get(name);
     }
 
@@ -31,9 +31,10 @@ export class BuiltInSymbols {
         const defaultLibFileLocation = compilerHost.getDefaultLibLocation!();
         const symbols = new Map<string, ts.Symbol>();
         const stdLibFiles = program.getSourceFiles().filter(file => file.fileName.startsWith(defaultLibFileLocation));
+        const symbolKinds = ts.SymbolFlags.Variable | ts.SymbolFlags.Interface | ts.SymbolFlags.Function;
 
         for (const lib of stdLibFiles) {
-            const stdLibVariables = program.getTypeChecker().getSymbolsInScope(lib, ts.SymbolFlags.Variable | ts.SymbolFlags.Interface | ts.SymbolFlags.Function);
+            const stdLibVariables = program.getTypeChecker().getSymbolsInScope(lib, symbolKinds);
             for (const type of stdLibVariables) {
                 symbols.set(type.name, type);
             }

@@ -1,15 +1,16 @@
-import * as assert from "assert";
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
+import {isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
+import {AddressLValue} from "./address-lvalue";
 import {FunctionReference} from "./function-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectReference} from "./object-reference";
 import {SpeedyJSClassReference} from "./speedy-js-class-reference";
 import {UnresolvedMethodReference} from "./unresolved-method-reference";
-import {AssignableValue, Value} from "./value";
-import {Pointer} from "./pointer";
+import {Value} from "./value";
 
 export class SpeedyJSObjectReference implements ObjectReference {
 
@@ -37,22 +38,38 @@ export class SpeedyJSObjectReference implements ObjectReference {
     }
 
     getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
-        throw new Error('Indexers are not supported for speedyJS objects.');
+        throw CodeGenerationDiagnostic.unsupportedIndexer(element);
     }
 
-    generateAssignmentIR(value: Value, context: CodeGenerationContext): void {
-        assert(value.isObject(), "Cannot assign non objects");
-        assert(this.address.isPointer(), "Cannot assign to an address");
-
-        (this.address as Pointer).set(value.generateIR(context), context);
-    }
-
-    isAssignable(): this is AssignableValue {
-        return this.address.isPointer();
+    isAssignable(): false {
+        return false;
     }
 
     isObject(): this is ObjectReference {
         return true;
+    }
+
+    castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
+        if (this.type === type || isMaybeObjectType(type) && type.types.indexOf(this.type) !== -1) {
+            return this;
+        }
+
+        // casting it to undefined. Casts to other types are not yet supported
+        if (type.flags & ts.TypeFlags.Undefined) {
+            const castedPtr = context.builder.createBitCast(this.generateIR(context), toLLVMType(type, context));
+            return this.clazz.objectFor(new AddressLValue(castedPtr, type), this.type, context);
+        }
+
+        if (type.flags & ts.TypeFlags.TypeParameter) {
+            const typeParameter = type as ts.TypeParameter;
+
+            // e.g. function with return type this
+            if (typeParameter.constraint === this.type) {
+                return this;
+            }
+        }
+
+        return undefined;
     }
 
     dereference(context: CodeGenerationContext): Value {

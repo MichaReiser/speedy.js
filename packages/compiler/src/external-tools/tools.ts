@@ -1,7 +1,7 @@
-import * as ts from "typescript";
-import * as path from "path";
-import * as debug from "debug";
 import * as child_process from "child_process";
+import * as debug from "debug";
+import * as path from "path";
+import * as ts from "typescript";
 
 const CONFIGURATION_FILE = path.normalize(path.join(__dirname, "../../tools/configuration.json"));
 
@@ -62,7 +62,7 @@ function execute(tool: string, args: string, cwd?: string) {
     const command = `${tool} ${args}`;
 
     log(`Execute command '${command}'`);
-    const output = child_process.execSync(`${tool} ${args}`, { env: env, cwd: cwd });
+    const output = child_process.execSync(`${tool} ${args}`, { env, cwd });
 
     return outputToString(output);
 }

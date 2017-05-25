@@ -1,7 +1,6 @@
 class ClassWithStaticMethod {
     static lastId = 0;
     private constructor(public id: int) {
-
     }
 
     static create() {
@@ -10,7 +9,7 @@ class ClassWithStaticMethod {
 }
 
 async function classWithStaticMethod() {
-    "use speedyjs"
+    "use speedyjs";
 
     return ClassWithStaticMethod.create();
 }

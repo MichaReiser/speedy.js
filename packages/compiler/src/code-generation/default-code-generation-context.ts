@@ -47,7 +47,14 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     resolveClass: (type: ts.Type, symbol?: ts.Symbol) => ClassReference | undefined;
 
     createChildContext(): CodeGenerationContext {
-        return new DefaultCodeGenerationContext(this.compilationContext, this.module, this.rootScope, this.codeGenerators, this.entryFunctions, this.fallbackCodeGenerator);
+        return new DefaultCodeGenerationContext(
+            this.compilationContext,
+            this.module,
+            this.rootScope,
+            this.codeGenerators,
+            this.entryFunctions,
+            this.fallbackCodeGenerator
+        );
     }
 
     generate(node: ts.Node): void | Value {

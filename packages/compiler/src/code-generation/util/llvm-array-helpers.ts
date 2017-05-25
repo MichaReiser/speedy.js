@@ -32,7 +32,11 @@ function allocateLlvmArrayWith(elements: llvm.Value[], elementType: llvm.Type, c
     return array;
 }
 
-function assignFromConstantArray(arrayAllocation: llvm.AllocaInst, elements: llvm.Constant[], elementType: llvm.Type, context: CodeGenerationContext, name?: string) {
+function assignFromConstantArray(arrayAllocation: llvm.AllocaInst,
+                                 elements: llvm.Constant[],
+                                 elementType: llvm.Type,
+                                 context: CodeGenerationContext,
+                                 name?: string) {
     const arrayType = llvm.ArrayType.get(elementType, elements.length);
     const array = llvm.ConstantArray.get(arrayType, elements);
     const global = new llvm.GlobalVariable(context.module, array.type, true, llvm.LinkageTypes.PrivateLinkage, array, name || "values");
@@ -42,7 +46,15 @@ function assignFromConstantArray(arrayAllocation: llvm.AllocaInst, elements: llv
     const arrayValue = context.builder.createBitCast(arrayAllocation, pointerType);
     const globalValue = context.builder.createBitCast(global, pointerType);
 
-    const memcpy = context.module.getOrInsertFunction("llvm.memcpy.p0i8.p0i8.i32", llvm.FunctionType.get(llvm.Type.getVoidTy(context.llvmContext), [pointerType, pointerType, llvm.Type.getInt32Ty(context.llvmContext), llvm.Type.getInt32Ty(context.llvmContext), llvm.Type.getInt1Ty(context.llvmContext)], false));
+    const memcpyType = llvm.FunctionType.get(llvm.Type.getVoidTy(context.llvmContext), [
+        pointerType,
+        pointerType,
+        llvm.Type.getInt32Ty(context.llvmContext),
+        llvm.Type.getInt32Ty(context.llvmContext),
+        llvm.Type.getInt1Ty(context.llvmContext)
+    ], false);
+    const memcpy = context.module.getOrInsertFunction("llvm.memcpy.p0i8.p0i8.i32", memcpyType);
+
     context.builder.createCall(memcpy, [
         arrayValue,
         globalValue,

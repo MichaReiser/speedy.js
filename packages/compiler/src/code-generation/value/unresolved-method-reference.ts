@@ -38,7 +38,10 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
         return new UnresolvedMethodReference(object, signatures, new SpeedyJSFunctionFactory(context.compilationContext));
     }
 
-    protected constructor(private object: ObjectReference, signatures: ts.Signature[], llvmFunctionFactory: FunctionFactory, properties?: Partial<FunctionProperties>) {
+    protected constructor(private object: ObjectReference,
+                          signatures: ts.Signature[],
+                          llvmFunctionFactory: FunctionFactory,
+                          properties?: Partial<FunctionProperties>) {
         super(signatures, llvmFunctionFactory, object.type, properties);
     }
 

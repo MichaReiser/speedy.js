@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
-import * as ts from"typescript";
+import * as ts from "typescript";
 import {Address} from "./address";
 
 /**

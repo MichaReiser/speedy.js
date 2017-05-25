@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as ts from "typescript";
-import {TypeChecker} from "../../type-checker";
 import {CompilationContext} from "../../compilation-context";
+import {TypeChecker} from "../../type-checker";
 
 /**
  * Resolved function parameter
@@ -97,7 +97,14 @@ export interface ResolvedFunction {
 /**
  * Creates a new resolved function
  */
-export function createResolvedFunction(name: string, typeParameters: ts.Type[], parameters: ResolvedFunctionParameter[], returnType: ts.Type, sourceFile?: ts.SourceFile, classType?: ts.ObjectType, instanceMethod = false, async=false): ResolvedFunction {
+export function createResolvedFunction(name: string,
+                                       typeParameters: ts.Type[],
+                                       parameters: ResolvedFunctionParameter[],
+                                       returnType: ts.Type,
+                                       sourceFile?: ts.SourceFile,
+                                       classType?: ts.ObjectType,
+                                       instanceMethod = false,
+                                       async = false): ResolvedFunction {
     return {
         async,
         functionName: name,
@@ -113,7 +120,11 @@ export function createResolvedFunction(name: string, typeParameters: ts.Type[], 
 /**
  * Creates a new resolved parameter
  */
-export function createResolvedParameter(name: string, type: ts.Type, optional = false, initializer?: ts.Expression, variadic = false): ResolvedFunctionParameter {
+export function createResolvedParameter(name: string,
+                                        type: ts.Type,
+                                        optional = false,
+                                        initializer?: ts.Expression,
+                                        variadic = false): ResolvedFunctionParameter {
     return {
         name,
         type,
@@ -130,14 +141,17 @@ export function createResolvedParameter(name: string, type: ts.Type, optional = 
  * @param classType the class type if the function belongs to a class
  * @returns the created resolved function
  */
-export function createResolvedFunctionFromSignature(signature: ts.Signature, compilationContext: CompilationContext, classType?: ts.ObjectType): ResolvedFunction {
-    let returnType = signature.getReturnType();
+export function createResolvedFunctionFromSignature(signature: ts.Signature,
+                                                    compilationContext: CompilationContext,
+                                                    classType?: ts.ObjectType): ResolvedFunction {
+    const returnType = signature.getReturnType();
 
     let definition = (signature.declaration as ts.FunctionLikeDeclaration).body ? signature.declaration as ts.FunctionLikeDeclaration : undefined;
     const symbol =  signature.declaration.name ? compilationContext.typeChecker.getSymbolAtLocation(signature.declaration.name) : undefined;
 
     if (symbol && symbol.declarations && symbol.declarations.length > 1) {
-        definition = (symbol.declarations as ts.FunctionLikeDeclaration[]).find(decl => compilationContext.typeChecker.isImplementationOfOverload(decl)) || definition;
+        const isOverloadPredicate = (decl: ts.FunctionLikeDeclaration) => compilationContext.typeChecker.isImplementationOfOverload(decl);
+        definition = (symbol.declarations as ts.FunctionLikeDeclaration[]).find(isOverloadPredicate) || definition;
     }
 
     return {
@@ -148,9 +162,9 @@ export function createResolvedFunctionFromSignature(signature: ts.Signature, com
         functionName: getDeclaredFunctionName(signature.declaration, compilationContext.typeChecker),
         instanceMethod: isInstanceMethod(signature.declaration),
         parameters: getResolvedParameters(signature, compilationContext.typeChecker),
-        returnType: returnType,
+        returnType,
         sourceFile: signature.declaration.getSourceFile(),
-        symbol: symbol,
+        symbol,
         typeParameters: signature.typeParameters || []
     };
 }
@@ -192,7 +206,7 @@ function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeCheck
 
 function getResolvedParameters(signature: ts.Signature, typeChecker: TypeChecker) {
     const declaration = signature.getDeclaration();
-    let parameters: ResolvedFunctionParameter[] = [];
+    const parameters: ResolvedFunctionParameter[] = [];
 
     for (let i = 0; i < declaration.parameters.length; ++i) {
         const parameter = declaration.parameters[i];

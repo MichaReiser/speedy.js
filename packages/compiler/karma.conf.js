@@ -54,7 +54,7 @@ module.exports = function (config) {
                 fs: "empty",
                 path: "empty",
                 Buffer: false
-            },
+            }
         },
         webpackMiddleware: {
             stats: {

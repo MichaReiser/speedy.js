@@ -49,8 +49,49 @@ attributes #1 = { argmemonly nounwind }
 "
 `;
 
-exports[`Array array-literal-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/array/array-literal-implicit-cast-error.ts(6,27): error TS1000018: The array element of type '7' requires an implicit cast to the array element type 'number'. Implicit casts are not supported. An explicit cast of the element to the array element type is required.
+exports[`Array array-literal-implicit-cast 1`] = `
+"; ModuleID = 'array/array-literal-implicit-cast.ts'
+source_filename = \\"array/array-literal-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.Array = type { double*, i32, i32 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@items = private local_unnamed_addr constant [4 x double] [double 1.000000e+00, double 2.000000e+00, double 3.000000e+00, double 7.000000e+00]
+
+define %class.Array* @_arrayLiteralWithImplicitCast() {
+entry:
+  %items = alloca [4 x double], align 8
+  %return = alloca %class.Array*, align 4
+  %items1 = getelementptr inbounds [4 x double], [4 x double]* %items, i32 0, i32 0
+  %0 = bitcast [4 x double]* %items to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([4 x double]* @items to i8*), i32 32, i32 0, i1 false)
+  %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayId_constructorPdu(double* %items1, i32 4)
+  store %class.Array* %constructorReturnValue, %class.Array** %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return2 = load %class.Array*, %class.Array** %return, align 4
+  ret %class.Array* %return2
+}
+
+; Function Attrs: alwaysinline
+declare dereferenceable(12) %class.Array* @ArrayId_constructorPdu(double*, i32) #0
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
+
+declare void @speedyJsGc()
+
+attributes #0 = { alwaysinline }
+attributes #1 = { argmemonly nounwind }
 "
 `;
 
@@ -165,7 +206,7 @@ attributes #2 = { alwaysinline norecurse nounwind readonly }
 `;
 
 exports[`Array element-access-with-number-error 1`] = `
-"__tests__/code-generation/cases/array/element-access-with-number-error.ts(5,15): error TS1000022: Unsupported element access expression with indexer of type '2.1'. Only element access expressions with an integer index are supported.
+"__tests__/code-generation/cases/array/element-access-with-number-error.ts(5,15): error TS1000022: Unsupported element access expression with indexer of type 'number'. Only element access expressions with an integer index are supported.
 "
 `;
 

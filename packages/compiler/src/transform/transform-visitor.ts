@@ -6,9 +6,9 @@ import * as ts from "typescript";
  * @return the factory
  */
 export function createTransformVisitorFactory(transformVisitor: TransformVisitor): ts.TransformerFactory<ts.SourceFile> {
-    return function (transformationContext: ts.TransformationContext) {
+    return function(transformationContext: ts.TransformationContext) {
         return createTransformer(transformVisitor, transformationContext);
-    }
+    };
 }
 
 /**

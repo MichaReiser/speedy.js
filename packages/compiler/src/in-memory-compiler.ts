@@ -1,11 +1,15 @@
-import * as ts from "typescript";
 import * as assert from "assert";
 import * as path from "path";
-
-import { initializeCompilerOptions, SpeedyJSCompilerOptions, UninitializedSpeedyJSCompilerOptions} from "./speedyjs-compiler-options";
+import * as ts from "typescript";
 import {Compiler} from "./compiler";
 
-function getInitializedCompilerOptions(options?: UninitializedSpeedyJSCompilerOptions): SpeedyJSCompilerOptions{
+import {
+    initializeCompilerOptions,
+    SpeedyJSCompilerOptions,
+    UninitializedSpeedyJSCompilerOptions
+} from "./speedyjs-compiler-options";
+
+function getInitializedCompilerOptions(options?: UninitializedSpeedyJSCompilerOptions): SpeedyJSCompilerOptions {
     options = options || ts.getDefaultCompilerOptions();
 
     // transpileModule does not write anything to disk so there is no need to verify that there are no conflicts between input and output paths.
@@ -83,7 +87,7 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
         useCaseSensitiveFileNames() {
             return defaultHost.useCaseSensitiveFileNames.apply(defaultHost, arguments);
         },
-        writeFile(name: string, text: string){
+        writeFile(name: string, text: string) {
             if (name.endsWith(".map")) {
                 assert(sourceMapText === undefined, `Unexpected multiple source map outputs for the file '${name}'`);
                 sourceMapText = text;

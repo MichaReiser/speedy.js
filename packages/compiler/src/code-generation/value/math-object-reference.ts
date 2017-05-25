@@ -7,8 +7,8 @@ import {MathClassReference} from "./math-class-reference";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {Pointer} from "./pointer";
 import {Primitive} from "./primitive";
-import {Value} from "./value";
 import {UnresolvedMethodReference} from "./unresolved-method-reference";
+import {Value} from "./value";
 
 /**
  * Wrapper for the built in Math object
@@ -21,7 +21,10 @@ export class MathObjectReference extends BuiltInObjectReference {
         super(pointer, mathType, mathClass);
     }
 
-    protected createFunctionFor(symbol: ts.Symbol, signatures: ts.Signature[], propertyAccessExpression: ts.PropertyAccessExpression, context: CodeGenerationContext) {
+    protected createFunctionFor(symbol: ts.Symbol,
+                                signatures: ts.Signature[],
+                                propertyAccessExpression: ts.PropertyAccessExpression,
+                                context: CodeGenerationContext) {
         switch (symbol.name) {
             // use the llvm intrinsic whenever a web assembly instruction exists
             case "pow":
@@ -53,12 +56,14 @@ export class MathObjectReference extends BuiltInObjectReference {
     /**
      * Calls the pow function
      * @param lhs the left hand side value (base)
+     * @param lhsType the type of the lhs value
      * @param rhs the right hand side value (exponent)
+     * @param rhsType the type of the rhs value
      * @param numberType the type of the pow result
      * @param context the context
      * @return the result of the pow operation
      */
-    static pow(lhs: Value, rhs: Value, numberType: ts.Type, context: CodeGenerationContext) {
+    static pow(lhs: Value, lhsType: ts.Type, rhs: Value, rhsType: ts.Type, numberType: ts.Type, context: CodeGenerationContext) {
         const mathSymbol = context.compilationContext.builtIns.get("Math")!;
         const mathAllocation = context.scope.getVariable(mathSymbol!);
         const mathObject = mathAllocation.dereference(context) as MathObjectReference;
@@ -67,7 +72,7 @@ export class MathObjectReference extends BuiltInObjectReference {
         const powSignature = context.typeChecker.getSignatureFromDeclaration(powSymbol.valueDeclaration as ts.FunctionDeclaration);
         const method = UnresolvedMethodReference.createRuntimeMethod(mathObject, [powSignature], context, { readnone: true, noUnwind: true });
 
-        const args = [Primitive.toNumber(lhs, numberType, context).generateIR(), Primitive.toNumber(rhs, numberType, context).generateIR()];
+        const args = [Primitive.toNumber(lhs, lhsType, numberType, context).generateIR(), Primitive.toNumber(rhs, rhsType, numberType, context).generateIR()];
         return method.invokeWith(args, context) as Value;
     }
 }

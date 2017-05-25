@@ -4,9 +4,9 @@ import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {toLLVMType} from "../util/types";
 import {ObjectReference} from "./object-reference";
+import {Pointer} from "./pointer";
 
 import {AssignableValue, Value} from "./value";
-import {Pointer} from "./pointer";
 
 /**
  * Wrapper for an allocation with an alignment.
@@ -71,8 +71,12 @@ export class Allocation implements AssignableValue {
     generateAssignmentIR(value: Value | llvm.Value, context: CodeGenerationContext) {
         assert(this.isAssignable, "Cannot assign to constant global variable");
 
-        let llvmValue = value instanceof llvm.Value ? value : value.generateIR(context);
+        const llvmValue = value instanceof llvm.Value ? value : value.generateIR(context);
         context.builder.createAlignedStore(llvmValue, this.store, this.alignment, false);
+    }
+
+    castImplicit(type: ts.Type, context: CodeGenerationContext) {
+        return this.dereference(context).castImplicit(type, context);
     }
 }
 

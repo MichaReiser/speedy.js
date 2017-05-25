@@ -101,9 +101,14 @@ exports[`FunctionDeclaration overloaded-entry-function-error 1`] = `
 "
 `;
 
-exports[`FunctionDeclaration overloaded-function 1`] = `
-"; ModuleID = 'function-declaration/overloaded-function.ts'
-source_filename = \\"function-declaration/overloaded-function.ts\\"
+exports[`FunctionDeclaration overloaded-function-error 1`] = `
+"__tests__/code-generation/cases/function-declaration/overloaded-function-error.ts(10,42): error TS1000030: Overloaded functions are not yet supported.
+"
+`;
+
+exports[`FunctionDeclaration return-with-implicit-value-coercion 1`] = `
+"; ModuleID = 'function-declaration/return-with-implicit-value-coercion.ts'
+source_filename = \\"function-declaration/return-with-implicit-value-coercion.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -116,60 +121,20 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
 
-define i32 @_entry() {
+define double @_returnWithImplicitReturnValueCoercion(i32 %arg) {
 entry:
-  %booleanResult = alloca i1, align 1
-  %numberResult = alloca double, align 8
-  %return = alloca i32, align 4
-  %identityReturnValue = call double @\\"function_declaration/overloaded_function.ts$$8identityd\\"(double 1.000000e+01)
-  store double %identityReturnValue, double* %numberResult, align 8
-  %identityReturnValue1 = call i1 @\\"function_declaration/overloaded_function.ts$$8identityb\\"(i1 true)
-  store i1 %identityReturnValue1, i1* %booleanResult, align 1
-  store i32 10, i32* %return, align 4
-  br label %returnBlock
-
-returnBlock:                                      ; preds = %entry
-  %return2 = load i32, i32* %return, align 4
-  ret i32 %return2
-}
-
-define linkonce_odr hidden double @\\"function_declaration/overloaded_function.ts$$8identityd\\"(double %arg) {
-entry:
-  %arg.addr = alloca double, align 8
+  %arg.addr = alloca i32, align 4
   %return = alloca double, align 8
-  store double %arg, double* %arg.addr, align 8
-  %arg.addr1 = load double, double* %arg.addr, align 8
-  store double %arg.addr1, double* %return, align 8
+  store i32 %arg, i32* %arg.addr, align 4
+  %arg.addr1 = load i32, i32* %arg.addr, align 4
+  %arg.addr1AsNumber = sitofp i32 %arg.addr1 to double
+  store double %arg.addr1AsNumber, double* %return, align 8
   br label %returnBlock
 
 returnBlock:                                      ; preds = %entry
   %return2 = load double, double* %return, align 8
   ret double %return2
 }
-
-define linkonce_odr hidden i1 @\\"function_declaration/overloaded_function.ts$$8identityb\\"(i1 %arg) {
-entry:
-  %arg.addr = alloca i1, align 1
-  %return = alloca i1, align 1
-  store i1 %arg, i1* %arg.addr, align 1
-  %arg.addr1 = load i1, i1* %arg.addr, align 1
-  store i1 %arg.addr1, i1* %return, align 1
-  br label %returnBlock
-
-returnBlock:                                      ; preds = %entry
-  %return2 = load i1, i1* %return, align 1
-  ret i1 %return2
-}
-"
-`;
-
-exports[`FunctionDeclaration overloaded-with-operations-in-body-error 1`] = `
-"__tests__/code-generation/cases/function-declaration/overloaded-with-operations-in-body-error.ts(13,11): error TS100007: The binary operator PlusToken is not supported for the left and right hand side types 'number | int' and 'number | int'.
-"
-`;
-
-exports[`FunctionDeclaration return-with-implicit-value-coercion-error 1`] = `
-"__tests__/code-generation/cases/function-declaration/return-with-implicit-value-coercion-error.ts(2,20): error TS1000023: Unsupported implicit cast of return value with the type 'int' to function's return type 'number'. An explicit cast of the return value to the expected return type 'number' is required.
 "
 `;
 

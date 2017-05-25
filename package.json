@@ -7,6 +7,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --stream --loglevel verbose",
+    "coverage": "lerna run coverage --stream",
     "test": "lerna run test --stream ---max-buffer 10485760"
   },
   "dependencies": {},

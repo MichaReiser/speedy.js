@@ -1,28 +1,44 @@
+import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {Address} from "./address";
 
 import {ClassReference, Field} from "./class-reference";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
-import {Pointer} from "./pointer";
 import {SpeedyJSConstructorFunctionReference} from "./speedyjs-constructor-function-reference";
 import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
 
 export class SpeedyJSClassReference extends ClassReference {
 
     static create(type: ts.ObjectType, context: CodeGenerationContext) {
+        const baseTypes = type.getBaseTypes();
+
+        const declaration = type.getSymbol().valueDeclaration as ts.ClassDeclaration;
+        if (baseTypes && type.getBaseTypes().length > 0) {
+            throw CodeGenerationDiagnostic.unsupportedClassInheritance(declaration);
+        }
+
+        if (type.objectFlags & ts.ObjectFlags.Reference) {
+            const typeReference = type as ts.TypeReference;
+            if (typeReference.typeArguments && typeReference.typeArguments.length > 0) {
+                throw CodeGenerationDiagnostic.unsupportedGenericClass(declaration);
+            }
+        }
+
         const typeInformation = ClassReference.createTypeDescriptor(type.getSymbol(), context);
         return new SpeedyJSClassReference(typeInformation, type, context.compilationContext);
     }
 
-    constructor(typeInformation: llvm.GlobalVariable, private _type: ts.ObjectType, compilationContext: CompilationContext) {
-        super(typeInformation, _type.getSymbol(), compilationContext);
+    private constructor(typeInformation: llvm.GlobalVariable, private objectType: ts.ObjectType, compilationContext: CompilationContext) {
+        super(typeInformation, objectType.getSymbol(), compilationContext);
     }
 
-    public get type() {
-        return this._type;
+    get type() {
+        return this.objectType;
     }
 
     getFields(type: ts.ObjectType, context: CodeGenerationContext): Field[] {
@@ -42,7 +58,8 @@ export class SpeedyJSClassReference extends ClassReference {
         return SpeedyJSConstructorFunctionReference.create(signature, this, context);
     }
 
-    objectFor(pointer: Pointer, type: ts.ObjectType, context: CodeGenerationContext): ObjectReference {
-        return new SpeedyJSObjectReference(pointer, type, this);
+    objectFor(address: Address, type: ts.ObjectType, context: CodeGenerationContext): ObjectReference {
+        assert(type.flags & ts.TypeFlags.Object, "Requires an object type");
+        return new SpeedyJSObjectReference(address, type, this);
     }
 }

@@ -1,8 +1,8 @@
 import * as assert from "assert";
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {CodeGenerationContext} from "../code-generation-context";
+import * as ts from "typescript";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationContext} from "../code-generation-context";
 
 /**
  * Returns the llvm type for the given typescript type
@@ -31,6 +31,10 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         return llvm.Type.getVoidTy(context.llvmContext);
     }
 
+    if (type.flags & ts.TypeFlags.Undefined) {
+        return llvm.Type.getInt8PtrTy(context.llvmContext);
+    }
+
     if (type.flags & ts.TypeFlags.Object) {
         const classReference = context.resolveClass(type);
         if (classReference) {
@@ -38,11 +42,32 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         }
     }
 
+    if (isMaybeObjectType(type)) {
+        return toLLVMType(type.getNonNullableType(), context);
+    }
+
     if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
         throw CodeGenerationDiagnostic.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
     }
 
-    throw new Error(`Unsupported type with symbol ${context.typeChecker.typeToString(type)}`);
+    throw new Error(`Unsupported type ${context.typeChecker.typeToString(type)}`);
+}
+
+/**
+ * Tests if the given type is a maybe object type (objectType | undefined).
+ * @param type the type to test
+ * @return {boolean} true if the type contains either an object or undefined
+ */
+export function isMaybeObjectType(type: ts.Type): type is ts.UnionType {
+    if (type.flags & ts.TypeFlags.Union) {
+        const unionType = type as ts.UnionType;
+
+        return unionType.types.length === 2 &&
+            unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined)) &&
+            unionType.types.some(t => !!(t.flags & ts.TypeFlags.Object));
+    }
+
+    return false;
 }
 
 export function getArrayElementType(arrayType: ts.Type): ts.Type {
@@ -72,6 +97,7 @@ export function sizeof(type: llvm.Type, context: CodeGenerationContext) {
  * @return {Value} the offset as llvm.value
  */
 export function offset(type: llvm.PointerType, field: number, context: CodeGenerationContext) {
-    const offset = context.builder.createInBoundsGEP(llvm.ConstantPointerNull.get(type), [ llvm.ConstantInt.get(context.llvmContext, 0), llvm.ConstantInt.get(context.llvmContext, field)]);
+    const fieldIndex = [ llvm.ConstantInt.get(context.llvmContext, 0), llvm.ConstantInt.get(context.llvmContext, field)];
+    const offset = context.builder.createInBoundsGEP(llvm.ConstantPointerNull.get(type), fieldIndex);
     return context.builder.createPtrToInt(offset, llvm.Type.getInt32Ty(context.llvmContext), "offset");
 }

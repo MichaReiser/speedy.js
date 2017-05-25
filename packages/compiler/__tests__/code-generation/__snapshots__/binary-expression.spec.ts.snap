@@ -165,8 +165,27 @@ attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
-exports[`BinaryExpression asterisk-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/asterisk-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 3, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression asterisk-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/asterisk-implicit-cast.ts'
+source_filename = \\"binary-expression/asterisk-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_asteriskImplicitCast() {
+entry:
+  %result = alloca double, align 8
+  store double 1.200000e+01, double* %result, align 8
+  ret void
+}
 "
 `;
 
@@ -336,6 +355,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
+%class.EqualsTest = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -343,6 +363,8 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
 @Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
+@EqualsTest_name = private unnamed_addr constant [11 x i8] c\\"EqualsTest\\\\00\\"
+@EqualsTest_type_descriptor = private constant { [11 x i8]* } { [11 x i8]* @EqualsTest_name }
 
 define void @_equalsEqualsEqualsToken() {
 entry:
@@ -358,13 +380,72 @@ entry:
   %cmpEQ3 = fcmp oeq double %threePointFour2, 3.400000e+00
   %trueValue4 = load i1, i1* %trueValue, align 1
   %cmpEQ5 = icmp eq i1 %trueValue4, true
+  %constructorReturnValue = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$$EqualsTest$11constructor\\"()
+  %constructorReturnValue6 = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$$EqualsTest$11constructor\\"()
+  %cmpEQ7 = icmp eq %class.EqualsTest* %constructorReturnValue, %constructorReturnValue6
   ret void
 }
+
+define linkonce_odr %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$$EqualsTest$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.EqualsTest*
+  ret %class.EqualsTest* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;
 
-exports[`BinaryExpression equals-equals-equals-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/equals-equals-equals-implicit-cast-error.ts(4,18): error TS1000019: Unsupported implicit cast of binary expressions operands (left: int, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression equals-equals-equals-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/equals-equals-equals-implicit-cast.ts'
+source_filename = \\"binary-expression/equals-equals-equals-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.TestEquals = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@TestEquals_name = private unnamed_addr constant [11 x i8] c\\"TestEquals\\\\00\\"
+@TestEquals_type_descriptor = private constant { [11 x i8]* } { [11 x i8]* @TestEquals_name }
+
+define void @_equalsEqualsEqualsTokenImplicitCast() {
+entry:
+  %four = alloca i32, align 4
+  store i32 4, i32* %four, align 4
+  %four1 = load i32, i32* %four, align 4
+  %four1AsNumber = sitofp i32 %four1 to double
+  %cmpEQ = fcmp oeq double %four1AsNumber, 4.000000e+00
+  %constructorReturnValue = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$$TestEquals$11constructor\\"()
+  %cmpEQ2 = icmp eq %class.TestEquals* %constructorReturnValue, null
+  %constructorReturnValue3 = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$$TestEquals$11constructor\\"()
+  %cmpEQ4 = icmp eq %class.TestEquals* null, %constructorReturnValue3
+  ret void
+}
+
+define linkonce_odr %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$$TestEquals$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.TestEquals*
+  ret %class.TestEquals* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`BinaryExpression equals-equals-equals-no-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/equals-equals-equals-no-implicit-cast-error.ts(5,20): error TS1000019: No implicit cast for the binary expressions operands (left: TestEqualsTypeOne, right: TestEqualsTypeTwo) exists. An explicit cast of either of the operands to the other's type is required.
 "
 `;
 
@@ -375,6 +456,7 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
+%class.NotEqualsTest = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -382,6 +464,8 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
 @Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
+@NotEqualsTest_name = private unnamed_addr constant [14 x i8] c\\"NotEqualsTest\\\\00\\"
+@NotEqualsTest_type_descriptor = private constant { [14 x i8]* } { [14 x i8]* @NotEqualsTest_name }
 
 define void @_exclamationEqualsEqualsToken() {
 entry:
@@ -397,13 +481,72 @@ entry:
   %cmpNE3 = fcmp one double %threePointFour2, 3.400000e+00
   %trueValue4 = load i1, i1* %trueValue, align 1
   %cmpNE5 = icmp ne i1 %trueValue4, true
+  %constructorReturnValue = call dereferenceable(1) %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$$NotEqualsTest$11constructor\\"()
+  %constructorReturnValue6 = call dereferenceable(1) %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$$NotEqualsTest$11constructor\\"()
+  %cmpNE7 = icmp ne %class.NotEqualsTest* %constructorReturnValue, %constructorReturnValue6
   ret void
 }
+
+define linkonce_odr %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$$NotEqualsTest$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.NotEqualsTest*
+  ret %class.NotEqualsTest* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
 "
 `;
 
-exports[`BinaryExpression exclamation-equals-equals-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/exclamation-equals-equals-implicit-cast-error.ts(4,18): error TS1000019: Unsupported implicit cast of binary expressions operands (left: int, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression exclamation-equals-equals-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/exclamation-equals-equals-implicit-cast.ts'
+source_filename = \\"binary-expression/exclamation-equals-equals-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.NotEqualsImplicitCast = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@NotEqualsImplicitCast_name = private unnamed_addr constant [22 x i8] c\\"NotEqualsImplicitCast\\\\00\\"
+@NotEqualsImplicitCast_type_descriptor = private constant { [22 x i8]* } { [22 x i8]* @NotEqualsImplicitCast_name }
+
+define void @_exclamationEqualsEqualsTokenImplicitCast() {
+entry:
+  %four = alloca i32, align 4
+  store i32 4, i32* %four, align 4
+  %four1 = load i32, i32* %four, align 4
+  %four1AsNumber = sitofp i32 %four1 to double
+  %cmpNE = fcmp one double %four1AsNumber, 4.000000e+00
+  %constructorReturnValue = call dereferenceable(1) %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$$NotEqualsImplicitCast$11constructor\\"()
+  %cmpNE2 = icmp ne %class.NotEqualsImplicitCast* %constructorReturnValue, null
+  %constructorReturnValue3 = call dereferenceable(1) %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$$NotEqualsImplicitCast$11constructor\\"()
+  %cmpNE4 = icmp ne %class.NotEqualsImplicitCast* null, %constructorReturnValue3
+  ret void
+}
+
+define linkonce_odr %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$$NotEqualsImplicitCast$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.NotEqualsImplicitCast*
+  ret %class.NotEqualsImplicitCast* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`BinaryExpression exclamation-equals-equals-no-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/exclamation-equals-equals-no-implicit-cast-error.ts(5,20): error TS1000019: No implicit cast for the binary expressions operands (left: TestNotEqualsTypeOne, right: TestNotEqualsTypeTwo) exists. An explicit cast of either of the operands to the other's type is required.
 "
 `;
 
@@ -427,6 +570,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_firstAssignment() {
 entry:
+  %objectOrUndefined = alloca %class.MyClass*, align 4
   %objectVar = alloca %class.MyClass*, align 4
   %numberVar = alloca double, align 8
   %intVar = alloca i32, align 4
@@ -436,6 +580,9 @@ entry:
   store double 2.323000e+01, double* %numberVar, align 8
   %constructorReturnValue = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"()
   store %class.MyClass* %constructorReturnValue, %class.MyClass** %objectVar, align 4
+  %constructorReturnValue1 = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"()
+  store %class.MyClass* %constructorReturnValue1, %class.MyClass** %objectOrUndefined, align 4
+  store %class.MyClass* null, %class.MyClass** %objectOrUndefined, align 4
   ret void
 }
 
@@ -522,14 +669,65 @@ entry:
 "
 `;
 
-exports[`BinaryExpression greater-than-equals-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/greater-than-equals-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression greater-than-equals-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/greater-than-equals-implicit-cast.ts'
+source_filename = \\"binary-expression/greater-than-equals-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_greaterThanEqualsImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
-exports[`BinaryExpression greater-than-greater-than-greater-than 1`] = `
-"; ModuleID = 'binary-expression/greater-than-greater-than-greater-than.ts'
-source_filename = \\"binary-expression/greater-than-greater-than-greater-than.ts\\"
+exports[`BinaryExpression greater-than-greater-than 1`] = `
+"; ModuleID = 'binary-expression/greater-than-greater-than.ts'
+source_filename = \\"binary-expression/greater-than-greater-than.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_greaterThanGreaterThan() {
+entry:
+  %intValue = alloca i32, align 4
+  %AsInt32 = call i32 @toInt32d(double 6.500000e+00)
+  %AsInt321 = call i32 @toInt32d(double 4.200000e+00)
+  %ashr = ashr i32 %AsInt32, %AsInt321
+  store i32 3, i32* %intValue, align 4
+  %intValue2 = load i32, i32* %intValue, align 4
+  %ashr3 = ashr i32 %intValue2, 2
+  ret void
+}
+
+; Function Attrs: alwaysinline readnone
+declare i32 @toInt32d(double) #0
+
+attributes #0 = { alwaysinline readnone }
+"
+`;
+
+exports[`BinaryExpression greater-than-greater-than-greater 1`] = `
+"; ModuleID = 'binary-expression/greater-than-greater-than-greater.ts'
+source_filename = \\"binary-expression/greater-than-greater-than-greater.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
@@ -544,13 +742,11 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 define void @_greaterThanGreaterThanGreaterThan() {
 entry:
-  %numberValue = alloca double, align 8
   %intValue = alloca i32, align 4
   %AsInt32 = call i32 @toInt32d(double 6.500000e+00)
   %AsInt321 = call i32 @toInt32d(double 4.200000e+00)
   %lshr = lshr i32 %AsInt32, %AsInt321
   store i32 3, i32* %intValue, align 4
-  store double 3.400000e+00, double* %numberValue, align 8
   %intValue2 = load i32, i32* %intValue, align 4
   %lshr3 = lshr i32 %intValue2, 2
   ret void
@@ -563,8 +759,25 @@ attributes #0 = { alwaysinline readnone }
 "
 `;
 
-exports[`BinaryExpression greater-than-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/greater-than-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression greater-than-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/greater-than-implicit-cast.ts'
+source_filename = \\"binary-expression/greater-than-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_greaterThanImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
@@ -638,13 +851,47 @@ entry:
 "
 `;
 
-exports[`BinaryExpression less-than-equals-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/less-than-equals-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2.0, right: 4). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression less-than-equals-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/less-than-equals-implicit-cast.ts'
+source_filename = \\"binary-expression/less-than-equals-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_lessThanEqualsImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
-exports[`BinaryExpression less-than-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/less-than-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression less-than-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/less-than-implicit-cast.ts'
+source_filename = \\"binary-expression/less-than-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_lessThanImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
@@ -720,8 +967,25 @@ entry:
 "
 `;
 
-exports[`BinaryExpression minus-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/minus-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 2, right: 4.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression minus-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/minus-implicit-cast.ts'
+source_filename = \\"binary-expression/minus-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_minusImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
@@ -755,8 +1019,25 @@ entry:
 "
 `;
 
-exports[`BinaryExpression percent-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/percent-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 8, right: 2.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression percent-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/percent-implicit-cast.ts'
+source_filename = \\"binary-expression/percent-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_percentImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
@@ -796,8 +1077,25 @@ entry:
 "
 `;
 
-exports[`BinaryExpression plus-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/plus-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 12, right: 3.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression plus-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/plus-implicit-cast.ts'
+source_filename = \\"binary-expression/plus-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_plusImplicitCast() {
+entry:
+  ret void
+}
 "
 `;
 
@@ -833,7 +1131,24 @@ entry:
 "
 `;
 
-exports[`BinaryExpression slash-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/slash-implicit-cast-error.ts(2,20): error TS1000019: Unsupported implicit cast of binary expressions operands (left: 4, right: 12.0). An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression slash-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/slash-implicit-cast.ts'
+source_filename = \\"binary-expression/slash-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define void @_slashImplicitCast() {
+entry:
+  ret void
+}
 "
 `;

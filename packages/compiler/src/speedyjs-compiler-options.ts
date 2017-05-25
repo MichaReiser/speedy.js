@@ -1,6 +1,6 @@
 import {CompilerOptions} from "typescript";
-import {WasmFileWriter} from "./wasm-file-writer";
 import {DefaultWasmFileWriter} from "./default-wasm-file-writer";
+import {WasmFileWriter} from "./wasm-file-writer";
 
 export type OptimizationLevel = "0" | "1" | "2" | "3" | "z" | "s";
 

@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "./code-generation-context";
+import {isMaybeObjectType} from "./util/types";
 import {AddressLValue} from "./value/address-lvalue";
 import {ClassReference} from "./value/class-reference";
 import {Primitive} from "./value/primitive";
@@ -24,7 +25,7 @@ export class CodeGenerationContextMixin {
 
     generateChildren(this: CodeGenerationContext, node: ts.Node): void {
         ts.forEachChild(node, child => {
-            this.generate(child)
+            this.generate(child);
         });
     }
 
@@ -57,6 +58,10 @@ export class CodeGenerationContextMixin {
                 // well the object reference ptr
                 throw new Error("Returning methods is not yet supported");
             }
+        }
+
+        if (isMaybeObjectType(type)) {
+            type = type.getNonNullableType();
         }
 
         if (type.flags & ts.TypeFlags.Object) {
@@ -97,7 +102,8 @@ function isClassDefined(type: ts.ObjectType) {
         }
 
         const declaration = declarations[0];
-        return declaration.kind === ts.SyntaxKind.MethodDeclaration || (declaration.kind === ts.SyntaxKind.Constructor && !!(declaration as ts.ConstructorDeclaration).body);
+        return declaration.kind === ts.SyntaxKind.MethodDeclaration ||
+            (declaration.kind === ts.SyntaxKind.Constructor && !!(declaration as ts.ConstructorDeclaration).body);
     });
 }
 

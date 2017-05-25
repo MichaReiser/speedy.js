@@ -4,14 +4,16 @@ import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {Allocation} from "../value/allocation";
+import {ArrayClassReference} from "../value/array-class-reference";
+import {ObjectReference} from "../value/object-reference";
 import {ResolvedFunction} from "../value/resolved-function";
 import {Value} from "../value/value";
-import {ObjectReference} from "../value/object-reference";
-import {ArrayClassReference} from "../value/array-class-reference";
 
 export class FunctionDefinitionBuilder {
+    // tslint:disable-next-line:variable-name
     private _returnValue: Value | undefined = undefined;
-    private _this: ObjectReference | undefined;
+    // tslint:disable-next-line:variable-name
+    private _self: ObjectReference | undefined;
 
     private constructor(private fn: llvm.Function, private resolvedFunction: ResolvedFunction, private context: CodeGenerationContext) {
     }
@@ -45,7 +47,7 @@ export class FunctionDefinitionBuilder {
      * @return {FunctionDefinitionBuilder}
      */
     self(thisObject?: ObjectReference) {
-        this._this = thisObject;
+        this._self = thisObject;
         return this;
     }
 
@@ -55,7 +57,7 @@ export class FunctionDefinitionBuilder {
     define(): void {
         this.context.enterChildScope(this.fn);
 
-        let entryBlock = this.fn.getEntryBlock() || llvm.BasicBlock.create(this.context.llvmContext, "entry", this.fn);
+        const entryBlock = this.fn.getEntryBlock() || llvm.BasicBlock.create(this.context.llvmContext, "entry", this.fn);
         const returnBlock = llvm.BasicBlock.create(this.context.llvmContext, "returnBlock");
         this.context.builder.setInsertionPoint(entryBlock);
         this.context.scope.returnBlock = returnBlock;
@@ -125,7 +127,8 @@ export class FunctionDefinitionBuilder {
             args[i].name = parameter.name;
 
             if (parameter.variadic) {
-                allocation.generateAssignmentIR(ArrayClassReference.fromCArray(parameter.type as ts.ObjectType, args[i], args[++i], this.context), this.context);
+                const arrayOfVarArgs = ArrayClassReference.fromCArray(parameter.type as ts.ObjectType, args[i], args[++i], this.context);
+                allocation.generateAssignmentIR(arrayOfVarArgs, this.context);
             } else {
                 allocation.generateAssignmentIR(args[i], this.context);
             }
@@ -133,9 +136,11 @@ export class FunctionDefinitionBuilder {
             this.context.scope.addVariable(declaredParameterSymbol, allocation);
 
             // a field in a constructor that is marked with private, protected or public. Set the argument value on the field.
-            if (this._this && declaredParameterSymbol.flags & ts.SymbolFlags.Property) {
-                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._this.clazz.getFieldOffset(declaredParameterSymbol));
-                const fieldAddress = this.context.builder.createInBoundsGEP(this._this.generateIR(this.context), [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset ], `&${declaredParameterSymbol.name}`);
+            if (this._self && declaredParameterSymbol.flags & ts.SymbolFlags.Property) {
+                const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this._self.clazz.getFieldOffset(declaredParameterSymbol));
+                const fieldIndex = [ llvm.ConstantInt.get(this.context.llvmContext, 0), fieldOffset ];
+                const thiz = this._self.generateIR(this.context);
+                const fieldAddress = this.context.builder.createInBoundsGEP(thiz, fieldIndex, `&${declaredParameterSymbol.name}`);
                 this.context.builder.createAlignedStore(args[i], fieldAddress, Allocation.getPreferredValueAlignment(parameter.type, this.context));
             }
         }

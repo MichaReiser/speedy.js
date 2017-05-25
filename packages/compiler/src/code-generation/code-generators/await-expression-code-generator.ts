@@ -1,7 +1,7 @@
 import * as ts from "typescript";
+import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Value} from "../value/value";
-import {CodeGenerationContext} from "../code-generation-context";
 
 /**
  * Generator for await xy expressions.

@@ -1,8 +1,8 @@
 import * as ts from "typescript";
+import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
-import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
 
 /**
  * Code Generator implementation that logs a message to the console.

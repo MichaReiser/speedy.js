@@ -3,12 +3,12 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {toLLVMType} from "../util/types";
 import {Address} from "./address";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 
 import {Value} from "./value";
-import {toLLVMType} from "../util/types";
 
 export interface Field {
     name: string;
@@ -46,7 +46,14 @@ export abstract class ClassReference implements Value {
         }
 
         const nameConstant = llvm.ConstantDataArray.getString(context.llvmContext, symbol.name);
-        const nameVariable = new llvm.GlobalVariable(context.module, nameConstant.type, true, llvm.LinkageTypes.PrivateLinkage, nameConstant, `${symbol.name}_name`);
+        const nameVariable = new llvm.GlobalVariable(context.module,
+            nameConstant.type,
+            true,
+            llvm.LinkageTypes.PrivateLinkage,
+            nameConstant,
+            `${symbol.name}_name`
+        );
+
         nameVariable.setUnnamedAddr(llvm.UnnamedAddr.Global);
 
         const structType = llvm.StructType.get(context.llvmContext, [ nameConstant.type.getPointerTo() ], false);
@@ -77,6 +84,11 @@ export abstract class ClassReference implements Value {
 
     dereference() {
         return this;
+    }
+
+    castImplicit(type: ts.Type, context: CodeGenerationContext) {
+        // Can probably never be casted?
+        return undefined;
     }
 
     getTypeStoreSize(objectType: ts.ObjectType, context: CodeGenerationContext): number {
@@ -129,6 +141,9 @@ export abstract class ClassReference implements Value {
      */
     protected getObjectType(type: ts.ObjectType, context: CodeGenerationContext) {
         if (!this.llvmType) {
+            const forwardDeclaration = llvm.StructType.create(this.compilationContext.llvmContext, `class.${this.symbol.name}`);
+            this.llvmType = forwardDeclaration;
+
             const fieldTypes = this.getFields(type, context).map(field => toLLVMType(field.type, context));
 
             if (fieldTypes.length === 0) {
@@ -138,9 +153,7 @@ export abstract class ClassReference implements Value {
                 fieldTypes.push(llvm.Type.getInt1Ty(context.llvmContext));
             }
 
-            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, fieldTypes,
-                `class.${this.symbol.name}`
-            );
+            forwardDeclaration.setBody(fieldTypes);
         }
         return this.llvmType;
     }

@@ -26,7 +26,10 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
      * @param properties properties for the declared function
      * @return {UnresolvedFunctionReference} the function reference
      */
-    static createRuntimeFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType, properties?: Partial<FunctionProperties>) {
+    static createRuntimeFunction(signatures: ts.Signature[],
+                                 context: CodeGenerationContext,
+                                 classType?: ts.ObjectType,
+                                 properties?: Partial<FunctionProperties>) {
         properties = Object.assign({ linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true }, properties);
         const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
         return new UnresolvedFunctionReference(signatures, functionFactory, classType, properties);
@@ -43,10 +46,13 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
         return new UnresolvedFunctionReference(signatures, new SpeedyJSFunctionFactory(context.compilationContext), classType);
     }
 
-    protected constructor(private signatures: ts.Signature[], protected llvmFunctionFactory: FunctionFactory, classType?: ts.ObjectType, properties?: Partial<FunctionProperties>) {
+    protected constructor(private signatures: ts.Signature[],
+                          protected llvmFunctionFactory: FunctionFactory,
+                          classType?: ts.ObjectType,
+                          properties?: Partial<FunctionProperties>) {
         super(classType);
         assert(signatures.length, "Cannot reference a function without a signature");
-        this.properties = properties || { linkage: llvm.LinkageTypes.LinkOnceODRLinkage }
+        this.properties = properties || { linkage: llvm.LinkageTypes.LinkOnceODRLinkage };
     }
 
     protected getResolvedFunction(context: CodeGenerationContext) {

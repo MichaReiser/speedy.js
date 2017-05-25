@@ -1,5 +1,5 @@
-import * as ts from "typescript";
 import * as path from "path";
+import * as ts from "typescript";
 
 export const MODULE_LOADER_FACTORY_NAME = "__moduleLoader";
 

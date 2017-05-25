@@ -1,6 +1,6 @@
+import * as assert from "assert";
 import * as ts from "typescript";
 import * as util from "util";
-import * as assert from "assert";
 
 /**
  * Error thrown if the code generation fails. Stores the node to show the node that  caused the error
@@ -25,11 +25,11 @@ export class CodeGenerationDiagnostic extends Error {
             length: this.node.getFullWidth(),
             category: ts.DiagnosticCategory.Error,
             file: this.node.getSourceFile()
-        }
+        };
     }
 
     static builtInMethodNotSupported(propertyAccessExpression: ts.PropertyAccessExpression, objectName: string, methodName: string) {
-        return CodeGenerationDiagnostic.createException(propertyAccessExpression, diagnostics.BuiltInMethodNotSupported, methodName, objectName)
+        return CodeGenerationDiagnostic.createException(propertyAccessExpression, diagnostics.BuiltInMethodNotSupported, methodName, objectName);
     }
 
     static builtInPropertyNotSupported(property: ts.PropertyAccessExpression, objectName: string) {
@@ -40,7 +40,7 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(element, diagnostics.BuiltInObjectDoesNotSupportElementAccess, objectName);
     }
 
-    private static createException(node: ts.Node, diagnostic: { message: string, code: number }, ...args: (string | number)[]) {
+    private static createException(node: ts.Node, diagnostic: { message: string, code: number }, ...args: Array<string | number>) {
         const message = util.format(diagnostic.message, ...args);
         return new CodeGenerationDiagnostic(node, diagnostic.code, message);
     }
@@ -58,14 +58,20 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedBinaryOperation(binaryExpression: ts.BinaryExpression, leftType: string, rightType: string) {
-        return CodeGenerationDiagnostic.createException(binaryExpression, diagnostics.UnsupportedBinaryOperation, ts.SyntaxKind[binaryExpression.operatorToken.kind], leftType, rightType);
+        return CodeGenerationDiagnostic.createException(
+            binaryExpression,
+            diagnostics.UnsupportedBinaryOperation,
+            ts.SyntaxKind[binaryExpression.operatorToken.kind],
+            leftType,
+            rightType
+        );
     }
 
     static unsupportedUnaryOperation(node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, type: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operand.kind], type);
+        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operator], type);
     }
 
-    static anonymousEntryFunctionsNotSupported(fun: ts.FunctionDeclaration) {
+    static anonymousEntryFunctionsNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.AnonymousEntryFunctionsUnsupported);
     }
 
@@ -73,7 +79,7 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(optionalParameter, diagnostics.OptionalParametersNotSupportedForEntryFunction);
     }
 
-    static genericEntryFunctionNotSupported(fun: ts.FunctionDeclaration) {
+    static genericEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.GenericEntryFunctionNotSuppoorted);
     }
 
@@ -85,7 +91,7 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(identifier, diagnostics.ReferenceToNonEntrySpeedyJSFunctionFromJS, speedyJSFunctionSymbol.name);
     }
 
-    static overloadedEntryFunctionNotSupported(fun: ts.FunctionDeclaration) {
+    static overloadedEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
     }
 
@@ -106,27 +112,59 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static implicitArrayElementCast(element: ts.Expression, arrayElementType: string, typeOfElementRequiringImplicitCast: string) {
-        return CodeGenerationDiagnostic.createException(element, diagnostics.UnsupportedImplicitArrayElementCast, typeOfElementRequiringImplicitCast, arrayElementType);
+        return CodeGenerationDiagnostic.createException(
+            element,
+            diagnostics.UnsupportedImplicitArrayElementCast,
+            typeOfElementRequiringImplicitCast,
+            arrayElementType
+        );
     }
 
     static unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression: ts.BinaryExpression, leftOperandType: string, rightOperandType: string) {
-        return CodeGenerationDiagnostic.createException(binaryExpression, diagnostics.UnsupportedImplicitCastOfBinaryExpressionOperands, leftOperandType, rightOperandType);
+        return CodeGenerationDiagnostic.createException(
+            binaryExpression,
+            diagnostics.UnsupportedImplicitCastOfBinaryExpressionOperands,
+            leftOperandType,
+            rightOperandType
+        );
     }
 
     static unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType: ts.Expression, parameterType: string, argumentType: string) {
-        return CodeGenerationDiagnostic.createException(elementNotMatchingArrayElementType, diagnostics.UnsupportedImplicitCastOfArgument, argumentType, parameterType, parameterType);
+        return CodeGenerationDiagnostic.createException(
+            elementNotMatchingArrayElementType,
+            diagnostics.UnsupportedImplicitCastOfArgument,
+            argumentType,
+            parameterType,
+            parameterType
+        );
     }
 
     static unsupportedImplicitCastOfConditionalResult(conditionalResult: ts.Expression, typeOfConditional: string, typeOfConditionResult: string) {
-        return CodeGenerationDiagnostic.createException(conditionalResult, diagnostics.UnsupportedImplicitCastOfConditionalResult, typeOfConditionResult, typeOfConditional, typeOfConditional);
+        return CodeGenerationDiagnostic.createException(
+            conditionalResult,
+            diagnostics.UnsupportedImplicitCastOfConditionalResult,
+            typeOfConditionResult,
+            typeOfConditional,
+            typeOfConditional
+        );
     }
 
     static unsupportedElementAccessExpression(elementAccessExpression: ts.ElementAccessExpression, argumentExpressionType?: string) {
-        return CodeGenerationDiagnostic.createException(elementAccessExpression, diagnostics.UnsupportedElementAccessExpression, argumentExpressionType || "undefined");
+        return CodeGenerationDiagnostic.createException(
+            elementAccessExpression,
+            diagnostics.UnsupportedElementAccessExpression,
+            argumentExpressionType || "undefined"
+        );
     }
 
     static unsupportedImplicitCastOfReturnValue(returnStatement: ts.ReturnStatement, declaredReturnType: string, returnStatementExpressionType: string) {
-        return CodeGenerationDiagnostic.createException(returnStatement, diagnostics.UnsupportedImplicitCastOfReturnValue, returnStatementExpressionType, declaredReturnType, declaredReturnType);
+        return CodeGenerationDiagnostic.createException(
+            returnStatement,
+            diagnostics.UnsupportedImplicitCastOfReturnValue,
+            returnStatementExpressionType,
+            declaredReturnType,
+            declaredReturnType
+        );
     }
 
     static unsupportedImplicitCast(node: ts.Node, castTargetType: string, actualValueType: string) {
@@ -152,18 +190,31 @@ export class CodeGenerationDiagnostic extends Error {
     static variableDeclarationList(variableDeclarationList: ts.VariableDeclarationList) {
         return CodeGenerationDiagnostic.createException(variableDeclarationList, diagnostics.UnsupportedVarDeclaration);
     }
+
+    static unsupportedOverloadedFunctionDeclaration(declaration: ts.FunctionLikeDeclaration) {
+        return CodeGenerationDiagnostic.createException(declaration, diagnostics.UnsupportedOverloadedFunctionDeclaration);
+    }
+
+    static unsupportedGenericClass(classDeclaration: ts.ClassDeclaration) {
+        return CodeGenerationDiagnostic.createException(classDeclaration, diagnostics.UnsupportedGenericClass);
+    }
+
+    static unsupportedClassInheritance(classDeclaration: ts.ClassDeclaration) {
+        return CodeGenerationDiagnostic.createException(classDeclaration, diagnostics.UnsupportedClassInheritance);
+    }
 }
 
+/* tslint:disable:max-line-length */
 const diagnostics = {
-    "BuiltInMethodNotSupported": {
+    BuiltInMethodNotSupported: {
         message: "The method '%s' of the built in object '%s' is not supported.",
         code: 100000
     },
-    "BuiltInPropertyNotSupported": {
+    BuiltInPropertyNotSupported: {
         message: "The property '%s' of the built in object '%s' is not supported.",
         code: 100001
     },
-    "BuiltInObjectDoesNotSupportElementAccess": {
+    BuiltInObjectDoesNotSupportElementAccess: {
         message: "The built in object '%s' does not support element access (%s[index] or $s[index]=value).",
         code: 100002
     },
@@ -171,19 +222,19 @@ const diagnostics = {
         message: "The class referenced by this identifier is not supported.",
         code: 100003,
     },
-    "UnsupportedLiteralType": {
+    UnsupportedLiteralType: {
         message: "The literal type '%s' is not supported.",
         code: 100004
     },
-    "UnsupportedType": {
+    UnsupportedType: {
         message: "The type '%s' is not supported.",
         code: 100005
     },
-    "UnsupportedIdentifier": {
+    UnsupportedIdentifier: {
         message: "Unsupported type or kind of identifier '%s'.",
         code: 100006
     },
-    "UnsupportedBinaryOperation": {
+    UnsupportedBinaryOperation: {
         message: "The binary operator %s is not supported for the left and right hand side types '%s' and '%s'.",
         code: 100007
     },
@@ -232,7 +283,7 @@ const diagnostics = {
         code: 1000018
     },
     UnsupportedImplicitCastOfBinaryExpressionOperands: {
-        message: "Unsupported implicit cast of binary expressions operands (left: %s, right: %s). An explicit cast of either of the operands to the other's type is required.",
+        message: "No implicit cast for the binary expressions operands (left: %s, right: %s) exists. An explicit cast of either of the operands to the other's type is required.",
         code: 1000019
     },
     UnsupportedImplicitCastOfArgument: {
@@ -274,5 +325,17 @@ const diagnostics = {
     UnsupportedVarDeclaration: {
         message: "Unsupported 'var' declaration of variable. Only variables with block scope ('let' and 'const') are supported.",
         code: 1000029
+    },
+    UnsupportedOverloadedFunctionDeclaration: {
+        message: "Overloaded functions are not yet supported.",
+        code: 1000030
+    },
+    UnsupportedGenericClass: {
+        message: "Generic classes are not yet supported.",
+        code: 1000031
+    },
+    UnsupportedClassInheritance: {
+        message: "Class inheritance is not yet supported.",
+        code: 1000032
     }
 };

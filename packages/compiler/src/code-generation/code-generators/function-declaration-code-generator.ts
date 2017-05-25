@@ -17,7 +17,6 @@ class FunctionDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Functio
         const apparentType = context.typeChecker.getApparentType(type);
         const callSignatures = context.typeChecker.getSignaturesOfType(apparentType, ts.SignatureKind.Call);
 
-
         const functionReference = UnresolvedFunctionReference.createFunction(callSignatures, context);
         context.scope.addFunction(symbol, functionReference);
     }

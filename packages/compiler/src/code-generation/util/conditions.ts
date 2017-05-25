@@ -7,10 +7,10 @@ import {Primitive} from "../value/primitive";
  * Generates a condition statement that takes the whenTrue branch if the condition evaluates to a truthy value and to the whenFalse branch otherwise.
  * The implementation optimizes conditions. E.g. && and || are optimized to not store the value and instead just evaluate
  * if the expression is truthy (the value is not needed)
- * @param condition
- * @param whenTrue
- * @param whenFalse
- * @param context
+ * @param condition the condition
+ * @param whenTrue the block to take if the condition is true
+ * @param whenFalse the block to take if the condition is false
+ * @param context the context
  */
 export function generateCondition(condition: ts.Node, whenTrue: llvm.BasicBlock, whenFalse: llvm.BasicBlock, context: CodeGenerationContext): void {
     if (condition.kind === ts.SyntaxKind.ParenthesizedExpression) {
@@ -22,7 +22,7 @@ export function generateCondition(condition: ts.Node, whenTrue: llvm.BasicBlock,
 
         // x && y
         if (binaryExpression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
-            let rhsBlock = llvm.BasicBlock.create(context.llvmContext, "land.lhs.true");
+            const rhsBlock = llvm.BasicBlock.create(context.llvmContext, "land.lhs.true");
             generateCondition(binaryExpression.left, rhsBlock, whenFalse, context);
 
             context.scope.enclosingFunction.addBasicBlock(rhsBlock);
@@ -31,7 +31,7 @@ export function generateCondition(condition: ts.Node, whenTrue: llvm.BasicBlock,
             return;
 
         } else if (binaryExpression.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
-            let rhsBlock = llvm.BasicBlock.create(context.llvmContext, "lor.lhs.false");
+            const rhsBlock = llvm.BasicBlock.create(context.llvmContext, "lor.lhs.false");
             generateCondition(binaryExpression.left, whenTrue, rhsBlock, context);
 
             context.scope.enclosingFunction.addBasicBlock(rhsBlock);

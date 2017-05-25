@@ -1,6 +1,6 @@
 import * as llvm from "llvm-node";
-import {CodeGenerationContext} from "./code-generation-context";
 import {CompilationContext} from "../compilation-context";
+import {CodeGenerationContext} from "./code-generation-context";
 
 /**
  * Factory that creates the code generation context

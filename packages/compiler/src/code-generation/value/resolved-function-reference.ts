@@ -1,10 +1,12 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {AbstractFunctionReference} from "./abstract-function-reference";
-import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
-import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
+import {AbstractFunctionReference} from "./abstract-function-reference";
+import {FunctionFactory, FunctionProperties} from "./function-factory";
+import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
+
+const DEFAULT_RUNTIME_FUNCTION_PROPERTIES = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true } as Partial<FunctionProperties>;
 
 /**
  * Reference to a specific overload of a function.
@@ -19,7 +21,7 @@ export class ResolvedFunctionReference extends AbstractFunctionReference {
      * @return {ResolvedFunctionReference} the reference to the specified runtime function overload
      */
     static createRuntimeFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, functionProperties?: Partial<FunctionProperties>) {
-        functionProperties = Object.assign({}, { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true } as Partial<FunctionProperties>, functionProperties);
+        functionProperties = Object.assign({}, DEFAULT_RUNTIME_FUNCTION_PROPERTIES, functionProperties);
         const llvmFunctionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
         const fn = llvmFunctionFactory.getOrCreate(resolvedFunction, resolvedFunction.parameters.length, context, functionProperties);
         return new ResolvedFunctionReference(fn, resolvedFunction);

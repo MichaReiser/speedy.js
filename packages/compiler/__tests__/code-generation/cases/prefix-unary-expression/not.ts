@@ -8,4 +8,5 @@ async function not() {
     !boolValue;
     !intValue;
     !doubleValue;
+    !undefined;
 }

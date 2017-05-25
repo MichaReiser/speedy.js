@@ -8,15 +8,21 @@ declare function fetch(url: string): Promise<any>;
 declare var window: any;
 
 interface Type {
-    primitive: boolean,
-    fields: { name: string, type: string }[],
+    primitive: boolean;
+    fields: Array<{ name: string, type: string }>;
     constructor?: Function;
     typeArguments: string[];
 }
 
-
 interface Types {
-    [name: string]: Type
+    [name: string]: Type;
+}
+
+interface Options {
+    totalStack: int;
+    initialMemory: int;
+    globalBase: int;
+    staticBump: int;
 }
 
 interface ModuleLoader {
@@ -33,13 +39,13 @@ interface ModuleLoader {
      * Converts the js object (array or object) to a WASM pointer
      * @param jsObject the js object
      * @param type the type of the object
-     * @param objectReferences Map from the JS object to the WASM pointer for this object. Used to ensure reference equality across the
-     * boundary
+     * @param objectReferences Map from the JS object to the WASM pointer for this object. Used to ensure reference
+     * equality across the boundary
      */
-    toWASM(jsObject: Object, type: string, objectReferences: Map<object, int>): int | undefined;
+    toWASM(jsObject: object, type: string, objectReferences: Map<object, int>): int | undefined;
 }
 
-function __moduleLoader(this: any, wasmUri: string, types: Types, options: { totalStack: int, initialMemory: int, globalBase: int, staticBump: int }): ModuleLoader {
+function __moduleLoader(this: any, wasmUri: string, types: Types, options: Options): ModuleLoader {
     const PTR_SIZE = 4;
     const PTR_SHIFT = Math.log2(PTR_SIZE);
 
@@ -115,14 +121,18 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
     function jsToWasm(jsValue: any, typeName: string, objectReferences: Map<object, int>): any {
         const type = types[typeName];
 
-        if (!type) { throw new Error("Unknown type " + typeName) }
+        if (!type) { throw new Error("Unknown type " + typeName); }
 
         if (type.primitive) {
             return jsValue;
         }
 
-        if (typeof(jsValue) === "undefined" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error("Undefined and null values are not supported");
+        }
+
+        if (typeof(jsValue) === "undefined") {
+            return 0;
         }
 
         let ptr = objectReferences.get(jsValue);
@@ -172,7 +182,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
 
     function wasmToJs(wasmValue: any, typeName: string, returnedObjects: Map<int, object>) {
         const type = types[typeName];
-        if (!type) { throw new Error("Unknown type " + typeName) }
+        if (!type) { throw new Error("Unknown type " + typeName); }
 
         if (type.primitive) {
             if (typeName === "i1") {
@@ -283,7 +293,10 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
                 case "double":
                     return Array.from(heap64.subarray(this.begin >> 3, this.back >> 3));
                 default:
-                    return Array.from(heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT), objectPtr => wasmToJs(objectPtr, this.elementType, objectReferences));
+                    return Array.from(
+                        heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT),
+                        objectPtr => wasmToJs(objectPtr, this.elementType, objectReferences)
+                    );
             }
         }
     }
@@ -314,24 +327,25 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
 
     function sbrk(increment: number) {
-        increment = increment|0;
+        increment = increment | 0;
         let oldDynamicTop = 0;
         let newDynamicTop = 0;
-        increment = ((increment + 15) & -16)|0;
+        increment = ((increment + 15) & -16) | 0;
         oldDynamicTop = heap32[DYNAMIC_TOP_PTR >> 2] | 0;
         newDynamicTop = oldDynamicTop + increment | 0;
 
-        if (((increment|0) > 0 && (newDynamicTop|0) < (oldDynamicTop|0)) // Detect and fail if we would wrap around signed 32-bit int.
-            || (newDynamicTop|0) < 0) { // Also underflow, sbrk() should be able to be used to subtract.
+        if (((increment | 0) > 0 && (newDynamicTop | 0) < (oldDynamicTop | 0)) // Detect and fail if we would wrap around signed 32-bit int.
+            || (newDynamicTop | 0) < 0) { // Also underflow, sbrk() should be able to be used to subtract.
+            // tslint:disable-next-line:no-console
             console.error("Signed 32 wrap around detected");
             return -1;
         }
 
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
-        if ((newDynamicTop|0) > (totalMemory|0)) {
+        if ((newDynamicTop | 0) > (totalMemory | 0)) {
             let pagesToAdd = 0;
 
-            while ((newDynamicTop|0) > (totalMemory|0)) {
+            while ((newDynamicTop | 0) > (totalMemory | 0)) {
                 pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
                 totalMemory += pagesToAdd * WASM_PAGE_SIZE;
             }
@@ -340,11 +354,11 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
 
             updateHeap(memory.buffer);
         }
-        return oldDynamicTop|0;
+        return oldDynamicTop | 0;
     }
 
     function alignMemory(size: int, quantum?: int): int {
-        return Math.ceil((size)/(quantum ? quantum : 16))*(quantum ? quantum : 16);
+        return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
     }
 
     function loadInstance(): Promise<WebAssemblyInstance> {
@@ -353,25 +367,25 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
         let wasmLoaded: Promise<ArrayBuffer>;
         // browser
         if (typeof window !== "undefined") {
-            if (typeof fetch !=="function") {
+            if (typeof fetch !== "function") {
                 throw new Error("Your browser does not support the fetch API. Include a fetch polyfill to load the WASM module");
             }
 
-            wasmLoaded = fetch(wasmUri).then(function (response: any) {
+            wasmLoaded = fetch(wasmUri).then(function(response: any) {
                 if (response.ok) {
                     return response.arrayBuffer();
                 }
 
                 throw new Error("Failed to load WASM module from " + wasmUri + " (" + response.statusText + ").");
             });
-        } else if (typeof module !== 'undefined' && module.exports) { // Node.js
-            wasmLoaded = new Promise(function (resolve, reject) {
+        } else if (typeof module !== "undefined" && module.exports) { // Node.js
+            wasmLoaded = new Promise(function(resolve, reject) {
                 // trick webpack to not detect the require call. Webpack should not include the required files as we only
                 // want to execute this code if we are in node and use the fetch api in the browser.
-                const req = (module as any)["require"] as NodeRequire;
+                const req = (module as any).require as NodeRequire;
                 const fs = req("fs");
                 const path = req("path");
-                fs.readFile(path.join(__dirname, wasmUri), function (error: any, data: Buffer) {
+                fs.readFile(path.join(__dirname, wasmUri), function(error: any, data: Buffer) {
                     if (error) {
                         reject(error);
                     } else {
@@ -383,57 +397,59 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
             throw new Error("Unknown environment, can not load WASM module");
         }
 
-        return wasmLoaded.then(function (buffer) {
+        return wasmLoaded.then(function(buffer) {
             return WebAssembly.instantiate(buffer, {
                 env: {
-                    memory: memory,
+                    memory,
                     STACKTOP: STACK_TOP,
                     __dso_handle: 0,
-                    "__cxa_allocate_exception": function (size: int) {
+                    __cxa_allocate_exception(size: int) {
                         return malloc(size);
                     },
-                    "__cxa_throw": function () {
+                    __cxa_throw() {
                         throw new Error("Exceptions not yet supported");
                     },
-                    "__cxa_find_matching_catch_2": function () {
+                    __cxa_find_matching_catch_2() {
                         throw new Error("Exceptions not yet supported");
                     },
-                    "__cxa_free_exception": function (ptr: int) {
+                    __cxa_free_exception(ptr: int) {
                         try {
                             return free(ptr);
-                        } catch(e) {
-                            console.error('exception during cxa_free_exception: ' + e);
+                        } catch (e) {
+                            // tslint:disable-next-line:no-console
+                            console.error("exception during cxa_free_exception: " + e);
                         }
                     },
-                    "__resumeException": function () {
+                    __resumeException() {
                         throw new Error("Exceptions not yet supported");
                     },
-                    "__cxa_atexit": function () {
+                    __cxa_atexit() {
                         throw new Error("Exceptions not yet supported");
                     },
-                    "pow": Math.pow,
-                    "fmod": function frem(x: number, y: number) {
+                    pow: Math.pow,
+                    fmod(x: number, y: number) {
                         return x % y;
                     },
-                    "abort": function (what: any) {
+                    abort(what: any) {
+                        // tslint:disable-next-line:no-console
                         console.error("Abort WASM for reason: " + what);
                     },
-                    "invoke_ii": function (index: number, a1: number) {
+                    invoke_ii(index: number, a1: number) {
                         return instance.exports.dynCall_ii(index, a1);
                     },
-                    "invoke_iii": function (index: number, a1: number, a2: number) {
+                    invoke_iii(index: number, a1: number, a2: number) {
                         return instance.exports.dynCall_iii(index, a1, a2);
                     },
-                    "invoke_iiii": function (index: number, a1: number, a2: number, a3: number) {
+                    invoke_iiii(index: number, a1: number, a2: number, a3: number) {
                         return instance.exports.dynCall_iiii(index, a1, a2, a3);
                     },
-                    "invoke_iiiii": function (index: number, a1: number, a2: number, a3: number, a4: number) {
+                    invoke_iiiii(index: number, a1: number, a2: number, a3: number, a4: number) {
                         return instance.exports.dynCall_iiiii(index, a1, a2, a3, a4);
                     },
-                    "invoke_viii": function (index: void, a1: number, a2: number, a3: number) {
+                    invoke_viii(index: void, a1: number, a2: number, a3: number) {
                         return instance.exports.dynCall_viii(index, a1, a2, a3);
                     },
-                    "sbrk": sbrk
+                    sbrk
                 }
             });
         }).then(result => {
@@ -451,8 +467,8 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
         }
     }
 
-    let loaded: Promise<WebAssemblyInstance> | undefined = undefined;
-    const loader = function loader () {
+    let loaded: Promise<WebAssemblyInstance> | undefined;
+    const loader = function loader() {
         if (loaded) {
             return loaded;
         }
@@ -465,7 +481,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
     } as ModuleLoader;
 
     loader.gc = gc;
-    loader.toWASM = function (jsObject: Object, objectTypeName: string, objectReferences: Map<object, int>) {
+    loader.toWASM = function(jsObject: Object, objectTypeName: string, objectReferences: Map<object, int>) {
         return jsToWasm(jsObject, objectTypeName, objectReferences) as int;
     };
 

@@ -2,6 +2,7 @@ import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
 import {NameMangler} from "./name-mangler";
 import {getTypeOfParentObject} from "./util/object-helper";
+import {isMaybeObjectType} from "./util/types";
 
 /**
  * Base Implementation of a name mangler
@@ -69,7 +70,7 @@ export abstract class BaseNameMangler implements NameMangler {
     protected abstract getModulePrefix(sourceFile?: ts.SourceFile): string;
 
     private mangleAccessor(name: string, node: ts.ElementAccessExpression | ts.PropertyAccessExpression, setter: boolean): string {
-        let argumentTypes: ts.Type[] = [];
+        const argumentTypes: ts.Type[] = [];
 
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
             argumentTypes.push(this.typeChecker.getTypeAtLocation(node.argumentExpression!));
@@ -84,7 +85,7 @@ export abstract class BaseNameMangler implements NameMangler {
     }
 
     private getFunctionName(name: string, argumentTypes: ts.Type[]) {
-        let parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
+        const parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
         return this.encodeName(name) + parameterPostfix;
     }
 
@@ -121,6 +122,10 @@ export abstract class BaseNameMangler implements NameMangler {
             return "v";
         }
 
+        if (isMaybeObjectType(type)) {
+            return "?" + this.typeToCode(type.getNonNullableType());
+        }
+
         if (type.flags & ts.TypeFlags.Object) {
             const objectType = type as ts.ObjectType;
             const objectName = this.encodeName(objectType.getSymbol().getName());
@@ -137,4 +142,3 @@ export abstract class BaseNameMangler implements NameMangler {
         throw new Error(`Unsupported runtime type ${this.typeChecker.typeToString(type)}`);
     }
 }
-

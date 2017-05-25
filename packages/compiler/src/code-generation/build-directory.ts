@@ -13,7 +13,7 @@ export interface TempFsObject {
 export class BuildDirectory {
     private tempObjects: TempFsObject[] = [];
     private directoriesToClean: string[] = [];
-    public path: string;
+    path: string;
 
     /**
      * Creates a new build directory that safes the intermediate files at the given path

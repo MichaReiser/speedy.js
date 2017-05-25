@@ -5,13 +5,13 @@ declare interface EnvType {
 }
 
 declare interface ImportObject {
-    imports?: { [name: string]: any },
+    imports?: { [name: string]: any };
     env?: EnvType;
 }
 
 declare interface WebAssemblyMemory {
     buffer: ArrayBuffer;
-    grow(number: number): number;
+    grow(size: number): number;
 }
 
 declare interface WebAssemblyMemoryConstructor {
@@ -26,14 +26,11 @@ declare interface WebAssemblyConstructor {
 
 declare const WebAssembly: WebAssemblyConstructor;
 
-declare interface WebAssemblyInstanceConstructor {
-
-}
-
 declare interface WebAssemblyInstance {
     exports: { [name: string]: any };
 }
 
+// tslint:disable-next-line
 declare interface WebAssemblyModule {
 
 }

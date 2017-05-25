@@ -3,9 +3,7 @@ dist: trusty
 language: node_js
 node_js:
 - node
-
 cache: ccache
-
 addons:
   apt:
     sources:
@@ -18,12 +16,12 @@ addons:
     - libobjc-4.8-dev
     - libstdc++6
     - checkinstall
-
   sauce_connect: true
 env:
   global:
   - LLVM=/usr/bin
   - GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
+  - secure: s8kN9v/XmraWaNVsX8fuaA6Ozz3jVXQQMFXsX8OzAKkton18cvxMwj55SMuELrym1dYHs5JczLJPJ4ASUfpcrk9zranFklt8rEtdfuPsKzu/FsseWkBV9gOFLJ7Fyamdu+6XG0ZipW5KXTKiPIUBYWFr6ryvagfjhup5OLsPyqqiBeCr6o5WLmx74b8mj1wgdMxpWkPLU9sDFT1uHMwJIX56mcT9wKHkoUsP7BOnJS4VBT75zLQVQXFOk2H1Ejg0c+KP2L0/sj1weqmPYeIlfCZiBZ/1nGOUqmuQykMEgwE1at+jJG5PF3yA3Za534l19xNPcI5i65SwJBkRLEOVo/sxAxqYL/q8IOLk3lUH53oRoZB578gdH2kOzQlG32fpfef1oz9BcCP0lK7IZau6mAG+FgnV3O47z12YjEoItcvn7eXKXnBp1JEWuMzcfErZQ7ck8qT9yfr5js7PCwb4o8sGcRRlACd5eB5gHX6wRp6/knjjNzmPQrpZmD4Yrj2IjogvbeevQPvp3waX6Ocv4MypODKXrZNC57iQd7LNkLBE87hZeDpY23UbRV8XG7dZTfyLd8qnh9V7+pXxeqpdyFeiD2loa7Y952qEtvd/f14YEOumpGb6uBL0Rpq+63R35hFi951Tg6MA3gUs8U6OJH+v2RjLrJZhGKgb2Py35UM=
 
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
@@ -37,24 +35,22 @@ before_install:
   && cd ..
 - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 50
 - sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-5.0
-  50
+- sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-5.0 50
 - sudo update-alternatives --install /usr/bin/llc llc /usr/bin/llc-5.0 50
 - sudo update-alternatives --install /usr/bin/opt opt /usr/bin/opt-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-nm llvm-nm /usr/bin/llvm-nm-5.0
-  50
-- sudo update-alternatives --install /usr/bin/llvm-link llvm-link /usr/bin/llvm-link-5.0
-  50
-- sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-5.0
-  50
-- sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-5.0
-  50
+- sudo update-alternatives --install /usr/bin/llvm-nm llvm-nm /usr/bin/llvm-nm-5.0 50
+- sudo update-alternatives --install /usr/bin/llvm-link llvm-link /usr/bin/llvm-link-5.0 50
+- sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-5.0 50
+- sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-5.0 50
 - export CC=clang-5.0
 - export CXX=clang++-5.0
 
 install:
 - npm install
 - npm run bootstrap
+
+after_script:
+- npm run coverage
 
 after_failure:
 - cat npm-debug.log || true

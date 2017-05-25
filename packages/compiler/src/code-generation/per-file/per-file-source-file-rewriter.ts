@@ -1,6 +1,8 @@
 import * as ts from "typescript";
 import {WastMetaData} from "./wast-meta-data";
 
+export type EmitHelperProvider = (emitHelper: ts.EmitHelper) => void;
+
 /**
  * Rewriter for a single source file
  */
@@ -24,7 +26,7 @@ export interface PerFileSourceFileRewirter {
      * @param functionDeclaration the entry function to rewrite
      * @param requestEmitHelper function that allows to request type script emit helpers
      */
-    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: (emitHelper: ts.EmitHelper) => void): ts.FunctionDeclaration;
+    rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration, requestEmitHelper: EmitHelperProvider): ts.FunctionDeclaration;
 
     /**
      * Rewrites the statements of the source file

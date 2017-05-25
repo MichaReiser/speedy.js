@@ -1,6 +1,6 @@
 import * as path from "path";
-import {WasmFileWriter} from "./wasm-file-writer";
 import {CodeGenerationContext} from "./code-generation/code-generation-context";
+import {WasmFileWriter} from "./wasm-file-writer";
 
 export class DefaultWasmFileWriter implements WasmFileWriter {
     writeWasmFile(fileName: string, content: Buffer, codeGenerationContext: CodeGenerationContext): string {

@@ -1,19 +1,20 @@
-import * as ts from "typescript";
 import * as assert from "assert";
+import * as ts from "typescript";
+import {TypeChecker} from "../../type-checker";
+import {CodeGenerationContext} from "../code-generation-context";
+import {isMaybeObjectType} from "../util/types";
+import {PerFileSourceFileRewirter} from "./per-file-source-file-rewriter";
 
 import {MODULE_LOADER_FACTORY_NAME, PerFileWasmLoaderEmitHelper} from "./per-file-wasm-loader-emit-helper";
-import {PerFileSourceFileRewirter} from "./per-file-source-file-rewriter";
 import {WastMetaData} from "./wast-meta-data";
-import {CodeGenerationContext} from "../code-generation-context";
-import {TypeChecker} from "../../type-checker";
 
 interface Types {
     [name: string]: {
         primitive: boolean,
-        fields: { name: string, type: string }[],
+        fields: Array<{ name: string, type: string }>,
         constructor?: ts.Identifier;
         typeArguments: string[];
-    }
+    };
 }
 
 /**
@@ -63,9 +64,10 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         let argumentObjects: ts.Identifier;
         // argumentObjects = new Map();
-        if (argumentTypes.findIndex(argumentType => (argumentType.flags & ts.TypeFlags.Object) !== 0) !== -1) {
+        if (argumentTypes.findIndex(argumentType => (argumentType.flags & ts.TypeFlags.Object) !== 0 || isMaybeObjectType(argumentType)) !== -1) {
             argumentObjects = ts.createUniqueName("argumentObjects");
-            bodyStatements.push(ts.createVariableStatement(undefined, [ts.createVariableDeclaration(argumentObjects, undefined, ts.createNew(ts.createIdentifier("Map"), undefined, []))]));
+            const argumentObjectsMap = ts.createNew(ts.createIdentifier("Map"), undefined, []);
+            bodyStatements.push(ts.createVariableStatement(undefined, [ts.createVariableDeclaration(argumentObjects, undefined, argumentObjectsMap)]));
         } else {
             argumentObjects = ts.createIdentifier("undefined");
         }
@@ -89,7 +91,9 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         bodyStatements.push(ts.createReturn(resultIdentifier));
 
         // function (instance) { ... }
-        const loadedHandler = ts.createFunctionExpression(undefined, undefined, "instanceLoaded", undefined, [ts.createParameter(undefined, undefined, undefined, instanceIdentifier) ], undefined, ts.createBlock(bodyStatements));
+        const instanceParameter = ts.createParameter(undefined, undefined, undefined, instanceIdentifier);
+        const loadHandlerBody = ts.createBlock(bodyStatements);
+        const loadedHandler = ts.createFunctionExpression(undefined, undefined, "instanceLoaded", undefined, [ instanceParameter ], undefined, loadHandlerBody);
 
         // loadWasmModule().then(instance => );
         const loadInstance = ts.createCall(this.loadWasmFunctionIdentifier, [], []);
@@ -145,7 +149,8 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         // export let speedyJsGc = loadWasmModule_1.gc; or without export if only expose
         if (compilerOptions.exposeGc || compilerOptions.exportGc) {
-            const speedyJsGcDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"))], ts.NodeFlags.Const);
+            const speedyJsGcVariable = ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"));
+            const speedyJsGcDeclaration = ts.createVariableDeclarationList([speedyJsGcVariable], ts.NodeFlags.Const);
             const modifiers = compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
             statements.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
         }
@@ -159,7 +164,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             return ts.createBinary(returnValue, ts.SyntaxKind.EqualsEqualsEqualsToken, ts.createNumericLiteral("1"));
         }
 
-        if (type.flags & ts.TypeFlags.Object) {
+        if (type.flags & ts.TypeFlags.Object || isMaybeObjectType(type)) {
             return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toJSObject"), undefined, [
                 returnValue,
                 ts.createLiteral(serializedTypeName(type, this.context.typeChecker))
@@ -169,11 +174,13 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         return returnValue;
     }
 
-    private castToWasm(parameterDeclaration: ts.ParameterDeclaration, loadWasmFunctionIdentifier: ts.Identifier, argumentObjects: ts.Identifier): ts.Expression {
+    private castToWasm(parameterDeclaration: ts.ParameterDeclaration,
+                       loadWasmFunctionIdentifier: ts.Identifier,
+                       argumentObjects: ts.Identifier): ts.Expression {
         const parameterType = this.context.typeChecker.getTypeAtLocation(parameterDeclaration);
         const symbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
 
-        if (parameterType.flags & ts.TypeFlags.Object) {
+        if (parameterType.flags & ts.TypeFlags.Object || isMaybeObjectType(parameterType)) {
             return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toWASM"), undefined, [
                 ts.createIdentifier(symbol.name),
                 ts.createLiteral(serializedTypeName(parameterType, this.context.typeChecker)),
@@ -186,10 +193,10 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
     private serializeArgumentAndReturnTypes() {
         const types: Types = {};
-        let typesToProcess = Array.from(new Set(this.argumentAndReturnTypes));
+        const typesToProcess = Array.from(new Set(this.argumentAndReturnTypes));
 
         while (typesToProcess.length > 0) {
-            const type = typesToProcess.pop()!;
+            let type = typesToProcess.pop()!;
             const name = serializedTypeName(type, this.context.typeChecker);
 
             if (name in types) {
@@ -197,9 +204,13 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             }
 
             const primitive = !!(type.flags & ts.TypeFlags.BooleanLike || type.flags & ts.TypeFlags.IntLike || type.flags & ts.TypeFlags.NumberLike);
-            let fields: { name: string, type: string }[] = [];
-            let typeArguments: string[] = [];
+            let fields: Array<{ name: string, type: string }> = [];
+            const typeArguments: string[] = [];
             let constructor: ts.Identifier | undefined;
+
+            if (isMaybeObjectType(type)) {
+                type = type.getNonNullableType();
+            }
 
             if (type.flags & ts.TypeFlags.Object) {
                 const objectType = type as ts.ObjectType;
@@ -210,7 +221,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
                     return {
                         name: field.name,
                         type: serializedTypeName(field.type, this.context.typeChecker)
-                    }
+                    };
                 });
 
                 if (objectType.objectFlags & ts.ObjectFlags.Reference && (objectType as ts.TypeReference).typeArguments) {
@@ -223,10 +234,10 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             }
 
             types[name] = {
-                primitive: primitive,
-                fields: fields,
-                constructor: constructor,
-                typeArguments: typeArguments
+                primitive,
+                fields,
+                constructor,
+                typeArguments
             };
         }
 
@@ -235,6 +246,10 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 }
 
 function serializedTypeName(type: ts.Type, typeChecker: TypeChecker): string {
+    if (isMaybeObjectType(type)) {
+        type = type.getNonNullableType();
+    }
+
     if (type.flags & ts.TypeFlags.BooleanLike) {
         return "i1";
     } else if (type.flags & ts.TypeFlags.IntLike) {

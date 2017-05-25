@@ -1,7 +1,7 @@
-import * as ts from "typescript";
 import * as llvm from "llvm-node";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
 
 class FalseKeywordCodeGenerator implements SyntaxCodeGenerator<ts.BooleanLiteral, Primitive> {

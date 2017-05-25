@@ -1,7 +1,7 @@
-import * as ts from "typescript";
 import * as assert from "assert";
-import {SyntaxCodeGenerator} from "../syntax-code-generator";
+import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
+import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
 /**
  * Code generator for the break statement
