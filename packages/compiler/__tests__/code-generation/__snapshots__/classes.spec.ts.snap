@@ -87,6 +87,11 @@ attributes #1 = { alwaysinline norecurse nounwind readonly }
 "
 `;
 
+exports[`Classes class-inheritance-error 1`] = `
+"__tests__/code-generation/cases/classes/class-inheritance-error.ts(3,2): error TS1000032: Class inheritance is not yet supported.
+"
+`;
+
 exports[`Classes class-only-with-attributes 1`] = `
 "; ModuleID = 'classes/class-only-with-attributes.ts'
 source_filename = \\"classes/class-only-with-attributes.ts\\"
@@ -599,6 +604,143 @@ attributes #0 = { alwaysinline nounwind readnone }
 `;
 
 exports[`Classes class-with-static-method-error 1`] = `
-"__tests__/code-generation/cases/classes/class-with-static-method-error.ts(15,11): error TS1000026: Static methods and properties are not yet supported.
+"__tests__/code-generation/cases/classes/class-with-static-method-error.ts(14,11): error TS1000026: Static methods and properties are not yet supported.
+"
+`;
+
+exports[`Classes generic-class-error 1`] = `
+"__tests__/code-generation/cases/classes/generic-class-error.ts(1,1): error TS1000031: Generic classes are not yet supported.
+"
+`;
+
+exports[`Classes potentially-undefined-object-reference 1`] = `
+"; ModuleID = 'classes/potentially-undefined-object-reference.ts'
+source_filename = \\"classes/potentially-undefined-object-reference.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.PotentiallyUndefinedClass = type { double, double }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@PotentiallyUndefinedClass_name = private unnamed_addr constant [26 x i8] c\\"PotentiallyUndefinedClass\\\\00\\"
+@PotentiallyUndefinedClass_type_descriptor = private constant { [26 x i8]* } { [26 x i8]* @PotentiallyUndefinedClass_name }
+
+define double @_classOnlyWithAttributes(%class.PotentiallyUndefinedClass* %instance) {
+entry:
+  %instance.addr = alloca %class.PotentiallyUndefinedClass*, align 4
+  %return = alloca double, align 8
+  store %class.PotentiallyUndefinedClass* %instance, %class.PotentiallyUndefinedClass** %instance.addr, align 4
+  %instance.addr1 = load %class.PotentiallyUndefinedClass*, %class.PotentiallyUndefinedClass** %instance.addr, align 4
+  %cmpEQ = icmp eq %class.PotentiallyUndefinedClass* %instance.addr1, null
+  br i1 %cmpEQ, label %if.then, label %if.end
+
+if.then:                                          ; preds = %entry
+  %constructorReturnValue = call dereferenceable(16) %class.PotentiallyUndefinedClass* @\\"classes/potentially_undefined_object_reference.ts$$PotentiallyUndefinedClass$11constructor\\"()
+  store %class.PotentiallyUndefinedClass* %constructorReturnValue, %class.PotentiallyUndefinedClass** %instance.addr, align 4
+  br label %if.end
+
+if.end:                                           ; preds = %entry, %if.then
+  %instance.addr2 = load %class.PotentiallyUndefinedClass*, %class.PotentiallyUndefinedClass** %instance.addr, align 4
+  %\\"&x\\" = getelementptr inbounds %class.PotentiallyUndefinedClass, %class.PotentiallyUndefinedClass* %instance.addr2, i32 0, i32 0
+  %x = load double, double* %\\"&x\\", align 8
+  %instance.addr3 = load %class.PotentiallyUndefinedClass*, %class.PotentiallyUndefinedClass** %instance.addr, align 4
+  %\\"&y\\" = getelementptr inbounds %class.PotentiallyUndefinedClass, %class.PotentiallyUndefinedClass* %instance.addr3, i32 0, i32 1
+  %y = load double, double* %\\"&y\\", align 8
+  %fadd = fadd double %x, %y
+  store double %fadd, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %if.end
+  %return4 = load double, double* %return, align 8
+  ret double %return4
+}
+
+define linkonce_odr %class.PotentiallyUndefinedClass* @\\"classes/potentially_undefined_object_reference.ts$$PotentiallyUndefinedClass$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 16)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.PotentiallyUndefinedClass*
+  %\\"&x\\" = getelementptr inbounds %class.PotentiallyUndefinedClass, %class.PotentiallyUndefinedClass* %this, i32 0, i32 0
+  store double 0.000000e+00, double* %\\"&x\\"
+  %\\"&y\\" = getelementptr inbounds %class.PotentiallyUndefinedClass, %class.PotentiallyUndefinedClass* %this, i32 0, i32 1
+  store double 0.000000e+00, double* %\\"&y\\"
+  ret %class.PotentiallyUndefinedClass* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`Classes undefined-object-member 1`] = `
+"; ModuleID = 'classes/undefined-object-member.ts'
+source_filename = \\"classes/undefined-object-member.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.Node = type { double, %class.Node* }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@Node_name = private unnamed_addr constant [5 x i8] c\\"Node\\\\00\\"
+@Node_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Node_name }
+
+define i32 @_length(%class.Node* %start) {
+entry:
+  %length = alloca i32, align 4
+  %current = alloca %class.Node*, align 4
+  %start.addr = alloca %class.Node*, align 4
+  %return = alloca i32, align 4
+  store %class.Node* %start, %class.Node** %start.addr, align 4
+  %start.addr1 = load %class.Node*, %class.Node** %start.addr, align 4
+  store %class.Node* %start.addr1, %class.Node** %current, align 4
+  store i32 0, i32* %length, align 4
+  br label %while.cond
+
+while.cond:                                       ; preds = %while.body, %entry
+  %current2 = load %class.Node*, %class.Node** %current, align 4
+  %cmpNE = icmp ne %class.Node* %current2, null
+  br i1 %cmpNE, label %while.body, label %while.end
+
+while.body:                                       ; preds = %while.cond
+  %length3 = load i32, i32* %length, align 4
+  %add = add i32 %length3, 1
+  store i32 %add, i32* %length, align 4
+  %current4 = load %class.Node*, %class.Node** %current, align 4
+  %\\"&next\\" = getelementptr inbounds %class.Node, %class.Node* %current4, i32 0, i32 1
+  %next = load %class.Node*, %class.Node** %\\"&next\\", align 4
+  store %class.Node* %next, %class.Node** %current, align 4
+  br label %while.cond
+
+while.end:                                        ; preds = %while.cond
+  %length5 = load i32, i32* %length, align 4
+  store i32 %length5, i32* %return, align 4
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %while.end
+  %return6 = load i32, i32* %return, align 4
+  ret i32 %return6
+}
+
+define void @_truncate(%class.Node* %position) {
+entry:
+  %position.addr = alloca %class.Node*, align 4
+  store %class.Node* %position, %class.Node** %position.addr, align 4
+  %position.addr1 = load %class.Node*, %class.Node** %position.addr, align 4
+  %\\"&next\\" = getelementptr inbounds %class.Node, %class.Node* %position.addr1, i32 0, i32 1
+  store %class.Node* null, %class.Node** %\\"&next\\", align 4
+  ret void
+}
 "
 `;

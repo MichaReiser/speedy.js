@@ -31,6 +31,10 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         return llvm.Type.getVoidTy(context.llvmContext);
     }
 
+    if (type.flags & ts.TypeFlags.Undefined) {
+        return llvm.Type.getInt8PtrTy(context.llvmContext);
+    }
+
     if (type.flags & ts.TypeFlags.Object) {
         const classReference = context.resolveClass(type);
         if (classReference) {
@@ -38,11 +42,30 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         }
     }
 
+    if (isMaybeObjectType(type)) {
+        return toLLVMType(type.getNonNullableType(), context);
+    }
+
     if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
         throw CodeGenerationDiagnostic.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
     }
 
-    throw new Error(`Unsupported type with symbol ${context.typeChecker.typeToString(type)}`);
+    throw new Error(`Unsupported type ${context.typeChecker.typeToString(type)}`);
+}
+
+/**
+ * Tests if the given type is a maybe object type (objectType | undefined).
+ * @param type the type to test
+ * @return {boolean} true if the type contains either an object or undefined
+ */
+export function isMaybeObjectType(type: ts.Type): type is ts.UnionType {
+    if (type.flags & ts.TypeFlags.Union) {
+        const unionType = type as ts.UnionType;
+
+        return unionType.types.length === 2 && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined)) && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Object));
+    }
+
+    return false;
 }
 
 export function getArrayElementType(arrayType: ts.Type): ts.Type {

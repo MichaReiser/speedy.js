@@ -58,6 +58,21 @@ async function minusMinusNumber(value: number) {
     return new NumberResultTuple(--value, value);
 }
 
+async function plusBoolean(value: boolean) {
+    "use speedyjs";
+    return +value;
+}
+
+async function plusInt(value: int) {
+    "use speedyjs";
+    return +value;
+}
+
+async function plusNumber(value: number) {
+    "use speedyjs";
+    return +value;
+}
+
 async function plusPlusInt(value: int) {
     "use speedyjs";
     return new IntResultTuple(++value, value);
@@ -142,6 +157,24 @@ describe("PrefixUnaryExpression", () => {
 
             expect(returnValue.result).toBe(9.5);
             expect(returnValue.value).toBe(9.5);
+            cb();
+        });
+    });
+
+    describe("+x", () => {
+        it("returns the boolean as number", async (cb) => {
+            expect(await plusBoolean(true)).toBe(1);
+            expect(await plusBoolean(false)).toBe(0);
+            cb();
+        });
+
+        it("returns the int", async (cb) => {
+            expect(await plusInt(10)).toBe(10);
+            cb();
+        });
+
+        it("returns the number", async (cb) => {
+            expect(await plusNumber(10.23)).toBe(10.23);
             cb();
         });
     });

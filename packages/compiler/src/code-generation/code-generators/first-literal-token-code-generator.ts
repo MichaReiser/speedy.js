@@ -13,9 +13,9 @@ class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralEx
         const type = context.typeChecker.getTypeAtLocation(node);
         let value: llvm.Value;
 
-        if (type.flags & ts.TypeFlags.IntLiteral) {
+        if (type.flags & ts.TypeFlags.IntLike) {
             value = llvm.ConstantInt.get(context.llvmContext, +node.text);
-        } else if (type.flags & ts.TypeFlags.NumberLiteral) {
+        } else if (type.flags & ts.TypeFlags.NumberLike) {
             value = llvm.ConstantFP.get(context.llvmContext, +node.text);
         } else {
             throw CodeGenerationDiagnostic.unsupportedLiteralType(node, context.typeChecker.typeToString(type));

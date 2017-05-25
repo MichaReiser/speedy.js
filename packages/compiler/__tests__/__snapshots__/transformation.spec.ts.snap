@@ -79,8 +79,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -487,8 +490,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -897,8 +903,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -1305,8 +1314,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -1750,8 +1762,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -2159,8 +2174,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -2568,8 +2586,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -2976,8 +2997,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -3384,8 +3408,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {
@@ -3792,8 +3819,11 @@ function __moduleLoader(wasmUri, types, options) {
         if (type.primitive) {
             return jsValue;
         }
-        if (typeof (jsValue) === \\"undefined\\" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error(\\"Undefined and null values are not supported\\");
+        }
+        if (typeof (jsValue) === \\"undefined\\") {
+            return 0;
         }
         var ptr = objectReferences.get(jsValue);
         if (typeof (ptr) !== \\"undefined\\") {

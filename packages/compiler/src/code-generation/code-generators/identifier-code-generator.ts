@@ -5,12 +5,17 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {UnresolvedFunctionReference} from "../value/unresolved-function-reference";
 import {Value} from "../value/value";
+import {Undefined} from "../value/undefined";
 
 class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Value> {
     syntaxKind = ts.SyntaxKind.Identifier;
 
     generate(identifier: ts.Identifier, context: CodeGenerationContext): Value {
         const symbol = context.typeChecker.getSymbolAtLocation(identifier);
+
+        if (context.typeChecker.isUndefinedSymbol(symbol)) {
+            return Undefined.create(context);
+        }
 
         if (symbol.flags & ts.SymbolFlags.Function) {
             return IdentifierCodeGenerator.getFunction(symbol, identifier, context);

@@ -63,21 +63,27 @@ export abstract class AbstractFunctionReference implements FunctionReference {
             const argumentType = callerContext.typeChecker.getTypeAtLocation(arg);
 
             if (parameter.variadic) {
-                const varArgs = args.slice(i);
                 const elementType = getArrayElementType(parameterType);
+                const llvmVarArgs = new Array<llvm.Value>(args.length - i);
 
-                const elementNotMatchingArrayElementType = varArgs.find(varArg => !callerContext.typeChecker.isAssignableTo(callerContext.typeChecker.getTypeAtLocation(varArg), elementType));
-                if (typeof elementNotMatchingArrayElementType !== "undefined") {
-                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(elementNotMatchingArrayElementType)));
+                for (let j = 0; j < args.length - i; ++j) {
+                    const varArgNode = args[i + j];
+                    const castedElement = callerContext.generateValue(varArgNode).castImplicit(elementType, callerContext);
+                    if (!castedElement) {
+                        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(varArgNode, callerContext.typeChecker.typeToString(elementType), callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(varArgNode)));
+                    }
+
+                    llvmVarArgs[j] = castedElement.generateIR(callerContext);
                 }
 
-                values.push(...varArgs.map(varArg => callerContext.generateValue(varArg).generateIR(callerContext)));
+                values.push(...llvmVarArgs);
             } else {
-                if (!callerContext.typeChecker.isAssignableTo(argumentType, parameterType)) {
-                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(arg, callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
+                const castedElement = callerContext.generateValue(args[i]).castImplicit(parameterType, callerContext);
+                if (!castedElement) {
+                    throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(args[i], callerContext.typeChecker.typeToString(parameterType), callerContext.typeChecker.typeToString(argumentType));
                 }
 
-                values.push(callerContext.generateValue(arg).generateIR(callerContext));
+                values.push(castedElement.generateIR(callerContext));
             }
         }
 
@@ -161,5 +167,9 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     generateIR(context: CodeGenerationContext): llvm.Value {
         return this.getLLVMFunction(this.getResolvedFunction(context), context);
+    }
+
+    castImplicit(type: ts.Type, context: CodeGenerationContext): Value {
+        throw new Error("TODO");
     }
 }

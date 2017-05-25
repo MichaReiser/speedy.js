@@ -16,12 +16,17 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
         let type = context.typeChecker.getTypeAtLocation(arrayLiteral);
         const elementType = getArrayElementType(type);
 
-        const elementRequiringCast = arrayLiteral.elements.find(element => !context.typeChecker.isAssignableTo(context.typeChecker.getTypeAtLocation(element), elementType));
-        if (typeof(elementRequiringCast) !== "undefined") {
-            throw CodeGenerationDiagnostic.implicitArrayElementCast(elementRequiringCast, context.typeChecker.typeToString(elementType), context.typeChecker.typeToString(context.typeChecker.getTypeAtLocation(elementRequiringCast)));
+        const elements = new Array<llvm.Value>(arrayLiteral.elements.length);
+
+        for (let i = 0; i < elements.length; ++i) {
+            const element = arrayLiteral.elements[i];
+            const casted = context.generateValue(element).castImplicit(elementType, context);
+            if (!casted) {
+                throw CodeGenerationDiagnostic.implicitArrayElementCast(element, context.typeChecker.typeToString(elementType), context.typeChecker.typeToString(context.typeChecker.getTypeAtLocation(element)));
+            }
+            elements[i] = casted.generateIR(context);
         }
 
-        const elements = arrayLiteral.elements.map(value => context.generateValue(value).generateIR(context));
         return ArrayClassReference.fromLiteral(type as ts.ObjectType, elements, context);
     }
 }

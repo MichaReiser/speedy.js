@@ -1,4 +1,5 @@
 import * as llvm from "llvm-node";
+import * as ts from "typescript";
 import {ObjectReference} from "./object-reference";
 import {CodeGenerationContext} from "../code-generation-context";
 
@@ -29,10 +30,20 @@ export interface Value {
      * Generates the IR Code for this value
      */
     generateIR(context: CodeGenerationContext): llvm.Value;
+
+    /**
+     * Performs an implicit cast of this value to the specified target type if supported.
+     * @param type the target type
+     * @param context the code generation context
+     * @returns the casted value if the implicit cast is supported. If no implicit cast for this type to the specified
+     * target type exists, undefined is returned.
+     */
+    castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined;
 }
 
 /**
- * Value that might be assigned to
+ * Value that might be assigned to. In general, values that have a storage location, e.g. an allocation or a member
+ * of an object.
  */
 export interface AssignableValue extends Value {
 

@@ -40,4 +40,8 @@ export class ObjectIndexReference implements AssignableValue {
     dereference(context: CodeGenerationContext) {
         return this.getValue(context);
     }
+
+    castImplicit(type: ts.Type, context: CodeGenerationContext) {
+        return this.dereference(context).castImplicit(type, context);
+    }
 }

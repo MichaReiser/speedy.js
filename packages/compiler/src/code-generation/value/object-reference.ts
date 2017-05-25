@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {AssignableValue} from "./value";
+import {Value} from "./value";
 import {ObjectPropertyReference} from "./object-property-reference";
 import {ObjectIndexReference} from "./object-index-reference";
 import {FunctionReference} from "./function-reference";
@@ -11,7 +11,7 @@ import {ClassReference} from "./class-reference";
  * Does not represent a specific instance as the object is not destroyed when the
  * address is overridden with a new instance.
  */
-export interface ObjectReference extends AssignableValue {
+export interface ObjectReference extends Value {
 
     /**
      * The class reference

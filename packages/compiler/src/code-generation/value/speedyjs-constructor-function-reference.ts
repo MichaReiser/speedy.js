@@ -14,6 +14,7 @@ import {ObjectReference} from "./object-reference";
 import {createResolvedFunction, createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {SpeedyJSClassReference} from "./speedy-js-class-reference";
 import {SpeedyJSObjectReference} from "./speedyjs-object-reference";
+import {verifyIsSupportedSpeedyJSFunction} from "./speedyjs-function-factory";
 
 export class SpeedyJSConstructorFunctionReference extends AbstractFunctionReference {
 
@@ -22,10 +23,13 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
 
         if (signature.declaration) {
             resolvedFunction = createResolvedFunctionFromSignature(signature, context.compilationContext, classReference.type);
+            verifyIsSupportedSpeedyJSFunction(signature.declaration, context);
         } else {
+            // default constructor
             const sourceFile = classReference.type.getSymbol().declarations![0].getSourceFile();
             resolvedFunction = createResolvedFunction("constructor", [], [], signature.getReturnType(), sourceFile, classReference.type);
         }
+
 
         const declarationContext = context.createChildContext();
         const fn = new ConstructorFunctionBuilder(resolvedFunction, classReference, declarationContext)
@@ -131,7 +135,7 @@ class ConstructorFunctionBuilder {
     }
 
     private callUserConstructorFn(fn: llvm.Function, objectReference: ObjectReference) {
-        if (!this.resolvedFunction.declaration) {
+        if (!this.resolvedFunction.definition) {
             this.context.builder.createRet(objectReference.generateIR(this.context));
             return;
         }

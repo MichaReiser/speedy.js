@@ -51,6 +51,7 @@
     "test:integration:watch": "karma start karma.conf.js"
   },
   "jest": {
+    "mapCoverage": true,
     "transform": {
       ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },

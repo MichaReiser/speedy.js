@@ -2,6 +2,7 @@ import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
 import {NameMangler} from "./name-mangler";
 import {getTypeOfParentObject} from "./util/object-helper";
+import {isMaybeObjectType} from "./util/types";
 
 /**
  * Base Implementation of a name mangler
@@ -119,6 +120,10 @@ export abstract class BaseNameMangler implements NameMangler {
 
         if (type.flags & ts.TypeFlags.Void) {
             return "v";
+        }
+
+        if (isMaybeObjectType(type)) {
+            return "?" + this.typeToCode(type.getNonNullableType());
         }
 
         if (type.flags & ts.TypeFlags.Object) {

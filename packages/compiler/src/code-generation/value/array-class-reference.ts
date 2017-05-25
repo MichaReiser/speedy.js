@@ -2,7 +2,7 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
-import {getArrayElementType, toLLVMType} from "../util/types";
+import {getArrayElementType, isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
 
 import {ArrayReference} from "./array-reference";
@@ -18,7 +18,7 @@ import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
  */
 export class ArrayClassReference extends ClassReference {
 
-    private static arrayTypes = new Map<ts.Type, llvm.StructType>();
+    private llvmTypes = new Map<ts.Type, llvm.StructType>();
 
     private constructor(typeInformation: llvm.GlobalVariable, symbol: ts.Symbol, compilationContext: CompilationContext) {
         super(typeInformation, symbol, compilationContext);
@@ -79,19 +79,20 @@ export class ArrayClassReference extends ClassReference {
     }
 
     getLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
-        const elementType = getArrayElementType(type);
+        let elementType = getArrayElementType(type);
 
-        const existing = ArrayClassReference.arrayTypes.get(elementType);
+        if (isMaybeObjectType(elementType)) {
+            elementType = elementType.getNonNullableType();
+        }
+
+        const existing = this.llvmTypes.get(elementType);
         if (existing) {
             return existing;
         }
 
-        const arrayType = ArrayClassReference.getArrayType(elementType, context);
-        ArrayClassReference.arrayTypes.set(elementType, arrayType);
-        return arrayType;
-    }
+        const forwardDeclaration = llvm.StructType.create(context.llvmContext, "class.Array");
+        this.llvmTypes.set(elementType, forwardDeclaration);
 
-    private static getArrayType(elementType: ts.Type, context: CodeGenerationContext) {
         let llvmElementType: llvm.Type;
 
         if (elementType.flags & ts.TypeFlags.Object) {
@@ -100,12 +101,12 @@ export class ArrayClassReference extends ClassReference {
             llvmElementType = toLLVMType(elementType, context);
         }
 
-        return llvm.StructType.create(context.llvmContext, [
+        forwardDeclaration.setBody([
                 llvmElementType.getPointerTo(),
                 llvm.Type.getInt32Ty(context.llvmContext),
                 llvm.Type.getInt32Ty(context.llvmContext)
-            ],
-            "class.Array"
-        );
+            ]);
+
+        return forwardDeclaration;
     }
 }

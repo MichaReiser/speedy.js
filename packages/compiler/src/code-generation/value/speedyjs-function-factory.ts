@@ -10,6 +10,26 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {ObjectReference} from "./object-reference";
 import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
 
+export function verifyIsSupportedSpeedyJSFunction(declaration: ts.Declaration, context: CodeGenerationContext) {
+    if (!(declaration.kind === ts.SyntaxKind.FunctionDeclaration || declaration.kind === ts.SyntaxKind.MethodDeclaration || declaration.kind === ts.SyntaxKind.Constructor)) {
+        throw CodeGenerationDiagnostic.unsupportedFunctionDeclaration(declaration);
+    }
+
+    const functionDeclaration = declaration as ts.FunctionDeclaration | ts.MethodDeclaration | ts.ConstructorDeclaration;
+
+    if (functionDeclaration.typeParameters && functionDeclaration.typeParameters.length > 0) {
+        throw CodeGenerationDiagnostic.unsupportedGenericFunction(functionDeclaration);
+    }
+
+    if (functionDeclaration.kind === ts.SyntaxKind.FunctionDeclaration && functionDeclaration.parent && functionDeclaration.parent.kind !== ts.SyntaxKind.SourceFile) {
+        throw CodeGenerationDiagnostic.unsupportedNestedFunctionDeclaration(functionDeclaration);
+    }
+
+    if (context.typeChecker.isImplementationOfOverload(functionDeclaration)) {
+        throw CodeGenerationDiagnostic.unsupportedOverloadedFunctionDeclaration(functionDeclaration);
+    }
+}
+
 /**
  * Function factory for functions marked with "speedyjs"
  */
@@ -37,7 +57,7 @@ export class SpeedyJSFunctionFactory extends FunctionFactory {
         const definition = resolvedFunction.definition as ts.FunctionDeclaration;
         assert(definition, "Functions only with a declaration cannot be defined");
 
-        this.verifyIsSupportedDeclaration(definition);
+        verifyIsSupportedSpeedyJSFunction(definition, context);
 
         assert(definition.body, "Cannot define a function without a body");
 
@@ -47,21 +67,5 @@ export class SpeedyJSFunctionFactory extends FunctionFactory {
         FunctionDefinitionBuilder.create(fn, resolvedFunction, childContext).define();
 
         return fn;
-    }
-
-    private verifyIsSupportedDeclaration(declaration: ts.Declaration) {
-        if (!(declaration.kind === ts.SyntaxKind.FunctionDeclaration || declaration.kind === ts.SyntaxKind.MethodDeclaration)) {
-            throw CodeGenerationDiagnostic.unsupportedFunctionDeclaration(declaration);
-        }
-
-        const functionDeclaration = declaration as ts.FunctionDeclaration | ts.MethodDeclaration;
-
-        if (functionDeclaration.typeParameters && functionDeclaration.typeParameters.length > 0) {
-            throw CodeGenerationDiagnostic.unsupportedGenericFunction(functionDeclaration);
-        }
-
-        if (functionDeclaration.kind === ts.SyntaxKind.FunctionDeclaration && functionDeclaration.parent && functionDeclaration.parent.kind !== ts.SyntaxKind.SourceFile) {
-            throw CodeGenerationDiagnostic.unsupportedNestedFunctionDeclaration(functionDeclaration);
-        }
     }
 }

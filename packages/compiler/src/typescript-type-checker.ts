@@ -39,7 +39,7 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getSignatureFromDeclaration(functionDeclaration: ts.FunctionDeclaration): ts.Signature {
-        return new SignatureWrapper(this.tsTypeChecker.getSignatureFromDeclaration(functionDeclaration));
+        return new SignatureWrapper(this.tsTypeChecker.getSignatureFromDeclaration(functionDeclaration), this.tsTypeChecker);
     }
 
     getTypeAtLocation(node: ts.Node): ts.Type {
@@ -51,7 +51,7 @@ export class TypeScriptTypeChecker implements TypeChecker {
             const typeReference = type as ts.TypeReference;
 
             if (typeReference.typeArguments && typeReference.typeArguments.some(typeArgument => !!(typeArgument.flags & ts.TypeFlags.Never))) {
-                type = this.getContextualType(node as ts.Expression) || type;
+                type = this.toSupportedType(this.getContextualType(node as ts.Expression)) || type;
             }
         }
 
@@ -71,61 +71,34 @@ export class TypeScriptTypeChecker implements TypeChecker {
     }
 
     getResolvedSignature(callLikeExpression: ts.CallLikeExpression): ts.Signature {
-        return new SignatureWrapper(this.tsTypeChecker.getResolvedSignature(callLikeExpression));
+        return new SignatureWrapper(this.tsTypeChecker.getResolvedSignature(callLikeExpression), this.tsTypeChecker);
     }
 
     isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean {
         return this.tsTypeChecker.isImplementationOfOverload(fun);
     }
 
-    isAssignableTo(source: ts.Type, target: ts.Type): boolean {
-        if (source.flags & ts.TypeFlags.Literal) {
-            source = this.tsTypeChecker.getBaseTypeOfLiteralType(source);
-        }
-
-        if (target.flags & ts.TypeFlags.Literal) {
-            target = this.tsTypeChecker.getBaseTypeOfLiteralType(target);
-        }
-
-        if (source === target) {
-            return true;
-        }
-        if (source.flags & ts.TypeFlags.Union) {
-            return (source as ts.UnionType).types.every(t => this.isAssignableTo(t, target));
-        }
-
-        if (target.flags & ts.TypeFlags.Union) {
-            return (target as ts.UnionType).types.some(t => this.isAssignableTo(source, t));
-        }
-
-        if (source.flags & ts.TypeFlags.Intersection) {
-            return (source as ts.IntersectionType).types.some(t => this.isAssignableTo(t, target));
-        }
-
-        if (target.flags & ts.TypeFlags.Intersection) {
-            return (target as ts.IntersectionType).types.every(t => this.isAssignableTo(source, t));
-        }
-
-        return false;
+    toSupportedType(type: ts.Type): ts.Type {
+        return toSupportedType(type, this.tsTypeChecker);
     }
 
-    toSupportedType(type: ts.Type): ts.Type {
-        return toSupportedType(type);
+    isUndefinedSymbol(symbol: ts.Symbol) {
+        return this.tsTypeChecker.isUndefinedSymbol(symbol);
     }
 }
 
-function toSupportedType(type: ts.Type): ts.Type {
+function toSupportedType(type: ts.Type, typeChecker: ts.TypeChecker): ts.Type {
     // should never happen but it does!, thanks typescript
     if (typeof(type) === "undefined") {
         return type;
     }
 
-    // getNonNullableType returns never for void?
-    if (type.flags === ts.TypeFlags.Void) {
-        return type;
+    // e.g. 1, 2... we are not interested in the literals, only in the type
+    if (type.flags & ts.TypeFlags.Literal) {
+        return typeChecker.getBaseTypeOfLiteralType(type);
     }
 
-    // e.g. 1 | 2
+    // e.g. 1 | 2. We are not interested in the actual literals, just what the type is.
     if (type.flags & ts.TypeFlags.Union) {
         const unionType = type as ts.UnionType;
         const intLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.IntLike));
@@ -133,16 +106,27 @@ function toSupportedType(type: ts.Type): ts.Type {
         const booleanLiterals = unionType.types.every(type => !!(type.flags & ts.TypeFlags.BooleanLike));
 
         if ((intLiterals || numberLiterals || booleanLiterals) && unionType.types.length > 0) {
-            return toSupportedType(unionType.types[0]);
+            return toSupportedType(unionType.types[0], typeChecker);
         }
     }
 
-    return type.getNonNullableType();
+    if (type.flags & ts.TypeFlags.Union) {
+        const unionType = type as ts.UnionType;
+        const isMaybeType = unionType.types.length === 2 && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined));
+
+        // e.g. double | undefined, int | undefined, boolean | undefined are not supported. Compiler does not allow undefined values of
+        // primitive types (yet). Maybe in the future when union types are fully supported. So until then, just return the non nullable type
+        if (isMaybeType && unionType.types.some(t => !!(t.flags & (ts.TypeFlags.IntLike | ts.TypeFlags.NumberLike | ts.TypeFlags.BooleanLike)))) {
+            return unionType.getNonNullableType();
+        }
+    }
+
+    return type;
 }
 
 class SignatureWrapper implements ts.Signature {
 
-    constructor(private signature: ts.Signature) {
+    constructor(private signature: ts.Signature, private typeChecker: ts.TypeChecker) {
 
     }
 
@@ -181,7 +165,7 @@ class SignatureWrapper implements ts.Signature {
             returnType = typeReference.typeArguments && typeReference.typeArguments.length === 1 ? typeReference.typeArguments[0] : returnType;
         }
 
-        return toSupportedType(returnType);
+        return toSupportedType(returnType, this.typeChecker);
     }
 
     getDocumentationComment(): ts.SymbolDisplayPart[] {

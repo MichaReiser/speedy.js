@@ -40,6 +40,14 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
 
                 break;
 
+            case ts.SyntaxKind.PlusToken:
+                if (operandType.flags & ts.TypeFlags.IntLike || operandType.flags & ts.TypeFlags.NumberLike || operandType.flags & ts.TypeFlags.BooleanLike) {
+                    const castedToResultType = left.castImplicit(resultType, context);
+                    result = castedToResultType ? castedToResultType.generateIR(context) : undefined;
+                }
+
+                break;
+
             case ts.SyntaxKind.PlusPlusToken:
                 if (operandType.flags & ts.TypeFlags.IntLike) {
                     result = context.builder.createAdd(left.generateIR(context), llvm.ConstantInt.get(context.llvmContext, 1), "add");

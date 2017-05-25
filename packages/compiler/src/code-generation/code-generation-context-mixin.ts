@@ -9,6 +9,7 @@ import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {SpeedyJSClassReference} from "./value/speedy-js-class-reference";
 
 import {Value} from "./value/value";
+import {isMaybeObjectType} from "./util/types";
 
 /**
  * Defines the extension methods / default implementations that do not depend on a particular code generation context implementation
@@ -57,6 +58,10 @@ export class CodeGenerationContextMixin {
                 // well the object reference ptr
                 throw new Error("Returning methods is not yet supported");
             }
+        }
+
+        if (isMaybeObjectType(type)) {
+            type = type.getNonNullableType();
         }
 
         if (type.flags & ts.TypeFlags.Object) {

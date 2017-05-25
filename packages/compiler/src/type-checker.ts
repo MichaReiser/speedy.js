@@ -21,15 +21,9 @@ export interface TypeChecker {
     isImplementationOfOverload(fun: ts.FunctionLikeDeclaration): boolean;
 
     /**
-     * Tests if the passed in types are are equal.
-     * @param first the first type to test
-     * @param second the second type to test
-     */
-    isAssignableTo(first: ts.Type, second: ts.Type): boolean;
-
-    /**
      * Takes a type script type and converts it to a supported variant of it
      * @param type the type to convert
      */
     toSupportedType(type: ts.Type): ts.Type;
+    isUndefinedSymbol(symbol: ts.Symbol): boolean;
 }

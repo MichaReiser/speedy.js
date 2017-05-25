@@ -161,8 +161,42 @@ attributes #2 = { alwaysinline nounwind readonly }
 "
 `;
 
-exports[`CallExpression implicit-call-arguments-type-coercion-error 1`] = `
-"__tests__/code-generation/cases/call-expression/implicit-call-arguments-type-coercion-error.ts(4,22): error TS1000020: Unsupported implicit cast of the argument with the type 'int' to the expected parameter type 'number'. An explicit cast of the argument to the type 'number' is required.
+exports[`CallExpression implicit-call-arguments-type-coercion 1`] = `
+"; ModuleID = 'call-expression/implicit-call-arguments-type-coercion.ts'
+source_filename = \\"call-expression/implicit-call-arguments-type-coercion.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+
+define double @_implicitCallArgumentsTypeCoercion(i32 %value) {
+entry:
+  %value.addr = alloca i32, align 4
+  %return = alloca double, align 8
+  store i32 %value, i32* %value.addr, align 4
+  %value.addr1 = load i32, i32* %value.addr, align 4
+  %value.addr1AsNumber = sitofp i32 %value.addr1 to double
+  %mathPtr = load %class.Math*, %class.Math** @Math_ptr, align 4
+  %sqrtReturnValue = call double @Math_sqrtd(%class.Math* %mathPtr, double %value.addr1AsNumber)
+  store double %sqrtReturnValue, double* %return, align 8
+  br label %returnBlock
+
+returnBlock:                                      ; preds = %entry
+  %return2 = load double, double* %return, align 8
+  ret double %return2
+}
+
+; Function Attrs: alwaysinline nounwind readnone
+declare double @Math_sqrtd(%class.Math* readonly dereferenceable(1), double) #0
+
+attributes #0 = { alwaysinline nounwind readnone }
 "
 `;
 
@@ -227,7 +261,43 @@ returnBlock:                                      ; preds = %if.end, %if.then
 "
 `;
 
-exports[`CallExpression varargs-implicit-type-coercion-error 1`] = `
-"__tests__/code-generation/cases/call-expression/varargs-implicit-type-coercion-error.ts(4,60): error TS1000020: Unsupported implicit cast of the argument with the type '2' to the expected parameter type 'number'. An explicit cast of the argument to the type 'number' is required.
+exports[`CallExpression varargs-implicit-type-coercion 1`] = `
+"; ModuleID = 'call-expression/varargs-implicit-type-coercion.ts'
+source_filename = \\"call-expression/varargs-implicit-type-coercion.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.Array = type { double*, i32, i32 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@items = private local_unnamed_addr constant [10 x double] [double 1.100000e+00, double 1.200000e+00, double 1.300000e+00, double 1.400000e+00, double 1.500000e+00, double 1.600000e+00, double 1.700000e+00, double 1.800000e+00, double 1.900000e+00, double 2.000000e+00]
+
+define void @_varargsImplicitTypeCoercion(%class.Array* %array) {
+entry:
+  %items = alloca [10 x double], align 8
+  %array.addr = alloca %class.Array*, align 4
+  store %class.Array* %array, %class.Array** %array.addr, align 4
+  %array.addr1 = load %class.Array*, %class.Array** %array.addr, align 4
+  %items2 = getelementptr inbounds [10 x double], [10 x double]* %items, i32 0, i32 0
+  %0 = bitcast [10 x double]* %items to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([10 x double]* @items to i8*), i32 80, i32 0, i1 false)
+  %pushReturnValue = call i32 @ArrayId_pushPdu(%class.Array* %array.addr1, double* %items2, i32 10)
+  ret void
+}
+
+; Function Attrs: alwaysinline
+declare i32 @ArrayId_pushPdu(%class.Array* readonly dereferenceable(12), double*, i32) #0
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
+
+attributes #0 = { alwaysinline }
+attributes #1 = { argmemonly nounwind }
 "
 `;

@@ -74,6 +74,10 @@ export class Allocation implements AssignableValue {
         let llvmValue = value instanceof llvm.Value ? value : value.generateIR(context);
         context.builder.createAlignedStore(llvmValue, this.store, this.alignment, false);
     }
+
+    castImplicit(type: ts.Type, context: CodeGenerationContext) {
+        return this.dereference(context).castImplicit(type, context);
+    }
 }
 
 /**

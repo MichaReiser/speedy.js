@@ -1,3 +1,5 @@
+class NotEqualsTest {}
+
 async function exclamationEqualsEqualsToken() {
     "use speedyjs";
 
@@ -8,4 +10,6 @@ async function exclamationEqualsEqualsToken() {
     four !== 4;
     threePointFour !== 3.4;
     trueValue !== true;
+    undefined !== undefined;
+    new NotEqualsTest() !== new NotEqualsTest();
 }

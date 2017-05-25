@@ -121,8 +121,12 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: { tot
             return jsValue;
         }
 
-        if (typeof(jsValue) === "undefined" || jsValue === null) {
+        if (jsValue === null) {
             throw new Error("Undefined and null values are not supported");
+        }
+
+        if (typeof(jsValue) === "undefined") {
+            return 0;
         }
 
         let ptr = objectReferences.get(jsValue);

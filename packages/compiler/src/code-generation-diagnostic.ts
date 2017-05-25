@@ -62,7 +62,7 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedUnaryOperation(node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, type: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operand.kind], type);
+        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operator], type);
     }
 
     static anonymousEntryFunctionsNotSupported(fun: ts.FunctionDeclaration) {
@@ -152,6 +152,18 @@ export class CodeGenerationDiagnostic extends Error {
     static variableDeclarationList(variableDeclarationList: ts.VariableDeclarationList) {
         return CodeGenerationDiagnostic.createException(variableDeclarationList, diagnostics.UnsupportedVarDeclaration);
     }
+
+    static unsupportedOverloadedFunctionDeclaration(declaration: ts.FunctionLikeDeclaration) {
+        return CodeGenerationDiagnostic.createException(declaration, diagnostics.UnsupportedOverloadedFunctionDeclaration);
+    }
+
+    static unsupportedGenericClass(classDeclaration: ts.ClassDeclaration) {
+        return CodeGenerationDiagnostic.createException(classDeclaration, diagnostics.UnsupportedGenericClass);
+    }
+
+    static unsupportedClassInheritance(classDeclaration: ts.ClassDeclaration) {
+        return CodeGenerationDiagnostic.createException(classDeclaration, diagnostics.UnsupportedClassInheritance);
+    }
 }
 
 const diagnostics = {
@@ -232,7 +244,7 @@ const diagnostics = {
         code: 1000018
     },
     UnsupportedImplicitCastOfBinaryExpressionOperands: {
-        message: "Unsupported implicit cast of binary expressions operands (left: %s, right: %s). An explicit cast of either of the operands to the other's type is required.",
+        message: "No implicit cast for the binary expressions operands (left: %s, right: %s) exists. An explicit cast of either of the operands to the other's type is required.",
         code: 1000019
     },
     UnsupportedImplicitCastOfArgument: {
@@ -274,5 +286,17 @@ const diagnostics = {
     UnsupportedVarDeclaration: {
         message: "Unsupported 'var' declaration of variable. Only variables with block scope ('let' and 'const') are supported.",
         code: 1000029
+    },
+    UnsupportedOverloadedFunctionDeclaration: {
+        message: "Overloaded functions are not yet supported.",
+        code: 1000030
+    },
+    UnsupportedGenericClass: {
+        message: "Generic classes are not yet supported.",
+        code: 1000031
+    },
+    UnsupportedClassInheritance: {
+        message: "Class inheritance is not yet supported.",
+        code: 1000032
     }
 };

@@ -1,5 +1,5 @@
 async function asteriskImplicitCast() {
     "use speedyjs";
 
-    3 * 4.0;
+    let result = 3 * 4.0;
 }

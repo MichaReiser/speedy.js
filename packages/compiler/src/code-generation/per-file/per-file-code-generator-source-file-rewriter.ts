@@ -6,6 +6,7 @@ import {PerFileSourceFileRewirter} from "./per-file-source-file-rewriter";
 import {WastMetaData} from "./wast-meta-data";
 import {CodeGenerationContext} from "../code-generation-context";
 import {TypeChecker} from "../../type-checker";
+import {isMaybeObjectType} from "../util/types";
 
 interface Types {
     [name: string]: {
@@ -63,7 +64,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         let argumentObjects: ts.Identifier;
         // argumentObjects = new Map();
-        if (argumentTypes.findIndex(argumentType => (argumentType.flags & ts.TypeFlags.Object) !== 0) !== -1) {
+        if (argumentTypes.findIndex(argumentType => (argumentType.flags & ts.TypeFlags.Object) !== 0 || isMaybeObjectType(argumentType)) !== -1) {
             argumentObjects = ts.createUniqueName("argumentObjects");
             bodyStatements.push(ts.createVariableStatement(undefined, [ts.createVariableDeclaration(argumentObjects, undefined, ts.createNew(ts.createIdentifier("Map"), undefined, []))]));
         } else {
@@ -159,7 +160,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             return ts.createBinary(returnValue, ts.SyntaxKind.EqualsEqualsEqualsToken, ts.createNumericLiteral("1"));
         }
 
-        if (type.flags & ts.TypeFlags.Object) {
+        if (type.flags & ts.TypeFlags.Object || isMaybeObjectType(type)) {
             return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toJSObject"), undefined, [
                 returnValue,
                 ts.createLiteral(serializedTypeName(type, this.context.typeChecker))
@@ -173,7 +174,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const parameterType = this.context.typeChecker.getTypeAtLocation(parameterDeclaration);
         const symbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
 
-        if (parameterType.flags & ts.TypeFlags.Object) {
+        if (parameterType.flags & ts.TypeFlags.Object || isMaybeObjectType(parameterType)) {
             return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toWASM"), undefined, [
                 ts.createIdentifier(symbol.name),
                 ts.createLiteral(serializedTypeName(parameterType, this.context.typeChecker)),
@@ -189,7 +190,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         let typesToProcess = Array.from(new Set(this.argumentAndReturnTypes));
 
         while (typesToProcess.length > 0) {
-            const type = typesToProcess.pop()!;
+            let type = typesToProcess.pop()!;
             const name = serializedTypeName(type, this.context.typeChecker);
 
             if (name in types) {
@@ -200,6 +201,10 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             let fields: { name: string, type: string }[] = [];
             let typeArguments: string[] = [];
             let constructor: ts.Identifier | undefined;
+
+            if (isMaybeObjectType(type)) {
+                type = type.getNonNullableType();
+            }
 
             if (type.flags & ts.TypeFlags.Object) {
                 const objectType = type as ts.ObjectType;
@@ -235,6 +240,10 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 }
 
 function serializedTypeName(type: ts.Type, typeChecker: TypeChecker): string {
+    if (isMaybeObjectType(type)) {
+        type = type.getNonNullableType();
+    }
+
     if (type.flags & ts.TypeFlags.BooleanLike) {
         return "i1";
     } else if (type.flags & ts.TypeFlags.IntLike) {

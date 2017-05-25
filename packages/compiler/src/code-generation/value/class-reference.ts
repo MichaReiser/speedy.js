@@ -79,6 +79,11 @@ export abstract class ClassReference implements Value {
         return this;
     }
 
+    castImplicit(type: ts.Type, context: CodeGenerationContext) {
+        // Can probably never be casted?
+        return undefined;
+    }
+
     getTypeStoreSize(objectType: ts.ObjectType, context: CodeGenerationContext): number {
         const llvmType = this.getLLVMType(objectType, context);
         return context.module.dataLayout.getTypeStoreSize(llvmType);
@@ -129,6 +134,9 @@ export abstract class ClassReference implements Value {
      */
     protected getObjectType(type: ts.ObjectType, context: CodeGenerationContext) {
         if (!this.llvmType) {
+            const forwardDeclaration = llvm.StructType.create(this.compilationContext.llvmContext, `class.${this.symbol.name}`);
+            this.llvmType = forwardDeclaration;
+
             const fieldTypes = this.getFields(type, context).map(field => toLLVMType(field.type, context));
 
             if (fieldTypes.length === 0) {
@@ -138,9 +146,7 @@ export abstract class ClassReference implements Value {
                 fieldTypes.push(llvm.Type.getInt1Ty(context.llvmContext));
             }
 
-            this.llvmType = llvm.StructType.create(this.compilationContext.llvmContext, fieldTypes,
-                `class.${this.symbol.name}`
-            );
+            forwardDeclaration.setBody(fieldTypes);
         }
         return this.llvmType;
     }

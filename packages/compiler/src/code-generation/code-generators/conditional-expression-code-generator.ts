@@ -16,19 +16,19 @@ class ConditionalExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Condi
         const whenFalseType = context.typeChecker.getTypeAtLocation(node.whenFalse);
         const conditionalType = context.typeChecker.getTypeAtLocation(node);
 
-        if (!context.typeChecker.isAssignableTo(conditionalType, whenTrueType)) {
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenTrueType));
-        }
-
-        if (!context.typeChecker.isAssignableTo(conditionalType, whenFalseType)) {
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenFalseType));
-        }
-
         const condition = context.generateValue(node.condition);
         const conditionBool = Primitive.toBoolean(condition.generateIR(context), context.typeChecker.getTypeAtLocation(node.condition), context);
 
-        const whenTrue = context.generateValue(node.whenTrue);
-        const whenFalse = context.generateValue(node.whenFalse);
+        const whenTrue = context.generateValue(node.whenTrue).castImplicit(conditionalType, context);
+        const whenFalse = context.generateValue(node.whenFalse).castImplicit(conditionalType, context);
+
+        if (!whenFalse) {
+            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenFalse, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenFalseType));
+        }
+
+        if (!whenTrue) {
+            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, context.typeChecker.typeToString(conditionalType), context.typeChecker.typeToString(whenTrueType));
+        }
 
         const result = context.builder.createSelect(conditionBool, whenTrue.generateIR(context), whenFalse.generateIR(context), "cond");
         return context.value(result, context.typeChecker.getTypeAtLocation(node));

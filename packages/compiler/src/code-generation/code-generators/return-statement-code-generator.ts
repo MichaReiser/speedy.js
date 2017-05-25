@@ -17,12 +17,14 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
             const returnType = getExpectedReturnType(returnStatement, context.typeChecker);
             const expressionType = context.typeChecker.getTypeAtLocation(returnStatement.expression);
 
-            if (!context.typeChecker.isAssignableTo(returnType, expressionType)) {
+            const returnValue = context.generateValue(returnStatement.expression);
+            const casted = returnValue.castImplicit(returnType, context);
+
+            if (!casted) {
                 throw CodeGenerationDiagnostic.unsupportedImplicitCastOfReturnValue(returnStatement, context.typeChecker.typeToString(returnType), context.typeChecker.typeToString(expressionType));
             }
 
-            const returnValue = context.generateValue(returnStatement.expression);
-            returnAllocation!.generateAssignmentIR(returnValue, context);
+            returnAllocation!.generateAssignmentIR(casted, context);
         }
 
         assert(returnBlock, "No return block present (not inside of a function?)");

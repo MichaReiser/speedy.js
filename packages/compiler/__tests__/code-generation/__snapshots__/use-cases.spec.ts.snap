@@ -729,7 +729,7 @@ entry:
   %return = alloca double, align 8
   store %class.Array* %points, %class.Array** %points.addr, align 4
   %points.addr1 = load %class.Array*, %class.Array** %points.addr, align 4
-  %shiftReturnValue = call dereferenceable(8) %class.Point* @ArrayIPv_shift(%class.Array* %points.addr1)
+  %shiftReturnValue = call %class.Point* @ArrayIPv_shift(%class.Array* %points.addr1)
   store %class.Point* %shiftReturnValue, %class.Point** %current, align 4
   %current2 = load %class.Point*, %class.Point** %current, align 4
   %items3 = getelementptr inbounds [1 x %class.Point*], [1 x %class.Point*]* %items, i32 0, i32 0
@@ -817,7 +817,7 @@ returnBlock:                                      ; preds = %while.end
 }
 
 ; Function Attrs: alwaysinline
-declare dereferenceable(8) %class.Point* @ArrayIPv_shift(%class.Array* readonly dereferenceable(12)) #0
+declare %class.Point* @ArrayIPv_shift(%class.Array* readonly dereferenceable(12)) #0
 
 ; Function Attrs: alwaysinline nounwind readonly
 declare i32 @ArrayIPv_length(%class.Array* nocapture readonly dereferenceable(12)) #1
