@@ -17,12 +17,13 @@ addons:
     - libstdc++6
     - checkinstall
   sauce_connect: true
+  code_climate:
+    repo_token:
+      secure: PQXA/Ctjjrx9CT1+IkSzvIVzUXf00L6gcCnqPsG0o8FtgodxbVBMKIOxl1A/rEAV618xjhBGE15OjtnOwUbFwKVPYNDu1gnHBb/539mCuO0WSXfcLPGY7HmHfdsLtBt7EkeEmqERib7/+3dFjIQG5Sr2k/GB6Vl0z71W1D/QzutocfbF/EtvRmrzpo/tHXYFJQBoHWfzKP1Wjupt7aWpSWYke+K+cqiLo9JlFG/+Jox8Uw8kb7e07IlDCnwIDHLJ9ok0Az7Ys33XYHQXZNGaxbeJ3+HInvTLGhe58hgqo/EAyLZAIbeyDXseiTeU4h2fiT6d/yQjJJnWvtK0QUSvWNPex770+rOx4BAILe0UDxbY71QUWYOywioPa4YeYWqeOqdE/GikxnpbYR/ZENjRnSi/L0C4dxoaUQsMJ90OYE6QCG3Ou7pY0OjGhOBinDLs7NM/OwpnWcL4u3mTo0GV/6y6G2URnuelP+Bx4EB1On1ZvexSvIdRCt1mx985c2lZb1g7lov3vcjVVyWsZGmw9oEbnGRIgbDb6p0ygkdumc+O+H4hYFTuZWr4foOsBkRf4/bjQGTCFUWAD8Lgr9OuoZ8wEkBFGhugLpA+nJL7sz5VOk+9uivg9QgUuJtupgbhpeNP/2S7x13TP4/EQTRfAIKdsdHucDyEfmSr+WoF8/U=
 env:
   global:
   - LLVM=/usr/bin
   - GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
-  - secure: s8kN9v/XmraWaNVsX8fuaA6Ozz3jVXQQMFXsX8OzAKkton18cvxMwj55SMuELrym1dYHs5JczLJPJ4ASUfpcrk9zranFklt8rEtdfuPsKzu/FsseWkBV9gOFLJ7Fyamdu+6XG0ZipW5KXTKiPIUBYWFr6ryvagfjhup5OLsPyqqiBeCr6o5WLmx74b8mj1wgdMxpWkPLU9sDFT1uHMwJIX56mcT9wKHkoUsP7BOnJS4VBT75zLQVQXFOk2H1Ejg0c+KP2L0/sj1weqmPYeIlfCZiBZ/1nGOUqmuQykMEgwE1at+jJG5PF3yA3Za534l19xNPcI5i65SwJBkRLEOVo/sxAxqYL/q8IOLk3lUH53oRoZB578gdH2kOzQlG32fpfef1oz9BcCP0lK7IZau6mAG+FgnV3O47z12YjEoItcvn7eXKXnBp1JEWuMzcfErZQ7ck8qT9yfr5js7PCwb4o8sGcRRlACd5eB5gHX6wRp6/knjjNzmPQrpZmD4Yrj2IjogvbeevQPvp3waX6Ocv4MypODKXrZNC57iQd7LNkLBE87hZeDpY23UbRV8XG7dZTfyLd8qnh9V7+pXxeqpdyFeiD2loa7Y952qEtvd/f14YEOumpGb6uBL0Rpq+63R35hFi951Tg6MA3gUs8U6OJH+v2RjLrJZhGKgb2Py35UM=
-
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
   && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
@@ -49,7 +50,7 @@ install:
 - npm install
 - npm run bootstrap
 
-after_script:
+after_success:
 - npm run coverage
 
 after_failure:
