@@ -1,0 +1,10 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/
+cmake-build-debug/
+cmake-build-default/
+cmake-build-release/
+tools/
+.emscripten
+.emscripten_cache/
+.emscripten_cache.lock
+.emscripten_sanity_wasm

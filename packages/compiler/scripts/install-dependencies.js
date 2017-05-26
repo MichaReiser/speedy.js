@@ -3,14 +3,14 @@ const fs = require("fs");
 const llvmInstaller = require("./llvm-installer");
 const binaryenInstaller = require("./binaryen-installer");
 
-const TOOLS_DIRECTORY = path.resolve("./tools");
+const TOOLS_DIRECTORY = "./tools";
 
 function build() {
     if (!fs.existsSync(TOOLS_DIRECTORY)) {
         fs.mkdirSync(TOOLS_DIRECTORY);
     }
 
-    const llvm = llvmInstaller.install(TOOLS_DIRECTORY);
+    const llvm = llvmInstaller.install();
     const binaryen = binaryenInstaller.install(TOOLS_DIRECTORY);
 
     const configuration = {

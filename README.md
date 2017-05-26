@@ -21,25 +21,35 @@ There is also a pre-build [Ubuntu VM](https://drive.switch.ch/index.php/s/niYl4k
 
 ## Getting Started
 
-Install the compiler using `npm install` (or yarn or whatever). Also install the custom TypeScript version to make use of the `int
- type.
+### Setup LLVM
+First, you need an LLVM installation that includes the experimental WebAssembly target. You can test if your LLVM installation includes the WebAssembly backend by running
+
+```bash
+llvm-config --targets-built
+```
+
+If the output contains the word *WebAssembly* you are good to go (continue with *Install Cross Compiler*). If not, then you have to build LLVM from source by following [these instructions](./doc/BUILD_LLVM_FROM_SOURCE.md).
+
+After LLVM has been built and is installed, set the path to the `llvm-config` executable (it is located in the installation directory) using `npm config set` or an `.npmrc` file in your project:
+
+```bash
+npm config set LLVM_CONFIG /llvm/install/dir/llvm-config
+```
+
+or when using the `.npmrc` file:
+
+```ini
+LLVM_CONFIG = "/llvm/install/dir/llvm-config"
+```
+
+### Install Cross Compiler
+
+Now the compiler can be installed using `npm install` (or yarn or whatever). Also install the custom TypeScript version that has support for the `int` base type.
+
  
 ```bash
 npm install --save-dev speedyjs-compiler MichaReiser/TypeScript#2.3.3-with-int
 ```
-
-The install script is going to take a while as it clones the latest version of LLVM and clang and builds them from source. So it's best if you take a nap, do your groceries...
-
-Alternatively, LLVM and clang can be [built manually](http://llvm.org/docs/CMake.html) from source including the flag `-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly`. The `npm run bootstrap` script will pick up your LLVM installation if you set the `LLVM_CONFIG` config variable to the path where llvm-config is installed.
-
-```
-npm config set LLVM_CONFIG /usr/local/bin/llvm-config
-npm install --save-dev speedyjs-compiler MichaReiser/TypeScript#2.3.3-with-int
-```
-
-You can also define the variable in the project specific `.npmrc` file or pass it as additional argument using `npm install ... --LLVM_CONFIG=...`
-
-
 
 ## Compile your first Script
 You have to mark Speedy.js functions with the `use speedyjs` directive. Furthermore, you have to declare Speedy.js functions that are called from a pure JavaScript function as `async` (see `fib`). 
@@ -73,7 +83,7 @@ The compiler will compile the `fib` and `fibSync` function to WebAssembly wherea
 The script can be compiled using:
 
 ```
-node packages/compiler/cli.js fib.ts
+node node_modules/.bin/speedyjs fib.ts
 ```
 
 which outputs the `fib.js` file. 
@@ -95,11 +105,11 @@ Clone the git repository:
 git clone --recursive https://github.com/MichaReiser/speedy.js.git
 ```
 
+Ensure that LLVM is set up (see Getting Started).
+
 Run the `install` and `bootstrap` scripts in the just cloned directory:
 
 ```
 npm install
 npm run bootstrap
 ```
-
-See *Getting started* for an explanation how to use a custom LLVM installation.
