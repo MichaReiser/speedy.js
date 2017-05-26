@@ -21,8 +21,6 @@ export function runCases(name: string, directory: string) {
     const successCases = cases.filter(fileName => errorCases.indexOf(fileName) === -1);
 
     describe(name, () => {
-
-        let tmpDirectory: tmp.SynchrounousResult;
         let compilerOptions: SpeedyJSCompilerOptions;
         let compilerHost: ts.CompilerHost;
 
@@ -31,7 +29,13 @@ export function runCases(name: string, directory: string) {
             const tsConfigTxt = ts.sys.readFile(tsConfigName);
             const optionsAsJson = ts.parseConfigFileTextToJson(tsConfigName, tsConfigTxt).config;
 
-            const options = ts.parseJsonConfigFileContent(optionsAsJson, ts.sys, __dirname, ts.getDefaultCompilerOptions(), tsConfigName).options as SpeedyJSCompilerOptions;
+            const options = ts.parseJsonConfigFileContent(optionsAsJson,
+                ts.sys,
+                __dirname,
+                ts.getDefaultCompilerOptions(),
+                tsConfigName
+            ).options as SpeedyJSCompilerOptions;
+
             options.emitLLVM = true;
             options.unsafe = false;
             options.rootDir = TEST_CASES_DIR;
@@ -76,7 +80,6 @@ export function runCases(name: string, directory: string) {
         afterAll(() => {
             const trash = fs.readdirSync(path.join(OUT_DIR, directory)).map(file => path.join(OUT_DIR, directory, file));
             trash.forEach(file => fs.unlinkSync(file));
-            tmpDirectory.removeCallback();
         });
     });
 }

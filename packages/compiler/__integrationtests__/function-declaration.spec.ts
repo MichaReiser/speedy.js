@@ -33,7 +33,7 @@ function max(first: number, ...others: number[]) {
 
 describe("FunctionDeclaration", () => {
     describe("passing arrays", () => {
-       it("arrays can be passed between speedyJS functions", async function (cb) {
+       it("arrays can be passed between speedyJS functions", async (cb) => {
             expect(await passesArray()).toBe(4);
             cb();
        });

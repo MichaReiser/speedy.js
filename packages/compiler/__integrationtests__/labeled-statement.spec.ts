@@ -2,7 +2,8 @@ async function breakToLabelWithReturnInNormalEnd() {
     "use speedyjs";
 
     let i = 0;
-    outer_block:{
+    // tslint:disable-next-line
+    outer_block: {
         {
             ++i;
             if (i === 1) {
@@ -15,7 +16,6 @@ async function breakToLabelWithReturnInNormalEnd() {
 
     return i; // always 1
 }
-
 
 describe("LabeledStatement", () => {
     describe("break", () => {

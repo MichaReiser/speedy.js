@@ -1,20 +1,21 @@
 #!/usr/bin/env node
 
+import * as program from "commander";
 import * as path from "path";
 import * as ts from "typescript";
-import * as program from "commander";
-
-const packageJson = require("./package.json");
-import {reportDiagnostics} from "./src/util/diagnostics";
 import {Compiler} from "./src/compiler";
 import {initializeCompilerOptions, UninitializedSpeedyJSCompilerOptions} from "./src/speedyjs-compiler-options";
+import {reportDiagnostics} from "./src/util/diagnostics";
+
+// tslint:disable-next-line
+const packageJson = require("./package.json");
 
 interface CommandLineArguments {
     /**
-     * The name of the files to process
+     * The name of the files to prØocess
      */
-    args: string[],
-    config?: string,
+    args: string[];
+    config?: string;
     unsafe?: boolean;
     emitLlvm?: boolean;
     saveWast?: boolean;
@@ -36,10 +37,11 @@ interface CommandLineArguments {
 function parseCommandLine(): CommandLineArguments {
     function parseSettings(setting: string, memo: any) {
         const [key, value] = setting.split("=");
-        memo[key] = parseInt(value);
+        memo[key] = parseInt(value, 10);
         return memo;
     }
 
+    // tslint:disable:max-line-length
     program
         .version(packageJson.version)
         .usage("[options] [files ...]")
@@ -55,6 +57,7 @@ function parseCommandLine(): CommandLineArguments {
         .option("--optimization-level [value]", "The optimization level to use. One of the following values: '0, 1, 2, 3, s or z'")
         .option("-s --settings [value]", "additional settings", parseSettings, {})
         .parse(process.argv);
+    // tslint:enable:max-line-length
 
     return program as any as CommandLineArguments;
 }

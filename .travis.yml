@@ -16,13 +16,18 @@ addons:
     - libobjc-4.8-dev
     - libstdc++6
     - checkinstall
-  sauce_connect: true
+  sauce_connect:
+    username:
+      secure: awXNvlwMXZ0t419TKnB2Gfbg2CjU0fSmuCNq+rklGV3vQQPPweQjW7W4mdaMGr4UMzNlwlG+PKEabhwV/PmzZXhBfe1H9bJKO4TmsEONTO2i5WrYAHHXEpAwCpF3SUf1hecL0uS5dFel0mvJHrZwTdupLzFmEOLmt1N+b9z3DqfiP//Uc1aqnThsaflpz8MG4evVbUNPM/AiNlLTQTqZuIsmaoHGR7lqgwZSZWhB3x6ut5A7zEActWiFu4iSVdWA7l7pJInhvx8pEoL3vV2ZRIKLF0HexMk0Ykm+n5jO5BTpGm0GsxseBk6zK+AEeS4yAucj8DFr0QtiSgLaOwBwvrRMlF4ryzjzxmnC7x5wIpRSpyHP9XQQX+1q5LPAKNR/aYSjrWKJJhr00R7xQ2BQg7xMHYajcK4ILiX8kXXQZQ3aKXqDs6rpgUJqci2JMdfhziIlT1lnR7y5B3CLjWs70ZSvm+UP8cm/ZRfSrMm1NH2ENUnInRry938dIQq1lHgnk7JYjYuJy8VlG5tCmi2tac8LJCDd+/62Io2r5YTp5kc/+qMAuLonGit5mZYF4YaAJI1mWOjfAaIHyGnY+5O7t/mBJalngnE2q6QgcN6Dmdd7khO2AmNGCG44DpwTKSV69XyxbExrnSfmaibtYVmpfRt2XvDrF9fp2/FT239nUcw=
+    access_key:
+      secure: UiJJRJPRm5pH8quE2EvCooGkykll1MwadYMakTDPJIH3Ecn+fKOgntrovReJlwuH74Mi2sxS+7j8zrdOhd1fiOyY8zDgvAUEviWa2Q5UW82EdQ0ReVUtR6t63rSgFqhH20gsH1zPh96vIfmWRY52WACX3yBgmrMuZGjMStXzjXeBH2G5weWhYanbE6jRX/AWVuK25/etrzFWfXFYlXgZNptn9XBBsirxAv0QFjt0uBS4c3ANUd+MtKohlKdYdmUIPY/6uoWjZk3i7COmlWXKNsDsT+IuxTTx8DyMqUf1/9dn8/KobKBWlRWxM9Kzawn49ydJrkgSoAnYjTdUh5XCwq/sW/TWS7kWWZCBcJa9xL4M3e+6m2UDmgeX9jGZuD/OGE/5CSbL0Mv5YKGSY5Ek/rT+HCBGv/fXSXNLfSyX+KhS6/6ZchVj+KduEgTmKBuZ3x6N1pBfBT7HbgNBX3Opgxbs2iomXRcTDsrxEirLWrec5CsJ3pf/hhkBcjz1sBwze7ShYqbemEdNcVjtQtdhH+4Hm+JEuJILJoWajLMWTUL7tInokCc3F03w17bZIbafm+PjcUV30g+kE1F6axLt4GPBZVBBuuKOOyAWy1R47RCr4Teh5pLB+9byX5pXSZ0mUAirR2R5qwENh6cWmR2s/FU5QswGR0nGjX4Kohq84Lc=
+  code_climate:
+    repo_token:
+      secure: i26rPVMhJbffCwkWfItH7fsmEK2bxjcxSj/+ktRK+RF7oaPJVzJzJHkEuJ7/WVz4tQJeul/+pSiInpyj6UkdOz1QMWHQ/liSIP3KlnUJ4JMqBn2jrFCgrVN3wPqwoa9zXuHsHoO/uLZzX2kqsPCwwypWLV95NgINUGUX6RLdnrxh+lrFmWsDwfmMeTfqobOXCSwCu1tX7MqHYHZhzakrunVGxlpiMUlHHPxb+4ap8cYv6JGWhxITQRJI/G/O1WprxgQu+j1xp6odXhZBkL0jeZHwOExj3YB56LTxDE3rZVhsMhMAawsHMJzr9CYNe5eR/zjlRD+uwS5649L0iFiHM0JpBK4igYi439zTqIfdQJlQnIxFUJ9yfOp41KbFF0tMGdpCDQc1brkxpuADQjrrFnlKnmXE13Y8iGnxKg0G1BxvyuviqmsHwVqVGosaoMbbEWy4X+sy7EGEf29PaDuPnoqCjZcZ/j3vVoyv8FJNTJfcwJAE68WT+tU5PZY4mBE3YIZqI/Zq39ndrLlooJ/8mF64119rpRVF6da4nXXgbo1nGn+S8Gv/+Tiu9XofrCQgsGTBhw5R1TpA6OCoNLVMYhVG6aW5Jyzxy/SoOVCfgxCfws94sNJi85R24RlnpY8Tki4D77JfRGmi0Fl1mWlEkTZ39ESsoCdSesnIuKSAJpA=
 env:
   global:
   - LLVM=/usr/bin
   - GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
-  - secure: s8kN9v/XmraWaNVsX8fuaA6Ozz3jVXQQMFXsX8OzAKkton18cvxMwj55SMuELrym1dYHs5JczLJPJ4ASUfpcrk9zranFklt8rEtdfuPsKzu/FsseWkBV9gOFLJ7Fyamdu+6XG0ZipW5KXTKiPIUBYWFr6ryvagfjhup5OLsPyqqiBeCr6o5WLmx74b8mj1wgdMxpWkPLU9sDFT1uHMwJIX56mcT9wKHkoUsP7BOnJS4VBT75zLQVQXFOk2H1Ejg0c+KP2L0/sj1weqmPYeIlfCZiBZ/1nGOUqmuQykMEgwE1at+jJG5PF3yA3Za534l19xNPcI5i65SwJBkRLEOVo/sxAxqYL/q8IOLk3lUH53oRoZB578gdH2kOzQlG32fpfef1oz9BcCP0lK7IZau6mAG+FgnV3O47z12YjEoItcvn7eXKXnBp1JEWuMzcfErZQ7ck8qT9yfr5js7PCwb4o8sGcRRlACd5eB5gHX6wRp6/knjjNzmPQrpZmD4Yrj2IjogvbeevQPvp3waX6Ocv4MypODKXrZNC57iQd7LNkLBE87hZeDpY23UbRV8XG7dZTfyLd8qnh9V7+pXxeqpdyFeiD2loa7Y952qEtvd/f14YEOumpGb6uBL0Rpq+63R35hFi951Tg6MA3gUs8U6OJH+v2RjLrJZhGKgb2Py35UM=
-
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
   && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
@@ -49,7 +54,7 @@ install:
 - npm install
 - npm run bootstrap
 
-after_script:
+after_success:
 - npm run coverage
 
 after_failure:

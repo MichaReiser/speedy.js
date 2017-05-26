@@ -1,0 +1,19 @@
+engines:
+  eslint:
+    enabled: true
+  tslint:
+    enabled: true
+    channel: beta
+  duplicate:
+    enabled: true
+  fixme:
+    enabled: true
+ratings:
+  paths:
+  - "packages/compiler/**/*.ts"
+  - "packages/loader/**/*"
+  - "packages/runtime/lib/**/*"
+exclude_paths:
+- packages/benchmark
+- packages/compiler/__tests__
+- node_modules/
