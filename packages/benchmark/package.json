@@ -3,6 +3,7 @@
   "version": "0.0.4",
   "description": "Speedy.js Benchmark",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "start": "./cases/compile-emcc && webpack-dev-server"
   },
