@@ -19,31 +19,27 @@ included in your platforms build by default.
 
 There is also a pre-build [Ubuntu VM](https://drive.switch.ch/index.php/s/niYl4khM4Q2cX1z) (user: speedyjs, password: welcome) that can be used to experiment with the compiler.
 
-## Getting started
+## Getting Started
 
-Clone the git repository:
-
-```
-git clone --recursive https://github.com/MichaReiser/speedy.js.git
-```
-
-Run the `install` and `bootstrap` scripts in the just cloned directory:
-
-```
-npm install
-npm run bootstrap
+Install the compiler using `npm install` (or yarn or whatever). Also install the custom TypeScript version to make use of the `int
+ type.
+ 
+```bash
+npm install --save-dev speedyjs-compiler MichaReiser/TypeScript#2.3.3-with-int
 ```
 
-The bootstrap script is going to take a while as it clones the latest version of LLVM and clang and builds them from source. So it's best if you take a nap, do your groceries...
+The install script is going to take a while as it clones the latest version of LLVM and clang and builds them from source. So it's best if you take a nap, do your groceries...
 
 Alternatively, LLVM and clang can be [built manually](http://llvm.org/docs/CMake.html) from source including the flag `-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly`. The `npm run bootstrap` script will pick up your LLVM installation if you set the `LLVM_CONFIG` config variable to the path where llvm-config is installed.
 
 ```
 npm config set LLVM_CONFIG /usr/local/bin/llvm-config
-npm run bootstrap
+npm install --save-dev speedyjs-compiler MichaReiser/TypeScript#2.3.3-with-int
 ```
 
-You can also define the variable in the project specific `.npmrc` file or pass it as `npm run bootstrap --LLVM_CONFIG=...`
+You can also define the variable in the project specific `.npmrc` file or pass it as additional argument using `npm install ... --LLVM_CONFIG=...`
+
+
 
 ## Compile your first Script
 You have to mark Speedy.js functions with the `use speedyjs` directive. Furthermore, you have to declare Speedy.js functions that are called from a pure JavaScript function as `async` (see `fib`). 
@@ -86,7 +82,24 @@ To compile all files in the current directory omit any file names or pass multip
 
 ## WebPack Loader
 
-The package `loader` contains a WebPack loader implementation. See `packages/benchmark/webpack.config.js` for more details.
+The package `loader` contains a WebPack loader implementation. See the packages [README](./packages/loader/README.md) for more details.
 
 ## Benchmark
 ![Benchmark](./doc/benchmark.png)
+
+## Setup the Development Environment
+
+Clone the git repository:
+
+```
+git clone --recursive https://github.com/MichaReiser/speedy.js.git
+```
+
+Run the `install` and `bootstrap` scripts in the just cloned directory:
+
+```
+npm install
+npm run bootstrap
+```
+
+See *Getting started* for an explanation how to use a custom LLVM installation.

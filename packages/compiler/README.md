@@ -4,4 +4,4 @@
 
 The Speedy.js Compiler that generates WebAssembly module for TypeScript input files.
 
-For more details, go to the [main project page](https://github.com/MichaReiser/speedy.js).
+Go to [main project page](https://github.com/MichaReiser/speedy.js) to see how you get started.
