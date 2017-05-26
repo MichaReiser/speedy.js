@@ -8,3 +8,4 @@ cases/*.ll
 cases/*.bc
 !cases/pre.js
 dist
+node_modules

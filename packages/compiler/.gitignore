@@ -1,8 +1,10 @@
-!__integrationtests__/index.js
-**/*.js
-!scripts
-!env.js
-__tests__/code-generation/tmp
+.idea/
+coverage/
+src/**/*.js
+cli.js
+index.js
+__tests__/code-generation/tmp/
 *.map
-tools
-
+tools/
+node_modules/
+karma.conf.js
