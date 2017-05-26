@@ -1,10 +1,9 @@
 {
   "name": "speedyjs-loader",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "SpeedyJS WebPack Loader",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MichaReiser/speedy.js.git"
@@ -21,12 +20,12 @@
   },
   "homepage": "https://github.com/MichaReiser/speedy.js#readme",
   "peerDependencies": {
-    "webpack": "^2.3.2",
-    "speedyjs-compiler": "0.0.1",
-    "typescript": "^2.2.2"
+    "speedyjs-compiler": "^0.0.2",
+    "typescript": "^2.2.2",
+    "webpack": "^2.3.2"
   },
   "devDependencies": {
-    "speedyjs-compiler": "0.0.1",
+    "speedyjs-compiler": "^0.0.2",
     "typescript": "MichaReiser/TypeScript#2.3.3-with-int"
   },
   "dependencies": {

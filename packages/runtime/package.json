@@ -1,6 +1,6 @@
 {
   "name": "speedyjs-runtime",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Runtime of SpeedyJS",
   "main": "index.js",
   "typings": "index.ts",
