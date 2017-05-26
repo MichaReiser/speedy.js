@@ -157,12 +157,6 @@ export class PerFileCodeGenerator implements CodeGenerator {
         return transforms;
     }
 
-    dump() {
-        for (const states of Array.from(this.sourceFileStates.values())) {
-            states.context.module.dump();
-        }
-    }
-
     private getSourceFileState(node: ts.Node): SourceFileState {
         const sourceFile = node.getSourceFile();
         const state = this.sourceFileStates.get(sourceFile.fileName);

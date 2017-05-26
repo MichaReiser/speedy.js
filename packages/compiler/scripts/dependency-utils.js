@@ -11,6 +11,14 @@ function exec() {
     console.log("\n");
 }
 
+function execPiped() {
+    const fullCommand = util.format.apply(undefined, arguments);
+    console.log("Execute '" + fullCommand + "'");
+    const output = child_process.execSync(fullCommand, { encoding: "utf8" });
+    console.log(output);
+    return output;
+}
+
 function gitCloneOrPull(repository, target) {
     if (fs.existsSync(target) && fs.existsSync(path.join(target, ".git"))) {
         exec("git -C %s pull", target);
@@ -30,6 +38,7 @@ function make(directory, install = false) {
 
 module.exports = {
     exec: exec,
+    execPiped: execPiped,
     gitCloneOrPull: gitCloneOrPull,
     make: make,
     COMPILER_TOOLS_DIRECTORY: path.resolve("./tools")

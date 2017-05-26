@@ -24,10 +24,6 @@ addons:
   code_climate:
     repo_token:
       secure: i26rPVMhJbffCwkWfItH7fsmEK2bxjcxSj/+ktRK+RF7oaPJVzJzJHkEuJ7/WVz4tQJeul/+pSiInpyj6UkdOz1QMWHQ/liSIP3KlnUJ4JMqBn2jrFCgrVN3wPqwoa9zXuHsHoO/uLZzX2kqsPCwwypWLV95NgINUGUX6RLdnrxh+lrFmWsDwfmMeTfqobOXCSwCu1tX7MqHYHZhzakrunVGxlpiMUlHHPxb+4ap8cYv6JGWhxITQRJI/G/O1WprxgQu+j1xp6odXhZBkL0jeZHwOExj3YB56LTxDE3rZVhsMhMAawsHMJzr9CYNe5eR/zjlRD+uwS5649L0iFiHM0JpBK4igYi439zTqIfdQJlQnIxFUJ9yfOp41KbFF0tMGdpCDQc1brkxpuADQjrrFnlKnmXE13Y8iGnxKg0G1BxvyuviqmsHwVqVGosaoMbbEWy4X+sy7EGEf29PaDuPnoqCjZcZ/j3vVoyv8FJNTJfcwJAE68WT+tU5PZY4mBE3YIZqI/Zq39ndrLlooJ/8mF64119rpRVF6da4nXXgbo1nGn+S8Gv/+Tiu9XofrCQgsGTBhw5R1TpA6OCoNLVMYhVG6aW5Jyzxy/SoOVCfgxCfws94sNJi85R24RlnpY8Tki4D77JfRGmi0Fl1mWlEkTZ39ESsoCdSesnIuKSAJpA=
-env:
-  global:
-  - LLVM=/usr/bin
-  - GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
   && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
@@ -51,6 +47,7 @@ before_install:
 - export CXX=clang++-5.0
 
 install:
+- npm config set LLVM_CONFIG llvm-config-5.0
 - npm install
 - npm run bootstrap
 

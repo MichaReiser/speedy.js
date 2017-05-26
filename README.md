@@ -36,11 +36,14 @@ npm run bootstrap
 
 The bootstrap script is going to take a while as it clones the latest version of LLVM and clang and builds them from source. So it's best if you take a nap, do your groceries...
 
-Alternatively, LLVM and clang can be [built manually](http://llvm.org/docs/CMake.html) from source including the flag `-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly`. The `npm run bootstrap` script will pick up your LLVM installation if you set the `LLVM` environment variable.
+Alternatively, LLVM and clang can be [built manually](http://llvm.org/docs/CMake.html) from source including the flag `-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly`. The `npm run bootstrap` script will pick up your LLVM installation if you set the `LLVM_CONFIG` config variable to the path where llvm-config is installed.
 
 ```
-LLVM=/usr/local/bin npm run bootstrap
+npm config set LLVM_CONFIG /usr/local/bin/llvm-config
+npm run bootstrap
 ```
+
+You can also define the variable in the project specific `.npmrc` file or pass it as `npm run bootstrap --LLVM_CONFIG=...`
 
 ## Compile your first Script
 You have to mark Speedy.js functions with the `use speedyjs` directive. Furthermore, you have to declare Speedy.js functions that are called from a pure JavaScript function as `async` (see `fib`). 

@@ -15,9 +15,11 @@ function buildEmscripten(directory) {
 }
 
 function install(directory) {
+    const configuredEmscripten = process.env.EMSCRIPTEN || process.env.npm_config_EMSCRIPTEN;
+
     if (process.env.EMSCRIPTEN) {
-        fs.symlinkSync(process.env.EMSCRIPTEN, path.join(directory, "emscripten"), "directory");
-        return process.env.EMSCRIPTEN;
+        fs.symlinkSync(configuredEmscripten, path.join(directory, "emscripten"), "directory");
+        return configuredEmscripten;
     }
 
     return buildEmscripten(directory);

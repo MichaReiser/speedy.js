@@ -33,9 +33,4 @@ export interface CodeGenerator {
      * Called when the compilation of all source files is complete
      */
     completeCompilation(): void;
-
-    /**
-     * Prints debug output. Only available if llvm is build in Debug mode.
-     */
-    dump(): void;
 }

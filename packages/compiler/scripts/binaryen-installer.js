@@ -23,8 +23,9 @@ function buildBinaryen(directory) {
 }
 
 function install(directory) {
-    if (process.env.BINARYEN) {
-        return process.env.BINARYEN;
+    const configuredBinaryen = process.env.BINARYEN || process.env.npm_config_BINARYEN;
+    if (configuredBinaryen) {
+        return configuredBinaryen;
     }
 
     return buildBinaryen(directory);
