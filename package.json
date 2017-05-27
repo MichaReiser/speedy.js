@@ -8,7 +8,10 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --stream --loglevel verbose",
     "coverage": "lerna run coverage --stream",
-    "test": "lerna run test --stream ---max-buffer 10485760"
+    "test": "lerna run test --stream ---max-buffer 10485760",
+    "release:patch": "lerna publish --skip-npm --cd-version patch",
+    "release:minor": "lerna publish --skip-npm --cd-version minor",
+    "release:major": "lerna publish --skip-npm --cd-version major"
   },
   "dependencies": {},
   "license": "MIT"

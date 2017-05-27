@@ -18,17 +18,7 @@ apt-get update
 apt-get g++ checkinstall libffi-dev python-dev libjsoncpp-dev subversion rsync quilt help2man lftp git ocaml -y
 ```
 
-Install up to date cmake
-
-```sh
-wget https://cmake.org/files/v3.8/cmake-3.8.1.tar.gz
-tar -xf cmake-3.8.1.tar.gz
-cd cmake-3.8.1
-./configure
-make -j2
-checkinstall -y 
-cd ..
-```
+See *create CMake deb package* on how to install an up to date CMake version.
 
 Create an empty llvm directory
 
@@ -97,3 +87,30 @@ open famreiser.ch
 login travis 
 put filename
 ```
+
+
+## Create CMake Deb Package
+
+Travis, as well as the Build environment requires an up to date CMake version. Follow these commands to create a debian packages of cmake that can be installed on travis and the build machine.
+
+```
+wget https://cmake.org/files/v3.8/cmake-3.8.1.tar.gz
+tar -xf cmake-3.8.1.tar.gz
+cd cmake-3.8.1
+./configure
+make -j2
+sudo checkinstall -y --install=no
+```
+
+The package can then be installed using
+
+```bash
+dpkg -i cmake_3.8.1-1_amd64.deb
+```
+
+Tar the file before uploading it (otherwise hoster reports file not found???):
+
+```bash
+tar -cvzf cmake-3.8.1.tar.gz cmake_3.8.1-1_amd64.deb
+```
+
