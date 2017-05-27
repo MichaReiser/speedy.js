@@ -4,6 +4,7 @@ language: node_js
 node_js:
 - node
 cache: ccache
+
 addons:
   apt:
     sources:
@@ -24,12 +25,15 @@ addons:
   code_climate:
     repo_token:
       secure: i26rPVMhJbffCwkWfItH7fsmEK2bxjcxSj/+ktRK+RF7oaPJVzJzJHkEuJ7/WVz4tQJeul/+pSiInpyj6UkdOz1QMWHQ/liSIP3KlnUJ4JMqBn2jrFCgrVN3wPqwoa9zXuHsHoO/uLZzX2kqsPCwwypWLV95NgINUGUX6RLdnrxh+lrFmWsDwfmMeTfqobOXCSwCu1tX7MqHYHZhzakrunVGxlpiMUlHHPxb+4ap8cYv6JGWhxITQRJI/G/O1WprxgQu+j1xp6odXhZBkL0jeZHwOExj3YB56LTxDE3rZVhsMhMAawsHMJzr9CYNe5eR/zjlRD+uwS5649L0iFiHM0JpBK4igYi439zTqIfdQJlQnIxFUJ9yfOp41KbFF0tMGdpCDQc1brkxpuADQjrrFnlKnmXE13Y8iGnxKg0G1BxvyuviqmsHwVqVGosaoMbbEWy4X+sy7EGEf29PaDuPnoqCjZcZ/j3vVoyv8FJNTJfcwJAE68WT+tU5PZY4mBE3YIZqI/Zq39ndrLlooJ/8mF64119rpRVF6da4nXXgbo1nGn+S8Gv/+Tiu9XofrCQgsGTBhw5R1TpA6OCoNLVMYhVG6aW5Jyzxy/SoOVCfgxCfws94sNJi85R24RlnpY8Tki4D77JfRGmi0Fl1mWlEkTZ39ESsoCdSesnIuKSAJpA=
+
+env:
+  global:
+    secure: a7Q9g1y8U6Z3Tx9z3Lm1IQAfPG8Xn7o5XUAUewwGvB6qHw6DpcRxY2xkBpMV1uYJQpqojLNWPIXUWGWG+VkedzwgJZGDFx/87YII/h/wufLY5ZTjLnQXV12PMgzxT/1ubLdKd+xP+JzxzG1dLSAzfeDTc49lzeTQapu6y+SV+4Di64emyiJejGqSfJf/2ZWm1Zy50QgX3xHIBb+7NMiD3sdjVx6rlTJ288Y6McPG357YQimbGpd1VjkrsqNkiR7lrdNi+kKn9FVghm3B3gG88y00wcFdCfZsbkiQ9VeNw43pjwSON8AFC6YUTGzovJGGn6FQIXKPBMQiQzRXCbavcf90oFFQzPJ1EpBHQNWqJkPjOdBJfB5XdSLDxGpwTEC0PU9IoMgfjHq1LCrTKqdxijK+lIaMf12vaG2ypR7MJTcoHJvRHInDPamRLPDge5DfOWn9ZQYCfJCAjN/ld9kquz8im9eLNeZA9CEr1YIkCVUV5O1okMT9A0YyKOoLNedkB8yVXqjJrBUz41N+Tv9HR6dH55C2au+jUYWqtDVWd9DuGJpFangnrOIwv/vDZFI8yr03yEhH7Z+OpVc003UFA52PRyq+stQ1UCPohuhzQxVWFSjtJTkc6MsrAb+cFodTwyEbD7DzAzKKZKfP6BpxYUTSD2vpqlfdWOKZ835kT0I= # NPM_TOKEN
+
 before_install:
-- wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
-  && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
+- wget http://famreiser.ch/llvm/cmake-3.8.1.tar.gz && tar -xzf cmake-3.8.1.tar.gz && sudo dpkg -i cmake_3.8.1-1_amd64.deb
 - wget http://famreiser.ch/llvm/llvm-5.0-20170527.tar.gz
 - mkdir llvm && tar -xzf llvm-5.0-20170527.tar.gz -C llvm
-- $(pwd)/llvm/bin/llvm-config --targets-built
 - export CC=$(pwd)/llvm/bin/clang
 - export CXX=$(pwd)/llvm/bin/clang++
 
@@ -40,7 +44,7 @@ install:
 
 after_success:
 - npm run coverage
-
+- ./deploy.sh
 after_failure:
 - cat npm-debug.log || true
 - cat packages/compiler/npm-debug.log || true
