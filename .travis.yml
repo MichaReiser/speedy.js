@@ -24,33 +24,17 @@ addons:
   code_climate:
     repo_token:
       secure: i26rPVMhJbffCwkWfItH7fsmEK2bxjcxSj/+ktRK+RF7oaPJVzJzJHkEuJ7/WVz4tQJeul/+pSiInpyj6UkdOz1QMWHQ/liSIP3KlnUJ4JMqBn2jrFCgrVN3wPqwoa9zXuHsHoO/uLZzX2kqsPCwwypWLV95NgINUGUX6RLdnrxh+lrFmWsDwfmMeTfqobOXCSwCu1tX7MqHYHZhzakrunVGxlpiMUlHHPxb+4ap8cYv6JGWhxITQRJI/G/O1WprxgQu+j1xp6odXhZBkL0jeZHwOExj3YB56LTxDE3rZVhsMhMAawsHMJzr9CYNe5eR/zjlRD+uwS5649L0iFiHM0JpBK4igYi439zTqIfdQJlQnIxFUJ9yfOp41KbFF0tMGdpCDQc1brkxpuADQjrrFnlKnmXE13Y8iGnxKg0G1BxvyuviqmsHwVqVGosaoMbbEWy4X+sy7EGEf29PaDuPnoqCjZcZ/j3vVoyv8FJNTJfcwJAE68WT+tU5PZY4mBE3YIZqI/Zq39ndrLlooJ/8mF64119rpRVF6da4nXXgbo1nGn+S8Gv/+Tiu9XofrCQgsGTBhw5R1TpA6OCoNLVMYhVG6aW5Jyzxy/SoOVCfgxCfws94sNJi85R24RlnpY8Tki4D77JfRGmi0Fl1mWlEkTZ39ESsoCdSesnIuKSAJpA=
-env:
-  global:
-  - LLVM=/usr/bin
-  - GYP_DEFINES="LLVM_CONFIG=llvm-config-5.0"
 before_install:
 - wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz && tar -xf cmake-3.7.2.tar.gz
   && cd cmake-3.7.2 && ./configure && make -j2 && sudo checkinstall -y && cd ..
-- wget http://famreiser.ch/llvm/llvm-5.0-303148-webassembly.tar.gz
-- mkdir llvm && tar -xzf llvm-5.0-303148-webassembly.tar.gz -C llvm
-- cd llvm && sudo dpkg -i clang-5.0_5.0~svn303148-1~exp1_amd64.deb libclang1-5.0_5.0~svn303148-1~exp1_amd64.deb
-  libclang-5.0-dev_5.0~svn303148-1~exp1_amd64.deb libclang-common-5.0-dev_5.0~svn303148-1~exp1_amd64.deb
-  libllvm5.0_5.0~svn303148-1~exp1_amd64.deb llvm-5.0_5.0~svn303148-1~exp1_amd64.deb
-  llvm-5.0-runtime_5.0~svn303148-1~exp1_amd64.deb llvm-5.0-dev_5.0~svn303148-1~exp1_amd64.deb
-  && cd ..
-- sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 50
-- sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-5.0 50
-- sudo update-alternatives --install /usr/bin/llc llc /usr/bin/llc-5.0 50
-- sudo update-alternatives --install /usr/bin/opt opt /usr/bin/opt-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-nm llvm-nm /usr/bin/llvm-nm-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-link llvm-link /usr/bin/llvm-link-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-5.0 50
-- sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-5.0 50
-- export CC=clang-5.0
-- export CXX=clang++-5.0
+- wget http://famreiser.ch/llvm/llvm-5.0-20170527.tar.gz
+- mkdir llvm && tar -xzf llvm-5.0-20170527.tar.gz -C llvm
+- $(pwd)/llvm/bin/llvm-config --targets-built
+- export CC=$(pwd)/llvm/bin/clang
+- export CXX=$(pwd)/llvm/bin/clang++
 
 install:
+- npm config set LLVM_CONFIG $(pwd)/llvm/bin/llvm-config
 - npm install
 - npm run bootstrap
 

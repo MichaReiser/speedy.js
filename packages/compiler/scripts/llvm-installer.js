@@ -2,35 +2,43 @@ const fs = require("fs");
 const path = require("path");
 const dependencyUtils = require("./dependency-utils");
 
-const LLVM_GIT_URL = "https://github.com/llvm-mirror/llvm.git";
-const CLANG_GIT_URL = "https://github.com/llvm-mirror/clang.git";
+function install() {
+    let binDir;
 
+    const configuredLLVM = process.env.LLVM_CONFIG || process.env.npm_config_LLVM_CONFIG;
 
-function buildLLVM(directory) {
-    console.log("Build LLVM");
-    const targetDirectory = path.join(directory, "llvm");
-    const llvmDirectory = path.join(targetDirectory, "src");
-    const llvmBuildDirectory = path.join(targetDirectory, "build");
+    // Use version defined by environment variable
+    if (configuredLLVM) {
+        const builtTargets = dependencyUtils.execPiped("%s --targets-built", configuredLLVM);
 
-    dependencyUtils.gitCloneOrPull(LLVM_GIT_URL, llvmDirectory);
-    dependencyUtils.gitCloneOrPull(CLANG_GIT_URL, path.join(llvmDirectory, "tools/clang"));
+        if (builtTargets.indexOf("WebAssembly") === -1) {
+            throw new Error("LLVM config (" + configuredLLVM + ") reports that the WebAssembly target is missing (" + builtTargets.trim() +"). An LLVM installation with the WebAssembly target is required");
+        }
 
-    if (!fs.existsSync(llvmBuildDirectory)) {
-        fs.mkdirSync(llvmBuildDirectory);
+        binDir = dependencyUtils.execPiped("%s --bindir", configuredLLVM).trim();
+    } else {
+        // no explicit llvm installation set, try default
+        try {
+            const builtTargets = dependencyUtils.execPiped("llvm-config --targets-built").trim();
+
+            if (builtTargets.indexOf("WebAssembly") !== -1) {
+                binDir = dependencyUtils.execPiped("llvm-config --bindir").trim();
+            } else {
+                console.warn("Default LLVM-Installation reports no WebAssembly backend (" + builtTargets + ") and is, therefore, not used.");
+            }
+        } catch (error) {
+            console.warn("Failed to detect default llvm installation", error);
+        }
     }
 
-    dependencyUtils.exec('cmake -E chdir %s cmake -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_TESTS=OFF -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_INSTALL_PREFIX=%s %s', llvmBuildDirectory, targetDirectory, llvmDirectory);
-    dependencyUtils.make(llvmBuildDirectory, true);
-
-    return path.join(targetDirectory, "bin");
-}
-
-function install(directory) {
-    if (process.env.LLVM) {
-        return process.env.LLVM;
+    // No installation provided and default did not work, so use custom build
+    if (!binDir) {
+        throw new Error("No LLVM installation with built in WebAssembly backend found. Please build LLVM from source according to https://github.com/MichaReiser/speedy.js/blob/master/doc/BUILD_LLVM_FROM_SOURCE.md and set the LLVM_CONFIG variable to the llvm-config executable.");
     }
 
-    return buildLLVM(directory);
+    console.log("Use llvm installation located at '" + binDir + "'.");
+
+    return binDir;
 }
 
 module.exports = { install: install };

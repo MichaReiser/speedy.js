@@ -1,7 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
-node_modules/
 .idea/
-bin/
 cmake-build-debug/
 cmake-build-default/
 cmake-build-release/
@@ -10,6 +8,3 @@ tools/
 .emscripten_cache/
 .emscripten_cache.lock
 .emscripten_sanity_wasm
-npm-debug.log
-index.js
-*.map

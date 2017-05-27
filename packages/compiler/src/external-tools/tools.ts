@@ -48,7 +48,7 @@ export function execLLVM(tool: string, args: string, cwd?: string): string {
  * @return {string} the output of the execution
  */
 export function execBinaryen(tool: string, args: string): string {
-    const toolPath = path.join(getConfiguration().BINARYEN, "bin", tool);
+    const toolPath = path.join(path.resolve(getConfiguration().BINARYEN), "bin", tool);
 
     if (!ts.sys.fileExists(toolPath)) {
         throw new Error(`BINARYEN executable ${toolPath} is missing`);

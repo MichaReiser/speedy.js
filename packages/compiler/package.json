@@ -1,6 +1,6 @@
 {
   "name": "speedyjs-compiler",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "main": "index.js",
   "bin": {
     "speedyjs": "./cli.js"
@@ -12,7 +12,6 @@
     "@types/jasmine": "^2.5.47",
     "@types/jest": "^19.2.3",
     "codeclimate-test-reporter": "^0.4.1",
-    "env-cmd": "^5.1.0",
     "gulp": "^3.9.1",
     "jasmine-core": "^2.6.2",
     "jest": "^20.0.4",
@@ -25,7 +24,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.3",
     "merge-stream": "^1.0.1",
-    "speedyjs-loader": "0.x.x",
+    "speedyjs-loader": "^0.0.4",
     "ts-jest": "^20.0.4",
     "tslint": "^5.3.2",
     "webpack": "^2.6.1"
@@ -38,8 +37,9 @@
     "@types/tmp": "0.0.33",
     "commander": "^2.9.0",
     "debug": "^2.6.8",
+    "llvm-node": "^2.0.1",
     "lodash": "^4.17.4",
-    "speedyjs-runtime": "0.x.x",
+    "speedyjs-runtime": "^0.0.4",
     "tmp": "0.0.31",
     "typescript": "MichaReiser/TypeScript#2.3.3-with-int"
   },
@@ -47,7 +47,6 @@
     "coverage": "codeclimate-test-reporter < ./coverage/lcov.info",
     "lint": "tslint -c ../../tslint.json 'src/**/*.ts' '*.ts' '__integrationtests__/**/*.ts'",
     "preinstall": "node ./scripts/install-dependencies.js",
-    "postinstall": "env-cmd ./env.js npm install llvm-node@^2.0.0",
     "start": "tsc --watch",
     "prepublish": "tsc && npm run lint",
     "test": "jest --coverage && karma start karma.conf.js --single-run",

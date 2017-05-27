@@ -7,7 +7,7 @@ const BINARYEN_GIT_URL = "https://github.com/WebAssembly/binaryen.git";
 function buildBinaryen(directory) {
     console.log("Build Binaryen");
 
-    const binaryenDirectory = path.join(directory, "binaryen");
+    const binaryenDirectory = path.join(path.resolve(directory), "binaryen");
     const binaryenBuildDirectory = binaryenDirectory;
 
     dependencyUtils.gitCloneOrPull(BINARYEN_GIT_URL, binaryenDirectory);
@@ -16,15 +16,19 @@ function buildBinaryen(directory) {
         fs.mkdirSync(binaryenBuildDirectory);
     }
 
+    const absolutePath = path.resolve(binaryenBuildDirectory);
+
     dependencyUtils.exec('cmake -E chdir "%s" cmake "%s"', binaryenBuildDirectory, binaryenDirectory);
     dependencyUtils.make(binaryenBuildDirectory);
 
-    return binaryenBuildDirectory;
+    // The path needs to be relative as npm install is run in a temporary directory that changes when the installation was successful.
+    return path.relative(process.cwd(), binaryenBuildDirectory);
 }
 
 function install(directory) {
-    if (process.env.BINARYEN) {
-        return process.env.BINARYEN;
+    const configuredBinaryen = process.env.BINARYEN || process.env.npm_config_BINARYEN;
+    if (configuredBinaryen) {
+        return configuredBinaryen;
     }
 
     return buildBinaryen(directory);
