@@ -2,6 +2,7 @@
   "name": "speedyjs-compiler",
   "version": "0.0.7",
   "main": "index.js",
+  "description": "A TypeScript to WebAssembly Compiler",
   "bin": {
     "speedyjs": "./cli.js"
   },
