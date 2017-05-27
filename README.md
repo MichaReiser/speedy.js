@@ -1,5 +1,6 @@
 # Speedy.js
 
+[![npm version](https://badge.fury.io/js/speedyjs-compiler.svg)](https://badge.fury.io/js/speedyjs-compiler)
 [![Build Status](https://travis-ci.org/MichaReiser/speedy.js.svg?branch=master)](https://travis-ci.org/MichaReiser/speedy.js) [![Code Climate](https://codeclimate.com/github/MichaReiser/speedy.js/badges/gpa.svg)](https://codeclimate.com/github/MichaReiser/speedy.js)
 <a href="https://codeclimate.com/github/MichaReiser/speedy.js/coverage"><img src="https://codeclimate.com/github/MichaReiser/speedy.js/badges/coverage.svg" /></a>
 
