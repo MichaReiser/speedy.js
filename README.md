@@ -18,7 +18,7 @@ The project is very experimental and still far away from being production ready.
 These requirements will change as soon as the WebAssembly backend for LLVM is no longer experimental and 
 included in your platforms build by default.
 
-There is also a pre-build [Ubuntu VM](https://drive.switch.ch/index.php/s/niYl4khM4Q2cX1z) (user: speedyjs, password: welcome) that can be used to experiment with the compiler.
+There is also a pre-build [Ubuntu VM](https://drive.switch.ch/index.php/s/vpjsvWfVPnJHp9k) (user: speedyjs, password: welcome) that can be used to experiment with the compiler. You find the [Speedy.js Playground project](https://github.com/MichaReiser/speedy.js-playground) in the users home directory.
 
 ## Getting Started
 
@@ -84,7 +84,7 @@ The compiler will compile the `fib` and `fibSync` function to WebAssembly wherea
 The script can be compiled using:
 
 ```
-node node_modules/.bin/speedyjs fib.ts
+$(npm bin)/speedyjs fib.ts
 ```
 
 which outputs the `fib.js` file. 
