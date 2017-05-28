@@ -48,3 +48,6 @@ return {
 Now you can start using speedy.js in your project.
 
 For more details, go to the [main project page](https://github.com/MichaReiser/speedy.js).
+
+## Example Project
+[Speedy.js Playground](https://github.com/MichaReiser/speedy.js-playground) is a running example project.
