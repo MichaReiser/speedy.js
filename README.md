@@ -89,11 +89,11 @@ $(npm bin)/speedyjs fib.ts
 
 which outputs the `fib.js` file. 
 
-To compile all files in the current directory omit any file names or pass multiple file names to the CLI. More details about how to use the CLI is documented in [the wiki](https://github.com/MichaReiser/speedy.js/wiki/CLI).
+To compile all files in the current directory omit any file names or pass multiple file names to the CLI. More details about how to use the CLI are documented in [the wiki](https://github.com/MichaReiser/speedy.js/wiki/CLI).
 
 ## WebPack Loader
 
-The package `loader` contains a WebPack loader implementation. See the packages [README](./packages/loader/README.md) for more details.
+The package `loader` contains a WebPack loader for Speedy.js. Consult the [README](./packages/loader/README.md) of the loader package for more details.
 
 ## Benchmark
 ![Benchmark](./doc/benchmark.png)
