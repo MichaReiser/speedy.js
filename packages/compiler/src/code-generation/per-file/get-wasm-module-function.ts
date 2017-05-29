@@ -1,7 +1,7 @@
 /**
  * This file includes a single statement, the function declaration of the getWasmModuleFactory. This function is used in the
  * speedyjs-transformer to generate the code to load the wasm module.
- * Part of this source code has been taken from https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
+ * The code is inspired by https://github.com/kripken/emscripten/blob/incoming/src/runtime.js
  */
 
 declare function fetch(url: string): Promise<any>;
@@ -32,20 +32,22 @@ interface ModuleLoader {
      * Converts the given value to the JS equivalent
      * @param ptr the ptr of the WASM object in the heap
      * @param type the type of the object
+     * @param types the reflection information of the types
      */
-    toJSObject(ptr: int, type: string): any;
+    toJSObject(ptr: int, type: string, types: Types): any;
 
     /**
      * Converts the js object (array or object) to a WASM pointer
      * @param jsObject the js object
      * @param type the type of the object
+     * @param types the reflection information of the used types
      * @param objectReferences Map from the JS object to the WASM pointer for this object. Used to ensure reference
      * equality across the boundary
      */
-    toWASM(jsObject: object, type: string, objectReferences: Map<object, int>): int | undefined;
+    toWASM(jsObject: object, type: string, types: Types, objectReferences: Map<object, int>): int | undefined;
 }
 
-function __moduleLoader(this: any, wasmUri: string, types: Types, options: Options): ModuleLoader {
+function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoader {
     const PTR_SIZE = 4;
     const PTR_SHIFT = Math.log2(PTR_SIZE);
 
@@ -118,7 +120,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
         }, 0);
     }
 
-    function jsToWasm(jsValue: any, typeName: string, objectReferences: Map<object, int>): any {
+    function jsToWasm(jsValue: any, typeName: string, types: Types, objectReferences: Map<object, int>): any {
         const type = types[typeName];
 
         if (!type) { throw new Error("Unknown type " + typeName); }
@@ -145,7 +147,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
                 throw new Error("Expected argument of type Array");
             }
 
-            ptr = RuntimeArray.from(jsValue as any[], type.typeArguments[0], objectReferences).ptr;
+            ptr = RuntimeArray.from(jsValue as any[], type.typeArguments[0], types, objectReferences).ptr;
         } else {
             // Object
             if (typeof(jsValue) !== "object") {
@@ -167,7 +169,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
                 const fieldSize = sizeOf(field.type);
                 offset = alignMemory(offset, fieldSize);
 
-                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, objectReferences), field.type);
+                setHeapValue(objPtr + offset, jsToWasm(jsValue[field.name], field.type, types, objectReferences), field.type);
 
                 offset += fieldSize;
             }
@@ -180,7 +182,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
         return ptr;
     }
 
-    function wasmToJs(wasmValue: any, typeName: string, returnedObjects: Map<int, object>) {
+    function wasmToJs(wasmValue: any, typeName: string, types: Types, returnedObjects: Map<int, object>) {
         const type = types[typeName];
         if (!type) { throw new Error("Unknown type " + typeName); }
 
@@ -202,7 +204,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
         if (ptr === 0) {
             return undefined;
         } else if (type.constructor === Array) {
-            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(returnedObjects);
+            objectReference = new RuntimeArray(ptr, type.typeArguments[0]).toArray(types, returnedObjects);
         } else {
             // Object
             const obj: { [name: string]: any } = Object.create(type.constructor!.prototype); // ensure it is an instance of the class
@@ -211,7 +213,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
             for (const field of type.fields) {
                 const fieldSize = sizeOf(field.type);
                 memoryOffset = alignMemory(memoryOffset, fieldSize);
-                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, returnedObjects);
+                obj[field.name] = wasmToJs(getHeapValue(memoryOffset, field.type), field.type, types, returnedObjects);
                 memoryOffset += fieldSize;
             }
 
@@ -228,9 +230,11 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
          * Allocates a Speedy.js array for the given JS array
          * @param native the js array
          * @param elementType the element type
+         * @param types the reflection information of the used types
+         * @param objectReferences map from JS to WASM pointers of already deserialized objects
          * @return {RuntimeArray} the Speedy.js Array
          */
-        static from(native: any[], elementType: string, objectReferences: Map<object, int>): RuntimeArray {
+        static from(native: any[], elementType: string, types: Types, objectReferences: Map<object, int>): RuntimeArray {
             // begin, back, capacity
             const size = PTR_SIZE * 2 + sizeOf("i32");
             const arrayPtr = malloc(size);
@@ -260,7 +264,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
                     heap64.set(native, begin >> 3);
                     break;
                 default:
-                    heapPtr.set(Int32Array.from(native, object => jsToWasm(object, elementType, objectReferences)), begin >> PTR_SHIFT);
+                    heapPtr.set(Int32Array.from(native, object => jsToWasm(object, elementType, types, objectReferences)), begin >> PTR_SHIFT);
             }
 
             return new RuntimeArray(arrayPtr, elementType);
@@ -279,10 +283,11 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
 
         /**
          * Converts a Speedy.js array to a native JS array
+         * @param types the reflection information of the object types
          * @param objectReferences map from WASM pointers to the deserialized JS objects
          * @return {Array} the native JS Array
          */
-        toArray(objectReferences: Map<int, object>): any[] {
+        toArray(types: Types, objectReferences: Map<int, object>): any[] {
             switch (this.elementType) {
                 case "i1":
                     return Array.from(heap8.subarray(this.begin, this.back), value => value !== 0); // Elements need to be converted to bool
@@ -295,7 +300,7 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
                 default:
                     return Array.from(
                         heapPtr.subarray(this.begin >> PTR_SHIFT, this.back >> PTR_SHIFT),
-                        objectPtr => wasmToJs(objectPtr, this.elementType, objectReferences)
+                        objectPtr => wasmToJs(objectPtr, this.elementType, types, objectReferences)
                     );
             }
         }
@@ -481,12 +486,12 @@ function __moduleLoader(this: any, wasmUri: string, types: Types, options: Optio
     } as ModuleLoader;
 
     loader.gc = gc;
-    loader.toWASM = function(jsObject: Object, objectTypeName: string, objectReferences: Map<object, int>) {
-        return jsToWasm(jsObject, objectTypeName, objectReferences) as int;
+    loader.toWASM = function(jsObject: Object, objectTypeName: string, types: Types, objectReferences: Map<object, int>) {
+        return jsToWasm(jsObject, objectTypeName, types, objectReferences) as int;
     };
 
-    loader.toJSObject = function(objectPointer: int, objectTypeName: string) {
-        return wasmToJs(objectPointer, objectTypeName, new Map<int, object>());
+    loader.toJSObject = function(objectPointer: int, objectTypeName: string, types: Types) {
+        return wasmToJs(objectPointer, objectTypeName, types, new Map<int, object>());
     };
 
     return loader;

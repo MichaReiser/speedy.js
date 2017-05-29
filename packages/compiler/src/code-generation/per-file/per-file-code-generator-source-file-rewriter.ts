@@ -25,7 +25,6 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
     private loadWasmFunctionIdentifier: ts.Identifier | undefined;
     private wasmUrl: string | undefined;
     private wastMetaData: Partial<WastMetaData> = {};
-    private argumentAndReturnTypes: ts.Type[] = [];
 
     constructor(private context: CodeGenerationContext) {}
 
@@ -55,12 +54,15 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
     rewriteEntryFunction(name: string, functionDeclaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
         this.loadWasmFunctionIdentifier = this.loadWasmFunctionIdentifier || ts.createUniqueName("loadWasmModule");
         const signature = this.context.typeChecker.getSignatureFromDeclaration(functionDeclaration);
-        this.argumentAndReturnTypes.push(signature.getReturnType());
-
-        const argumentTypes = signature.declaration.parameters.map(parameter => this.context.typeChecker.getTypeAtLocation(parameter));
-        this.argumentAndReturnTypes.push(...argumentTypes);
 
         const bodyStatements: ts.Statement[] = [];
+
+        // types = { ... }
+        const argumentTypes = signature.declaration.parameters.map(parameter => this.context.typeChecker.getTypeAtLocation(parameter));
+        const serializedTypes = this.serializeArgumentAndReturnTypes(argumentTypes, signature.getReturnType());
+        const typesIdentifier = ts.createUniqueName("types");
+        const typesDeclaration = ts.createVariableStatement(undefined , [ts.createVariableDeclaration(typesIdentifier, undefined, serializedTypes)]);
+        bodyStatements.push(typesDeclaration);
 
         let argumentObjects: ts.Identifier;
         // argumentObjects = new Map();
@@ -76,9 +78,15 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const instanceIdentifier = ts.createUniqueName("instance");
         const wasmExports = ts.createPropertyAccess(instanceIdentifier, "exports");
         const targetFunction = ts.createPropertyAccess(wasmExports, name);
-        const args = signature.declaration.parameters.map(parameter => this.castToWasm(parameter, this.loadWasmFunctionIdentifier!, argumentObjects));
+        const args = signature.declaration.parameters.map(parameter => this.castToWasm(
+            parameter,
+            this.loadWasmFunctionIdentifier!,
+            typesIdentifier,
+            argumentObjects)
+        );
+
         const functionCall = ts.createCall(targetFunction, [], args);
-        const castedResult = this.castToJs(functionCall, signature.getReturnType(), this.loadWasmFunctionIdentifier!);
+        const castedResult = this.castToJs(functionCall, signature.getReturnType(), this.loadWasmFunctionIdentifier!, typesIdentifier);
         const resultIdentifier = ts.createUniqueName("result");
         const resultVariable = ts.createVariableDeclaration(resultIdentifier, undefined, castedResult);
         bodyStatements.push(ts.createVariableStatement(undefined, [resultVariable]));
@@ -133,32 +141,28 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         const initializer = ts.createCall(ts.createIdentifier(MODULE_LOADER_FACTORY_NAME), [], [
             ts.createLiteral(this.wasmUrl!),
-            this.serializeArgumentAndReturnTypes(),
             options
         ]);
 
         const statements = sourceFile.statements;
+        const statementsToInsert = [];
 
-        // var loadWasmModule;
-        const loaderDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(this.loadWasmFunctionIdentifier)], ts.NodeFlags.Let);
-        statements.unshift(ts.createVariableStatement([], loaderDeclaration));
-
-        // loadWasmModule = __moduleLoader(...
-        const loadDefinition = ts.createBinary(this.loadWasmFunctionIdentifier!, ts.SyntaxKind.EqualsToken, initializer);
-        statements.push(ts.createStatement(loadDefinition)); // Insert last to ensure that all classes are visible (entry functions need to be top level)
+        // var loadWasmModule = _moduleLoader(...);
+        const loaderDeclaration = ts.createVariableDeclarationList([ts.createVariableDeclaration(this.loadWasmFunctionIdentifier, undefined, initializer)]);
+        statementsToInsert.push(ts.createVariableStatement([], loaderDeclaration));
 
         // export let speedyJsGc = loadWasmModule_1.gc; or without export if only expose
         if (compilerOptions.exposeGc || compilerOptions.exportGc) {
             const speedyJsGcVariable = ts.createVariableDeclaration("speedyJsGc", undefined, ts.createPropertyAccess(this.loadWasmFunctionIdentifier, "gc"));
             const speedyJsGcDeclaration = ts.createVariableDeclarationList([speedyJsGcVariable], ts.NodeFlags.Const);
             const modifiers = compilerOptions.exportGc ? [ ts.createToken(ts.SyntaxKind.ExportKeyword) ] : [];
-            statements.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
+            statementsToInsert.push(ts.createVariableStatement(modifiers, speedyJsGcDeclaration));
         }
 
-        return ts.updateSourceFileNode(sourceFile, statements);
+        return ts.updateSourceFileNode(sourceFile, [...statementsToInsert, ...statements]);
     }
 
-    private castToJs(returnValue: ts.Expression, type: ts.Type, loadWasmFunctionIdentifier: ts.Identifier): ts.Expression {
+    private castToJs(returnValue: ts.Expression, type: ts.Type, loadWasmFunctionIdentifier: ts.Identifier, typesIdentifier: ts.Identifier): ts.Expression {
         // wasm code returns 1 for true and zero for false. Cast it to a boolean
         if (type.flags & ts.TypeFlags.BooleanLike) {
             return ts.createBinary(returnValue, ts.SyntaxKind.EqualsEqualsEqualsToken, ts.createNumericLiteral("1"));
@@ -167,7 +171,8 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         if (type.flags & ts.TypeFlags.Object || isMaybeObjectType(type)) {
             return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toJSObject"), undefined, [
                 returnValue,
-                ts.createLiteral(serializedTypeName(type, this.context.typeChecker))
+                ts.createLiteral(serializedTypeName(type, this.context.typeChecker)),
+                typesIdentifier
             ]);
         }
 
@@ -176,6 +181,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
     private castToWasm(parameterDeclaration: ts.ParameterDeclaration,
                        loadWasmFunctionIdentifier: ts.Identifier,
+                       typesIdentifier: ts.Identifier,
                        argumentObjects: ts.Identifier): ts.Expression {
         const parameterType = this.context.typeChecker.getTypeAtLocation(parameterDeclaration);
         const symbol = this.context.typeChecker.getSymbolAtLocation(parameterDeclaration.name);
@@ -184,6 +190,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             return ts.createCall(ts.createPropertyAccess(loadWasmFunctionIdentifier, "toWASM"), undefined, [
                 ts.createIdentifier(symbol.name),
                 ts.createLiteral(serializedTypeName(parameterType, this.context.typeChecker)),
+                typesIdentifier,
                 argumentObjects
             ]);
         }
@@ -191,9 +198,9 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         return ts.createIdentifier(symbol.name);
     }
 
-    private serializeArgumentAndReturnTypes() {
+    private serializeArgumentAndReturnTypes(argumentTypes: ts.Type[], returnType: ts.Type) {
         const types: Types = {};
-        const typesToProcess = Array.from(new Set(this.argumentAndReturnTypes));
+        const typesToProcess = Array.from(new Set([...argumentTypes, returnType]));
 
         while (typesToProcess.length > 0) {
             let type = typesToProcess.pop()!;
