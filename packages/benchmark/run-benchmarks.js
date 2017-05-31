@@ -66,7 +66,7 @@ const TEST_CASES = {
     },
     "arrayReverse": {
         args: [],
-        result: 1248.9035770674511
+        result: 1248.9035770674525
     }
 };
 

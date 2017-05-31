@@ -10022,8 +10022,8 @@ extern "C" {
                 0.15010735535582342
         }};
 
-        for (unsigned round = 0; round < 1000; ++round) {
-            for (size_t i = 0; i < array.size(); ++i) {
+        for (unsigned round = 0; round < 999; ++round) {
+            for (size_t i = 0; i < array.size() / 2; ++i) {
                 swap(array, i, array.size() - i - 1);
             }
         }

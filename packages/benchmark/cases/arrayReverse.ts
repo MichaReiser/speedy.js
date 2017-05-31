@@ -1,8 +1,8 @@
 export function arrayReverse() {
     const array = createArray();
 
-    for (let round = 0; round < 1000; ++round) {
-        for (let i = 0; i < array.length; ++i) {
+    for (let round = 0; round < 999; ++round) {
+        for (let i = 0; i < array.length / 2; ++i) {
             swap(array, i, array.length - i - 1);
         }
     }
