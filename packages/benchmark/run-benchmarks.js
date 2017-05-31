@@ -7,6 +7,10 @@ const platform = require("platform");
 const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
 
 const TEST_CASES = {
+    "factorize": {
+        args: [183626381],
+        result: 183626381
+    },
     "tspInt": {
         args: [],
         result: 500074.11491760757
