@@ -1,7 +1,7 @@
 export async function isPrime(value: int) {
     "use speedyjs";
 
-    if (value <= 1) {
+    if (value <= 2) {
         return false;
     }
 
