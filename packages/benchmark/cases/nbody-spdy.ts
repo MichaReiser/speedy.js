@@ -9,7 +9,6 @@ function daysPerYear() {
     return 365.24;
 }
 
-
 class Body {
 
     constructor(
@@ -20,7 +19,9 @@ class Body {
         public vy: number,
         public vz: number,
         public mass: number
-    ) {}
+    ) {
+        "use speedyjs";
+    }
 
     offsetMomentum(px: number, py: number, pz: number) {
         "use speedyjs";
@@ -98,6 +99,8 @@ function Sun(): Body {
 class NBodySystem {
     public bodies: Array< Body >;
     constructor(bodies: Array< Body >) {
+        "use speedyjs";
+
         let px = 0.0;
         let py = 0.0;
         let pz = 0.0;
@@ -114,6 +117,8 @@ class NBodySystem {
     }
 
     advance(dt: number): void {
+        "use speedyjs";
+
         let dx: number,
             dy: number,
             dz: number,
@@ -173,6 +178,8 @@ class NBodySystem {
     }
 
     energy(): number {
+        "use speedyjs";
+        
         let dx: number, dy: number, dz: number, distance: number;
         let ix: number, iy: number, iz: number, vx: number, vy: number, vz: number, bim: number;
         let e = 0.0;

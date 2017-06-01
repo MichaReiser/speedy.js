@@ -3,11 +3,15 @@ export class Point {
     y: number;
 
     constructor(x: number, y: number) {
+        "use speedyjs";
+
         this.x = x;
         this.y = y;
     }
 
     distanceTo(to: Point) {
+        "use speedyjs";
+
         return Math.sqrt(Math.pow(this.x - to.x, 2.0) + Math.pow(this.y - to.y, 2.0));
     }
 }

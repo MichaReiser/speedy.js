@@ -1688,6 +1688,11 @@ exports[`Transformation emits a diagnostic if a non entry speedyjs function is r
 "
 `;
 
+exports[`Transformation emits a diagnostic if a speedy.js function references a regular JavaScript function 1`] = `
+"test.ts(9,17): error TS1000033: The Speedy.js function cannot reference the regular JavaScript function 'regularJavaScriptFunction'. Calling JavaScript functions from Speedy.js is not yet supported. Either remove the function call or make the called function a Speedy.js function by adding the \\"use speedyjs\\" directive.
+"
+`;
+
 exports[`Transformation emits a diagnostic if the entry function has optional parameters 1`] = `
 "test.ts(2,51): error TS100011: Optional parameters or variadic parameters are not supported for SpeedyJS entry functions.
 "

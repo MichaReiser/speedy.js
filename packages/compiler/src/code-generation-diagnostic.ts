@@ -91,6 +91,10 @@ export class CodeGenerationDiagnostic extends Error {
         return CodeGenerationDiagnostic.createException(identifier, diagnostics.ReferenceToNonEntrySpeedyJSFunctionFromJS, speedyJSFunctionSymbol.name);
     }
 
+    static refereneToNonSpeedyJSFunctionFromSpeedyJS(identifier: ts.Identifier, nonSpeedyJsFunctionSymbol: ts.Symbol) {
+        return CodeGenerationDiagnostic.createException(identifier, diagnostics.ReferenceToNonSpeedyJSFunctionFromSpeedyJS, nonSpeedyJsFunctionSymbol.name);
+    }
+
     static overloadedEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
         return CodeGenerationDiagnostic.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
     }
@@ -337,5 +341,9 @@ const diagnostics = {
     UnsupportedClassInheritance: {
         message: "Class inheritance is not yet supported.",
         code: 1000032
+    },
+    ReferenceToNonSpeedyJSFunctionFromSpeedyJS: {
+        message: "The Speedy.js function cannot reference the regular JavaScript function '%s'. Calling JavaScript functions from Speedy.js is not yet supported. Either remove the function call or make the called function a Speedy.js function by adding the \"use speedyjs\" directive.",
+        code: 1000033
     }
 };

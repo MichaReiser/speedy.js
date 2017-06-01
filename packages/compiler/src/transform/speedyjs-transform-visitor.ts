@@ -5,6 +5,7 @@ import {CompilationContext} from "../compilation-context";
 import {TypeChecker} from "../type-checker";
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 import debug = require("debug");
+import {isSpeedyJSEntryFunction, isSpeedyJSFunction} from "../util/speedyjs-function";
 
 const LOG = debug("transform/speedyjs-transform-visitor");
 
@@ -34,15 +35,13 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
      * If this is the case, an error is emitted.
      */
     visitIdentifier(identifier: ts.Identifier, context: TransformVisitorContext) {
-        if (this.inSpeedyJSFunction) {
-            return identifier;
-        }
-
         const symbol = this.compilationContext.typeChecker.getSymbolAtLocation(identifier);
 
-        if (typeof symbol !== "undefined" && symbol.flags & ts.SymbolFlags.Function) {
+        if (typeof symbol !== "undefined" && symbol.flags & (ts.SymbolFlags.Function | ts.SymbolFlags.Method | ts.SymbolFlags.Constructor)) {
             for (const declaration of symbol.getDeclarations() as ts.FunctionLikeDeclaration[]) {
-                if (isSpeedyJSFunction(declaration) && !isSpeedyJSEntryFunction(declaration)) {
+                if (this.inSpeedyJSFunction && !canBeCalledFromSpeedyJs(declaration)) {
+                    throw CodeGenerationDiagnostic.refereneToNonSpeedyJSFunctionFromSpeedyJS(identifier, symbol);
+                } else if (!this.inSpeedyJSFunction && !canBeCalledFromJs(declaration)) {
                     throw CodeGenerationDiagnostic.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
                 }
             }
@@ -63,71 +62,40 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
         return this.visitFunctionLikeDeclaration(methodDeclaration, context);
     }
 
-    visitConstructorDeclaration(constructorDeclaration: ts.ConstructorDeclaration, context: TransformVisitorContext) {
+    visitConstructor(constructorDeclaration: ts.ConstructorDeclaration, context: TransformVisitorContext) {
         return this.visitFunctionLikeDeclaration(constructorDeclaration, context);
     }
 
     visitFunctionLikeDeclaration(functionLikeDeclaration: ts.FunctionLikeDeclaration, context: TransformVisitorContext) {
         const speedyJSFunction = isSpeedyJSFunction(functionLikeDeclaration);
 
-        if (!speedyJSFunction && functionLikeDeclaration.body) {
+        if (!speedyJSFunction) {
             return context.visitEachChild(functionLikeDeclaration);
         }
 
+        const wasInSpeedyJSFunction = this.inSpeedyJSFunction;
         this.inSpeedyJSFunction = true;
-
         try {
+            const visited = context.visitEachChild(functionLikeDeclaration);
+
             if (isSpeedyJSEntryFunction(functionLikeDeclaration)) {
                 const name = getName(functionLikeDeclaration, this.compilationContext.typeChecker);
                 LOG(`Found SpeedyJS entry function ${name}`);
                 validateSpeedyJSFunction(functionLikeDeclaration, this.compilationContext.typeChecker);
                 return this.codeGenerator.generateEntryFunction(functionLikeDeclaration);
-            } else {
-                context.visitEachChild(functionLikeDeclaration);
+            } else if (functionLikeDeclaration.kind === ts.SyntaxKind.FunctionDeclaration) {
                 return ts.createNotEmittedStatement(functionLikeDeclaration); // remove the function
+            } else {
+                return visited; // do not remove methods or constructors
             }
         } finally {
-            this.inSpeedyJSFunction = false;
+            this.inSpeedyJSFunction = wasInSpeedyJSFunction;
         }
     }
 
     fallback<T extends ts.Node>(node: T, context: TransformVisitorContext): T {
         return context.visitEachChild(node);
     }
-}
-
-/**
- * tests if the passed function is a speedy js function
- * @param fun the function to test
- * @return {boolean} true if the function is a speedy js function
- */
-function isSpeedyJSFunction(fun: ts.FunctionLikeDeclaration) {
-    if (!fun.body || !isBlock(fun.body)) {
-        return false;
-    }
-
-    for (const statement of fun.body.statements) {
-        if (isPrologueDirective(statement)) {
-            if (statement.expression.text === "use speedyjs") {
-                return true;
-            }
-        } else {
-            break;
-        }
-    }
-    return false;
-}
-
-/**
- * A speedy js function has the async modifier and contains "use speedyjs" directive
- * @param fun the function to test
- * @return {boolean} true if it is a speedy js entry function
- */
-function isSpeedyJSEntryFunction(fun: ts.FunctionLikeDeclaration): fun is ts.FunctionDeclaration {
-    return isSpeedyJSFunction(fun) &&
-            fun.kind === ts.SyntaxKind.FunctionDeclaration &&
-            !!fun.modifiers &&
-            !!fun.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
 }
 
 /**
@@ -169,14 +137,13 @@ function getName(functionDeclaration: ts.FunctionLikeDeclaration, typeChecker: T
     return typeChecker.getFullyQualifiedName(symbol);
 }
 
-interface PrologueDirective extends ts.ExpressionStatement {
-    expression: ts.StringLiteral;
+function canBeCalledFromJs(declaration: ts.FunctionLikeDeclaration) {
+    // methods and constructors are find as object can be shared between JavaScript and Speedy.js
+    return declaration.kind !== ts.SyntaxKind.FunctionDeclaration ||
+        !isSpeedyJSFunction(declaration) ||
+        isSpeedyJSEntryFunction(declaration);
 }
 
-function isPrologueDirective(node: ts.Node): node is PrologueDirective {
-    return node.kind === ts.SyntaxKind.ExpressionStatement && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
-}
-
-function isBlock(node: ts.Node): node is ts.Block {
-    return node.kind === ts.SyntaxKind.Block;
+function canBeCalledFromSpeedyJs(declaration: ts.FunctionLikeDeclaration) {
+    return !declaration.body || isSpeedyJSFunction(declaration);
 }

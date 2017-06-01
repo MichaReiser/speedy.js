@@ -137,6 +137,25 @@ describe("Transformation", () => {
         expect(formatDiagnostics(diagnostics)).toMatchSnapshot();
     });
 
+    it("does not emit a diagnostic if a speedyjs method is referenced from normal JavaScriptCode", () => {
+        const compilerOptions = createCompilerOptions();
+        const source = `
+        class Test {
+            nonEntryFunction(value: number) {
+                "use speedyjs";
+            
+                return value ** 2;
+            }    
+        }
+                
+        const instance = new Test();
+        const sqr = instance.nonEntryFunction(10);
+        `;
+
+        const {exitStatus, diagnostics } = compileSourceCode(source, "test.ts", compilerOptions);
+        expect(exitStatus).toBe(ts.ExitStatus.Success);
+    });
+
     it("emits a diagnostic if the entry function is overloaded", () => {
         const compilerOptions = createCompilerOptions();
         const source = `
@@ -181,6 +200,29 @@ describe("Transformation", () => {
             "use speedyjs";
             
             if (withSuperPower) {
+                return value ** value;
+            }
+            return value;
+        }
+        `;
+
+        const {exitStatus, diagnostics } = compileSourceCode(source, "test.ts", compilerOptions);
+
+        expect(exitStatus).toBe(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
+        expect(formatDiagnostics(diagnostics)).toMatchSnapshot();
+    });
+
+    it("emits a diagnostic if a speedy.js function references a regular JavaScript function", () => {
+        const compilerOptions = createCompilerOptions();
+        const source = `
+        function regularJavaScriptFunction(value: number) {
+            return value;
+        }
+        
+        async function referenceJavaScriptFunction(value: number)  {
+            "use speedyjs";
+            
+            if (regularJavaScriptFunction(value) !== 0) {
                 return value ** value;
             }
             return value;
