@@ -8,6 +8,8 @@ class ClassWithConstructor {
     y: number;
 
     constructor(x: number, y: number) {
+        "use speedyjs";
+
         this.x = x;
         this.y = y;
     }
@@ -18,11 +20,15 @@ class ClassWithMethod {
     y: number;
 
     constructor(x: number, y: number) {
+        "use speedyjs";
+
         this.x = x;
         this.y = y;
     }
 
     distanceTo(other: ClassWithMethod) {
+        "use speedyjs";
+
         return Math.sqrt(Math.pow(this.x - other.x, 2.0) + Math.pow(this.y - other.y, 2.0));
     }
 }
@@ -31,10 +37,12 @@ class SubtypeWithMethod extends ClassWithMethod {}
 
 class ClassWithArrayField {
     constructor(public points: ClassWithMethod[] = []) {
-
+        "use speedyjs";
     }
 
     totalDistance() {
+        "use speedyjs";
+
         let distance = 0.0;
 
         for (let i = 0; i < this.points.length - 1; ++i) {
@@ -46,7 +54,9 @@ class ClassWithArrayField {
 }
 
 class ClassWithFieldsDeclaredInConstructor {
-    constructor(public x: number, public y: number) {}
+    constructor(public x: number, public y: number) {
+        "use speedyjs";
+    }
 }
 
 class ClassWithFieldsOfDifferentSize {

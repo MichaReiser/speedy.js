@@ -6,5 +6,7 @@ async function passesArray() {
 }
 
 function arrayLength(array: int[]) {
+    "use speedyjs";
+
     return array.length;
 }

@@ -1,8 +1,11 @@
 class Point {
     constructor(private x: int, private y: int) {
+        "use speedyjs";
     }
 
     distanceTo(other: Point) {
+        "use speedyjs";
+
         return Math.sqrt(Math.pow(this.x - other.x as number, 2.0) + Math.pow(this.y - other.y as number, 2.0));
     }
 }

@@ -1,5 +1,7 @@
 class ClassOnlyWithMethods {
     add(x: number, y: number) {
+        "use speedyjs";
+
         return x + y;
     }
 }

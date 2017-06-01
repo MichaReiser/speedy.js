@@ -4,6 +4,8 @@ class Parent {
 
 class Child extends Parent {
     age() {
+        "use speedyjs";
+
         return 10;
     }
 }

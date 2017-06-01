@@ -4,7 +4,7 @@
  * The code is licensed as LGPL.
  */
 
-/* 
+/*
  A C-program for MT19937, with initialization improved 2002/1/26.
  Coded by Takuji Nishimura and Makoto Matsumoto.
 
@@ -62,6 +62,8 @@ class Random {
     private lastNormal = NaN;
 
     constructor(seed: int) {
+        "use speedyjs";
+
         this.mt = new Array<int>(this.N); /* the array for the state vector */
         this.mti=this.N+1; /* mti==N+1 means mt[N] is not initialized */
 
@@ -74,6 +76,8 @@ class Random {
     /* key_length is its length */
     /* slight change for C++, 2004/2/26 */
     init_by_array(init_key: int[], key_length: int) {
+        "use speedyjs";
+
         this.init_genrand(19650218);
 
         let i = 1;
@@ -102,6 +106,8 @@ class Random {
 
     /* initializes mt[N] with a seed */
     init_genrand(s: int) {
+        "use speedyjs";
+
         this.mt[0] = s >>> 0;
         for (this.mti=1; this.mti<this.N; ++this.mti) {
             const s = this.mt[this.mti-1] ^ (this.mt[this.mti-1] >>> 30);
@@ -117,6 +123,8 @@ class Random {
 
     /* generates a random number on [0,0xffffffff]-interval */
     genrand_int32(): int {
+        "use speedyjs";
+
         const mag01 = [0x0, this.MATRIX_A];
         /* mag01[x] = x * MATRIX_A  for x=0,1 */
         let y: int;
@@ -165,6 +173,8 @@ class Random {
 
     /* generates a random number on [0,1)-real-interval */
     random(): number {
+        "use speedyjs";
+
         if (this.pythonCompatibility) {
             if (this.skip) {
                 this.genrand_int32();
@@ -195,7 +205,6 @@ class Random {
         return(a*67108864.0+b)*(1.0/9007199254740992.0);
     }
 
-
     /* These real versions are due to Isaku Wada, 2002/01/09 added */
 
 
@@ -203,7 +212,7 @@ class Random {
     exponential(lambda: number) {
         const r = this.random();
         return -Math.log(r) / lambda;
-    };
+    }
 
     gamma(alpha: number, beta: number) {
         /* Based on Python 2.6 source code of random.py.
@@ -260,6 +269,8 @@ class Random {
     }
 
     normal(mu: number, sigma: number) {
+        "use speedyjs";
+
         let z = this.lastNormal;
         this.lastNormal = NaN;
         if (isNaN(z)) {

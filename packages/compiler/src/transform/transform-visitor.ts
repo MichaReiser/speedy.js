@@ -64,12 +64,20 @@ export interface TransformVisitor {
      */
     fallback<T extends ts.Node>(node: T, context: TransformVisitorContext): T;
 
+    visitAsExpression?(asExpression: ts.AsExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitAsyncKeyword?(asyncKeyword: ts.Token<ts.SyntaxKind.AsyncKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitArrayLiteralExpression?(arrayLiteralExpression: ts.ArrayLiteralExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitArrayType?(arrayType: ts.ArrayTypeNode, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitAwaitExpression?(awaitExpression: ts.AwaitExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitBinaryExpression?(binaryExpression: ts.BinaryExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitBlock?(block: ts.Block, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitBooleanKeyword?(booleanKeyword: ts.Token<ts.SyntaxKind.BooleanKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitBreakStatement?(breakStatement: ts.BreakStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitCallExpression?(callExpression: ts.CallExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitClassDeclaration?(classDeclaration: ts.ClassDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitConditionalExpression?(conditionalExpression: ts.ConditionalExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitConstructor?(constructor: ts.ConstructorDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitContinueStatement?(continueStatement: ts.ContinueStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitElementAccessExpression?(elementAccessExpression: ts.ElementAccessExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitExpressionStatement?(expressionStatement: ts.ExpressionStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitExportKeyword?(exportKeyword: ts.Token<ts.SyntaxKind.ExportKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
@@ -80,20 +88,26 @@ export interface TransformVisitor {
     visitIdentifier?(identifier: ts.Identifier, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitIfStatement?(ifStatement: ts.IfStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitIntKeyword?(intKeyword: ts.Token<ts.SyntaxKind.IntKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitMethodDeclaration?(methodDeclaration: ts.MethodDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitNewExpression?(newExpression: ts.NewExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitNumberKeyword?(keyword: ts.Token<ts.SyntaxKind.NumberKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitParameter?(parameter: ts.ParameterDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitParenthesizedExpression?(parenthesizedExpression: ts.ParenthesizedExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitPrivateKeyword?(privateKeyword: ts.Token<ts.SyntaxKind.PrivateKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitPublicKeyword?(publicKeyword: ts.Token<ts.SyntaxKind.PublicKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitPrefixUnaryExpression?(prefixUnaryExpression: ts.PrefixUnaryExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitPropertyAccessExpression?(propertyAccessExpression: ts.PropertyAccessExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitPropertyDeclaration?(propertyDeclaration: ts.PropertyDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitReturnStatement?(returnStatement: ts.ReturnStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitSourceFile?(sourceFile: ts.SourceFile, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitStringLiteral?(stringLiteral: ts.Token<ts.SyntaxKind.StringLiteral>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitThisKeyword?(thisKeyword: ts.Token<ts.SyntaxKind.ThisKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitTrueKeyword?(trueKeyword: ts.Token<ts.SyntaxKind.TrueKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitTypeReference?(typeReference: ts.TypeReferenceNode, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitVariableDeclaration?(variableDeclaration: ts.VariableDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitVariableDeclarationList?(variableDeclarationList: ts.VariableDeclarationList, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitVariableStatement?(variableStatement: ts.VariableStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitWhileStatement?(whileStatement: ts.WhileStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
 }
 
 /**

@@ -2,6 +2,8 @@ class TestBuilder {
     _size: number;
 
     size(value: number) {
+        "use speedyjs";
+
         this._size = value;
         return this;
     }

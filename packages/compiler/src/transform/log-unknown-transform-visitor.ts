@@ -129,6 +129,62 @@ export class LogUnknownTransformVisitor implements TransformVisitor {
         return context.visitEachChild(parenthesizedExpression);
     }
 
+    visitThisKeyword?(thisKeyword: ts.Token<ts.SyntaxKind.ThisKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(thisKeyword);
+    }
+
+    visitPropertyDeclaration?(propertyDeclaration: ts.PropertyDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(propertyDeclaration);
+    }
+
+    visitPrivateKeyword?(privateKeyword: ts.Token<ts.SyntaxKind.PrivateKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(privateKeyword);
+    }
+
+    visitConstructor?(constructor: ts.ConstructorDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(constructor);
+    }
+
+    visitArrayLiteralExpression(arrayLiteralExpression: ts.ArrayLiteralExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(arrayLiteralExpression);
+    }
+
+    visitClassDeclaration?(classDeclaration: ts.ClassDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(classDeclaration);
+    }
+
+    visitMethodDeclaration(methodDeclaration: ts.MethodDeclaration, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(methodDeclaration);
+    }
+
+    visitWhileStatement?(whileStatement: ts.WhileStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(whileStatement);
+    }
+
+    visitBreakStatement?(breakStatement: ts.BreakStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(breakStatement);
+    }
+
+    visitPublicKeyword?(publicKeyword: ts.Token<ts.SyntaxKind.PublicKeyword>, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(publicKeyword);
+    }
+
+    visitArrayType?(arrayType: ts.ArrayTypeNode, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(arrayType);
+    }
+
+    visitAsExpression?(asExpression: ts.AsExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(asExpression);
+    }
+
+    visitConditionalExpression?(conditionalExpression: ts.ConditionalExpression, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(conditionalExpression);
+    }
+
+    visitContinueStatement?(continueStatement: ts.ContinueStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return context.visitEachChild(continueStatement);
+    }
+
     fallback<T extends ts.Node>(node: T, context: TransformVisitorContext): T {
         LOG(`Unknown Node Type ${ts.SyntaxKind[node.kind]} - ${(node.constructor as any).name}`);
         return context.visitEachChild(node);
