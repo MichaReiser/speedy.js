@@ -11,6 +11,10 @@ function removeChildNodes(node) {
     }
 }
 
+function isVisible(x) {
+    return x.visible !== false;
+}
+
 function populateWithFileNames(selection) {
     const fileNames = resultsContext.keys().sort();
     for (let i = 0; i < fileNames.length; ++i) {
@@ -141,38 +145,27 @@ function stringComparator(x, y) {
 }
 
 function toMathematicaData(chartData) {
-    const visibleBrowsers = chartData.browsers.filter(browser => browser.visible !== false);
+    const visibleBrowsers = chartData.browsers.filter(isVisible);
+    const visibleCases = chartData.testCases.filter(isVisible);
+
     const result = {
-        browserNames: visibleBrowsers.map(browser => browser.name + " " + browser.version),
-        caseNames: [],
-        values: []
+        values: { },
+        caseNames: visibleCases.map(testCase => testCase.name)
     };
 
-    for (const testCase of chartData.testCases) {
-        if (testCase.visible === false) {
-            continue;
+    for (const browser of visibleBrowsers) {
+        const browserResults = result.values[browser.name] = [];
+        for (const testCase of visibleCases) {
+            browserResults.push(testCase.results[browser.id].wasm / testCase.results[browser.id].js * 100);
         }
-
-        const caseResult = [];
-        let min = Number.MAX_SAFE_INTEGER;
-        let max = Number.MIN_SAFE_INTEGER;
-
-        for (const browser of visibleBrowsers) {
-            const value = testCase.results[browser.id].wasm / testCase.results[browser.id].js * 100;
-            min = Math.min(value, min);
-            max = Math.max(value, max);
-        }
-
-        result.caseNames.push(testCase.name);
-        result.values.push([min, max - min]);
     }
 
     return result;
 }
 
 function renderTable(chartData) {
-    const visibleBrowsers= chartData.browsers.filter(browser => browser.visible !== false);
-    const visibleTestCases = chartData.testCases.filter(testCase => testCase.visible !== false);
+    const visibleBrowsers= chartData.browsers.filter(isVisible);
+    const visibleTestCases = chartData.testCases.filter(isVisible);
 
     const table = document.querySelector("#results-table");
     removeChildNodes(table);
