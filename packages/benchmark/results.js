@@ -149,18 +149,39 @@ function toMathematicaData(chartData) {
     const visibleCases = chartData.testCases.filter(isVisible);
 
     const result = {
-        values: { },
-        caseNames: visibleCases.map(testCase => testCase.name)
+        caseNames: visibleCases.map(testCase => testCase.name),
+        percentages: {},
+        ops: {}
     };
 
     for (const browser of visibleBrowsers) {
-        const browserResults = result.values[browser.name] = [];
+        const ops = result.ops[browser.name] = [];
+        const percentages = result.percentages[browser.name] = [];
         for (const testCase of visibleCases) {
-            browserResults.push(testCase.results[browser.id].wasm / testCase.results[browser.id].js * 100);
+            ops.push(testCase.results[browser.id].wasm);
+            percentages.push(testCase.results[browser.id].wasm / testCase.results[browser.id].js * 100);
         }
     }
 
     return result;
+}
+
+function appendCell(row, text, tag="td") {
+    const cell = document.createElement(tag);
+    cell.innerText = text;
+    row.appendChild(cell);
+    return cell;
+}
+
+function appendNumberCell(row, text) {
+    const cell = appendCell(row, text);
+    cell.setAttribute("style", "text-align: right");
+    return cell;
+}
+
+
+function percentageDifference(a, b) {
+    return Math.abs(a - b) / ((a + b) / 2);
 }
 
 function renderTable(chartData) {
@@ -172,50 +193,68 @@ function renderTable(chartData) {
 
     const headerRow = document.createElement("tr");
     const subtitleRow = document.createElement("tr");
-    const titles = ["Test Case", ...visibleBrowsers.map(browser => browser.name + " " + browser.version)];
+    const subSubTitleRow = document.createElement("tr");
+    const titles = ["Test Case", "JavaScript", "Speedy.js"];
 
     for (const title of titles) {
-        const titleCell = document.createElement("th");
-        titleCell.innerText = title;
+        const titleCell = appendCell(headerRow, title, "th");
 
-        headerRow.appendChild(titleCell);
         if (title !== titles[0]) {
-            titleCell.colSpan = 2;
+            titleCell.colSpan = visibleBrowsers.length * 2 + 1;
 
-            for (const subTitle of ["Speedy.js", "JS"]) {
-                const langCell = document.createElement("th");
-                langCell.innerText = subTitle;
-                subtitleRow.appendChild(langCell);
+            for (const subTitle of visibleBrowsers.map(browser => browser.name + " " + browser.version)) {
+                const cell = appendCell(subtitleRow, subTitle, "th");
+                cell.colSpan = 2;
+
+                appendCell(subSubTitleRow, "ops/s", "th");
+                appendCell(subSubTitleRow, "±E %", "th");
             }
+            appendCell(subtitleRow, "d", "th");
+            appendCell(subSubTitleRow, " ", "th");
         } else {
-            subtitleRow.appendChild(document.createElement("th"));
-            titleCell.colSpan = 1;
+            appendCell(subtitleRow, " ", "th");
+            appendCell(subSubTitleRow, " ", "th");
         }
     }
 
     const header = document.createElement("thead");
     header.appendChild(headerRow);
     header.appendChild(subtitleRow);
+    header.appendChild(subSubTitleRow);
     table.appendChild(header);
 
     const body = document.createElement("tbody");
 
     for (const testCase of visibleTestCases) {
         const row = document.createElement("tr");
+        let minJS = Number.MAX_SAFE_INTEGER,
+            maxJS = Number.MIN_SAFE_INTEGER;
 
-        const nameCell = document.createElement("td");
-        nameCell.innerText = testCase.name;
-        row.appendChild(nameCell);
+        appendCell(row, testCase.name);
 
         for (const browser of visibleBrowsers) {
-            const speedyJsCell = document.createElement("td");
-            speedyJsCell.innerText = testCase.results[browser.id].wasm.toFixed(2);
-            row.append(speedyJsCell);
+            const js = testCase.results[browser.id].js;
+            minJS = Math.min(minJS, js);
+            maxJS = Math.max(maxJS, js);
 
-            const jsCell = document.createElement("td");
-            jsCell.innerText = testCase.results[browser.id].js.toFixed(2);
-            row.append(jsCell);
+            appendNumberCell(row, js.toFixed(2));
+            appendNumberCell(row, testCase.results[browser.id].jsRme.toFixed(2))
         }
+
+        appendNumberCell(row, (100 * percentageDifference(minJS, maxJS)).toFixed(1));
+
+        let minSpeedy = Number.MAX_SAFE_INTEGER,
+            maxSpeedy = Number.MIN_SAFE_INTEGER;
+
+        for (const browser of visibleBrowsers) {
+            const speedyJs =  testCase.results[browser.id].wasm;
+            minSpeedy = Math.min(minSpeedy, speedyJs);
+            maxSpeedy = Math.max(maxSpeedy, speedyJs);
+            appendNumberCell(row, speedyJs.toFixed(2));
+            appendNumberCell(row, testCase.results[browser.id].wasmRme.toFixed(2));
+        }
+
+        appendNumberCell(row, (100 * percentageDifference(minSpeedy, maxSpeedy)).toFixed(1));
 
         body.appendChild(row);
     }
@@ -239,10 +278,12 @@ function transformResultToChartData(browserResults) {
             const emccResultNames = Object.keys(browserResults).filter(name => name.indexOf("emcc") !== -1);
 
             const jsAvg = jsResultNames.reduce((memo, current) => memo + browserResults[current].hz, 0) / jsResultNames.length;
+            const jsRme = jsResultNames.reduce((memo, current) => memo + browserResults[current].stats.rme, 0) / jsResultNames.length;
             const wasmAvg = wasmResultNames.reduce((memo, current) => memo + browserResults[current].hz, 0) / wasmResultNames.length;
+            const wasmRme = wasmResultNames.reduce((memo, current) => memo + browserResults[current].stats.rme, 0) / wasmResultNames.length;
             const emccAvg = emccResultNames.reduce((memo, current) => memo + browserResults[current].hz, 0) / emccResultNames.length;
 
-            testCase.results[browserId] = { js: jsAvg, wasm: wasmAvg, emcc: emccAvg };
+            testCase.results[browserId] = { js: jsAvg, jsRme: jsRme, wasm: wasmAvg, wasmRme: wasmRme, emcc: emccAvg };
         }
     }
 
