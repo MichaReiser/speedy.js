@@ -237,8 +237,8 @@ function renderTable(chartData) {
             minJS = Math.min(minJS, js);
             maxJS = Math.max(maxJS, js);
 
-            appendNumberCell(row, js.toFixed(2));
-            appendNumberCell(row, testCase.results[browser.id].jsRme.toFixed(2))
+            appendNumberCell(row, js.toFixed(1));
+            appendNumberCell(row, testCase.results[browser.id].jsRme.toFixed(1))
         }
 
         appendNumberCell(row, (100 * percentageDifference(minJS, maxJS)).toFixed(1));
@@ -250,8 +250,8 @@ function renderTable(chartData) {
             const speedyJs =  testCase.results[browser.id].wasm;
             minSpeedy = Math.min(minSpeedy, speedyJs);
             maxSpeedy = Math.max(maxSpeedy, speedyJs);
-            appendNumberCell(row, speedyJs.toFixed(2));
-            appendNumberCell(row, testCase.results[browser.id].wasmRme.toFixed(2));
+            appendNumberCell(row, speedyJs.toFixed(1));
+            appendNumberCell(row, testCase.results[browser.id].wasmRme.toFixed(1));
         }
 
         appendNumberCell(row, (100 * percentageDifference(minSpeedy, maxSpeedy)).toFixed(1));
