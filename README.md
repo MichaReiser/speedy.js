@@ -7,18 +7,6 @@
 Speedy.js is a compiler for a well considered, performance pitfalls free [subset of JavaScript](https://github.com/MichaReiser/speedy.js/wiki/Language-Reference) targeting WebAssembly. Because WebAssembly is statically-typed, the project uses TypeScript as type-checker and to resolve the types of the program symbols. 
 
 The project is very experimental and still far away from being production ready. 
- 
-## Prerequisites 
-
-1. A lot of disk space (~20gb)
-2. A lot of ram (~4gb)
-3. A lot of patience
-4. Up to date C++ compiler, and other build essentials (see [LLVM requirements](http://llvm.org/docs/GettingStarted.html#requirements))
-
-These requirements will change as soon as the WebAssembly backend for LLVM is no longer experimental and 
-included in your platforms build by default.
-
-There is also a pre-build [Ubuntu VM](https://drive.switch.ch/index.php/s/vpjsvWfVPnJHp9k) (user: speedyjs, password: welcome) that can be used to experiment with the compiler. You find the [Speedy.js Playground project](https://github.com/MichaReiser/speedy.js-playground) in the users home directory.
 
 ## Getting Started
 
@@ -51,6 +39,9 @@ Now the compiler can be installed using `npm install` (or yarn or whatever). Als
 ```bash
 npm install --save-dev speedyjs-compiler MichaReiser/TypeScript#2.3.3-with-int
 ```
+
+### Prebuilt VM
+For those just interested in playing around the prebuilt Ubuntu [Ubuntu VM](https://drive.switch.ch/index.php/s/vpjsvWfVPnJHp9k) (user: speedyjs, password: welcome) might be interesting. It contians the [Speedy.js Playground project](https://github.com/MichaReiser/speedy.js-playground) in the user's home directory. 
 
 ## Compile your first Script
 You have to mark Speedy.js functions with the `use speedyjs` directive. Furthermore, you have to declare Speedy.js functions that are called from a pure JavaScript function as `async` (see `fib`). 
