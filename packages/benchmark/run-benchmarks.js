@@ -7,6 +7,10 @@ const platform = require("platform");
 const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
 
 const TEST_CASES = {
+    "nbody": {
+        args: [10000000],
+        result: -0.16907784165413997
+    },
     "factorize": {
         args: [183626381],
         result: 183626381
