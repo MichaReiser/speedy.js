@@ -184,6 +184,19 @@ function percentageDifference(a, b) {
     return Math.abs(a - b) / ((a + b) / 2);
 }
 
+function avg(values) {
+    if (values.length === 0) {
+        return 0;
+    }
+
+    let result = 0.0;
+    for (const value of values) {
+        result += value;
+    }
+
+    return result / values.length;
+}
+
 function renderTable(chartData) {
     const visibleBrowsers= chartData.browsers.filter(isVisible);
     const visibleTestCases = chartData.testCases.filter(isVisible);
@@ -224,6 +237,10 @@ function renderTable(chartData) {
     table.appendChild(header);
 
     const body = document.createElement("tbody");
+    const jsDiffs = [];
+    const jsRmes = [];
+    const speedyDiffs = [];
+    const speedyRmes = [];
 
     for (const testCase of visibleTestCases) {
         const row = document.createElement("tr");
@@ -237,11 +254,15 @@ function renderTable(chartData) {
             minJS = Math.min(minJS, js);
             maxJS = Math.max(maxJS, js);
 
+            const jsRme = testCase.results[browser.id].jsRme;
+            jsRmes.push(jsRme);
             appendNumberCell(row, js.toFixed(1));
-            appendNumberCell(row, testCase.results[browser.id].jsRme.toFixed(1))
+            appendNumberCell(row, jsRme.toFixed(1));
         }
 
-        appendNumberCell(row, (100 * percentageDifference(minJS, maxJS)).toFixed(1));
+        const jsDiff = 100 * percentageDifference(minJS, maxJS);
+        jsDiffs.push(jsDiff);
+        appendNumberCell(row, jsDiff.toFixed(1));
 
         let minSpeedy = Number.MAX_SAFE_INTEGER,
             maxSpeedy = Number.MIN_SAFE_INTEGER;
@@ -250,16 +271,40 @@ function renderTable(chartData) {
             const speedyJs =  testCase.results[browser.id].wasm;
             minSpeedy = Math.min(minSpeedy, speedyJs);
             maxSpeedy = Math.max(maxSpeedy, speedyJs);
+
+            const wasmRme = testCase.results[browser.id].wasmRme;
+            speedyRmes.push(wasmRme);
             appendNumberCell(row, speedyJs.toFixed(1));
-            appendNumberCell(row, testCase.results[browser.id].wasmRme.toFixed(1));
+            appendNumberCell(row, wasmRme.toFixed(1));
         }
 
-        appendNumberCell(row, (100 * percentageDifference(minSpeedy, maxSpeedy)).toFixed(1));
+        const speedyDiff = 100 * percentageDifference(minSpeedy, maxSpeedy);
+        speedyDiffs.push(speedyDiff);
+        appendNumberCell(row, speedyDiff.toFixed(1));
 
         body.appendChild(row);
     }
 
     table.appendChild(body);
+
+    const footer = document.createElement("tfoot");
+    footer.appendChild(createFooterRow("ø JS Error", avg(jsRmes).toFixed(1), visibleBrowsers));
+    footer.appendChild(createFooterRow("ø Speedy.js Error", avg(speedyRmes).toFixed(1), visibleBrowsers));
+    footer.appendChild(createFooterRow("ø difference JS", avg(jsDiffs).toFixed(1), visibleBrowsers));
+    footer.appendChild(createFooterRow("ø difference Speedy.js", avg(speedyDiffs).toFixed(1), visibleBrowsers));
+
+    table.appendChild(footer);
+}
+
+function createFooterRow(caption, value, visibleBrowsers) {
+    const row = document.createElement("tr");
+    appendCell(row, caption);
+    appendNumberCell(row, value);
+
+    const spacer = appendCell(row, "");
+    spacer.colSpan = visibleBrowsers.length * 2  * 2 + 1;
+
+    return row;
 }
 
 function transformResultToChartData(browserResults) {
