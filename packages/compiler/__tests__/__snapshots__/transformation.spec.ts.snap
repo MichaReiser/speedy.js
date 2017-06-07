@@ -318,6 +318,9 @@ function __moduleLoader(wasmUri, options) {
                 });
             });
         }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
+        }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
         }
@@ -733,6 +736,9 @@ function __moduleLoader(wasmUri, options) {
                     }
                 });
             });
+        }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
         }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
@@ -1152,6 +1158,9 @@ function __moduleLoader(wasmUri, options) {
                 });
             });
         }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
+        }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
         }
@@ -1567,6 +1576,9 @@ function __moduleLoader(wasmUri, options) {
                     }
                 });
             });
+        }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
         }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
@@ -2026,6 +2038,9 @@ function __moduleLoader(wasmUri, options) {
                 });
             });
         }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
+        }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
         }
@@ -2442,6 +2457,9 @@ function __moduleLoader(wasmUri, options) {
                     }
                 });
             });
+        }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
         }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
@@ -2860,6 +2878,9 @@ function __moduleLoader(wasmUri, options) {
                 });
             });
         }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
+        }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
         }
@@ -3275,6 +3296,9 @@ function __moduleLoader(wasmUri, options) {
                     }
                 });
             });
+        }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
         }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
@@ -3692,6 +3716,9 @@ function __moduleLoader(wasmUri, options) {
                 });
             });
         }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
+        }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
         }
@@ -4107,6 +4134,9 @@ function __moduleLoader(wasmUri, options) {
                     }
                 });
             });
+        }
+        else if (typeof read !== \\"undefined\\") {
+            wasmLoaded = Promise.resolve(read(wasmUri, \\"binary\\").buffer);
         }
         else {
             throw new Error(\\"Unknown environment, can not load WASM module\\");
