@@ -5,6 +5,8 @@
  */
 
 declare function fetch(url: string): Promise<any>;
+declare function read(filename: string, type: "binary"): Uint8Array;
+declare function read(filename: string, type?: string): string;
 declare var window: any;
 
 interface Type {
@@ -398,6 +400,8 @@ function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoa
                     }
                 });
             });
+        } else if (typeof read !== "undefined") { // Spidermonkey shell
+            wasmLoaded = Promise.resolve(read(wasmUri, "binary").buffer);
         } else {
             throw new Error("Unknown environment, can not load WASM module");
         }
