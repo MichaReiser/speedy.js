@@ -258,6 +258,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -273,18 +291,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -677,6 +695,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -692,18 +728,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -1098,6 +1134,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -1113,18 +1167,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -1517,6 +1571,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -1532,18 +1604,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -1978,6 +2050,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -1993,18 +2083,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -2398,6 +2488,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -2413,18 +2521,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -2818,6 +2926,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -2833,18 +2959,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -3237,6 +3363,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -3252,18 +3396,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -3656,6 +3800,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -3671,18 +3833,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;
@@ -4075,6 +4237,24 @@ function __moduleLoader(wasmUri, options) {
     var DYNAMIC_TOP_PTR = STATIC_TOP;
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
+    function growMemory(requestedSize) {
+        var limit = Math.pow(2, 31) - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error(\\"Cannot grow memory larger than the WebAssembly limit of \\" + limit + \\" (requested: \\" + requestedSize + \\").\\");
+        }
+        var oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) {
+                totalMemory = totalMemory * 2;
+            }
+            else {
+                var increase = alignUp((Math.pow(2, 31) - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
     function sbrk(increment) {
         increment = increment | 0;
         var oldDynamicTop = 0;
@@ -4090,18 +4270,18 @@ function __moduleLoader(wasmUri, options) {
         }
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            var pagesToAdd = 0;
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-            memory.grow(pagesToAdd);
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
     function alignMemory(size, quantum) {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+    function alignUp(x, multiple) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
     function loadInstance() {
         var instance;

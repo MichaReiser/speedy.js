@@ -310,7 +310,7 @@ function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoa
 
     const TOTAL_STACK = options.totalStack;
     const INITIAL_MEMORY = options.initialMemory;
-    let totalMemory = INITIAL_MEMORY;
+    let totalMemory: number = INITIAL_MEMORY;
     const GLOBAL_BASE = options.globalBase;
     const STATIC_BUMP = options.staticBump;
 
@@ -333,6 +333,26 @@ function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoa
     heap32[GLOBAL_BASE >> 2] = STACK_TOP;
     heap32[DYNAMIC_TOP_PTR >> 2] = DYNAMIC_BASE;
 
+    function growMemory(requestedSize: number) {
+        const limit = 2 ** 31 - WASM_PAGE_SIZE;
+        if (requestedSize > limit) {
+            throw new Error("Cannot grow memory larger than the WebAssembly limit of " + limit + " (requested: " + requestedSize + ").");
+        }
+
+        const oldSize = totalMemory;
+        while ((requestedSize | 0) > (totalMemory | 0)) {
+            if (totalMemory <= 536870912) { // grow fast to 2 gb
+                totalMemory = totalMemory * 2;
+            } else {
+                const increase = alignUp((2 ** 31 - totalMemory) / 4, WASM_PAGE_SIZE);
+                totalMemory = Math.min(totalMemory + increase, limit);
+            }
+        }
+
+        memory.grow((totalMemory - oldSize) / WASM_PAGE_SIZE);
+        updateHeap(memory.buffer);
+    }
+
     function sbrk(increment: number) {
         increment = increment | 0;
         let oldDynamicTop = 0;
@@ -350,22 +370,20 @@ function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoa
 
         heap32[DYNAMIC_TOP_PTR >> 2] = newDynamicTop;
         if ((newDynamicTop | 0) > (totalMemory | 0)) {
-            let pagesToAdd = 0;
-
-            while ((newDynamicTop | 0) > (totalMemory | 0)) {
-                pagesToAdd = (totalMemory / WASM_PAGE_SIZE * 0.5) | 0;
-                totalMemory += pagesToAdd * WASM_PAGE_SIZE;
-            }
-
-            memory.grow(pagesToAdd);
-
-            updateHeap(memory.buffer);
+            growMemory(newDynamicTop);
         }
         return oldDynamicTop | 0;
     }
 
     function alignMemory(size: int, quantum?: int): int {
         return Math.ceil((size) / (quantum ? quantum : 16)) * (quantum ? quantum : 16);
+    }
+
+    function alignUp(x: number, multiple: number) {
+        if (x % multiple > 0) {
+            x += multiple - (x % multiple);
+        }
+        return x;
     }
 
     function loadInstance(): Promise<WebAssemblyInstance> {
