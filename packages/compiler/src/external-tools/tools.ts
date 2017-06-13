@@ -6,9 +6,10 @@ import * as ts from "typescript";
 const CONFIGURATION_FILE = path.normalize(path.join(__dirname, "../../tools/configuration.json"));
 
 const log = debug("external-tools/tools");
+let llvmBinDir: string | undefined;
 
 interface ToolsConfiguration {
-    LLVM: string;
+    LLVM_CONFIG: string;
     BINARYEN: string;
 }
 
@@ -24,6 +25,15 @@ export function getConfiguration(): ToolsConfiguration {
     return JSON.parse(content) as ToolsConfiguration;
 }
 
+function getLLVMBinDirectory() {
+    if (!llvmBinDir) {
+        const llvmConfigPath = path.resolve(`${__dirname}/../../`, getConfiguration().LLVM_CONFIG);
+        llvmBinDir = execute(llvmConfigPath, "--bindir").trim();
+    }
+
+    return llvmBinDir;
+}
+
 /**
  * executes a llvm tool
  * @param tool the name of the binary
@@ -32,8 +42,7 @@ export function getConfiguration(): ToolsConfiguration {
  * @return {string} the result of executing this command
  */
 export function execLLVM(tool: string, args: string, cwd?: string): string {
-    const llvmPath = path.resolve(`${__dirname}/../../`, getConfiguration().LLVM);
-    const toolPath = path.join(llvmPath, tool);
+    const toolPath = path.join(getLLVMBinDirectory(), tool);
 
     if (!ts.sys.fileExists(toolPath)) {
         throw new Error(`LLVM executable ${toolPath} is missing`);

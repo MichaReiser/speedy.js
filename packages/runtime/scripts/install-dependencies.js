@@ -3,6 +3,7 @@ const os = require("os");
 const fs = require("fs");
 const util = require("util");
 
+const dependencyUtils = require("../../compiler/scripts/dependency-utils");
 const llvmInstaller = require("../../compiler/scripts/llvm-installer");
 const binaryenInstaller = require("../../compiler/scripts/binaryen-installer");
 const emscriptenInstaller = require("./emscripten-installer");
@@ -19,7 +20,9 @@ function build() {
         fs.mkdirSync(COMPILER_TOOLS_DIRECTORY);
     }
 
-    const llvm = llvmInstaller.install(COMPILER_TOOLS_DIRECTORY);
+    const llvmConfig = llvmInstaller.install(COMPILER_TOOLS_DIRECTORY);
+    const llvm = dependencyUtils.execPiped(llvmConfig + " --bindir").trim();
+
     const binaryen = binaryenInstaller.install(COMPILER_TOOLS_DIRECTORY);
     const emscripten = emscriptenInstaller.install(TOOLS_DIRECTORY);
 
