@@ -79,7 +79,9 @@ function startBenchmark (numRuns=1) {
     progress.style.width = "0%";
     progress.parentNode.attributes.removeNamedItem("hidden");
 
-    runSuites(numRuns, beforeSuiteRun, progressHandler).then(complete);
+    runSuites(numRuns, beforeSuiteRun, progressHandler)
+        .then(complete)
+        .catch(error => console.error(error));
 }
 
 runButton.addEventListener("click", function () {
