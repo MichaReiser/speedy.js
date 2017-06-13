@@ -27,8 +27,7 @@ export function getConfiguration(): ToolsConfiguration {
 
 function getLLVMBinDirectory() {
     if (!llvmBinDir) {
-        const llvmConfigPath = path.resolve(`${__dirname}/../../`, getConfiguration().LLVM_CONFIG);
-        llvmBinDir = execute(llvmConfigPath, "--bindir").trim();
+        llvmBinDir = execute(getConfiguration().LLVM_CONFIG, "--bindir").trim();
     }
 
     return llvmBinDir;
