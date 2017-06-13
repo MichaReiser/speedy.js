@@ -37,8 +37,7 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
     const defaultHost = ts.createCompilerHost(initializedOptions);
 
     let sourceFile: ts.SourceFile | undefined;
-    let outputText: string | undefined;
-    let sourceMapText: string | undefined;
+    const outputs: { js?: string, wasm?: any[], wast?: string, sourceMapText?: string } = {};
 
     const compilerHost: ts.CompilerHost = {
         directoryExists() {
@@ -89,18 +88,30 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
         },
         writeFile(name: string, text: string) {
             if (name.endsWith(".map")) {
-                assert(sourceMapText === undefined, `Unexpected multiple source map outputs for the file '${name}'`);
-                sourceMapText = text;
+                assert(outputs.sourceMapText === undefined, `Unexpected multiple source map outputs for the file '${name}'`);
+                outputs.sourceMapText = text;
             } else if (name.endsWith(".js")) {
-                assert(outputText === undefined, `Unexpected multiple outputs for the file: '${name}'`);
-                outputText = text;
+                assert(outputs.js === undefined, `Unexpected multiple outputs for the file: '${name}'`);
+                outputs.js = text;
+            } else if (name.endsWith(".wast")) {
+                assert(outputs.wast === undefined, `Unexpected multiple outputs for the file: '${name}'`);
+                outputs.wast = text;
+            } else if (name.endsWith(".wasm")) {
+                assert(outputs.wasm === undefined, `Unexpected multiple outputs for the file: '${name}'`);
+                outputs.wasm = (text as any as Buffer).toJSON().data;
             }
-            // not interested in wasm file
         }
     };
 
     const compiler = new Compiler(initializedOptions, compilerHost);
     const result = compiler.compile([inputFileName]);
 
-    return { outputText: outputText!, diagnostics: result.diagnostics, sourceMapText, exitStatus: result.exitStatus };
+    return {
+        js: outputs.js!,
+        wasm: outputs.wasm,
+        wast: outputs.wast,
+        diagnostics: result.diagnostics,
+        sourceMapText: outputs.sourceMapText,
+        exitStatus: result.exitStatus
+    };
 }
