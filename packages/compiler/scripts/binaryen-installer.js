@@ -21,8 +21,7 @@ function buildBinaryen(directory) {
     dependencyUtils.exec('cmake -E chdir "%s" cmake "%s"', binaryenBuildDirectory, binaryenDirectory);
     dependencyUtils.make(binaryenBuildDirectory);
 
-    // The path needs to be relative as npm install is run in a temporary directory that changes when the installation was successful.
-    return path.relative(process.cwd(), binaryenBuildDirectory);
+    return binaryenBuildDirectory;
 }
 
 function install(directory) {
