@@ -10,8 +10,10 @@ function build() {
         fs.mkdirSync(TOOLS_DIRECTORY);
     }
 
-    const llvm = llvmInstaller.install();
-    const binaryen = binaryenInstaller.install(TOOLS_DIRECTORY);
+    // The paths needs to be relative as npm install is run in a temporary directory that changes when the installation was successful.
+    // relative paths are also useful on heroku where all dependencies need to be relative to the build directory
+    const llvm = path.relative(process.cwd(), llvmInstaller.install());
+    const binaryen = path.relative(process.cwd(), binaryenInstaller.install(TOOLS_DIRECTORY));
 
     const configuration = {
         BINARYEN: binaryen,

@@ -32,7 +32,8 @@ export function getConfiguration(): ToolsConfiguration {
  * @return {string} the result of executing this command
  */
 export function execLLVM(tool: string, args: string, cwd?: string): string {
-    const toolPath = path.join(getConfiguration().LLVM, tool);
+    const llvmPath = path.resolve(`${__dirname}/../../`, getConfiguration().LLVM);
+    const toolPath = path.join(llvmPath, tool);
 
     if (!ts.sys.fileExists(toolPath)) {
         throw new Error(`LLVM executable ${toolPath} is missing`);

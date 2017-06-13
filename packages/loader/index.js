@@ -80,7 +80,7 @@ function speedyJSLoader(source) {
         };
         callback(error);
     } else {
-        const output = makeSourceMap(result.sourceMapText, result.outputText, this.resourcePath + ".ts", source, this);
+        const output = makeSourceMap(result.sourceMapText, result.js, this.resourcePath + ".ts", source, this);
 
         callback(null, output.source, output.sourceMap);
     }

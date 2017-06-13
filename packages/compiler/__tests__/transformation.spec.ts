@@ -245,7 +245,7 @@ describe("Transformation", () => {
         }
 
         expect(result.exitStatus).toBe(ts.ExitStatus.Success);
-        expect(result.outputText).toMatchSnapshot();
+        expect(result.js).toMatchSnapshot();
     }
 
     function createCompilerOptions(options?: ts.CompilerOptions) {
