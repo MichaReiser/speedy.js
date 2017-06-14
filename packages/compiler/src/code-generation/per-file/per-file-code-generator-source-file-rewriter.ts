@@ -62,7 +62,6 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         const serializedTypes = this.serializeArgumentAndReturnTypes(argumentTypes, signature.getReturnType());
         const typesIdentifier = ts.createUniqueName("types");
         const typesDeclaration = ts.createVariableStatement(undefined , [ts.createVariableDeclaration(typesIdentifier, undefined, serializedTypes)]);
-        bodyStatements.push(typesDeclaration);
 
         let argumentObjects: ts.Identifier;
         // argumentObjects = new Map();
@@ -116,7 +115,7 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
             functionDeclaration.typeParameters,
             functionDeclaration.parameters,
             functionDeclaration.type,
-            ts.createBlock([ts.createReturn(instanceLoaded)])
+            ts.createBlock([typesDeclaration, ts.createReturn(instanceLoaded)])
         );
     }
 

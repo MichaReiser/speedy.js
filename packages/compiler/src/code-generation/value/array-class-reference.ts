@@ -106,10 +106,10 @@ export class ArrayClassReference extends ClassReference {
         }
 
         forwardDeclaration.setBody([
-                llvmElementType.getPointerTo(),
-                llvm.Type.getInt32Ty(context.llvmContext),
-                llvm.Type.getInt32Ty(context.llvmContext)
-            ]);
+            llvmElementType.getPointerTo(),
+            llvmElementType.getPointerTo(),
+            llvm.Type.getInt32Ty(context.llvmContext)
+        ]);
 
         return forwardDeclaration;
     }
