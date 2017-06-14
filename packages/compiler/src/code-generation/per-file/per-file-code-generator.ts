@@ -149,7 +149,7 @@ export class PerFileCodeGenerator implements CodeGenerator {
         }
 
         if (context.compilationContext.compilerOptions.saveWast) {
-            transforms.push(new CopyFileToOutputDirectoryTransformationStep(".wast", true));
+            transforms.push(new CopyFileToOutputDirectoryTransformationStep(".wast"));
         }
 
         transforms.push(new WasmToAsTransformationStep());
