@@ -1,6 +1,6 @@
 {
   "name": "speedyjs-benchmark",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Speedy.js Benchmark",
   "main": "index.js",
   "private": true,
@@ -28,7 +28,7 @@
     "d3-tip": "^0.7.1",
     "exports-loader": "^0.6.4",
     "file-loader": "^0.11.1",
-    "speedyjs-loader": "^0.0.16",
+    "speedyjs-loader": "^0.0.17",
     "ts-loader": "^2.1.0",
     "typescript": "MichaReiser/TypeScript#2.3.3-with-int",
     "webpack-dev-server": "^2.4.5"
