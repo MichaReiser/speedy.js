@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {getArrayElementType} from "../util/types";
@@ -24,7 +24,7 @@ class ArrayLiteralExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Arra
             if (!casted) {
                 const arrayElementTypeName = context.typeChecker.typeToString(elementType);
                 const elementTypeName = context.typeChecker.typeToString(context.typeChecker.getTypeAtLocation(element));
-                throw CodeGenerationDiagnostic.implicitArrayElementCast(element, arrayElementTypeName, elementTypeName);
+                throw CodeGenerationDiagnostics.implicitArrayElementCast(element, arrayElementTypeName, elementTypeName);
             }
             elements[i] = casted.generateIR(context);
         }

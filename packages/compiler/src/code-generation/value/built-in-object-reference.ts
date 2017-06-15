@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {isMaybeObjectType, toLLVMType} from "../util/types";
@@ -93,11 +93,11 @@ export abstract class BuiltInObjectReference implements ObjectReference {
      */
     protected throwUnsupportedBuiltIn(node: ts.PropertyAccessExpression | ts.ElementAccessExpression, symbol?: ts.Symbol): never {
         if (node.kind === ts.SyntaxKind.ElementAccessExpression) {
-            throw CodeGenerationDiagnostic.builtInDoesNotSupportElementAccess(node, this.typeName);
+            throw CodeGenerationDiagnostics.builtInDoesNotSupportElementAccess(node, this.typeName);
         } else if (node.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            throw CodeGenerationDiagnostic.builtInPropertyNotSupported(node, this.typeName);
+            throw CodeGenerationDiagnostics.builtInPropertyNotSupported(node, this.typeName);
         } else {
-            throw CodeGenerationDiagnostic.builtInMethodNotSupported(node, this.typeName, symbol!.name);
+            throw CodeGenerationDiagnostics.builtInMethodNotSupported(node, this.typeName, symbol!.name);
         }
     }
 

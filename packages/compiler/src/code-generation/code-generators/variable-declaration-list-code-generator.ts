@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
@@ -9,7 +9,7 @@ class VariableDeclarationListCodeGenerator implements SyntaxCodeGenerator<ts.Var
     generate(variableDeclarationList: ts.VariableDeclarationList, context: CodeGenerationContext): void {
         if ((variableDeclarationList.flags & ts.NodeFlags.Let) !== ts.NodeFlags.Let &&
             (variableDeclarationList.flags & ts.NodeFlags.Const) !== ts.NodeFlags.Const) {
-            throw CodeGenerationDiagnostic.variableDeclarationList(variableDeclarationList);
+            throw CodeGenerationDiagnostics.variableDeclarationList(variableDeclarationList);
         }
 
         context.generateChildren(variableDeclarationList);

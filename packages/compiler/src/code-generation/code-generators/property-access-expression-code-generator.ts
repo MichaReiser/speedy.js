@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {ClassReference} from "../value/class-reference";
@@ -17,11 +17,11 @@ class PropertyAccessExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Pr
         }
 
         if (object instanceof ClassReference) {
-            throw CodeGenerationDiagnostic.unsupportedStaticProperties(propertyExpression);
+            throw CodeGenerationDiagnostics.unsupportedStaticProperties(propertyExpression);
         }
 
         // e.g. on function
-        throw CodeGenerationDiagnostic.unsupportedProperty(propertyExpression);
+        throw CodeGenerationDiagnostics.unsupportedProperty(propertyExpression);
     }
 }
 

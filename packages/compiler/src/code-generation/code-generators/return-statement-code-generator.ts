@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {TypeChecker} from "../../type-checker";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
@@ -21,7 +21,7 @@ class ReturnStatementCodeGenerator implements SyntaxCodeGenerator<ts.ReturnState
             const casted = returnValue.castImplicit(returnType, context);
 
             if (!casted) {
-                throw CodeGenerationDiagnostic.unsupportedImplicitCastOfReturnValue(
+                throw CodeGenerationDiagnostics.unsupportedImplicitCastOfReturnValue(
                     returnStatement,
                     context.typeChecker.typeToString(returnType),
                     context.typeChecker.typeToString(expressionType)

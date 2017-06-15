@@ -1,6 +1,6 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
@@ -65,7 +65,7 @@ class PrefixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Prefi
         }
 
         if (!result) {
-            throw CodeGenerationDiagnostic.unsupportedUnaryOperation(node, context.typeChecker.typeToString(operandType));
+            throw CodeGenerationDiagnostics.unsupportedUnaryOperation(node, context.typeChecker.typeToString(operandType));
         }
 
         const resultValue = context.value(result, resultType);

@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Address} from "./address";
@@ -19,13 +19,13 @@ export class SpeedyJSClassReference extends ClassReference {
 
         const declaration = type.getSymbol().valueDeclaration as ts.ClassDeclaration;
         if (baseTypes && type.getBaseTypes().length > 0) {
-            throw CodeGenerationDiagnostic.unsupportedClassInheritance(declaration);
+            throw CodeGenerationDiagnostics.unsupportedClassInheritance(declaration);
         }
 
         if (type.objectFlags & ts.ObjectFlags.Reference) {
             const typeReference = type as ts.TypeReference;
             if (typeReference.typeArguments && typeReference.typeArguments.length > 0) {
-                throw CodeGenerationDiagnostic.unsupportedGenericClass(declaration);
+                throw CodeGenerationDiagnostics.unsupportedGenericClass(declaration);
             }
         }
 

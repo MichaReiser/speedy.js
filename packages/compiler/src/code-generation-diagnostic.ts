@@ -1,64 +1,106 @@
-import * as assert from "assert";
 import * as ts from "typescript";
 import * as util from "util";
+
+/**
+ * Error thrown during code generation. Has a node attach allowing to identify the source of the error.
+ * The error can either be the use of an unsupported language feature, an assertion error or any uncatched compiler error.
+ */
+export interface CodeGenerationDiagnostic extends Error {
+    /**
+     * The node that caused the error
+     */
+    node: ts.Node;
+
+    /**
+     * The code, if available
+     */
+    code: number;
+}
+
+export function createCodeGenerationDiagnostic(code: number, message: string, node: ts.Node) {
+    const error = new Error(message) as CodeGenerationDiagnostic;
+    error.node = node;
+    error.code = code;
+    return error;
+}
+
+/**
+ * Tests if the given object is a code generation error
+ * @param error the object to test for
+ * @return {boolean} true if it is a code generation error
+ */
+export function isCodeGenerationDiagnostic(error: any): error is CodeGenerationDiagnostic {
+    return typeof(error.node) !== "undefined" && typeof(error.code) === "number" && error instanceof Error;
+}
+
+/**
+ * Attaches the node to the given error or creates an error object with the node attached
+ * @param error the error object or message
+ * @param node the node that caused the error
+ * @return the code generation diagnostic error
+ */
+export function toCodeGenerationDiagnostic(error: any, node: ts.Node): CodeGenerationDiagnostic {
+    if (isCodeGenerationDiagnostic(error)) {
+        return error;
+    }
+
+    if (error instanceof Error) {
+        const diagnostic = error as CodeGenerationDiagnostic;
+        diagnostic.node = node;
+        diagnostic.code = 0;
+        return diagnostic;
+    } else {
+        throw createCodeGenerationDiagnostic(Number.NaN, error + "", node);
+    }
+}
 
 /**
  * Error thrown if the code generation fails. Stores the node to show the node that  caused the error
  * in the users code.
  */
-export class CodeGenerationDiagnostic extends Error {
-    constructor(public node: ts.Node, public code: number, message: string) {
-        super(message);
-        assert(node, "Node is not defined");
-        assert(code, "code is not defined");
-        assert(message, "message is not defined");
-
-        // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
-        Object.setPrototypeOf(this, CodeGenerationDiagnostic.prototype);
-    }
-
-    toDiagnostic(): ts.Diagnostic {
+export class CodeGenerationDiagnostics {
+    static toDiagnostic(error: CodeGenerationDiagnostic): ts.Diagnostic {
         return {
-            code: this.code,
-            messageText: this.message,
-            start: this.node.getFullStart(),
-            length: this.node.getFullWidth(),
+            code: error.code,
+            messageText: error.message,
+            start: error.node.getFullStart(),
+            length: error.node.getFullWidth(),
             category: ts.DiagnosticCategory.Error,
-            file: this.node.getSourceFile()
+            file: error.node.getSourceFile()
         };
     }
 
     static builtInMethodNotSupported(propertyAccessExpression: ts.PropertyAccessExpression, objectName: string, methodName: string) {
-        return CodeGenerationDiagnostic.createException(propertyAccessExpression, diagnostics.BuiltInMethodNotSupported, methodName, objectName);
+        return CodeGenerationDiagnostics.createException(propertyAccessExpression, diagnostics.BuiltInMethodNotSupported, methodName, objectName);
     }
 
     static builtInPropertyNotSupported(property: ts.PropertyAccessExpression, objectName: string) {
-        return CodeGenerationDiagnostic.createException(property, diagnostics.BuiltInPropertyNotSupported, property.name.text, objectName);
+        return CodeGenerationDiagnostics.createException(property, diagnostics.BuiltInPropertyNotSupported, property.name.text, objectName);
     }
 
     static builtInDoesNotSupportElementAccess(element: ts.ElementAccessExpression, objectName: string) {
-        return CodeGenerationDiagnostic.createException(element, diagnostics.BuiltInObjectDoesNotSupportElementAccess, objectName);
+        return CodeGenerationDiagnostics.createException(element, diagnostics.BuiltInObjectDoesNotSupportElementAccess, objectName);
     }
 
     private static createException(node: ts.Node, diagnostic: { message: string, code: number }, ...args: Array<string | number>) {
         const message = util.format(diagnostic.message, ...args);
-        return new CodeGenerationDiagnostic(node, diagnostic.code, message);
+        return createCodeGenerationDiagnostic(diagnostic.code, message, node);
     }
 
     static unsupportedLiteralType(node: ts.LiteralLikeNode, typeName: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedLiteralType, typeName);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedLiteralType, typeName);
     }
 
     static unsupportedType(node: ts.Declaration, typeName: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedType, typeName);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedType, typeName);
     }
 
     static unsupportedIdentifier(identifier: ts.Identifier) {
-        return CodeGenerationDiagnostic.createException(identifier, diagnostics.UnsupportedIdentifier, identifier.text);
+        return CodeGenerationDiagnostics.createException(identifier, diagnostics.UnsupportedIdentifier, identifier.text);
     }
 
     static unsupportedBinaryOperation(binaryExpression: ts.BinaryExpression, leftType: string, rightType: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             binaryExpression,
             diagnostics.UnsupportedBinaryOperation,
             ts.SyntaxKind[binaryExpression.operatorToken.kind],
@@ -68,55 +110,55 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedUnaryOperation(node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression, type: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operator], type);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedUnaryOperation, ts.SyntaxKind[node.operator], type);
     }
 
     static anonymousEntryFunctionsNotSupported(fun: ts.FunctionLikeDeclaration) {
-        return CodeGenerationDiagnostic.createException(fun, diagnostics.AnonymousEntryFunctionsUnsupported);
+        return CodeGenerationDiagnostics.createException(fun, diagnostics.AnonymousEntryFunctionsUnsupported);
     }
 
     static optionalParametersInEntryFunctionNotSupported(optionalParameter: ts.ParameterDeclaration) {
-        return CodeGenerationDiagnostic.createException(optionalParameter, diagnostics.OptionalParametersNotSupportedForEntryFunction);
+        return CodeGenerationDiagnostics.createException(optionalParameter, diagnostics.OptionalParametersNotSupportedForEntryFunction);
     }
 
     static genericEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
-        return CodeGenerationDiagnostic.createException(fun, diagnostics.GenericEntryFunctionNotSuppoorted);
+        return CodeGenerationDiagnostics.createException(fun, diagnostics.GenericEntryFunctionNotSuppoorted);
     }
 
     static unsupportedClassReferencedBy(identifier: ts.Identifier) {
-        return CodeGenerationDiagnostic.createException(identifier, diagnostics.UnsupportedBuiltInClass);
+        return CodeGenerationDiagnostics.createException(identifier, diagnostics.UnsupportedBuiltInClass);
     }
 
     static referenceToNonSpeedyJSEntryFunctionFromJS(identifier: ts.Identifier, speedyJSFunctionSymbol: ts.Symbol) {
-        return CodeGenerationDiagnostic.createException(identifier, diagnostics.ReferenceToNonEntrySpeedyJSFunctionFromJS, speedyJSFunctionSymbol.name);
+        return CodeGenerationDiagnostics.createException(identifier, diagnostics.ReferenceToNonEntrySpeedyJSFunctionFromJS, speedyJSFunctionSymbol.name);
     }
 
     static refereneToNonSpeedyJSFunctionFromSpeedyJS(identifier: ts.Identifier, nonSpeedyJsFunctionSymbol: ts.Symbol) {
-        return CodeGenerationDiagnostic.createException(identifier, diagnostics.ReferenceToNonSpeedyJSFunctionFromSpeedyJS, nonSpeedyJsFunctionSymbol.name);
+        return CodeGenerationDiagnostics.createException(identifier, diagnostics.ReferenceToNonSpeedyJSFunctionFromSpeedyJS, nonSpeedyJsFunctionSymbol.name);
     }
 
     static overloadedEntryFunctionNotSupported(fun: ts.FunctionLikeDeclaration) {
-        return CodeGenerationDiagnostic.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
+        return CodeGenerationDiagnostics.createException(fun, diagnostics.OverloadedEntryFunctionNotSupported);
     }
 
     static unsupportedSyntaxKind(node: ts.Node) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedSyntaxKind, ts.SyntaxKind[node.kind]);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedSyntaxKind, ts.SyntaxKind[node.kind]);
     }
 
     static unsupportedProperty(propertyExpression: ts.PropertyAccessExpression) {
-        return CodeGenerationDiagnostic.createException(propertyExpression, diagnostics.UnsupportedProperty);
+        return CodeGenerationDiagnostics.createException(propertyExpression, diagnostics.UnsupportedProperty);
     }
 
     static unsupportedIndexer(node: ts.ElementAccessExpression) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedIndexer);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedIndexer);
     }
 
     static unsupportedCast(node: ts.AsExpression, sourceType: string, targetType: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedCast, sourceType, targetType);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedCast, sourceType, targetType);
     }
 
     static implicitArrayElementCast(element: ts.Expression, arrayElementType: string, typeOfElementRequiringImplicitCast: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             element,
             diagnostics.UnsupportedImplicitArrayElementCast,
             typeOfElementRequiringImplicitCast,
@@ -125,7 +167,7 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedImplicitCastOfBinaryExpressionOperands(binaryExpression: ts.BinaryExpression, leftOperandType: string, rightOperandType: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             binaryExpression,
             diagnostics.UnsupportedImplicitCastOfBinaryExpressionOperands,
             leftOperandType,
@@ -134,7 +176,7 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedImplicitCastOfArgument(elementNotMatchingArrayElementType: ts.Expression, parameterType: string, argumentType: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             elementNotMatchingArrayElementType,
             diagnostics.UnsupportedImplicitCastOfArgument,
             argumentType,
@@ -144,7 +186,7 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedImplicitCastOfConditionalResult(conditionalResult: ts.Expression, typeOfConditional: string, typeOfConditionResult: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             conditionalResult,
             diagnostics.UnsupportedImplicitCastOfConditionalResult,
             typeOfConditionResult,
@@ -154,7 +196,7 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedElementAccessExpression(elementAccessExpression: ts.ElementAccessExpression, argumentExpressionType?: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             elementAccessExpression,
             diagnostics.UnsupportedElementAccessExpression,
             argumentExpressionType || "undefined"
@@ -162,7 +204,7 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedImplicitCastOfReturnValue(returnStatement: ts.ReturnStatement, declaredReturnType: string, returnStatementExpressionType: string) {
-        return CodeGenerationDiagnostic.createException(
+        return CodeGenerationDiagnostics.createException(
             returnStatement,
             diagnostics.UnsupportedImplicitCastOfReturnValue,
             returnStatementExpressionType,
@@ -172,39 +214,39 @@ export class CodeGenerationDiagnostic extends Error {
     }
 
     static unsupportedImplicitCast(node: ts.Node, castTargetType: string, actualValueType: string) {
-        return CodeGenerationDiagnostic.createException(node, diagnostics.UnsupportedImplicitCast, actualValueType, castTargetType, castTargetType);
+        return CodeGenerationDiagnostics.createException(node, diagnostics.UnsupportedImplicitCast, actualValueType, castTargetType, castTargetType);
     }
 
     static unsupportedFunctionDeclaration(declaration: ts.Declaration) {
-        throw CodeGenerationDiagnostic.createException(declaration, diagnostics.UnsupportedFunctionDeclaration);
+        throw CodeGenerationDiagnostics.createException(declaration, diagnostics.UnsupportedFunctionDeclaration);
     }
 
     static unsupportedGenericFunction(functionDeclaration: ts.FunctionLikeDeclaration) {
-        return CodeGenerationDiagnostic.createException(functionDeclaration, diagnostics.UnsupportedGenericFunction);
+        return CodeGenerationDiagnostics.createException(functionDeclaration, diagnostics.UnsupportedGenericFunction);
     }
 
     static unsupportedStaticProperties(propertyExpression: ts.PropertyAccessExpression) {
-        return CodeGenerationDiagnostic.createException(propertyExpression, diagnostics.UnsupportedStaticProperty);
+        return CodeGenerationDiagnostics.createException(propertyExpression, diagnostics.UnsupportedStaticProperty);
     }
 
     static unsupportedNestedFunctionDeclaration(functionDeclaration: ts.FunctionDeclaration | ts.MethodDeclaration) {
-        return CodeGenerationDiagnostic.createException(functionDeclaration, diagnostics.UnsupportedNestedFunctionDeclaration);
+        return CodeGenerationDiagnostics.createException(functionDeclaration, diagnostics.UnsupportedNestedFunctionDeclaration);
     }
 
     static variableDeclarationList(variableDeclarationList: ts.VariableDeclarationList) {
-        return CodeGenerationDiagnostic.createException(variableDeclarationList, diagnostics.UnsupportedVarDeclaration);
+        return CodeGenerationDiagnostics.createException(variableDeclarationList, diagnostics.UnsupportedVarDeclaration);
     }
 
     static unsupportedOverloadedFunctionDeclaration(declaration: ts.FunctionLikeDeclaration) {
-        return CodeGenerationDiagnostic.createException(declaration, diagnostics.UnsupportedOverloadedFunctionDeclaration);
+        return CodeGenerationDiagnostics.createException(declaration, diagnostics.UnsupportedOverloadedFunctionDeclaration);
     }
 
     static unsupportedGenericClass(classDeclaration: ts.ClassDeclaration) {
-        return CodeGenerationDiagnostic.createException(classDeclaration, diagnostics.UnsupportedGenericClass);
+        return CodeGenerationDiagnostics.createException(classDeclaration, diagnostics.UnsupportedGenericClass);
     }
 
     static unsupportedClassInheritance(classDeclaration: ts.ClassDeclaration) {
-        return CodeGenerationDiagnostic.createException(classDeclaration, diagnostics.UnsupportedClassInheritance);
+        return CodeGenerationDiagnostics.createException(classDeclaration, diagnostics.UnsupportedClassInheritance);
     }
 }
 

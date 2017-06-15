@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
@@ -165,7 +165,7 @@ function toLlvmVariadicArgument(varArgs: ts.Expression[], parameter: ResolvedFun
         const varArgNode = varArgs[j];
         const castedElement = callerContext.generateValue(varArgNode).castImplicit(elementType, callerContext);
         if (!castedElement) {
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(
+            throw CodeGenerationDiagnostics.unsupportedImplicitCastOfArgument(
                 varArgNode,
                 callerContext.typeChecker.typeToString(elementType),
                 callerContext.typeChecker.typeToString(callerContext.typeChecker.getTypeAtLocation(varArgNode))
@@ -182,7 +182,7 @@ function toLlvmArgumentValue(arg: ts.Expression, parameter: ResolvedFunctionPara
     const argumentType = callerContext.typeChecker.getTypeAtLocation(arg);
 
     if (!castedElement) {
-        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfArgument(
+        throw CodeGenerationDiagnostics.unsupportedImplicitCastOfArgument(
             arg,
             callerContext.typeChecker.typeToString(parameter.type),
             callerContext.typeChecker.typeToString(argumentType)

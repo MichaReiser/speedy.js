@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {DefaultNameMangler} from "../default-name-mangler";
@@ -13,22 +13,22 @@ import {ResolvedFunction} from "./resolved-function";
 export function verifyIsSupportedSpeedyJSFunction(declaration: ts.Declaration, context: CodeGenerationContext) {
     // tslint:disable-next-line: max-line-length
     if (!(declaration.kind === ts.SyntaxKind.FunctionDeclaration || declaration.kind === ts.SyntaxKind.MethodDeclaration || declaration.kind === ts.SyntaxKind.Constructor)) {
-        throw CodeGenerationDiagnostic.unsupportedFunctionDeclaration(declaration);
+        throw CodeGenerationDiagnostics.unsupportedFunctionDeclaration(declaration);
     }
 
     const functionDeclaration = declaration as ts.FunctionDeclaration | ts.MethodDeclaration | ts.ConstructorDeclaration;
 
     if (functionDeclaration.typeParameters && functionDeclaration.typeParameters.length > 0) {
-        throw CodeGenerationDiagnostic.unsupportedGenericFunction(functionDeclaration);
+        throw CodeGenerationDiagnostics.unsupportedGenericFunction(functionDeclaration);
     }
 
     // tslint:disable-next-line: max-line-length
     if (functionDeclaration.kind === ts.SyntaxKind.FunctionDeclaration && functionDeclaration.parent && functionDeclaration.parent.kind !== ts.SyntaxKind.SourceFile) {
-        throw CodeGenerationDiagnostic.unsupportedNestedFunctionDeclaration(functionDeclaration);
+        throw CodeGenerationDiagnostics.unsupportedNestedFunctionDeclaration(functionDeclaration);
     }
 
     if (context.typeChecker.isImplementationOfOverload(functionDeclaration)) {
-        throw CodeGenerationDiagnostic.unsupportedOverloadedFunctionDeclaration(functionDeclaration);
+        throw CodeGenerationDiagnostics.unsupportedOverloadedFunctionDeclaration(functionDeclaration);
     }
 }
 

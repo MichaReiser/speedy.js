@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
@@ -25,12 +25,12 @@ class ConditionalExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Condi
         const conditionalTypeName = context.typeChecker.typeToString(conditionalType);
         if (!whenFalse) {
             const whenFalseTypeName = context.typeChecker.typeToString(whenFalseType);
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenFalse, conditionalTypeName, whenFalseTypeName);
+            throw CodeGenerationDiagnostics.unsupportedImplicitCastOfConditionalResult(node.whenFalse, conditionalTypeName, whenFalseTypeName);
         }
 
         if (!whenTrue) {
             const whenTrueTypeName = context.typeChecker.typeToString(whenTrueType);
-            throw CodeGenerationDiagnostic.unsupportedImplicitCastOfConditionalResult(node.whenTrue, conditionalTypeName, whenTrueTypeName);
+            throw CodeGenerationDiagnostics.unsupportedImplicitCastOfConditionalResult(node.whenTrue, conditionalTypeName, whenTrueTypeName);
         }
 
         const result = context.builder.createSelect(conditionBool, whenTrue.generateIR(context), whenFalse.generateIR(context), "cond");

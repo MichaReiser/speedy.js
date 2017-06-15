@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ComputedObjectPropertyReferenceBuilder} from "../util/computed-object-property-reference-builder";
 import {BuiltInObjectReference} from "./built-in-object-reference";
@@ -35,7 +35,7 @@ export class MathObjectReference extends BuiltInObjectReference {
             case "max":
                 return UnresolvedMethodReference.createRuntimeMethod(this, signatures, context, { readnone: true, noUnwind: true });
             default:
-                throw CodeGenerationDiagnostic.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
+                throw CodeGenerationDiagnostics.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);
         }
     }
 

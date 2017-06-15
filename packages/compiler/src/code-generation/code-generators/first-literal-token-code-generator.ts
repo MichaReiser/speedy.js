@@ -1,6 +1,6 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
@@ -18,7 +18,7 @@ class FirstLiteralTokenCodeGenerator implements SyntaxCodeGenerator<ts.LiteralEx
         } else if (type.flags & ts.TypeFlags.NumberLike) {
             value = llvm.ConstantFP.get(context.llvmContext, +node.text);
         } else {
-            throw CodeGenerationDiagnostic.unsupportedLiteralType(node, context.typeChecker.typeToString(type));
+            throw CodeGenerationDiagnostics.unsupportedLiteralType(node, context.typeChecker.typeToString(type));
         }
 
         return new Primitive(value, type);

@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "./code-generation-context";
 import {FallbackCodeGenerator} from "./fallback-code-generator";
@@ -11,6 +11,6 @@ import {FallbackCodeGenerator} from "./fallback-code-generator";
 export class NotYetImplementedCodeGenerator implements FallbackCodeGenerator {
 
     generate(node: ts.Node, context: CodeGenerationContext): void {
-        throw CodeGenerationDiagnostic.unsupportedSyntaxKind(node);
+        throw CodeGenerationDiagnostics.unsupportedSyntaxKind(node);
     }
 }

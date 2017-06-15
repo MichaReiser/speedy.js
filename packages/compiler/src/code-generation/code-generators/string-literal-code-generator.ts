@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 
@@ -15,7 +15,7 @@ class StringLiteralCodeGenerator implements SyntaxCodeGenerator<ts.StringLiteral
             return;
         }
 
-        throw CodeGenerationDiagnostic.unsupportedSyntaxKind(node);
+        throw CodeGenerationDiagnostics.unsupportedSyntaxKind(node);
     }
 
     /**
