@@ -1,6 +1,6 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
@@ -34,7 +34,7 @@ class PostfixUnaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Post
         }
 
         if (!updated) {
-            throw CodeGenerationDiagnostic.unsupportedUnaryOperation(postfixUnaryExpression, context.typeChecker.typeToString(operandType));
+            throw CodeGenerationDiagnostics.unsupportedUnaryOperation(postfixUnaryExpression, context.typeChecker.typeToString(operandType));
         }
 
         context.assignValue(left, context.value(updated, operandType));

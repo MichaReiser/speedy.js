@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Allocation} from "../value/allocation";
@@ -19,7 +19,7 @@ class VariableDeclarationCodeGenerator implements SyntaxCodeGenerator<ts.Variabl
             const castedInitializer = initializer.castImplicit(type, context);
 
             if (!castedInitializer) {
-                throw CodeGenerationDiagnostic.unsupportedImplicitCast(
+                throw CodeGenerationDiagnostics.unsupportedImplicitCast(
                     variableDeclaration,
                     context.typeChecker.typeToString(type),
                     context.typeChecker.typeToString(initializerType)

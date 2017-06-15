@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../code-generation-diagnostic";
 import {CodeGenerator} from "../code-generation/code-generator";
 import {CompilationContext} from "../compilation-context";
 import {TypeChecker} from "../type-checker";
@@ -40,9 +40,9 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
         if (typeof symbol !== "undefined" && symbol.flags & (ts.SymbolFlags.Function | ts.SymbolFlags.Method | ts.SymbolFlags.Constructor)) {
             for (const declaration of symbol.getDeclarations() as ts.FunctionLikeDeclaration[]) {
                 if (this.inSpeedyJSFunction && !canBeCalledFromSpeedyJs(declaration)) {
-                    throw CodeGenerationDiagnostic.refereneToNonSpeedyJSFunctionFromSpeedyJS(identifier, symbol);
+                    throw CodeGenerationDiagnostics.refereneToNonSpeedyJSFunctionFromSpeedyJS(identifier, symbol);
                 } else if (!this.inSpeedyJSFunction && !canBeCalledFromJs(declaration)) {
-                    throw CodeGenerationDiagnostic.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
+                    throw CodeGenerationDiagnostics.referenceToNonSpeedyJSEntryFunctionFromJS(identifier, symbol);
                 }
             }
         }
@@ -111,20 +111,20 @@ export class SpeedyJSTransformVisitor implements TransformVisitor {
  */
 function validateSpeedyJSFunction(fun: ts.FunctionLikeDeclaration, typeChecker: TypeChecker) {
     if (!fun.name) {
-        throw CodeGenerationDiagnostic.anonymousEntryFunctionsNotSupported(fun);
+        throw CodeGenerationDiagnostics.anonymousEntryFunctionsNotSupported(fun);
     }
 
     const optional = fun.parameters.find(parameter => !!parameter.questionToken || !!parameter.dotDotDotToken);
     if (optional) {
-        throw CodeGenerationDiagnostic.optionalParametersInEntryFunctionNotSupported(optional);
+        throw CodeGenerationDiagnostics.optionalParametersInEntryFunctionNotSupported(optional);
     }
 
     if (fun.typeParameters && fun.typeParameters.length > 0) {
-        throw CodeGenerationDiagnostic.genericEntryFunctionNotSupported(fun);
+        throw CodeGenerationDiagnostics.genericEntryFunctionNotSupported(fun);
     }
 
     if (typeChecker.isImplementationOfOverload(fun)) {
-        throw CodeGenerationDiagnostic.overloadedEntryFunctionNotSupported(fun);
+        throw CodeGenerationDiagnostics.overloadedEntryFunctionNotSupported(fun);
     }
 }
 

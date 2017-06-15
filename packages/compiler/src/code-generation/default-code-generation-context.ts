@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as debug from "debug";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
+import {toCodeGenerationDiagnostic} from "../code-generation-diagnostic";
 import {CompilationContext} from "../compilation-context";
 import {CodeGenerationContext} from "./code-generation-context";
 import {applyCodeGenerationContextMixin} from "./code-generation-context-mixin";
@@ -59,8 +60,12 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
 
     generate(node: ts.Node): void | Value {
         log(`Generate node ${ts.SyntaxKind[node.kind]}`);
-        const codeGenerator = this.getCodeGenerator(node);
-        return codeGenerator.generate(node, this);
+        try {
+            const codeGenerator = this.getCodeGenerator(node);
+            return codeGenerator.generate(node, this);
+        } catch (error) {
+            throw toCodeGenerationDiagnostic(error, node);
+        }
     }
 
     registerCodeGenerator(codeGenerator: SyntaxCodeGenerator<ts.Node, Value | void>): void {

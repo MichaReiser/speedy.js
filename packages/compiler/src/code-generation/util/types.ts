@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 
 /**
@@ -47,7 +47,7 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     }
 
     if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
-        throw CodeGenerationDiagnostic.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
+        throw CodeGenerationDiagnostics.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
     }
 
     throw new Error(`Unsupported type ${context.typeChecker.typeToString(type)}`);

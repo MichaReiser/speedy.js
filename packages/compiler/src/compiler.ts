@@ -2,7 +2,7 @@ import * as debug from "debug";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {BuiltInSymbols} from "./built-in-symbols";
-import {CodeGenerationDiagnostic} from "./code-generation-diagnostic";
+import {CodeGenerationDiagnostics, isCodeGenerationDiagnostic} from "./code-generation-diagnostic";
 import {DefaultCodeGenerationContextFactory} from "./code-generation/default-code-generation-context-factory";
 import {NotYetImplementedCodeGenerator} from "./code-generation/not-yet-implemented-code-generator";
 import {PerFileCodeGenerator} from "./code-generation/per-file/per-file-code-generator";
@@ -96,8 +96,8 @@ export class Compiler {
 
             return { exitStatus, diagnostics: emitResult.diagnostics };
         } catch (ex) {
-            if (ex instanceof CodeGenerationDiagnostic) {
-                return { exitStatus: ts.ExitStatus.DiagnosticsPresent_OutputsSkipped, diagnostics: [ ex.toDiagnostic() ]};
+            if (isCodeGenerationDiagnostic(ex)) {
+                return { exitStatus: ts.ExitStatus.DiagnosticsPresent_OutputsSkipped, diagnostics: [ CodeGenerationDiagnostics.toDiagnostic(ex) ]};
             } else {
                 LOG(`Compilation failed`, ex);
                 throw ex;

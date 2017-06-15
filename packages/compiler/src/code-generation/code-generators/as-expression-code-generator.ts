@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {Primitive} from "../value/primitive";
@@ -21,7 +21,7 @@ class AsExpressionCodeGenerator implements SyntaxCodeGenerator<ts.AsExpression, 
         } else if (targetType.flags & ts.TypeFlags.NumberLike) {
             castedValue = Primitive.toNumber(value, sourceType, targetType, context);
         } else {
-            throw CodeGenerationDiagnostic.unsupportedCast(node, context.typeChecker.typeToString(sourceType), context.typeChecker.typeToString(targetType));
+            throw CodeGenerationDiagnostics.unsupportedCast(node, context.typeChecker.typeToString(sourceType), context.typeChecker.typeToString(targetType));
         }
 
         return castedValue;

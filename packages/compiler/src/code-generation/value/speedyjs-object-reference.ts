@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {isMaybeObjectType, toLLVMType} from "../util/types";
 import {Address} from "./address";
@@ -38,7 +38,7 @@ export class SpeedyJSObjectReference implements ObjectReference {
     }
 
     getIndexer(element: ts.ElementAccessExpression, context: CodeGenerationContext): ObjectIndexReference {
-        throw CodeGenerationDiagnostic.unsupportedIndexer(element);
+        throw CodeGenerationDiagnostics.unsupportedIndexer(element);
     }
 
     isAssignable(): false {

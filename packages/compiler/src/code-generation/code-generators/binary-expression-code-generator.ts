@@ -1,6 +1,6 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostic} from "../../code-generation-diagnostic";
+import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
 import {isMaybeObjectType, toLLVMType} from "../util/types";
@@ -393,7 +393,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         }
 
         if (!resultValue) {
-            throw CodeGenerationDiagnostic.unsupportedBinaryOperation(
+            throw CodeGenerationDiagnostics.unsupportedBinaryOperation(
                 binaryExpression,
                 context.typeChecker.typeToString(leftType),
                 context.typeChecker.typeToString(leftType)
@@ -453,7 +453,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
         const leftType = context.typeChecker.getTypeAtLocation(binaryExpression.left);
         const rightType = context.typeChecker.getTypeAtLocation(binaryExpression.right);
 
-        throw CodeGenerationDiagnostic.unsupportedImplicitCastOfBinaryExpressionOperands(
+        throw CodeGenerationDiagnostics.unsupportedImplicitCastOfBinaryExpressionOperands(
             binaryExpression,
             context.typeChecker.typeToString(leftType),
             context.typeChecker.typeToString(rightType)
