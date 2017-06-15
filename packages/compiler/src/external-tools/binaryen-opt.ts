@@ -14,6 +14,6 @@ const EXECUTABLE_NAME = "wasm-opt";
 export function wasmOpt(wastFile: string, outputFile: string): string {
     LOG(`Optimize ${wastFile}`);
 
-    LOG(execBinaryen(EXECUTABLE_NAME, `"${wastFile}" -o "${outputFile}" --post-emscripten --emit-text`));
+    LOG(execBinaryen(EXECUTABLE_NAME, [wastFile, "-o", outputFile, "--post-emscripten", "--emit-text"]));
     return outputFile;
 }

@@ -46,7 +46,7 @@ export class LLVMByteCodeSymbolsResolver {
     }
 
     private parseSymbolsFromObjectFile(objectFile: string): ObjectFileSymbols {
-        const output = execLLVM("llvm-nm", `"${objectFile}"`);
+        const output = execLLVM("llvm-nm", [objectFile]);
 
         const symbols = { undefined: new Set<string>(), common: new Set<string>(), defined: new Set<string>() };
         for (const line of output.split("\n")) {
