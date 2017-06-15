@@ -27,7 +27,7 @@ export function getConfiguration(): ToolsConfiguration {
 
 function getLLVMBinDirectory() {
     if (!llvmBinDir) {
-        llvmBinDir = execute(getConfiguration().LLVM_CONFIG, "--bindir").trim();
+        llvmBinDir = execute(getConfiguration().LLVM_CONFIG, ["--bindir"]).trim();
     }
 
     return llvmBinDir;
@@ -40,7 +40,7 @@ function getLLVMBinDirectory() {
  * @param cwd optionally, the working directory where the command is to be executed
  * @return {string} the result of executing this command
  */
-export function execLLVM(tool: string, args: string, cwd?: string): string {
+export function execLLVM(tool: string, args: string[], cwd?: string): string {
     const toolPath = path.join(getLLVMBinDirectory(), tool);
 
     if (!ts.sys.fileExists(toolPath)) {
@@ -56,7 +56,7 @@ export function execLLVM(tool: string, args: string, cwd?: string): string {
  * @param args the arguments to pass
  * @return {string} the output of the execution
  */
-export function execBinaryen(tool: string, args: string): string {
+export function execBinaryen(tool: string, args: string[]): string {
     const binaryenPath = path.resolve(`${__dirname}/../../`, getConfiguration().BINARYEN);
     const toolPath = path.join(binaryenPath, "bin", tool);
 
@@ -67,12 +67,12 @@ export function execBinaryen(tool: string, args: string): string {
     return execute(toolPath, args);
 }
 
-function execute(tool: string, args: string, cwd?: string) {
+function execute(tool: string, args: string[], cwd?: string) {
     const env = Object.create(process.env);
     const command = `${tool} ${args}`;
 
     log(`Execute command '${command}'`);
-    const output = child_process.execSync(`${tool} ${args}`, { env, cwd });
+    const output = child_process.execFileSync(tool, args, { env, cwd });
 
     return outputToString(output);
 }

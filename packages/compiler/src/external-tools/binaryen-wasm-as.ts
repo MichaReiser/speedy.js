@@ -12,5 +12,5 @@ const EXECUTABLE_NAME = "wasm-as";
 export function wasmAs(wast: string, outputFile: string) {
     LOG(`Compile wast ${wast} to wasm ${outputFile}`);
 
-    LOG(execBinaryen(EXECUTABLE_NAME, `"${wast}" -o "${outputFile}"`));
+    LOG(execBinaryen(EXECUTABLE_NAME, [wast, "-o", outputFile]));
 }

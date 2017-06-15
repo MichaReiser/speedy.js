@@ -80,8 +80,7 @@ export class LLVMLink {
      */
     link(target: string, entrySymbols: string[]): string {
         const linkingFiles = Array.from(this.getObjectFilesToLink(this.byteCodeFiles, entrySymbols));
-        const quotedFileNames = Array.from(linkingFiles).map(file => `"${file}"`).join(" ");
-        LOG(execLLVM(EXECUTABLE_NAME, `${quotedFileNames} -o "${target}"`));
+        LOG(execLLVM(EXECUTABLE_NAME, linkingFiles.concat(["-o", target])));
         return target;
     }
 
@@ -89,7 +88,7 @@ export class LLVMLink {
         const directory  = this.buildDirectory.getTempSubdirectory(path.basename(archiveFilePath));
         LOG(`Extract archive ${archiveFilePath} to ${directory}`);
 
-        execLLVM("llvm-ar", `x "${archiveFilePath}"`, directory);
+        execLLVM("llvm-ar", ["x", archiveFilePath], directory);
 
         return fs.readdirSync(directory).map(file => path.join(directory, file));
     }
