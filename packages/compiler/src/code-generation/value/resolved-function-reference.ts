@@ -5,8 +5,8 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {AbstractFunctionReference} from "./abstract-function-reference";
 import {FunctionFactory, FunctionProperties} from "./function-factory";
-import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 import {FunctionPointer} from "./function-reference";
+import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 
 const DEFAULT_RUNTIME_FUNCTION_PROPERTIES = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true } as Partial<FunctionProperties>;
 

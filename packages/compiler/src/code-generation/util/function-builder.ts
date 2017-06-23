@@ -15,7 +15,8 @@ import {FunctionDefinitionBuilder} from "./function-definition-builder";
  */
 export class FunctionBuilder {
     private declarationBuilder: FunctionDeclarationBuilder;
-    private functionName: string;
+    private functionName?: string;
+
     private constructor(private resolvedFunction: ResolvedFunction, private context: CodeGenerationContext) {
         this.declarationBuilder = FunctionDeclarationBuilder.forResolvedFunction(resolvedFunction, context);
         this.functionName = resolvedFunction.functionName;
@@ -74,8 +75,9 @@ export class FunctionBuilder {
      */
     define(declaration: ts.FunctionLikeDeclaration): FunctionReference {
         assert(declaration.body, `Cannot transform function declaration without a body`);
+        assert(this.functionName, `No function name defined`);
 
-        const fun = this.declarationBuilder.name(this.functionName).declare();
+        const fun = this.declarationBuilder.name(this.functionName!).declare();
         const functionReference = ResolvedFunctionReference.create(fun, this.resolvedFunction);
 
         FunctionDefinitionBuilder.create(fun, this.resolvedFunction, this.context).define();

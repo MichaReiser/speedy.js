@@ -38,6 +38,11 @@ export function createTransformer(transformVisitor: TransformVisitor, transforma
         },
 
         visitEachChild(node: ts.Node, visitor?: TransformVisitor) {
+            // visitEachChild does not like to be called with a function type???
+            if (node.kind === ts.SyntaxKind.FunctionType) {
+                return node;
+            }
+
             return ts.visitEachChild(node, child => context.visit(child, visitor), transformationContext);
         },
 
@@ -108,6 +113,7 @@ export interface TransformVisitor {
     visitVariableDeclarationList?(variableDeclarationList: ts.VariableDeclarationList, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitVariableStatement?(variableStatement: ts.VariableStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
     visitWhileStatement?(whileStatement: ts.WhileStatement, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
+    visitFunctionType?(functionType: ts.FunctionTypeNode, context: TransformVisitorContext): ts.VisitResult<ts.Node>;
 }
 
 /**

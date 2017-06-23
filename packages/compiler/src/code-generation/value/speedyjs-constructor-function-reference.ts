@@ -56,10 +56,9 @@ export class SpeedyJSConstructorFunctionReference extends AbstractFunctionRefere
 }
 
 class ConstructorFunctionBuilder {
-    private constructorName: string;
+    private constructorName = "constructor";
 
     constructor(private resolvedFunction: ResolvedFunction, private classReference: SpeedyJSClassReference, private context: CodeGenerationContext) {
-        this.constructorName = resolvedFunction.functionName;
     }
 
     mangleName() {

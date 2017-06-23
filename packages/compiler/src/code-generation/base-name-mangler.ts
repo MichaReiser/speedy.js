@@ -9,6 +9,8 @@ import {isMaybeObjectType} from "./util/types";
  */
 export abstract class BaseNameMangler implements NameMangler {
 
+    private anonymousFunctionCounter = 0;
+
     constructor(protected compilationContext: CompilationContext) {
     }
 
@@ -21,7 +23,7 @@ export abstract class BaseNameMangler implements NameMangler {
      */
     protected abstract get separator(): string;
 
-    mangleFunctionName(name: string, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
+    mangleFunctionName(name: string | undefined, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
         const parts = [
             this.getModulePrefix(sourceFile),
             this.getFunctionName(name, argumentTypes)
@@ -84,8 +86,9 @@ export abstract class BaseNameMangler implements NameMangler {
         return this.mangleMethodName(classType, name, argumentTypes);
     }
 
-    private getFunctionName(name: string, argumentTypes: ts.Type[]) {
+    private getFunctionName(name: string | undefined, argumentTypes: ts.Type[]) {
         const parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
+        name = name || `$${++this.anonymousFunctionCounter}`;
         return this.encodeName(name) + parameterPostfix;
     }
 

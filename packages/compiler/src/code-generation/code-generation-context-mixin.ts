@@ -5,12 +5,12 @@ import {CodeGenerationContext} from "./code-generation-context";
 import {isMaybeObjectType} from "./util/types";
 import {AddressLValue} from "./value/address-lvalue";
 import {ClassReference} from "./value/class-reference";
+import {FunctionPointer} from "./value/function-reference";
 import {Primitive} from "./value/primitive";
 import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {SpeedyJSClassReference} from "./value/speedy-js-class-reference";
 
 import {Value} from "./value/value";
-import {FunctionPointer} from "./value/function-reference";
 
 /**
  * Defines the extension methods / default implementations that do not depend on a particular code generation context implementation
@@ -46,13 +46,6 @@ export class CodeGenerationContextMixin {
         }
 
         if (symbol) {
-            if (symbol.flags & ts.SymbolFlags.Function) {
-                const signatures = type.getCallSignatures();
-                assert(signatures.length === 1, "No function type found or function is overloaded und should therefore not be dereferenced");
-
-                return ResolvedFunctionReference.createForSignature(value as FunctionPointer, signatures[0], this);
-            }
-
             if (symbol.flags & ts.SymbolFlags.Method) {
                 // TODO Objekt erstellen und dann methode
                 // Requires special return object that contains the method function pointer and as
@@ -67,6 +60,14 @@ export class CodeGenerationContextMixin {
 
         if (type.flags & ts.TypeFlags.Object) {
             const classReference = this.resolveClass(type as ts.ObjectType);
+
+            if (!classReference && type.getCallSignatures().length === 1) {
+                const signatures = type.getCallSignatures();
+                assert(signatures.length === 1, "No function type found or function is overloaded und should therefore not be dereferenced");
+
+                return ResolvedFunctionReference.createForSignature(value as FunctionPointer, signatures[0], this);
+            }
+
             if (classReference) {
                 return classReference.objectFor(new AddressLValue(value, type), type as ts.ObjectType, this);
             }

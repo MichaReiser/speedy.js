@@ -173,8 +173,11 @@ export class FunctionFactory {
             }
 
             if (parameterDefinition.type.flags & ts.TypeFlags.Object) {
-                const classReference = context.resolveClass(parameterDefinition.type as ts.ObjectType)!;
-                parameter.addDereferenceableAttr(classReference.getTypeStoreSize(parameterDefinition.type as ts.ObjectType, context));
+                const classReference = context.resolveClass(parameterDefinition.type as ts.ObjectType);
+
+                if (classReference) {
+                    parameter.addDereferenceableAttr(classReference.getTypeStoreSize(parameterDefinition.type as ts.ObjectType, context));
+                }
             }
         }
     }
@@ -198,7 +201,7 @@ export class FunctionFactory {
         if (resolvedFunction.classType) {
             return this.nameMangler.mangleMethodName(
                 resolvedFunction.classType,
-                resolvedFunction.functionName,
+                resolvedFunction.functionName!,
                 typesOfUsedParameters,
                 resolvedFunction.sourceFile
             );

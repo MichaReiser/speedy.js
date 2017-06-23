@@ -4,6 +4,7 @@ import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {ResolvedFunction} from "../value/resolved-function";
 import {toLLVMType} from "./types";
+import * as assert from "assert";
 
 /**
  * Builder for declaring llvm functions
@@ -12,7 +13,7 @@ export class FunctionDeclarationBuilder {
     private linkageType = llvm.LinkageTypes.InternalLinkage;
     private attributes: llvm.Attribute.AttrKind[] = [];
 
-    private constructor(private functionName: string,
+    private constructor(private functionName: string | undefined,
                         private parameters: Array<{ name: string, type: ts.Type}>,
                         private returnType: ts.Type,
                         private context: CodeGenerationContext) {
@@ -37,7 +38,7 @@ export class FunctionDeclarationBuilder {
      * @param context the context
      * @return the builder
      */
-    static create(name: string,
+    static create(name: string | undefined,
                   parameters: Array<{ name: string, type: ts.Type}>,
                   returnType: ts.Type, context: CodeGenerationContext): FunctionDeclarationBuilder {
         return new FunctionDeclarationBuilder(name, parameters, returnType, context);
@@ -94,6 +95,7 @@ export class FunctionDeclarationBuilder {
      * @return this for a fluent api
      */
     declare(): llvm.Function {
+        assert(this.functionName, "Cannot declare a function without a name");
         const llvmReturnType = toLLVMType(this.returnType, this.context);
         const parameters: llvm.Type[] = [];
 
@@ -113,7 +115,7 @@ export class FunctionDeclarationBuilder {
     }
 
     declareIfNotExisting(): llvm.Function {
-        const existing = this.context.module.getFunction(this.functionName);
+        const existing = this.context.module.getFunction(this.functionName!);
         if (existing) {
             return existing;
         }

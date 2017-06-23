@@ -6,7 +6,7 @@ import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
 import {getArrayElementType, toLLVMType} from "../util/types";
-import {FunctionReference} from "./function-reference";
+import {FunctionPointer, FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction, ResolvedFunctionParameter} from "./resolved-function";
 import {AssignableValue, Value} from "./value";
@@ -36,7 +36,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
      * @param context the context
      * @param passedArguments the arguments passed
      */
-    protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): llvm.Value;
+    protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): FunctionPointer;
 
     invoke(callExpression: ts.CallExpression | ts.NewExpression, callerContext: CodeGenerationContext): void | Value {
         const resolvedSignature = callerContext.typeChecker.getResolvedSignature(callExpression);
@@ -56,12 +56,16 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     private invokeResolvedFunction(resolvedFunction: ResolvedFunction, args: llvm.Value[], callerContext: CodeGenerationContext) {
         const llvmFunction = this.getLLVMFunction(resolvedFunction, callerContext, args);
-        const functionType = AbstractFunctionReference.getFunctionType(llvmFunction);
+        assert(llvmFunction.type.isPointerTy() && (llvmFunction.type as llvm.PointerType).elementType.isFunctionTy(), "Expected pointer to a function type");
+
         const callArguments = this.getCallArguments(resolvedFunction, args, callerContext);
+        let name: string | undefined;
 
-        const name = resolvedFunction.returnType.flags & ts.TypeFlags.Void ? undefined : `${resolvedFunction.functionName}ReturnValue`;
+        if (!(resolvedFunction.returnType.flags & ts.TypeFlags.Void)) {
+            name = resolvedFunction.functionName ? `${resolvedFunction.functionName}ReturnValue` : undefined;
+        }
 
-        assert(callArguments.length === functionType.getParams().length, "Calling function with less than expected number of arguments");
+        assert(callArguments.length === llvmFunction.type.elementType.getParams().length, "Calling function with less than expected number of arguments");
         const call = callerContext.builder.createCall(llvmFunction, callArguments, name);
 
         if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
@@ -72,12 +76,6 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         }
 
         return callerContext.value(call, resolvedFunction.returnType);
-    }
-
-    private static getFunctionType(fn: llvm.Value) {
-        assert(fn.type.isPointerTy() && (fn.type as llvm.PointerType).elementType.isFunctionTy(), "Expected pointer to a function type");
-
-        return ((fn.type as llvm.PointerType).elementType) as llvm.FunctionType;
     }
 
     /**
