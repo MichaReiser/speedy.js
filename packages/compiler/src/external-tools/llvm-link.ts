@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as debug from "debug";
 import * as fs from "fs";
 import * as path from "path";
-import {COMPILER_RT_FILE, SAFE_RUNTIME, SHARED_LIBRARIES_DIRECTORY, UNSAFE_RUNTIME} from "speedyjs-runtime";
+import {COMPILER_RT_FILE, LIBC_RT_FILE, SAFE_RUNTIME, SHARED_LIBRARIES_DIRECTORY, UNSAFE_RUNTIME} from "speedyjs-runtime";
 import * as ts from "typescript";
 import {BuildDirectory} from "../code-generation/build-directory";
 import {LLVMByteCodeSymbolsResolver} from "./llvm-nm";
@@ -61,7 +61,7 @@ export class LLVMLink {
         for (const file of fs.readdirSync(directory)) {
             const fullPath = path.join(directory, file);
 
-            if (fullPath === COMPILER_RT_FILE) {
+            if (fullPath === COMPILER_RT_FILE || fullPath === LIBC_RT_FILE) {
                 continue;
             }
 

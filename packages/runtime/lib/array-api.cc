@@ -92,52 +92,64 @@ DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_setiPv(Array<void*>& array, int32_t index
 // fill
 //---------------------------------------------------------------------------------
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillb(Array<bool>& array, bool value) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_fillb(Array<bool>& array, bool value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillbi(Array<bool>& array, bool value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_fillbi(Array<bool>& array, bool value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillbii(Array<bool>& array, bool value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_fillbii(Array<bool>& array, bool value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_filli(Array<int32_t>& array, int32_t value) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_filli(Array<int32_t>& array, int32_t value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_fillii(Array<int32_t>& array, int32_t value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_fillii(Array<int32_t>& array, int32_t value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_filliii(Array<int32_t>& array, int32_t value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_filliii(Array<int32_t>& array, int32_t value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_filld(Array<double>& array, double value) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_filld(Array<double>& array, double value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_filldi(Array<double>& array, double value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_filldi(Array<double>& array, double value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_filldii(Array<double>& array, double value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_filldii(Array<double>& array, double value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPv(Array<void*>& array, void* value) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_fillPv(Array<void*>& array, void* value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvi(Array<void*>& array, void* value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_fillPvi(Array<void*>& array, void* value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvii(Array<void*>& array, void* value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_fillPvii(Array<void*>& array, void* value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
 //---------------------------------------------------------------------------------

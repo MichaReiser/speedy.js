@@ -43,7 +43,7 @@ declare dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32*, i32) #0
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
 
-define linkonce_odr hidden i1 @\\"function_reference/function_accepting_callback.ts$$6isEveni\\"(i32 %x) {
+define linkonce_odr hidden zeroext i1 @\\"function_reference/function_accepting_callback.ts$$6isEveni\\"(i32 %x) {
 entry:
   %x.addr = alloca i32, align 4
   %return = alloca i1, align 1

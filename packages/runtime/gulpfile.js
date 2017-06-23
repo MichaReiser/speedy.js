@@ -93,7 +93,7 @@ gulp.task("build:libs", function() {
 
     const outputTmpFile = tmp.fileSync({ postfix: ".js" });
     const env = Object.create(process.env);
-    env.EMCC_CFLAGS = (env.EMCC_CFLAGS || "") + " -DMALLOC_INSPECT_ALL"; // expose the malloc_inspect_all function
+    env.EMCC_CFLAGS = (env.EMCC_CFLAGS || "") + " -s NO_EXIT_RUNTIME=1 -DMALLOC_INSPECT_ALL"; // expose the malloc_inspect_all function
 
     child_process.execSync(util.format("%s %s -std=c++11 -o %s --cache %s --em-config %s", em, sourceTmpFile.name, outputTmpFile.name, EMSCRIPTEN_CACHE_DIR, path.resolve("./.emscripten")),
         {
@@ -105,7 +105,7 @@ gulp.task("build:libs", function() {
 });
 
 gulp.task("copy:libs", function () {
-    const libs = ["dlmalloc.bc", "libc.bc", "libcxx_noexcept.a", "libcxx.a", "libcxxabi.bc", "wasm-libc.bc", "wasm_compiler_rt.a"];
+    const libs = ["dlmalloc.bc", "libc.bc", "libcxx_noexcept.a", "libcxx.a", "libcxxabi.bc", "wasm-libc.bc", "wasm_compiler_rt.a", "wasm_libc_rt.a"];
     const src = gulp.src(libs.map(lib => path.join(EMSCRIPTEN_CACHE_DIR, "wasm", lib)));
 
     return src.pipe(gulp.dest("./bin/shared"));

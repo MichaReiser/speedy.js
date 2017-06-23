@@ -312,7 +312,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
 %class.Array.1 = type { double*, double*, i32 }
-%class.Array = type { i1*, i1*, i32 }
+%class.Array = type { i8*, i8*, i32 }
 %class.Array.0 = type { i32*, i32*, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"

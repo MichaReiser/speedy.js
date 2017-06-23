@@ -124,6 +124,10 @@ export class FunctionFactory {
             fn.addDereferenceableAttr(0, classReference.getTypeStoreSize(resolvedFunction.returnType as ts.ObjectType, context));
         }
 
+        if (resolvedFunction.returnType.flags & ts.TypeFlags.BooleanLike) {
+            fn.addAttribute(0, llvm.Attribute.AttrKind.ZExt);
+        }
+
         return fn;
     }
 
@@ -170,6 +174,10 @@ export class FunctionFactory {
 
             if (parameterDefinition.variadic) {
                 break;
+            }
+
+            if (parameterDefinition.type.flags & ts.TypeFlags.BooleanLike) {
+                parameter.addAttr(llvm.Attribute.AttrKind.ZExt);
             }
 
             if (parameterDefinition.type.flags & ts.TypeFlags.Object) {

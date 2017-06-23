@@ -37,7 +37,7 @@ export class Undefined implements Value {
 
     castImplicit(type: ts.Type, context: CodeGenerationContext): Value | any {
         if (type.flags & ts.TypeFlags.BooleanLike) {
-            return new Primitive(llvm.ConstantInt.getFalse(context.llvmContext), type);
+            return Primitive.false(context, type);
         }
 
         if (type.flags & ts.TypeFlags.IntLike) {

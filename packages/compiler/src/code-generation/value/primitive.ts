@@ -12,6 +12,26 @@ import {Value} from "./value";
 export class Primitive implements Value {
 
     /**
+     * Returns the true value
+     * @param context
+     * @param type the boolean type
+     * @return {llvm.ConstantInt}
+     */
+    static true(context: CodeGenerationContext, type: ts.Type) {
+        return new Primitive(llvm.ConstantInt.getTrue(context.llvmContext), type);
+    }
+
+    /**
+     * Returns the false value
+     * @param context
+     * @param boolType the bool type
+     * @return {llvm.ConstantInt}
+     */
+    static false(context: CodeGenerationContext, boolType: ts.Type) {
+        return new Primitive(llvm.ConstantInt.getFalse(context.llvmContext), boolType);
+    }
+
+    /**
      * Converts the value to an int32 type
      * @param value the value to convert
      * @param valueType the type of the value
@@ -57,6 +77,7 @@ export class Primitive implements Value {
      */
     static toBoolean(value: Value | llvm.Value, valueType: ts.Type, context: CodeGenerationContext) {
         const llvmValue = value instanceof llvm.Value ? value : value.generateIR(context);
+
         if (valueType.flags & ts.TypeFlags.BooleanLike) {
             return llvmValue;
         }
@@ -109,7 +130,8 @@ export class Primitive implements Value {
         return new Primitive(numberValue, numberType);
     }
 
-    constructor(private llvmValue: llvm.Value, public type: ts.Type) {}
+    constructor(private llvmValue: llvm.Value, public type: ts.Type) {
+    }
 
     generateIR(): llvm.Value {
         return this.llvmValue;

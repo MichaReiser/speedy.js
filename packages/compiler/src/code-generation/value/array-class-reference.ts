@@ -13,6 +13,24 @@ import {createResolvedFunction, createResolvedParameter} from "./resolved-functi
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 
+function getLLVMArrayElementType(tsElementType: ts.Type, context: CodeGenerationContext) {
+    if (isMaybeObjectType(tsElementType)) {
+        tsElementType = tsElementType.getNonNullableType();
+    }
+
+    let llvmElementType: llvm.Type;
+
+    if (tsElementType.flags & ts.TypeFlags.Object) {
+        llvmElementType = llvm.Type.getInt8PtrTy(context.llvmContext);
+    } else if (tsElementType.flags & ts.TypeFlags.BooleanLike) {
+        llvmElementType = llvm.Type.getInt8Ty(context.llvmContext);
+    } else {
+        llvmElementType = toLLVMType(tsElementType, context);
+    }
+
+    return llvmElementType;
+}
+
 /**
  * Implements the static methods of the Array<T> class
  */
@@ -51,7 +69,7 @@ export class ArrayClassReference extends ClassReference {
         let constructorFn = context.module.getFunction(constructorName);
 
         if (!constructorFn) {
-            const elementType = toLLVMType(getArrayElementType(type), context);
+            const elementType = getLLVMArrayElementType(getArrayElementType(type), context);
             const constructorType = llvm.FunctionType.get(toLLVMType(type, context), [
                 llvm.PointerType.get(elementType, 0),
                 llvm.Type.getInt32Ty(context.llvmContext)
@@ -97,13 +115,7 @@ export class ArrayClassReference extends ClassReference {
         const forwardDeclaration = llvm.StructType.create(context.llvmContext, "class.Array");
         this.llvmTypes.set(elementType, forwardDeclaration);
 
-        let llvmElementType: llvm.Type;
-
-        if (elementType.flags & ts.TypeFlags.Object) {
-            llvmElementType = llvm.Type.getInt8PtrTy(context.llvmContext);
-        } else {
-            llvmElementType = toLLVMType(elementType, context);
-        }
+        const llvmElementType = getLLVMArrayElementType(elementType, context);
 
         forwardDeclaration.setBody([
             llvmElementType.getPointerTo(),

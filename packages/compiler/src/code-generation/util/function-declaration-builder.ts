@@ -1,10 +1,10 @@
+import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {ResolvedFunction} from "../value/resolved-function";
 import {toLLVMType} from "./types";
-import * as assert from "assert";
 
 /**
  * Builder for declaring llvm functions

@@ -3,6 +3,7 @@ function filter(array: int[], predicate: (value: int) => boolean) {
 
     const result = new Array<int>();
 
+    // tslint:disable-next-line:prefer-for-of
     for (let i = 0; i < array.length; ++i) {
         if (predicate(array[i])) {
             result.push(array[i]);

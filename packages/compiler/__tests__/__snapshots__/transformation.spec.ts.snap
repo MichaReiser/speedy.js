@@ -432,7 +432,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./istruthy.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./istruthy.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 16, \\"exposeGc\\": false });
 function isTruthy(value) { var types_1 = { \\"i1\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] }, \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._isTruthy(value) === 1; loadWasmModule_1.gc(); return result_1; }); }
 "
 `;
@@ -869,7 +869,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./converts-arrays-and-object.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1228, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./converts-arrays-and-object.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 816, \\"exposeGc\\": false });
 class Test {
 }
 function update(instance, values) { var types_1 = { \\"double\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] }, \\"Array<double>\\": { \\"primitive\\": false, \\"fields\\": [], \\"constructor\\": Array, \\"typeArguments\\": [\\"double\\"] }, \\"Test\\": { \\"primitive\\": false, \\"fields\\": [{ \\"name\\": \\"updated\\", \\"type\\": \\"i1\\" }, { \\"name\\": \\"value\\", \\"type\\": \\"double\\" }], \\"constructor\\": Test, \\"typeArguments\\": [] }, \\"i1\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var argumentObjects_1 = new Map(); var result_1 = instance_1.exports._update(loadWasmModule_1.toWASM(instance, \\"Test\\", types_1, argumentObjects_1), loadWasmModule_1.toWASM(values, \\"Array<double>\\", types_1, argumentObjects_1)); loadWasmModule_1.gc(); return result_1; }); }
@@ -1308,7 +1308,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./converts-returned-arrays.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1368, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./converts-returned-arrays.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1232, \\"exposeGc\\": false });
 function update() { var types_1 = { \\"Array<i32>\\": { \\"primitive\\": false, \\"fields\\": [], \\"constructor\\": Array, \\"typeArguments\\": [\\"i32\\"] }, \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = loadWasmModule_1.toJSObject(instance_1.exports._update(), \\"Array<i32>\\", types_1); loadWasmModule_1.gc(); return result_1; }); }
 "
 `;
@@ -1745,7 +1745,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./converts-arrays-and-object.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 1228, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./converts-arrays-and-object.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 816, \\"exposeGc\\": false });
 class Test {
 }
 function update(values) { var types_1 = { \\"double\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] }, \\"Array<double>\\": { \\"primitive\\": false, \\"fields\\": [], \\"constructor\\": Array, \\"typeArguments\\": [\\"double\\"] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var argumentObjects_1 = new Map(); var result_1 = instance_1.exports._update(loadWasmModule_1.toWASM(values, \\"Array<double>\\", types_1, argumentObjects_1)); loadWasmModule_1.gc(); return result_1; }); }
@@ -2224,7 +2224,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": true });
+var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 16, \\"exposeGc\\": true });
 export const speedyJsGc = loadWasmModule_1.gc;
 function fib(value) { var types_1 = { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
 "
@@ -2662,7 +2662,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": true });
+var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 16, \\"exposeGc\\": true });
 const speedyJsGc = loadWasmModule_1.gc;
 function fib(value) { var types_1 = { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
 "
@@ -3100,7 +3100,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 4000, \\"staticBump\\": 8, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 4000, \\"staticBump\\": 16, \\"exposeGc\\": false });
 function fib(value) { var types_1 = { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
 "
 `;
@@ -3537,7 +3537,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 10485760, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 10485760, \\"globalBase\\": 8, \\"staticBump\\": 16, \\"exposeGc\\": false });
 function fib(value) { var types_1 = { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
 "
 `;
@@ -3974,7 +3974,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 1048576, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 1048576, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 16, \\"exposeGc\\": false });
 function fib(value) { var types_1 = { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
 "
 `;
@@ -4411,7 +4411,7 @@ function __moduleLoader(wasmUri, options) {
     return loader;
 }
 //# sourceMappingURL=get-wasm-module-function.js.map
-var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 8, \\"exposeGc\\": false });
+var loadWasmModule_1 = __moduleLoader(\\"./fib.wasm\\", { \\"totalStack\\": 532480, \\"initialMemory\\": 16777216, \\"globalBase\\": 8, \\"staticBump\\": 16, \\"exposeGc\\": false });
 function fib(value) { var types_1 = { \\"i32\\": { \\"primitive\\": true, \\"fields\\": [], \\"constructor\\": undefined, \\"typeArguments\\": [] } }; return loadWasmModule_1().then(function instanceLoaded(instance_1) { var result_1 = instance_1.exports._fib(value); loadWasmModule_1.gc(); return result_1; }); }
 "
 `;

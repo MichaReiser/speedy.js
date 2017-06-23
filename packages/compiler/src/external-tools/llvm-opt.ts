@@ -6,7 +6,7 @@ const LOG = debug("external-tools/llvm-opt");
 const EXECUTABLE_NAME = "opt";
 // tslint:disable-next-line:max-line-length
 const LINK_TIME_OPTIMIZATIONS = ["-strip-debug", "-internalize", "-globaldce", "-disable-loop-vectorization", "-disable-slp-vectorization", "-vectorize-loops=false", "-vectorize-slp=false", "-vectorize-slp-aggressive=false"]; // Vectorization is not yet supported by the linker backend llc
-const DEFAULT_PUBLIC = "speedyJsGc,malloc,free,memcpy,memset,memmove,__errno_location,__cxa_can_catch,__cxa_is_pointer_type";
+const DEFAULT_PUBLIC = "speedyJsGc,malloc,__errno_location";
 
 /**
  * Executes the LLVM Optimizer on the given input file

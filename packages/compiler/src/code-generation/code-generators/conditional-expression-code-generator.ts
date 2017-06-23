@@ -17,7 +17,7 @@ class ConditionalExpressionCodeGenerator implements SyntaxCodeGenerator<ts.Condi
         const conditionalType = context.typeChecker.getTypeAtLocation(node);
 
         const condition = context.generateValue(node.condition);
-        const conditionBool = Primitive.toBoolean(condition.generateIR(context), context.typeChecker.getTypeAtLocation(node.condition), context);
+        const conditionBool = Primitive.toBoolean(condition, context.typeChecker.getTypeAtLocation(node.condition), context);
 
         const whenTrue = context.generateValue(node.whenTrue).castImplicit(conditionalType, context);
         const whenFalse = context.generateValue(node.whenFalse).castImplicit(conditionalType, context);
