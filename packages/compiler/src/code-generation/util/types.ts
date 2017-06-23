@@ -36,7 +36,18 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     }
 
     if (type.flags & ts.TypeFlags.Object) {
+        const objectType = type as ts.ObjectType;
+
+
         const classReference = context.resolveClass(type);
+        // probably a function
+        if (!classReference && type.getCallSignatures().length === 1 && !(objectType.objectFlags & ts.ObjectFlags.Interface)) {
+            const callSignature = type.getCallSignatures()[0];
+            const declaration = callSignature.getDeclaration();
+            const parameterTypes = callSignature.getParameters().map((p, i) => toLLVMType(context.typeChecker.getTypeOfSymbolAtLocation(p, declaration.parameters[i]), context));
+            return llvm.FunctionType.get(toLLVMType(callSignature.getReturnType(), context), parameterTypes, false).getPointerTo();
+        }
+
         if (classReference) {
             return classReference.getLLVMType(type as ts.ObjectType, context).getPointerTo();
         }

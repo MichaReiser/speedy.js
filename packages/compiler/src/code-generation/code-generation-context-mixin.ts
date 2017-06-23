@@ -10,6 +10,7 @@ import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {SpeedyJSClassReference} from "./value/speedy-js-class-reference";
 
 import {Value} from "./value/value";
+import {FunctionPointer} from "./value/function-reference";
 
 /**
  * Defines the extension methods / default implementations that do not depend on a particular code generation context implementation
@@ -46,10 +47,10 @@ export class CodeGenerationContextMixin {
 
         if (symbol) {
             if (symbol.flags & ts.SymbolFlags.Function) {
-                const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
+                const signatures = type.getCallSignatures();
                 assert(signatures.length === 1, "No function type found or function is overloaded und should therefore not be dereferenced");
 
-                return ResolvedFunctionReference.createForSignature(value as llvm.Function, signatures[0], this);
+                return ResolvedFunctionReference.createForSignature(value as FunctionPointer, signatures[0], this);
             }
 
             if (symbol.flags & ts.SymbolFlags.Method) {

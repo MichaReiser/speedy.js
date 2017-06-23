@@ -36,7 +36,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
      * @param context the context
      * @param passedArguments the arguments passed
      */
-    protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): llvm.Function;
+    protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): llvm.Value;
 
     invoke(callExpression: ts.CallExpression | ts.NewExpression, callerContext: CodeGenerationContext): void | Value {
         const resolvedSignature = callerContext.typeChecker.getResolvedSignature(callExpression);
@@ -56,11 +56,12 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     private invokeResolvedFunction(resolvedFunction: ResolvedFunction, args: llvm.Value[], callerContext: CodeGenerationContext) {
         const llvmFunction = this.getLLVMFunction(resolvedFunction, callerContext, args);
+        const functionType = AbstractFunctionReference.getFunctionType(llvmFunction);
         const callArguments = this.getCallArguments(resolvedFunction, args, callerContext);
 
         const name = resolvedFunction.returnType.flags & ts.TypeFlags.Void ? undefined : `${resolvedFunction.functionName}ReturnValue`;
 
-        assert(callArguments.length === llvmFunction.getArguments().length, "Calling function with less than expected number of arguments");
+        assert(callArguments.length === functionType.getParams().length, "Calling function with less than expected number of arguments");
         const call = callerContext.builder.createCall(llvmFunction, callArguments, name);
 
         if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
@@ -71,6 +72,12 @@ export abstract class AbstractFunctionReference implements FunctionReference {
         }
 
         return callerContext.value(call, resolvedFunction.returnType);
+    }
+
+    private static getFunctionType(fn: llvm.Value) {
+        assert(fn.type.isPointerTy() && (fn.type as llvm.PointerType).elementType.isFunctionTy(), "Expected pointer to a function type");
+
+        return ((fn.type as llvm.PointerType).elementType) as llvm.FunctionType;
     }
 
     /**
@@ -134,6 +141,24 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     }
 
     castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
+        assert(type.flags & ts.TypeFlags.Object, "Target type needs to be a function type");
+        assert(type.getCallSignatures().length === 1, "Cannot cast functions with more than one call signature");
+
+        const signature = type.getCallSignatures()[0];
+        const resolvedFunction = this.getResolvedFunction(context);
+        const parameters = signature.getParameters();
+        const declaredParameters = signature.getDeclaration().parameters;
+
+        const parameterTypes = resolvedFunction.parameters.map((p, i) => context.typeChecker.getTypeOfSymbolAtLocation(parameters[i], declaredParameters[i]));
+
+        const returnTypeEqual = signature.getReturnType() === resolvedFunction.returnType;
+        const parameterTypesEqual = resolvedFunction.parameters.length === parameterTypes.length &&
+            resolvedFunction.parameters.every((parameter, i) => parameter.type === parameterTypes[i]);
+
+        if (returnTypeEqual && parameterTypesEqual) {
+            return this; // no cast needed
+        }
+
         // casting functions is not yet supported
         return undefined;
     }

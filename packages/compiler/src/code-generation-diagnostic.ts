@@ -49,9 +49,8 @@ export function toCodeGenerationDiagnostic(error: any, node: ts.Node): CodeGener
         diagnostic.node = node;
         diagnostic.code = 0;
         return diagnostic;
-    } else {
-        throw createCodeGenerationDiagnostic(Number.NaN, error + "", node);
     }
+    return createCodeGenerationDiagnostic(0, error + "", node);
 }
 
 /**
@@ -60,9 +59,10 @@ export function toCodeGenerationDiagnostic(error: any, node: ts.Node): CodeGener
  */
 export class CodeGenerationDiagnostics {
     static toDiagnostic(error: CodeGenerationDiagnostic): ts.Diagnostic {
+        const message = error.code === 0 ? `${error.message}\n${error.stack}` : error.message;
         return {
             code: error.code,
-            messageText: error.message,
+            messageText: message,
             start: error.node.getFullStart(),
             length: error.node.getFullWidth(),
             category: ts.DiagnosticCategory.Error,

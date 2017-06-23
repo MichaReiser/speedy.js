@@ -8,7 +8,7 @@ class CallExpressionCodeGenerator implements SyntaxCodeGenerator<ts.CallExpressi
     syntaxKind = ts.SyntaxKind.CallExpression;
 
     generate(callExpression: ts.CallExpression, context: CodeGenerationContext): Value | void {
-        const callee = context.generateValue(callExpression.expression) as FunctionReference;
+        const callee = context.generateValue(callExpression.expression).dereference(context) as FunctionReference;
         return callee.invoke(callExpression, context);
     }
 }
