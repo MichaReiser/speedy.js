@@ -199,6 +199,36 @@ async function arraySliceInBetween(array: int[], start: int, end: int) {
     return array.slice(start, end);
 }
 
+async function boolArraySort(array: boolean[]) {
+    "use speedyjs";
+
+    return array.sort();
+}
+
+async function intArraySort(array: int[]) {
+    "use speedyjs";
+
+    return array.sort();
+}
+
+async function numberArraySort(array: number[]) {
+    "use speedyjs";
+
+    return array.sort();
+}
+
+function sortByXCoordinate(a: Point, b: Point) {
+    "use speedyjs";
+
+    return a.x - b.x as number;
+}
+
+async function objectArraySortByX(array: Point[]) {
+    "use speedyjs";
+
+    return array.sort(sortByXCoordinate);
+}
+
 describe("Array", () => {
 
     describe("[]", () => {
@@ -332,6 +362,23 @@ describe("Array", () => {
     describe("shift", () => {
         it("removes and returns the first element", async (cb) => {
             expect(await arrayShift()).toBe(3);
+            cb();
+        });
+    });
+
+    describe("sort", () => {
+        it("sorts the boolean array ascending", async (cb) => {
+            expect(await boolArraySort([true, false, true, true, false])).toEqual([false, false, true, true, true]);
+            cb();
+        });
+
+        it("sorts the int array ascending", async (cb) => {
+            expect(await intArraySort([2, 5, 1, 13, 8])).toEqual([1, 2, 5, 8, 13]);
+            cb();
+        });
+
+        it("sorts the number array ascending", async (cb) => {
+            expect(await numberArraySort([12.3, 83.3, 213.2, 11.2, 93.2])).toEqual([11.2, 12.3, 83.3, 93.2, 213.2]);
             cb();
         });
     });

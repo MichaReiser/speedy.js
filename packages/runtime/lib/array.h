@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <algorithm>
+#include <functional>
 #include "macros.h"
 
 const int32_t CAPACITY_GROW_FACTOR = 2;
@@ -151,8 +152,18 @@ public:
         std::fill(start, end, value);
     }
 
+    /**
+     * Sorts the array elements using the default comparision (objects by pointer since to string conversion is not yet suppported)
+     */
     inline void sort() {
         std::sort(begin, back);
+    }
+
+    typedef double (*Comparator)(const T a, const T b);
+    inline void sort(Comparator comparator) {
+        std::sort(begin, back, [&comparator](T a, T b) {
+            return comparator(a, b) < 0;
+        });
     }
 
     /**

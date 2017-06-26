@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "./code-generation-context";
-import {isMaybeObjectType} from "./util/types";
+import {getCallSignature, isFunctionType, isMaybeObjectType} from "./util/types";
 import {AddressLValue} from "./value/address-lvalue";
 import {ClassReference} from "./value/class-reference";
 import {FunctionPointer} from "./value/function-reference";
@@ -58,16 +58,13 @@ export class CodeGenerationContextMixin {
             type = type.getNonNullableType();
         }
 
+        if (isFunctionType(type)) {
+            const signature = getCallSignature(type);
+            return ResolvedFunctionReference.createForSignature(value as FunctionPointer, signature, this);
+        }
+
         if (type.flags & ts.TypeFlags.Object) {
             const classReference = this.resolveClass(type as ts.ObjectType);
-
-            if (!classReference && type.getCallSignatures().length === 1) {
-                const signatures = type.getCallSignatures();
-                assert(signatures.length === 1, "No function type found or function is overloaded und should therefore not be dereferenced");
-
-                return ResolvedFunctionReference.createForSignature(value as FunctionPointer, signatures[0], this);
-            }
-
             if (classReference) {
                 return classReference.objectFor(new AddressLValue(value, type), type as ts.ObjectType, this);
             }

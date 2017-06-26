@@ -35,21 +35,18 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
         return llvm.Type.getInt8PtrTy(context.llvmContext);
     }
 
+    if (isFunctionType(type)) {
+        const callSignature = getCallSignature(type);
+        const declaration = callSignature.getDeclaration();
+        const parameterTypes = callSignature.getParameters().map((p, i) => {
+            return toLLVMType(context.typeChecker.getTypeOfSymbolAtLocation(p, declaration.parameters[i]), context);
+        });
+
+        return llvm.FunctionType.get(toLLVMType(callSignature.getReturnType(), context), parameterTypes, false).getPointerTo();
+    }
+
     if (type.flags & ts.TypeFlags.Object) {
-        const objectType = type as ts.ObjectType;
-
         const classReference = context.resolveClass(type);
-        // probably a function
-        if (!classReference && type.getCallSignatures().length === 1 && !(objectType.objectFlags & ts.ObjectFlags.Interface)) {
-            const callSignature = type.getCallSignatures()[0];
-            const declaration = callSignature.getDeclaration();
-            const parameterTypes = callSignature.getParameters().map((p, i) => {
-                return toLLVMType(context.typeChecker.getTypeOfSymbolAtLocation(p, declaration.parameters[i]), context);
-            });
-
-            return llvm.FunctionType.get(toLLVMType(callSignature.getReturnType(), context), parameterTypes, false).getPointerTo();
-        }
-
         if (classReference) {
             return classReference.getLLVMType(type as ts.ObjectType, context).getPointerTo();
         }
@@ -64,6 +61,43 @@ export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.
     }
 
     throw new Error(`Unsupported type ${context.typeChecker.typeToString(type)}`);
+}
+
+/**
+ * Tests if the given type describes a reference to a function
+ * @param {ts.Type} type the type to test
+ * @return {boolean} true if this type is a function type, false other wise
+ */
+export function isFunctionType(type: ts.Type) {
+    if (type.flags & ts.TypeFlags.Union) {
+        const unionType = type as ts.UnionType;
+
+        if (unionType.types.length === 2 && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined))) {
+            type = unionType.types.find(t => !(t.flags & ts.TypeFlags.Undefined))!;
+        }
+    }
+
+    if (type.flags & ts.TypeFlags.Object) {
+        return type.getCallSignatures().length === 1 && type.getProperties().length === 0;
+    }
+
+    return false;
+}
+
+export function getCallSignature(type: ts.Type) {
+    assert(isFunctionType(type), "Function type expected");
+
+    if (type.flags & ts.TypeFlags.Union) {
+        const unionType = type as ts.UnionType;
+
+        if (unionType.types.length === 2 && unionType.types.some(t => !!(t.flags & ts.TypeFlags.Undefined))) {
+            type = unionType.types.find(t => !(t.flags & ts.TypeFlags.Undefined))!;
+        }
+    }
+
+    assert(type.getCallSignatures().length === 1, "Overloaded functions not yet supported");
+
+    return type.getCallSignatures()[0];
 }
 
 /**

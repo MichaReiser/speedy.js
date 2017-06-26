@@ -28,7 +28,7 @@ entry:
   %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32* %items1, i32 5)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
-  %filterReturnValue = call dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$$6filter5ArrayIi6__type\\"(%class.Array* %array2, i1 (i32)* @\\"function_reference/function_accepting_callback.ts$$6isEveni\\")
+  %filterReturnValue = call dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$$6filter5ArrayIiPFbi\\"(%class.Array* %array2, i1 (i32)* @\\"function_reference/function_accepting_callback.ts$$6isEveni\\")
   store %class.Array* %filterReturnValue, %class.Array** %return, align 4
   br label %returnBlock
 
@@ -59,7 +59,7 @@ returnBlock:                                      ; preds = %entry
   ret i1 %return2
 }
 
-define linkonce_odr hidden dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$$6filter5ArrayIi6__type\\"(%class.Array* dereferenceable(12) %array, i1 (i32)* %pred) {
+define linkonce_odr hidden dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$$6filter5ArrayIiPFbi\\"(%class.Array* dereferenceable(12) %array, i1 (i32)* %pred) {
 entry:
   %items = alloca [1 x i32], align 4
   %i = alloca i32, align 4

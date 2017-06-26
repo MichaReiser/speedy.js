@@ -717,3 +717,38 @@ TEST_F(ArrayTests, resize_decreases_the_size_of_the_array_if_the_new_size_is_sma
     // expect
     EXPECT_EQ(array->length(), 10);
 }
+
+// -----------------------------------------
+// sort
+// -----------------------------------------
+TEST_F(ArrayTests, sort_sorts_the_array_in_ascending_order) {
+    double elements[5] = { 8.3, 2.3, 48.53, 28.4, 21.2 };
+    array = new Array<double>(elements, 5);
+
+    // act
+    array->sort();
+
+    // expect
+    EXPECT_EQ(array->get(0), 2.3);
+    EXPECT_EQ(array->get(1), 8.3);
+    EXPECT_EQ(array->get(2), 21.2);
+    EXPECT_EQ(array->get(3), 28.4);
+    EXPECT_EQ(array->get(4), 48.53);
+}
+
+TEST_F(ArrayTests, sort_uses_the_given_comparator) {
+    double elements[5] = { 8.3, 2.3, 48.53, 28.4, 21.2 };
+    array = new Array<double>(elements, 5);
+
+    // act
+    array->sort([](double a, double b) {
+        return b - a;
+    });
+
+    // expect
+    EXPECT_EQ(array->get(0), 48.53);
+    EXPECT_EQ(array->get(1), 28.4);
+    EXPECT_EQ(array->get(2), 21.2);
+    EXPECT_EQ(array->get(3), 8.3);
+    EXPECT_EQ(array->get(4), 2.3);
+}

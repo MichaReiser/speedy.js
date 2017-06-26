@@ -5,7 +5,7 @@ import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
-import {getArrayElementType, toLLVMType} from "../util/types";
+import {getArrayElementType, getCallSignature, isFunctionType, toLLVMType} from "../util/types";
 import {FunctionPointer, FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction, ResolvedFunctionParameter} from "./resolved-function";
@@ -139,10 +139,9 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     }
 
     castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
-        assert(type.flags & ts.TypeFlags.Object, "Target type needs to be a function type");
-        assert(type.getCallSignatures().length === 1, "Cannot cast functions with more than one call signature");
+        assert(isFunctionType(type), "Target type needs to be a function type");
 
-        const signature = type.getCallSignatures()[0];
+        const signature = getCallSignature(type);
         const resolvedFunction = this.getResolvedFunction(context);
         const parameters = signature.getParameters();
         const declaredParameters = signature.getDeclaration().parameters;

@@ -371,6 +371,54 @@ DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_lengthi(Array<void*>& array, int32_t size
     array.resize(size);
 }
 
+//---------------------------------------------------------------------------------
+// length
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_sort(Array<bool>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*BoolComparator)(const bool a, const bool b);
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_sortPFdbb(Array<bool>& array, BoolComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_sort(Array<int32_t>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*IntComparator)(const int32_t a, const int32_t b);
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_sortPFdii(Array<int32_t>& array, IntComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_sort(Array<double>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*DoubleComparator)(const double a, const double b);
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_sortPFddd(Array<double>& array, DoubleComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sort(Array<void*>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*ObjectComparator)(void* const a, void* const b);
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sortPFdPvPv(Array<void*>& array, ObjectComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
 #ifdef __cplusplus
 }
 #endif
