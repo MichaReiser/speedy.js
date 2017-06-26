@@ -1,3 +1,4 @@
+import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {Value} from "./value";
@@ -20,4 +21,11 @@ export interface FunctionReference extends Value {
      * @param callerContext the context of the function caller
      */
     invokeWith(args: llvm.Value[], callerContext: CodeGenerationContext): Value | void;
+}
+
+/**
+ * A function in LLVM is a pointer to a value of a function type. So, do not expect to always get an llvm.Function.
+ */
+export interface FunctionPointer extends llvm.Value {
+    type: llvm.PointerType & { elementType: llvm.FunctionType };
 }

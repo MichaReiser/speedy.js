@@ -49,9 +49,8 @@ export function toCodeGenerationDiagnostic(error: any, node: ts.Node): CodeGener
         diagnostic.node = node;
         diagnostic.code = 0;
         return diagnostic;
-    } else {
-        throw createCodeGenerationDiagnostic(Number.NaN, error + "", node);
     }
+    return createCodeGenerationDiagnostic(0, error + "", node);
 }
 
 /**
@@ -60,9 +59,10 @@ export function toCodeGenerationDiagnostic(error: any, node: ts.Node): CodeGener
  */
 export class CodeGenerationDiagnostics {
     static toDiagnostic(error: CodeGenerationDiagnostic): ts.Diagnostic {
+        const message = error.code === 0 ? `${error.message}\n${error.stack}` : error.message;
         return {
             code: error.code,
-            messageText: error.message,
+            messageText: message,
             start: error.node.getFullStart(),
             length: error.node.getFullWidth(),
             category: ts.DiagnosticCategory.Error,
@@ -248,6 +248,10 @@ export class CodeGenerationDiagnostics {
     static unsupportedClassInheritance(classDeclaration: ts.ClassDeclaration) {
         return CodeGenerationDiagnostics.createException(classDeclaration, diagnostics.UnsupportedClassInheritance);
     }
+
+    static entryFunctionWithCallbackNotSupported(parameter: ts.ParameterDeclaration) {
+        return CodeGenerationDiagnostics.createException(parameter, diagnostics.UnsupportedEntryFunctionWithCallback);
+    }
 }
 
 /* tslint:disable:max-line-length */
@@ -387,5 +391,9 @@ const diagnostics = {
     ReferenceToNonSpeedyJSFunctionFromSpeedyJS: {
         message: "The Speedy.js function cannot reference the regular JavaScript function '%s'. Calling JavaScript functions from Speedy.js is not yet supported. Either remove the function call or make the called function a Speedy.js function by adding the \"use speedyjs\" directive.",
         code: 1000033
+    },
+    UnsupportedEntryFunctionWithCallback: {
+        message: "Passing callbacks to speedy.js entry functions is not yet supported",
+        code: 1000034
     }
 };

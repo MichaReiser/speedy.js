@@ -25,3 +25,9 @@ export const SHARED_LIBRARIES_DIRECTORY = path.join(BIN_DIRECTORY, "shared");
  * @type {string}
  */
 export const COMPILER_RT_FILE = path.join(SHARED_LIBRARIES_DIRECTORY, "wasm_compiler_rt.a");
+
+/**
+ * The path to the LIBC RT File
+ * @type {string}
+ */
+export const LIBC_RT_FILE = path.join(SHARED_LIBRARIES_DIRECTORY, "wasm_libc_rt.a");

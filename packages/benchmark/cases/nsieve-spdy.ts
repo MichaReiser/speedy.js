@@ -10,7 +10,7 @@ export async function nsieve(s: int) {
         if (isPrime[i]) {
             ++count;
 
-            for (let k = i; k < isPrime.length; k+=i) {
+            for (let k = i; k < isPrime.length; k += i) {
                 isPrime[k] = false;
             }
         }

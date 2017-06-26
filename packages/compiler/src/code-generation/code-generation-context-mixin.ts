@@ -2,9 +2,10 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "./code-generation-context";
-import {isMaybeObjectType} from "./util/types";
+import {getCallSignature, isFunctionType, isMaybeObjectType} from "./util/types";
 import {AddressLValue} from "./value/address-lvalue";
 import {ClassReference} from "./value/class-reference";
+import {FunctionPointer} from "./value/function-reference";
 import {Primitive} from "./value/primitive";
 import {ResolvedFunctionReference} from "./value/resolved-function-reference";
 import {SpeedyJSClassReference} from "./value/speedy-js-class-reference";
@@ -45,13 +46,6 @@ export class CodeGenerationContextMixin {
         }
 
         if (symbol) {
-            if (symbol.flags & ts.SymbolFlags.Function) {
-                const signatures = this.typeChecker.getSignaturesOfType(type, ts.SignatureKind.Call);
-                assert(signatures.length === 1, "No function type found or function is overloaded und should therefore not be dereferenced");
-
-                return ResolvedFunctionReference.createForSignature(value as llvm.Function, signatures[0], this);
-            }
-
             if (symbol.flags & ts.SymbolFlags.Method) {
                 // TODO Objekt erstellen und dann methode
                 // Requires special return object that contains the method function pointer and as
@@ -62,6 +56,11 @@ export class CodeGenerationContextMixin {
 
         if (isMaybeObjectType(type)) {
             type = type.getNonNullableType();
+        }
+
+        if (isFunctionType(type)) {
+            const signature = getCallSignature(type);
+            return ResolvedFunctionReference.createForSignature(value as FunctionPointer, signature, this);
         }
 
         if (type.flags & ts.TypeFlags.Object) {

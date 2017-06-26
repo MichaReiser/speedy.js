@@ -129,12 +129,16 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
         requestEmitHelper(new PerFileWasmLoaderEmitHelper());
 
         const compilerOptions = this.context.compilationContext.compilerOptions;
+        let staticBump = this.wastMetaData.staticBump || 0;
+        if (staticBump % 16 !== 0) {
+            staticBump += 16 - staticBump % 16;
+        }
 
         const options = toLiteral({
             totalStack: compilerOptions.totalStack,
             initialMemory: compilerOptions.initialMemory,
             globalBase: compilerOptions.globalBase,
-            staticBump: this.wastMetaData.staticBump || 0,
+            staticBump,
             exposeGc: compilerOptions.exportGc || compilerOptions.exposeGc
         });
 

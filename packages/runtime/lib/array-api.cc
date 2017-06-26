@@ -92,52 +92,64 @@ DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_setiPv(Array<void*>& array, int32_t index
 // fill
 //---------------------------------------------------------------------------------
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillb(Array<bool>& array, bool value) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_fillb(Array<bool>& array, bool value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillbi(Array<bool>& array, bool value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_fillbi(Array<bool>& array, bool value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIb_fillbii(Array<bool>& array, bool value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_fillbii(Array<bool>& array, bool value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_filli(Array<int32_t>& array, int32_t value) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_filli(Array<int32_t>& array, int32_t value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_fillii(Array<int32_t>& array, int32_t value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_fillii(Array<int32_t>& array, int32_t value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIi_filliii(Array<int32_t>& array, int32_t value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_filliii(Array<int32_t>& array, int32_t value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_filld(Array<double>& array, double value) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_filld(Array<double>& array, double value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_filldi(Array<double>& array, double value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_filldi(Array<double>& array, double value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayId_filldii(Array<double>& array, double value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_filldii(Array<double>& array, double value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPv(Array<void*>& array, void* value) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_fillPv(Array<void*>& array, void* value) {
     array.fill(value);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvi(Array<void*>& array, void* value, int32_t start) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_fillPvi(Array<void*>& array, void* value, int32_t start) {
     array.fill(value, start);
+    return &array;
 }
 
-DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_fillPvii(Array<void*>& array, void* value, int32_t start, int32_t end) {
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_fillPvii(Array<void*>& array, void* value, int32_t start, int32_t end) {
     array.fill(value, start, end);
+    return &array;
 }
 
 //---------------------------------------------------------------------------------
@@ -357,6 +369,54 @@ DLL_PUBLIC ALWAYS_INLINE void ArrayId_lengthi(Array<double>& array, int32_t size
 
 DLL_PUBLIC ALWAYS_INLINE void ArrayIPv_lengthi(Array<void*>& array, int32_t size) {
     array.resize(size);
+}
+
+//---------------------------------------------------------------------------------
+// length
+//---------------------------------------------------------------------------------
+
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_sort(Array<bool>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*BoolComparator)(const bool a, const bool b);
+DLL_PUBLIC ALWAYS_INLINE Array<bool>* ArrayIb_sortPFdbb(Array<bool>& array, BoolComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_sort(Array<int32_t>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*IntComparator)(const int32_t a, const int32_t b);
+DLL_PUBLIC ALWAYS_INLINE Array<int32_t>* ArrayIi_sortPFdii(Array<int32_t>& array, IntComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_sort(Array<double>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*DoubleComparator)(const double a, const double b);
+DLL_PUBLIC ALWAYS_INLINE Array<double>* ArrayId_sortPFddd(Array<double>& array, DoubleComparator comparator) {
+    array.sort(comparator);
+    return &array;
+}
+
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sort(Array<void*>& array) {
+    array.sort();
+    return &array;
+}
+
+typedef double (*ObjectComparator)(void* const a, void* const b);
+DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sortPFdPvPv(Array<void*>& array, ObjectComparator comparator) {
+    array.sort(comparator);
+    return &array;
 }
 
 #ifdef __cplusplus

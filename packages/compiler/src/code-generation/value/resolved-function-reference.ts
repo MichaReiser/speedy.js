@@ -1,9 +1,11 @@
+import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {AbstractFunctionReference} from "./abstract-function-reference";
 import {FunctionFactory, FunctionProperties} from "./function-factory";
+import {FunctionPointer} from "./function-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction} from "./resolved-function";
 
 const DEFAULT_RUNTIME_FUNCTION_PROPERTIES = { linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true } as Partial<FunctionProperties>;
@@ -12,6 +14,8 @@ const DEFAULT_RUNTIME_FUNCTION_PROPERTIES = { linkage: llvm.LinkageTypes.Externa
  * Reference to a specific overload of a function.
  */
 export class ResolvedFunctionReference extends AbstractFunctionReference {
+
+    private fn: FunctionPointer;
 
     /**
      * Creates a new reference to the specified runtime function
@@ -34,24 +38,28 @@ export class ResolvedFunctionReference extends AbstractFunctionReference {
      * @param context the context
      * @return {ResolvedFunctionReference} a reference to the given llvm function with the given signature
      */
-    static createForSignature(fn: llvm.Function, signature: ts.Signature, context: CodeGenerationContext) {
+    static createForSignature(fn: FunctionPointer, signature: ts.Signature, context: CodeGenerationContext) {
         const resolvedFunction = createResolvedFunctionFromSignature(signature, context.compilationContext);
         return new ResolvedFunctionReference(fn, resolvedFunction);
     }
 
-    static create(fn: llvm.Function, resolvedFunction: ResolvedFunction) {
+    static create(fn: FunctionPointer, resolvedFunction: ResolvedFunction) {
         return new ResolvedFunctionReference(fn, resolvedFunction);
     }
 
-    protected constructor(private fn: llvm.Function, public resolvedFunction: ResolvedFunction) {
+    protected constructor(fn: llvm.Value, public resolvedFunction: ResolvedFunction) {
         super();
+        assert(fn, "Function is missing");
+        assert(fn.type.isPointerTy && (fn.type as llvm.PointerType).elementType.isFunctionTy(), "Expected value to be a pointer to a function");
+
+        this.fn = fn as FunctionPointer;
     }
 
     getResolvedFunction(): ResolvedFunction {
         return this.resolvedFunction;
     }
 
-    protected getLLVMFunction(): llvm.Function {
+    protected getLLVMFunction(): FunctionPointer {
         return this.fn;
     }
 }

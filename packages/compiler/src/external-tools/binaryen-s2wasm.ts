@@ -1,5 +1,5 @@
 import * as debug from "debug";
-import {COMPILER_RT_FILE} from "speedyjs-runtime";
+import {COMPILER_RT_FILE, LIBC_RT_FILE} from "speedyjs-runtime";
 import {execBinaryen} from "./tools";
 
 const LOG = debug("external-tools/binaryen-s2wasm");
@@ -16,7 +16,17 @@ const EXECUTABLE_NAME = "s2wasm";
 export function s2wasm(sFile: string, wastFile: string, { globalBase, initialMemory }: { globalBase: number, initialMemory: number}): string {
     LOG(`Compile ${sFile} to wast file`);
 
-    const args = [sFile, "-o", wastFile, "-l", COMPILER_RT_FILE, "--emscripten-glue", `--global-base=${globalBase}`, `--initial-memory=${initialMemory}`];
+    const args = [
+        sFile,
+        "--emscripten-glue",
+        `--global-base=${globalBase}`,
+        `--initial-memory=${initialMemory}`,
+        "--allow-memory-growth",
+        "-o", wastFile,
+        "-l", COMPILER_RT_FILE,
+        "-l", LIBC_RT_FILE
+    ];
+
     LOG(execBinaryen(EXECUTABLE_NAME, args));
     return wastFile;
 }

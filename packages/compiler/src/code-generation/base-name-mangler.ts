@@ -2,12 +2,15 @@ import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
 import {NameMangler} from "./name-mangler";
 import {getTypeOfParentObject} from "./util/object-helper";
-import {isMaybeObjectType} from "./util/types";
+import {getCallSignature, isFunctionType, isMaybeObjectType} from "./util/types";
+import {createResolvedFunctionFromSignature} from "./value/resolved-function";
 
 /**
  * Base Implementation of a name mangler
  */
 export abstract class BaseNameMangler implements NameMangler {
+
+    private anonymousFunctionCounter = 0;
 
     constructor(protected compilationContext: CompilationContext) {
     }
@@ -21,7 +24,7 @@ export abstract class BaseNameMangler implements NameMangler {
      */
     protected abstract get separator(): string;
 
-    mangleFunctionName(name: string, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
+    mangleFunctionName(name: string | undefined, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
         const parts = [
             this.getModulePrefix(sourceFile),
             this.getFunctionName(name, argumentTypes)
@@ -84,8 +87,9 @@ export abstract class BaseNameMangler implements NameMangler {
         return this.mangleMethodName(classType, name, argumentTypes);
     }
 
-    private getFunctionName(name: string, argumentTypes: ts.Type[]) {
+    private getFunctionName(name: string | undefined, argumentTypes: ts.Type[]) {
         const parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
+        name = name || `$${++this.anonymousFunctionCounter}`;
         return this.encodeName(name) + parameterPostfix;
     }
 
@@ -120,6 +124,14 @@ export abstract class BaseNameMangler implements NameMangler {
 
         if (type.flags & ts.TypeFlags.Void) {
             return "v";
+        }
+
+        if (isFunctionType(type)) {
+            const signature = getCallSignature(type);
+            const resolvedFunction = createResolvedFunctionFromSignature(signature, this.compilationContext);
+
+            const parameterCodes = resolvedFunction.parameters.map(parameter => this.typeToCode(parameter.type)).join("");
+            return `PF${this.typeToCode(resolvedFunction.returnType)}${parameterCodes}`;
         }
 
         if (isMaybeObjectType(type)) {

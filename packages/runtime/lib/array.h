@@ -8,13 +8,18 @@
 #include <stdexcept>
 #include <stdint.h>
 #include <cstdlib>
-#include <cstring>
-#include <new>
 #include <algorithm>
+#include <functional>
 #include "macros.h"
 
 const int32_t CAPACITY_GROW_FACTOR = 2;
 const int32_t DEFAULT_CAPACITY = 16;
+
+#ifdef SAFE
+    const bool INITIALIZE = true;
+#else
+    const bool INITIALIZE  = false;
+#endif
 
 /**
  * Implementation of the JS Array. Grows when more elements are added.
@@ -58,12 +63,11 @@ private:
         begin = Array<T>::allocateElements(static_cast<size_t>(size));
         back = &begin[size];
 
-#ifdef SAFE
         if (initialize) {
             // This is quite expensive, if there is a GC that guarantees zeroed memory, this is no longer needed
             std::fill_n(begin, size, T {});
         }
-#endif
+
         capacity = static_cast<size_t>(size);
     }
 
@@ -73,7 +77,7 @@ public:
      * @param size the size (length) of the new array
      * @param initialize indicator if the elements array is to be default initialized.
      */
-    inline Array(int32_t size = 0) : Array(size, true) {
+    inline Array(int32_t size = 0) : Array(size, INITIALIZE) {
     }
 
     /**
@@ -146,6 +150,20 @@ public:
  #endif
 
         std::fill(start, end, value);
+    }
+
+    /**
+     * Sorts the array elements using the default comparision (objects by pointer since to string conversion is not yet suppported)
+     */
+    inline void sort() {
+        std::sort(begin, back);
+    }
+
+    typedef double (*Comparator)(const T a, const T b);
+    inline void sort(Comparator comparator) {
+        std::sort(begin, back, [&comparator](T a, T b) {
+            return comparator(a, b) < 0;
+        });
     }
 
     /**
@@ -342,7 +360,9 @@ private:
      * @returns the pointer to the allocated array
      */
     static inline T* allocateElements(size_t capacity, T* elements = nullptr)  __attribute__((returns_nonnull)) {
-        void* allocation = std::realloc(elements, capacity * sizeof(T));
+        const auto size = capacity * sizeof(T);
+        // LLVM can better optimize mallocs. If it detects an unused malloc, it is optimized away. Reallocs are not removed
+        void* allocation = elements == nullptr ? std::malloc(size) : std::realloc(elements, size);
 
         if (allocation == nullptr) {
             throw std::bad_alloc {};

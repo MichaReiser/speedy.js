@@ -43,7 +43,8 @@ export class SpeedyJSFunctionFactory extends FunctionFactory {
 
     protected mangleFunctionName(resolvedFunction: ResolvedFunction, typesOfUsedParameters: ts.Type[]) {
         if (resolvedFunction.async) {
-            return resolvedFunction.functionName;
+            assert(resolvedFunction.functionName, "Missing name for entry function");
+            return resolvedFunction.functionName!; // entry functions always have a name
         }
 
         return super.mangleFunctionName(resolvedFunction, typesOfUsedParameters);

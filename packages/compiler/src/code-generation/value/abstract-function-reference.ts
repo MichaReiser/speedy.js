@@ -5,8 +5,8 @@ import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
-import {getArrayElementType, toLLVMType} from "../util/types";
-import {FunctionReference} from "./function-reference";
+import {getArrayElementType, getCallSignature, isFunctionType, toLLVMType} from "../util/types";
+import {FunctionPointer, FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction, ResolvedFunctionParameter} from "./resolved-function";
 import {AssignableValue, Value} from "./value";
@@ -36,7 +36,7 @@ export abstract class AbstractFunctionReference implements FunctionReference {
      * @param context the context
      * @param passedArguments the arguments passed
      */
-    protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): llvm.Function;
+    protected abstract getLLVMFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, passedArguments?: llvm.Value[]): FunctionPointer;
 
     invoke(callExpression: ts.CallExpression | ts.NewExpression, callerContext: CodeGenerationContext): void | Value {
         const resolvedSignature = callerContext.typeChecker.getResolvedSignature(callExpression);
@@ -56,11 +56,16 @@ export abstract class AbstractFunctionReference implements FunctionReference {
 
     private invokeResolvedFunction(resolvedFunction: ResolvedFunction, args: llvm.Value[], callerContext: CodeGenerationContext) {
         const llvmFunction = this.getLLVMFunction(resolvedFunction, callerContext, args);
+        assert(llvmFunction.type.isPointerTy() && (llvmFunction.type as llvm.PointerType).elementType.isFunctionTy(), "Expected pointer to a function type");
+
         const callArguments = this.getCallArguments(resolvedFunction, args, callerContext);
+        let name: string | undefined;
 
-        const name = resolvedFunction.returnType.flags & ts.TypeFlags.Void ? undefined : `${resolvedFunction.functionName}ReturnValue`;
+        if (!(resolvedFunction.returnType.flags & ts.TypeFlags.Void)) {
+            name = resolvedFunction.functionName ? `${resolvedFunction.functionName}ReturnValue` : undefined;
+        }
 
-        assert(callArguments.length === llvmFunction.getArguments().length, "Calling function with less than expected number of arguments");
+        assert(callArguments.length === llvmFunction.type.elementType.getParams().length, "Calling function with less than expected number of arguments");
         const call = callerContext.builder.createCall(llvmFunction, callArguments, name);
 
         if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
@@ -134,6 +139,23 @@ export abstract class AbstractFunctionReference implements FunctionReference {
     }
 
     castImplicit(type: ts.Type, context: CodeGenerationContext): Value | undefined {
+        assert(isFunctionType(type), "Target type needs to be a function type");
+
+        const signature = getCallSignature(type);
+        const resolvedFunction = this.getResolvedFunction(context);
+        const parameters = signature.getParameters();
+        const declaredParameters = signature.getDeclaration().parameters;
+
+        const parameterTypes = resolvedFunction.parameters.map((p, i) => context.typeChecker.getTypeOfSymbolAtLocation(parameters[i], declaredParameters[i]));
+
+        const returnTypeEqual = signature.getReturnType() === resolvedFunction.returnType;
+        const parameterTypesEqual = resolvedFunction.parameters.length === parameterTypes.length &&
+            resolvedFunction.parameters.every((parameter, i) => parameter.type === parameterTypes[i]);
+
+        if (returnTypeEqual && parameterTypesEqual) {
+            return this; // no cast needed
+        }
+
         // casting functions is not yet supported
         return undefined;
     }

@@ -1,4 +1,3 @@
-import * as assert from "assert";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {TypeChecker} from "../../type-checker";
@@ -12,6 +11,10 @@ export interface ResolvedFunctionParameter {
      */
     name: string;
 
+    /**
+     * The symbol of the function
+     * Absent if this is an anonymous function
+     */
     symbol?: ts.Symbol;
 
     /**
@@ -56,9 +59,9 @@ export interface ResolvedFunction {
     async: boolean;
 
     /**
-     * The unmangled name of the function
+     * The unmangled name of the function. Absent, if this is an anonymous function
      */
-    functionName: string;
+    functionName?: string;
 
     /**
      * The parameters of the resolved function. Differs from the declaration as the types are specific for the resolved function
@@ -198,10 +201,13 @@ function isInstanceMethod(declaration: ts.SignatureDeclaration) {
 function getDeclaredFunctionName(declaration: ts.SignatureDeclaration, typeChecker: TypeChecker) {
     if (declaration.kind === ts.SyntaxKind.ConstructSignature || declaration.kind === ts.SyntaxKind.Constructor) {
         return "constructor";
-    } else {
-        assert(declaration.name, "Anonymous functions are not supported");
+    }
+
+    if (declaration.name) {
         return typeChecker.getSymbolAtLocation(declaration.name!).name;
     }
+
+    return undefined;
 }
 
 function getResolvedParameters(signature: ts.Signature, typeChecker: TypeChecker) {

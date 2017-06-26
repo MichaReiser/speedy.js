@@ -7,12 +7,12 @@ export interface NameMangler {
 
     /**
      * Returns the mangled function name for the given function call
-     * @param name the name of the function
+     * @param name the name of the function or undefined if it is an anonymous function
      * @param argumentTypes the types of the arguments passed to the function
      * @param sourceFile the source file, to which the function belongs (needed to avoid naming clashes between different files)
      * @returns the mangled function name for the function call with the specific arguments
      */
-    mangleFunctionName(name: string, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string;
+    mangleFunctionName(name: string | undefined, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string;
 
     /**
      * Returns the mangled name of either a static or instance method of a class.

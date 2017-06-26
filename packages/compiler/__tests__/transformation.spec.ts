@@ -235,6 +235,29 @@ describe("Transformation", () => {
         expect(formatDiagnostics(diagnostics)).toMatchSnapshot();
     });
 
+    it("emits a diagnostic if a speedy.js entry function accepts a callback", () => {
+        const compilerOptions = createCompilerOptions();
+        const source = `        
+        async function arrayFilter(array: number[], pred: (value: number) => boolean)  {
+            "use speedyjs";
+            
+            const result = new Array<number>();
+            for (let i = 0; i < array.length; ++i) {
+                if (pred(array[i])) {
+                    result.push(array[i]);
+                }
+            }
+            
+            return result;
+        }
+        `;
+
+        const {exitStatus, diagnostics } = compileSourceCode(source, "test.ts", compilerOptions);
+
+        expect(exitStatus).toBe(ts.ExitStatus.DiagnosticsPresent_OutputsSkipped);
+        expect(formatDiagnostics(diagnostics)).toMatchSnapshot();
+    });
+
     function expectCompiledJSOutputMatchesSnapshot(sourceCode: string, fileName: string, compilerOptions?: UninitializedSpeedyJSCompilerOptions) {
         compilerOptions = createCompilerOptions(compilerOptions);
         const result = compileSourceCode(sourceCode, fileName, compilerOptions);

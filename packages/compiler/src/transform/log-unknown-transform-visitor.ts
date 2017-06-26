@@ -185,6 +185,10 @@ export class LogUnknownTransformVisitor implements TransformVisitor {
         return context.visitEachChild(continueStatement);
     }
 
+    visitFunctionType(functionType: ts.FunctionTypeNode, context: TransformVisitorContext): ts.VisitResult<ts.Node> {
+        return functionType; // visitEachChild seems not to like being called with a function type... so don't do so
+    }
+
     fallback<T extends ts.Node>(node: T, context: TransformVisitorContext): T {
         LOG(`Unknown Node Type ${ts.SyntaxKind[node.kind]} - ${(node.constructor as any).name}`);
         return context.visitEachChild(node);

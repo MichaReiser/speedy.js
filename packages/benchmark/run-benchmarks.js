@@ -140,6 +140,8 @@ async function addBenchmark(suite, testCase, run) {
     // call each function once to not profile loading time
     jsFn();
     await wasmFn();
+    speedyJsGc();
+
     await emccFn();
 
     suite.add(run ? `js-${run}` : "js", function (deferred) {

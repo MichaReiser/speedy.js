@@ -16,7 +16,7 @@ interface CommandLineArguments {
      */
     args: string[];
     config?: string;
-    unsafe?: boolean;
+    safe?: boolean;
     emitLlvm?: boolean;
     saveWast?: boolean;
     saveBc?: boolean;
@@ -46,7 +46,7 @@ function parseCommandLine(): CommandLineArguments {
         .version(packageJson.version)
         .usage("[options] [files ...]")
         .option("-c --config <configFile>", "The path to the tsconfig.json")
-        .option("--unsafe", "Use the unsafe runtime system")
+        .option("--safe", "Use the safe runtime system")
         .option("--emit-llvm", "Emit LLVM Assembly Code instead of WASM files")
         .option("--save-wast", "Saves the WAST file in the output directory if compiling all the way to WebAssembly")
         .option("--save-bc", "Saves a copy of the bitcode to the output directory if compiling all the way to WebAssembly. The file includes the linked and optimized code.")
@@ -92,7 +92,7 @@ function getCompilerOptions(commandLine: CommandLineArguments, tsConfigFileName:
         compilerOptions = ts.getDefaultCompilerOptions();
     }
 
-    compilerOptions.unsafe = commandLine.unsafe;
+    compilerOptions.unsafe = !commandLine.safe;
     compilerOptions.binaryenOpt = commandLine.binaryenOpt;
     compilerOptions.emitLLVM = commandLine.emitLlvm;
     compilerOptions.saveWast = commandLine.saveWast;

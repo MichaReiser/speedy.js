@@ -40,7 +40,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
      * @param signatures the signatures of the function
      * @param context the context
      * @param classType the class type if the function is an instance or static method of an object
-     * @return {UnresolvedFunctionReference} the function reference
+     * @return the function reference
      */
     static createFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType) {
         return new UnresolvedFunctionReference(signatures, new SpeedyJSFunctionFactory(context.compilationContext), classType);
