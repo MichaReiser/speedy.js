@@ -1,11 +1,12 @@
 import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../code-generation-diagnostic";
 import {CodeGenerator} from "../code-generation/code-generator";
+import {isFunctionType} from "../code-generation/util/types";
 import {CompilationContext} from "../compilation-context";
 import {TypeChecker} from "../type-checker";
+import {isSpeedyJSEntryFunction, isSpeedyJSFunction} from "../util/speedyjs-function";
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
 import debug = require("debug");
-import {isSpeedyJSEntryFunction, isSpeedyJSFunction} from "../util/speedyjs-function";
 
 const LOG = debug("transform/speedyjs-transform-visitor");
 
@@ -125,6 +126,11 @@ function validateSpeedyJSFunction(fun: ts.FunctionLikeDeclaration, typeChecker: 
 
     if (typeChecker.isImplementationOfOverload(fun)) {
         throw CodeGenerationDiagnostics.overloadedEntryFunctionNotSupported(fun);
+    }
+
+    const callbackParameter = fun.parameters.find(parameter => isFunctionType(typeChecker.getTypeAtLocation(parameter)));
+    if (callbackParameter !==  undefined) {
+        throw CodeGenerationDiagnostics.entryFunctionWithCallbackNotSupported(callbackParameter);
     }
 }
 
