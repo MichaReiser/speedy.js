@@ -4,7 +4,7 @@
  * The code is licensed as LGPL.
  */
 
-/* 
+/*
  A C-program for MT19937, with initialization improved 2002/1/26.
  Coded by Takuji Nishimura and Makoto Matsumoto.
 
@@ -291,7 +291,7 @@ class Random {
     }
 }
 
-export function simjs(seed: int, runs: int) {
+function simjs(seed: int, runs: int) {
     const random = new Random(seed);
     let sum = 0.0;
 
@@ -301,3 +301,8 @@ export function simjs(seed: int, runs: int) {
 
     return sum;
 }
+
+export {
+    simjs,
+    Random
+};

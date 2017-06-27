@@ -47,7 +47,7 @@
  email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
  */
 
-class Random {
+export class Random {
     private N = 624;
     private M = 397;
     private MATRIX_A = 0x9908b0df;

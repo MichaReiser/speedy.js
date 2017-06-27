@@ -13,7 +13,7 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.js', '.jsx', '.ts']
+        extensions: [ '.ts', '.js', '.jsx' ]
     },
 
     module: {
@@ -21,7 +21,7 @@ module.exports = {
             {
                 test: /\.ts$/,
                 loader: "ts-loader",
-                exclude: path.resolve("./cases")
+                exclude: /-spdy\.ts$/
             }
         ],
         noParse: [
