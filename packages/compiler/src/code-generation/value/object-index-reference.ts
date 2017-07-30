@@ -1,6 +1,7 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
+import {invoke} from "../util/functions";
 import {ObjectReference} from "./object-reference";
 import {AssignableValue, Value} from "./value";
 
@@ -17,7 +18,7 @@ export class ObjectIndexReference implements AssignableValue {
     }
 
     generateIR(context: CodeGenerationContext): llvm.Value {
-        return context.builder.createCall(this.getter!, [this.object.generateIR(context), this.index.generateIR(context)], "[i]")!;
+        return invoke(this.getter!, [this.object.generateIR(context), this.index.generateIR(context)], context.toLLVMType(this.type), context, { name: "[i]" });
     }
 
     getValue(context: CodeGenerationContext): Value {
@@ -30,7 +31,7 @@ export class ObjectIndexReference implements AssignableValue {
         const objectPtr = this.object.generateIR(context);
         const indexValue = this.index.generateIR(context);
 
-        context.builder.createCall(this.setter!, [objectPtr, indexValue, valueToSet]);
+        invoke(this.setter!, [objectPtr, indexValue, valueToSet], llvm.Type.getVoidTy(context.llvmContext), context);
     }
 
     isAssignable(): true {

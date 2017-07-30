@@ -5,7 +5,8 @@ import {CodeGenerationContext} from "../code-generation-context";
 import {DefaultNameMangler} from "../default-name-mangler";
 import {FunctionDeclarationBuilder} from "../util/function-declaration-builder";
 import {FunctionDefinitionBuilder} from "../util/function-definition-builder";
-import {sizeof, toLLVMType} from "../util/types";
+import {sizeof} from "../util/types";
+import {TypePlace} from "../util/typescript-to-llvm-type-converter";
 
 import {AbstractFunctionReference} from "./abstract-function-reference";
 import {Address} from "./address";
@@ -62,8 +63,8 @@ class ConstructorFunctionBuilder {
     }
 
     mangleName() {
-        const argumentTypes = this.resolvedFunction.parameters.map(parameter => parameter.type);
         const nameMangler = new DefaultNameMangler(this.context.compilationContext);
+        const argumentTypes = this.resolvedFunction.parameters;
         this.constructorName = nameMangler.mangleMethodName(this.classReference.type, this.constructorName, argumentTypes, this.resolvedFunction.sourceFile);
         return this;
     }
@@ -90,7 +91,7 @@ class ConstructorFunctionBuilder {
         const objectAddress = this.allocateObjectOnHeap();
         const objectReference = new SpeedyJSObjectReference(objectAddress, this.classReference.type, this.classReference);
 
-        this.context.enterChildScope();
+        this.context.enterChildScope(declaration);
         this.context.scope.addVariable(this.classReference.symbol, objectReference);
 
         this.initializeFields(objectAddress);
@@ -125,7 +126,8 @@ class ConstructorFunctionBuilder {
             } else if (this.context.compilationContext.compilerOptions.unsafe) {
                 continue;
             } else {
-                value = llvm.Constant.getNullValue(toLLVMType(this.context.typeChecker.getTypeAtLocation(declaration), this.context));
+                const fieldType = this.context.typeChecker.getTypeAtLocation(declaration);
+                value = llvm.Constant.getNullValue(this.context.toLLVMType(fieldType, TypePlace.FIELD));
             }
 
             const fieldOffset = llvm.ConstantInt.get(this.context.llvmContext, this.classReference.getFieldOffset(field));

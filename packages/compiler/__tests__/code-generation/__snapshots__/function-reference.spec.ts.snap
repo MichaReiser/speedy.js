@@ -28,7 +28,7 @@ entry:
   %constructorReturnValue = call dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32* %items1, i32 5)
   store %class.Array* %constructorReturnValue, %class.Array** %array, align 4
   %array2 = load %class.Array*, %class.Array** %array, align 4
-  %filterReturnValue = call dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$$6filter5ArrayIiPFbi\\"(%class.Array* %array2, i1 (i32)* @\\"function_reference/function_accepting_callback.ts$$6isEveni\\")
+  %filterReturnValue = call dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$6filter5ArrayIiPFbi\\"(%class.Array* %array2, i1 (i32)* @\\"function_reference/function_accepting_callback.ts$6isEveni\\")
   store %class.Array* %filterReturnValue, %class.Array** %return, align 4
   br label %returnBlock
 
@@ -43,7 +43,7 @@ declare dereferenceable(12) %class.Array* @ArrayIi_constructorPiu(i32*, i32) #0
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
 
-define linkonce_odr hidden zeroext i1 @\\"function_reference/function_accepting_callback.ts$$6isEveni\\"(i32 %x) {
+define linkonce_odr hidden zeroext i1 @\\"function_reference/function_accepting_callback.ts$6isEveni\\"(i32 %x) {
 entry:
   %x.addr = alloca i32, align 4
   %return = alloca i1, align 1
@@ -59,7 +59,7 @@ returnBlock:                                      ; preds = %entry
   ret i1 %return2
 }
 
-define linkonce_odr hidden dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$$6filter5ArrayIiPFbi\\"(%class.Array* dereferenceable(12) %array, i1 (i32)* %pred) {
+define linkonce_odr hidden dereferenceable(12) %class.Array* @\\"function_reference/function_accepting_callback.ts$6filter5ArrayIiPFbi\\"(%class.Array* dereferenceable(12) %array, i1 (i32)* %pred) {
 entry:
   %items = alloca [1 x i32], align 4
   %i = alloca i32, align 4
@@ -162,7 +162,7 @@ define double @_initializedVariableDeclaration() {
 entry:
   %fn = alloca double (double, double)*, align 4
   %return = alloca double, align 8
-  store double (double, double)* @\\"function_reference/variable_to_function_reference.ts$$3adddd\\", double (double, double)** %fn, align 4
+  store double (double, double)* @\\"function_reference/variable_to_function_reference.ts$3adddd\\", double (double, double)** %fn, align 4
   %fn1 = load double (double, double)*, double (double, double)** %fn, align 4
   %addReturnValue = call double %fn1(double 3.000000e+00, double 4.000000e+00)
   store double %addReturnValue, double* %return, align 8
@@ -173,7 +173,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return2
 }
 
-define linkonce_odr hidden double @\\"function_reference/variable_to_function_reference.ts$$3adddd\\"(double %x, double %y) {
+define linkonce_odr hidden double @\\"function_reference/variable_to_function_reference.ts$3adddd\\"(double %x, double %y) {
 entry:
   %y.addr = alloca double, align 8
   %x.addr = alloca double, align 8

@@ -3,6 +3,7 @@ import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
 import {TypeChecker} from "../type-checker";
 import {Scope} from "./scope";
+import {TypePlace, TypeScriptToLLVMTypeConverter} from "./util/typescript-to-llvm-type-converter";
 import {ClassReference} from "./value/class-reference";
 import {Value} from "./value/value";
 
@@ -46,6 +47,16 @@ export interface BaseCodeGenerationContext {
      * @default false
      */
     requiresGc: boolean;
+
+    /**
+     * Default type converter of speedy.js
+     */
+    readonly typeConverter: TypeScriptToLLVMTypeConverter;
+
+    /**
+     * Type Converter for runtime types.
+     */
+    readonly runtimeTypeConverter: TypeScriptToLLVMTypeConverter;
 
     /**
      * Creates a new child context with it's own builder and with a detached scope (but shared global scope)
@@ -120,7 +131,22 @@ export interface CodeGenerationContext extends BaseCodeGenerationContext {
     /**
      * Resolves the class belonging to the given type if supported or returns undefined if not
      * @param type the class type
+     * @param symbol the symbol of the type
      * @returns the reference to this class
      */
     resolveClass(type: ts.Type, symbol?: ts.Symbol): ClassReference | undefined;
+
+    /**
+     * Converts the given typescript type to an llvm type
+     * @param {ts.Type} type the type to convert
+     * @param place where the type in the code occurs
+     */
+    toLLVMType(type: ts.Type, place?: TypePlace): llvm.Type;
+
+    /**
+     * Converts the given typescript type to an llvm runtime type
+     * @param {ts.Type} type the type to convert
+     * @param place where the type in the code occurs
+     */
+    toRuntimeLLVMType(type: ts.Type, place?: TypePlace): llvm.Type;
 }

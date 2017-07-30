@@ -3,6 +3,7 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "./code-generation-context";
 import {getCallSignature, isFunctionType, isMaybeObjectType} from "./util/types";
+import {TypePlace} from "./util/typescript-to-llvm-type-converter";
 import {AddressLValue} from "./value/address-lvalue";
 import {ClassReference} from "./value/class-reference";
 import {FunctionPointer} from "./value/function-reference";
@@ -16,6 +17,14 @@ import {Value} from "./value/value";
  * Defines the extension methods / default implementations that do not depend on a particular code generation context implementation
  */
 export class CodeGenerationContextMixin {
+
+    toLLVMType(this: CodeGenerationContext, type: ts.Type, place: TypePlace = TypePlace.INLINE) {
+        return this.typeConverter.convert(type, place);
+    }
+
+    toRuntimeLLVMType(this: CodeGenerationContext, type: ts.Type, place: TypePlace = TypePlace.INLINE): llvm.Type {
+        return this.runtimeTypeConverter.convert(type, place);
+    }
 
     generateValue(this: CodeGenerationContext, node: ts.Node): Value {
         const result = this.generate(node);

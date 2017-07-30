@@ -1,6 +1,8 @@
+import * as assert from "assert";
 import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
 import {BaseNameMangler} from "./base-name-mangler";
+import {Parameter} from "./name-mangler";
 
 /**
  * Name mangler for functions implemented in the Runtime
@@ -48,9 +50,10 @@ export class RuntimeSystemNameMangler extends BaseNameMangler {
         return "";
     }
 
-    protected getParameterTypeCode(parameter: ts.Type) {
-        if (parameter.getSymbol() === this.arraySymbol) {
-            const elementType = (parameter as ts.GenericType).typeArguments[0];
+    protected getParameterTypeCode(parameter: Parameter) {
+        if (parameter.variadic) {
+            assert(parameter.type.getSymbol() === this.arraySymbol, "Vararg should be ArrayType");
+            const elementType = (parameter.type as ts.GenericType).typeArguments[0];
             return `P${this.typeToCode(elementType)}u`;
         }
 

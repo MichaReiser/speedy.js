@@ -82,8 +82,8 @@ export class PerFileCodeGenerator implements CodeGenerator {
         }
 
         LOG(`Emit module for source file ${sourceFile.fileName}.`);
-        llvm.verifyModule(context.module);
-        this.writeModule(sourceFile, state);
+        // llvm.verifyModule(context.module);
+        this .writeModule(sourceFile, state);
         LOG(`Module for source file ${sourceFile.fileName} emitted.`);
 
         return state.sourceFileRewriter.rewriteSourceFile(sourceFile, state.requestEmitHelper);

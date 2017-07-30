@@ -373,6 +373,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -810,6 +811,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -1249,6 +1251,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -1686,6 +1689,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -2170,6 +2174,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -2608,6 +2613,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -3046,6 +3052,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -3483,6 +3490,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -3920,6 +3928,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },
@@ -4357,6 +4366,7 @@ function __moduleLoader(wasmUri, options) {
                         throw new Error(\\"Exceptions not yet supported\\");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod: function (x, y) {
                         return x % y;
                     },

@@ -5,7 +5,7 @@ import {DefaultNameMangler} from "../default-name-mangler";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {ObjectPropertyReference} from "../value/object-property-reference";
 import {ObjectReference} from "../value/object-reference";
-import {toLLVMType} from "./types";
+import {TypePlace} from "./typescript-to-llvm-type-converter";
 
 export class ComputedObjectPropertyReferenceBuilder {
     private runtimeFn = false;
@@ -31,14 +31,13 @@ export class ComputedObjectPropertyReferenceBuilder {
     build(objectReference: ObjectReference) {
         const propertyType = this.context.typeChecker.getTypeAtLocation(this.property);
         const property = this.context.typeChecker.getSymbolAtLocation(this.property);
-        const propertyLLVMType = toLLVMType(propertyType, this.context);
-        const thisLLVMType = toLLVMType(objectReference.type, this.context);
+        const thisLLVMType = this.context.typeConverter.convert(objectReference.type, TypePlace.THIS);
 
-        const getter = this.createGetter(thisLLVMType, propertyLLVMType, objectReference);
+        const getter = this.createGetter(thisLLVMType, propertyType, objectReference);
         let setter: llvm.Function | undefined;
 
         if (!this.readOnlyFlag) {
-            setter = this.createSetter(thisLLVMType, propertyLLVMType, objectReference);
+            setter = this.createSetter(thisLLVMType, propertyType, objectReference);
         }
 
         return ObjectPropertyReference.createComputedPropertyReference(propertyType, objectReference, property, getter, setter);
@@ -48,13 +47,13 @@ export class ComputedObjectPropertyReferenceBuilder {
         return this.runtimeFn ? new RuntimeSystemNameMangler(this.context.compilationContext) : new DefaultNameMangler(this.context.compilationContext);
     }
 
-    private createGetter(thisType: llvm.Type, propertyType: llvm.Type, objectReference: ObjectReference): llvm.Function {
+    private createGetter(thisType: llvm.Type, propertyType: ts.Type, objectReference: ObjectReference): llvm.Function {
         const getterName = this.getNameMangler().mangleProperty(this.property, false);
 
         let getter = this.context.module.getFunction(getterName);
 
         if (!getter) {
-            const getterType = llvm.FunctionType.get(propertyType, [thisType], false);
+            const getterType = llvm.FunctionType.get(this.context.typeConverter.convert(propertyType, TypePlace.RETURN_VALUE), [thisType], false);
             getter = llvm.Function.create(getterType, llvm.LinkageTypes.ExternalLinkage, getterName, this.context.module);
             getter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
             getter.addFnAttr(llvm.Attribute.AttrKind.ReadOnly);
@@ -69,13 +68,14 @@ export class ComputedObjectPropertyReferenceBuilder {
         return getter;
     }
 
-    private createSetter(thisType: llvm.Type, propertyType: llvm.Type, objectReference: ObjectReference): llvm.Function {
+    private createSetter(thisType: llvm.Type, propertyType: ts.Type, objectReference: ObjectReference): llvm.Function {
         const setterName = this.getNameMangler().mangleProperty(this.property, true);
 
         let setter = this.context.module.getFunction(setterName);
 
         if (!setter) {
-            const setterType = llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [thisType, propertyType], false);
+            const llvmPropertyType = this.context.typeConverter.convert(propertyType, TypePlace.FIELD);
+            const setterType = llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [thisType, llvmPropertyType], false);
             setter = llvm.Function.create(setterType, llvm.LinkageTypes.ExternalLinkage, setterName, this.context.module);
             setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
 

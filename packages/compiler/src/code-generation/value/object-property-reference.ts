@@ -1,6 +1,7 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
+import {invoke} from "../util/functions";
 import {Allocation} from "./allocation";
 import {ObjectReference} from "./object-reference";
 import {AssignableValue, Value} from "./value";
@@ -86,7 +87,7 @@ class ComputedObjectPropertyReference extends ObjectPropertyReference {
     }
 
     protected getValue(context: CodeGenerationContext): Value {
-        const result = context.builder.createCall(this.getter!, [this.object.generateIR(context)], this.property.name);
+        const result = invoke(this.getter!, [this.object.generateIR(context)], context.toLLVMType(this.propertyType), context, { name: this.property.name });
         return context.value(result, this.propertyType);
     }
 
@@ -96,7 +97,7 @@ class ComputedObjectPropertyReference extends ObjectPropertyReference {
             this.object.generateIR(context)
         ].reverse();
 
-        context.builder.createCall(this.setter!, args);
+        invoke(this.setter!, args, llvm.Type.getVoidTy(context.llvmContext), context, this.property.name);
     }
 
     isAssignable(): boolean {

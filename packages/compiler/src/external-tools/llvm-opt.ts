@@ -5,7 +5,7 @@ import {execLLVM} from "./tools";
 const LOG = debug("external-tools/llvm-opt");
 const EXECUTABLE_NAME = "opt";
 // tslint:disable-next-line:max-line-length
-const LINK_TIME_OPTIMIZATIONS = ["-strip-debug", "-internalize", "-globaldce", "-disable-loop-vectorization", "-disable-slp-vectorization", "-vectorize-loops=false", "-vectorize-slp=false", "-vectorize-slp-aggressive=false"]; // Vectorization is not yet supported by the linker backend llc
+const LINK_TIME_OPTIMIZATIONS = ["-strip-debug", "-internalize", "-globaldce", "-disable-loop-vectorization", "-disable-slp-vectorization", "-vectorize-loops=false", "-vectorize-slp=false"]; // Vectorization is not yet supported by the linker backend llc
 const DEFAULT_PUBLIC = "speedyJsGc,malloc,__errno_location";
 
 /**

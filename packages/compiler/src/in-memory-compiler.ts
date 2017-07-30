@@ -37,6 +37,7 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
     const defaultHost = ts.createCompilerHost(initializedOptions);
 
     let sourceFile: ts.SourceFile | undefined;
+    const basename = path.basename(inputFileName).replace(".ts", "");
     const outputs: { js?: string, wasm?: any[], wast?: string, sourceMapText?: string } = {};
 
     const compilerHost: ts.CompilerHost = {
@@ -87,16 +88,16 @@ export function compileSourceCode(sourceCode: string, inputFileName: string, opt
             return defaultHost.useCaseSensitiveFileNames.apply(defaultHost, arguments);
         },
         writeFile(name: string, text: string) {
-            if (name.endsWith(".map")) {
+            if (name.endsWith(`${basename}.map`)) {
                 assert(outputs.sourceMapText === undefined, `Unexpected multiple source map outputs for the file '${name}'`);
                 outputs.sourceMapText = text;
-            } else if (name.endsWith(".js")) {
+            } else if (name.endsWith(`${basename}.js`)) {
                 assert(outputs.js === undefined, `Unexpected multiple outputs for the file: '${name}'`);
                 outputs.js = text;
-            } else if (name.endsWith(".wast")) {
+            } else if (name.endsWith(`${basename}.wast`)) {
                 assert(outputs.wast === undefined, `Unexpected multiple outputs for the file: '${name}'`);
                 outputs.wast = text;
-            } else if (name.endsWith(".wasm")) {
+            } else if (name.endsWith(`${basename}.wasm`)) {
                 assert(outputs.wasm === undefined, `Unexpected multiple outputs for the file: '${name}'`);
                 outputs.wasm = (text as any as Buffer).toJSON().data;
             }

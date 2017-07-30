@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 import {SyntaxCodeGenerator} from "../syntax-code-generator";
-import {isMaybeObjectType, toLLVMType} from "../util/types";
+import {isMaybeObjectType} from "../util/types";
 import {MathObjectReference} from "../value/math-object-reference";
 import {Primitive} from "../value/primitive";
 import {Value} from "../value/value";
@@ -50,7 +50,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
-            // a || b
+            // a && b
             case ts.SyntaxKind.AmpersandAmpersandToken: {
                 const lhs = context.generateValue(binaryExpression.left).generateIR(context);
                 const lhsAsBool = Primitive.toBoolean(lhs, leftType, context);
@@ -68,7 +68,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 context.scope.enclosingFunction.addBasicBlock(end);
                 context.builder.setInsertionPoint(end);
 
-                const phi = context.builder.createPhi(toLLVMType(resultType, context), 2, "land");
+                const phi = context.builder.createPhi(context.toLLVMType(resultType), 2, "land");
                 phi.addIncoming(lhs, lhsBlock);
                 phi.addIncoming(right, rhsBlock);
 
@@ -142,7 +142,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 context.scope.enclosingFunction.addBasicBlock(lorEnd);
                 context.builder.setInsertionPoint(lorEnd);
 
-                const phi = context.builder.createPhi(toLLVMType(resultType, context), 2, "lor");
+                const phi = context.builder.createPhi(context.toLLVMType(resultType), 2, "lor");
                 phi.addIncoming(lhs, lhsBlock);
                 phi.addIncoming(rhs, rhsBlock);
 

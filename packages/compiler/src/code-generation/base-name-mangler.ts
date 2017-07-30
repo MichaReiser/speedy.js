@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 import {CompilationContext} from "../compilation-context";
-import {NameMangler} from "./name-mangler";
+import {NameMangler, Parameter} from "./name-mangler";
 import {getTypeOfParentObject} from "./util/object-helper";
 import {getCallSignature, isFunctionType, isMaybeObjectType} from "./util/types";
 import {createResolvedFunctionFromSignature} from "./value/resolved-function";
@@ -24,20 +24,20 @@ export abstract class BaseNameMangler implements NameMangler {
      */
     protected abstract get separator(): string;
 
-    mangleFunctionName(name: string | undefined, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
+    mangleFunctionName(name: string | undefined, parameters: Parameter[], sourceFile?: ts.SourceFile): string {
         const parts = [
             this.getModulePrefix(sourceFile),
-            this.getFunctionName(name, argumentTypes)
+            this.getFunctionName(name, parameters)
         ];
 
         return parts.filter(part => !!part).join(this.separator);
     }
 
-    mangleMethodName(clazz: ts.ObjectType, methodName: string, argumentTypes: ts.Type[], sourceFile?: ts.SourceFile): string {
+    mangleMethodName(clazz: ts.ObjectType, methodName: string, parameters: Parameter[], sourceFile?: ts.SourceFile): string {
         const parts = [
             this.getModulePrefix(sourceFile),
             this.getObjectName(clazz),
-            this.getFunctionName(methodName, argumentTypes)
+            this.getFunctionName(methodName, parameters)
         ];
 
         return parts.filter(part => !!part).join(this.separator);
@@ -53,11 +53,11 @@ export abstract class BaseNameMangler implements NameMangler {
 
     /**
      * Returns the type code for the given parameter
-     * @param parameterType the parameter to encode
+     * @param parameter the parameter to encode
      * @return {string} by default, the type code of the parameter type
      */
-    protected getParameterTypeCode(parameterType: ts.Type): string {
-        return this.typeToCode(parameterType);
+    protected getParameterTypeCode(parameter: Parameter): string {
+        return this.typeToCode(parameter.type);
     }
 
     /**
@@ -84,11 +84,15 @@ export abstract class BaseNameMangler implements NameMangler {
         }
 
         const classType = getTypeOfParentObject(node, this.typeChecker)!;
-        return this.mangleMethodName(classType, name, argumentTypes);
+        const parameters = argumentTypes.map(type => {
+            return { type, variadic: false };
+        });
+
+        return this.mangleMethodName(classType, name, parameters);
     }
 
-    private getFunctionName(name: string | undefined, argumentTypes: ts.Type[]) {
-        const parameterPostfix = argumentTypes.map(type => this.getParameterTypeCode(type)).join("");
+    private getFunctionName(name: string | undefined, parameters: Parameter[]) {
+        const parameterPostfix = parameters.map(parameter => this.getParameterTypeCode(parameter)).join("");
         name = name || `$${++this.anonymousFunctionCounter}`;
         return this.encodeName(name) + parameterPostfix;
     }

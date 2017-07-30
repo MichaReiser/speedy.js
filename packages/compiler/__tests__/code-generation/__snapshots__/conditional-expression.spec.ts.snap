@@ -130,9 +130,9 @@ entry:
   %x = alloca %class.Test*, align 4
   %condition.addr = alloca %class.Test*, align 4
   store %class.Test* %condition, %class.Test** %condition.addr, align 4
-  %constructorReturnValue = call dereferenceable(1) %class.Test* @\\"conditional_expression/object_condition.ts$$Test$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.Test* @\\"conditional_expression/object_condition.ts$Test$11constructor\\"()
   store %class.Test* %constructorReturnValue, %class.Test** %x, align 4
-  %constructorReturnValue1 = call dereferenceable(1) %class.Test* @\\"conditional_expression/object_condition.ts$$Test$11constructor\\"()
+  %constructorReturnValue1 = call dereferenceable(1) %class.Test* @\\"conditional_expression/object_condition.ts$Test$11constructor\\"()
   store %class.Test* %constructorReturnValue1, %class.Test** %y, align 4
   %condition.addr2 = load %class.Test*, %class.Test** %condition.addr, align 4
   %condition.addr2AsBool = icmp ne %class.Test* %condition.addr2, null
@@ -142,7 +142,7 @@ entry:
   ret void
 }
 
-define linkonce_odr %class.Test* @\\"conditional_expression/object_condition.ts$$Test$11constructor\\"() {
+define linkonce_odr %class.Test* @\\"conditional_expression/object_condition.ts$Test$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.Test*

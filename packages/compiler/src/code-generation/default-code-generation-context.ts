@@ -10,6 +10,9 @@ import {FallbackCodeGenerator} from "./fallback-code-generator";
 import {Scope} from "./scope";
 
 import {SyntaxCodeGenerator} from "./syntax-code-generator";
+import {DefaultTypeConverter} from "./util/default-type-converter";
+import {RuntimeSystemTypeConverter} from "./util/runtime-system-type-converter";
+import {TypeScriptToLLVMTypeConverter} from "./util/typescript-to-llvm-type-converter";
 import {ClassReference} from "./value/class-reference";
 import {Value} from "./value/value";
 
@@ -22,6 +25,8 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     builder: llvm.IRBuilder;
     scope: Scope;
     requiresGc = false;
+    typeConverter: TypeScriptToLLVMTypeConverter;
+    runtimeTypeConverter: TypeScriptToLLVMTypeConverter;
 
     constructor(public compilationContext: CompilationContext, public module: llvm.Module,
                 private rootScope = new Scope(),
@@ -30,6 +35,8 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
                 private fallbackCodeGenerator?: FallbackCodeGenerator) {
         this.builder = new llvm.IRBuilder(this.compilationContext.llvmContext);
         this.scope = rootScope;
+        this.typeConverter = new DefaultTypeConverter(this);
+        this.runtimeTypeConverter = new RuntimeSystemTypeConverter(this);
     }
 
     get llvmContext() {
@@ -46,6 +53,8 @@ export class DefaultCodeGenerationContext implements CodeGenerationContext {
     generateValue: (node: ts.Node) => Value;
     value: (value: llvm.Value, type: ts.Type) => Value;
     resolveClass: (type: ts.Type, symbol?: ts.Symbol) => ClassReference | undefined;
+    toLLVMType: (type: ts.Type) => llvm.Type;
+    toRuntimeLLVMType: (type: ts.Type) => llvm.Type;
 
     createChildContext(): CodeGenerationContext {
         return new DefaultCodeGenerationContext(

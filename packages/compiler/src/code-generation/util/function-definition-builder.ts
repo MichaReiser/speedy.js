@@ -74,7 +74,7 @@ export class FunctionDefinitionBuilder {
 
         this.context.leaveChildScope();
 
-        llvm.verifyFunction(this.fn);
+        // llvm.verifyFunction(this.fn);
     }
 
     private generateReturnStatement() {

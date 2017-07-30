@@ -207,6 +207,11 @@ export class PerFileCodeGeneratorSourceFileRewriter implements PerFileSourceFile
 
         while (typesToProcess.length > 0) {
             let type = typesToProcess.pop()!;
+
+            if (type.flags & ts.TypeFlags.Void) {
+                continue;
+            }
+
             const name = serializedTypeName(type, this.context.typeChecker);
 
             if (name in types) {

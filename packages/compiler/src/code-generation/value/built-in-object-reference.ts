@@ -2,7 +2,7 @@ import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 
 import {CodeGenerationContext} from "../code-generation-context";
-import {isMaybeObjectType, toLLVMType} from "../util/types";
+import {isMaybeObjectType} from "../util/types";
 import {Address} from "./address";
 import {AddressLValue} from "./address-lvalue";
 import {ClassReference} from "./class-reference";
@@ -54,7 +54,7 @@ export abstract class BuiltInObjectReference implements ObjectReference {
 
         // casting it to undefined. Casts to other types not yet supported
         if (type.flags & ts.TypeFlags.Undefined) {
-            const castedPtr = context.builder.createBitCast(this.generateIR(context), toLLVMType(type, context));
+            const castedPtr = context.builder.createBitCast(this.generateIR(context), context.toLLVMType(type));
             return this.clazz.objectFor(new AddressLValue(castedPtr, type), this.type, context);
         }
 

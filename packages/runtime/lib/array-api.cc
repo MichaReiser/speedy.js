@@ -423,5 +423,4 @@ DLL_PUBLIC ALWAYS_INLINE Array<void*>* ArrayIPv_sortPFdPvPv(Array<void*>& array,
 }
 #endif
 
-
 #endif //SPEEDYJS_RUNTIME_ARRAY_API_H

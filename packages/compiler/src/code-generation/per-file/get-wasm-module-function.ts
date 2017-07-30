@@ -454,6 +454,7 @@ function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoa
                         throw new Error("Exceptions not yet supported");
                     },
                     pow: Math.pow,
+                    round: Math.round,
                     fmod(x: number, y: number) {
                         return x % y;
                     },

@@ -380,13 +380,13 @@ entry:
   %cmpEQ3 = fcmp oeq double %threePointFour2, 3.400000e+00
   %trueValue4 = load i1, i1* %trueValue, align 1
   %cmpEQ5 = icmp eq i1 %trueValue4, true
-  %constructorReturnValue = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$$EqualsTest$11constructor\\"()
-  %constructorReturnValue6 = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$$EqualsTest$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsTest$11constructor\\"()
+  %constructorReturnValue6 = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsTest$11constructor\\"()
   %cmpEQ7 = icmp eq %class.EqualsTest* %constructorReturnValue, %constructorReturnValue6
   ret void
 }
 
-define linkonce_odr %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$$EqualsTest$11constructor\\"() {
+define linkonce_odr %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsTest$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.EqualsTest*
@@ -424,14 +424,14 @@ entry:
   %four1 = load i32, i32* %four, align 4
   %four1AsNumber = sitofp i32 %four1 to double
   %cmpEQ = fcmp oeq double %four1AsNumber, 4.000000e+00
-  %constructorReturnValue = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$$TestEquals$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEquals$11constructor\\"()
   %cmpEQ2 = icmp eq %class.TestEquals* %constructorReturnValue, null
-  %constructorReturnValue3 = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$$TestEquals$11constructor\\"()
+  %constructorReturnValue3 = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEquals$11constructor\\"()
   %cmpEQ4 = icmp eq %class.TestEquals* null, %constructorReturnValue3
   ret void
 }
 
-define linkonce_odr %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$$TestEquals$11constructor\\"() {
+define linkonce_odr %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEquals$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.TestEquals*
@@ -481,13 +481,13 @@ entry:
   %cmpNE3 = fcmp one double %threePointFour2, 3.400000e+00
   %trueValue4 = load i1, i1* %trueValue, align 1
   %cmpNE5 = icmp ne i1 %trueValue4, true
-  %constructorReturnValue = call dereferenceable(1) %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$$NotEqualsTest$11constructor\\"()
-  %constructorReturnValue6 = call dereferenceable(1) %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$$NotEqualsTest$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$NotEqualsTest$11constructor\\"()
+  %constructorReturnValue6 = call dereferenceable(1) %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$NotEqualsTest$11constructor\\"()
   %cmpNE7 = icmp ne %class.NotEqualsTest* %constructorReturnValue, %constructorReturnValue6
   ret void
 }
 
-define linkonce_odr %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$$NotEqualsTest$11constructor\\"() {
+define linkonce_odr %class.NotEqualsTest* @\\"binary_expression/exclamation_equals_equals.ts$NotEqualsTest$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.NotEqualsTest*
@@ -525,14 +525,14 @@ entry:
   %four1 = load i32, i32* %four, align 4
   %four1AsNumber = sitofp i32 %four1 to double
   %cmpNE = fcmp one double %four1AsNumber, 4.000000e+00
-  %constructorReturnValue = call dereferenceable(1) %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$$NotEqualsImplicitCast$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$NotEqualsImplicitCast$11constructor\\"()
   %cmpNE2 = icmp ne %class.NotEqualsImplicitCast* %constructorReturnValue, null
-  %constructorReturnValue3 = call dereferenceable(1) %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$$NotEqualsImplicitCast$11constructor\\"()
+  %constructorReturnValue3 = call dereferenceable(1) %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$NotEqualsImplicitCast$11constructor\\"()
   %cmpNE4 = icmp ne %class.NotEqualsImplicitCast* null, %constructorReturnValue3
   ret void
 }
 
-define linkonce_odr %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$$NotEqualsImplicitCast$11constructor\\"() {
+define linkonce_odr %class.NotEqualsImplicitCast* @\\"binary_expression/exclamation_equals_equals_implicit_cast.ts$NotEqualsImplicitCast$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.NotEqualsImplicitCast*
@@ -578,15 +578,15 @@ entry:
   store i1 true, i1* %booleanVar, align 1
   store i32 23, i32* %intVar, align 4
   store double 2.323000e+01, double* %numberVar, align 8
-  %constructorReturnValue = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$MyClass$11constructor\\"()
   store %class.MyClass* %constructorReturnValue, %class.MyClass** %objectVar, align 4
-  %constructorReturnValue1 = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"()
+  %constructorReturnValue1 = call dereferenceable(1) %class.MyClass* @\\"binary_expression/first_assignment.ts$MyClass$11constructor\\"()
   store %class.MyClass* %constructorReturnValue1, %class.MyClass** %objectOrUndefined, align 4
   store %class.MyClass* null, %class.MyClass** %objectOrUndefined, align 4
   ret void
 }
 
-define linkonce_odr %class.MyClass* @\\"binary_expression/first_assignment.ts$$MyClass$11constructor\\"() {
+define linkonce_odr %class.MyClass* @\\"binary_expression/first_assignment.ts$MyClass$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.MyClass*

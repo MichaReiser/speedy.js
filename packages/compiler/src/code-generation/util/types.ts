@@ -1,7 +1,6 @@
 import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
-import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
 
 /**
@@ -9,58 +8,10 @@ import {CodeGenerationContext} from "../code-generation-context";
  * @param type the type script type to convert into an llvm type
  * @param context the code generation context
  * @return the llvm type
+ * @deprecated use context.toLLVMType instead.
  */
 export function toLLVMType(type: ts.Type, context: CodeGenerationContext): llvm.Type {
-    if (type.flags & ts.TypeFlags.IntLike) {
-        return llvm.Type.getInt32Ty(context.llvmContext);
-    }
-
-    if (type.flags & ts.TypeFlags.NumberLike) {
-        return llvm.Type.getDoubleTy(context.llvmContext);
-    }
-
-    if (type.flags & ts.TypeFlags.BooleanLike) {
-        return llvm.Type.getInt1Ty(context.llvmContext);
-    }
-
-    if (type.flags & ts.TypeFlags.Any) {
-        throw new Error(`Any type not supported, annotate the type`);
-    }
-
-    if (type.flags & ts.TypeFlags.Void) {
-        return llvm.Type.getVoidTy(context.llvmContext);
-    }
-
-    if (type.flags & ts.TypeFlags.Undefined) {
-        return llvm.Type.getInt8PtrTy(context.llvmContext);
-    }
-
-    if (isFunctionType(type)) {
-        const callSignature = getCallSignature(type);
-        const declaration = callSignature.getDeclaration();
-        const parameterTypes = callSignature.getParameters().map((p, i) => {
-            return toLLVMType(context.typeChecker.getTypeOfSymbolAtLocation(p, declaration.parameters[i]), context);
-        });
-
-        return llvm.FunctionType.get(toLLVMType(callSignature.getReturnType(), context), parameterTypes, false).getPointerTo();
-    }
-
-    if (type.flags & ts.TypeFlags.Object) {
-        const classReference = context.resolveClass(type);
-        if (classReference) {
-            return classReference.getLLVMType(type as ts.ObjectType, context).getPointerTo();
-        }
-    }
-
-    if (isMaybeObjectType(type)) {
-        return toLLVMType(type.getNonNullableType(), context);
-    }
-
-    if (type.getSymbol() && type.getSymbol().getDeclarations().length > 0) {
-        throw CodeGenerationDiagnostics.unsupportedType(type.getSymbol().getDeclarations()[0], context.typeChecker.typeToString(type));
-    }
-
-    throw new Error(`Unsupported type ${context.typeChecker.typeToString(type)}`);
+   return context.toLLVMType(type);
 }
 
 /**

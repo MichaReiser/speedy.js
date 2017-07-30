@@ -95,6 +95,91 @@ attributes #1 = { argmemonly nounwind }
 "
 `;
 
+exports[`Array array-of-array 1`] = `
+"; ModuleID = 'array/array-of-array.ts'
+source_filename = \\"array/array-of-array.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.Array.1 = type { double*, double*, i32 }
+%class.Array = type { i8**, i8**, i32 }
+%class.Array.0 = type { i32*, i32*, i32 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@items = private local_unnamed_addr constant [1 x i32] [i32 1]
+@items.1 = private local_unnamed_addr constant [2 x i32] [i32 2, i32 3]
+@items.2 = private local_unnamed_addr constant [1 x double] [double 1.230000e+00]
+@items.3 = private local_unnamed_addr constant [2 x double] [double 2.300000e+00, double 2.340000e+01]
+
+define void @_arrayOfArray() {
+entry:
+  %items14 = alloca [2 x %class.Array.1*], align 4
+  %items11 = alloca [2 x double], align 8
+  %items8 = alloca [1 x double], align 8
+  %numberArray = alloca %class.Array*, align 4
+  %items5 = alloca [2 x %class.Array.0*], align 4
+  %items2 = alloca [2 x i32], align 4
+  %items = alloca [1 x i32], align 4
+  %intArray = alloca %class.Array*, align 4
+  %items1 = getelementptr inbounds [1 x i32], [1 x i32]* %items, i32 0, i32 0
+  %0 = bitcast [1 x i32]* %items to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([1 x i32]* @items to i8*), i32 4, i32 0, i1 false)
+  %constructorReturnValue = call dereferenceable(12) %class.Array.0* @ArrayIi_constructorPiu(i32* %items1, i32 1)
+  %items3 = getelementptr inbounds [2 x i32], [2 x i32]* %items2, i32 0, i32 0
+  %1 = bitcast [2 x i32]* %items2 to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* bitcast ([2 x i32]* @items.1 to i8*), i32 8, i32 0, i1 false)
+  %constructorReturnValue4 = call dereferenceable(12) %class.Array.0* @ArrayIi_constructorPiu(i32* %items3, i32 2)
+  %items6 = getelementptr inbounds [2 x %class.Array.0*], [2 x %class.Array.0*]* %items5, i32 0, i32 0
+  %2 = getelementptr inbounds [2 x %class.Array.0*], [2 x %class.Array.0*]* %items5, i32 0, i32 0
+  store %class.Array.0* %constructorReturnValue, %class.Array.0** %2, align 4
+  %3 = getelementptr inbounds [2 x %class.Array.0*], [2 x %class.Array.0*]* %items5, i32 0, i32 1
+  store %class.Array.0* %constructorReturnValue4, %class.Array.0** %3, align 4
+  %constructorReturnValue7 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Array.0** %items6, i32 2)
+  store %class.Array* %constructorReturnValue7, %class.Array** %intArray, align 4
+  %items9 = getelementptr inbounds [1 x double], [1 x double]* %items8, i32 0, i32 0
+  %4 = bitcast [1 x double]* %items8 to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %4, i8* bitcast ([1 x double]* @items.2 to i8*), i32 8, i32 0, i1 false)
+  %constructorReturnValue10 = call dereferenceable(12) %class.Array.1* @ArrayId_constructorPdu(double* %items9, i32 1)
+  %items12 = getelementptr inbounds [2 x double], [2 x double]* %items11, i32 0, i32 0
+  %5 = bitcast [2 x double]* %items11 to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32(i8* %5, i8* bitcast ([2 x double]* @items.3 to i8*), i32 16, i32 0, i1 false)
+  %constructorReturnValue13 = call dereferenceable(12) %class.Array.1* @ArrayId_constructorPdu(double* %items12, i32 2)
+  %items15 = getelementptr inbounds [2 x %class.Array.1*], [2 x %class.Array.1*]* %items14, i32 0, i32 0
+  %6 = getelementptr inbounds [2 x %class.Array.1*], [2 x %class.Array.1*]* %items14, i32 0, i32 0
+  store %class.Array.1* %constructorReturnValue10, %class.Array.1** %6, align 4
+  %7 = getelementptr inbounds [2 x %class.Array.1*], [2 x %class.Array.1*]* %items14, i32 0, i32 1
+  store %class.Array.1* %constructorReturnValue13, %class.Array.1** %7, align 4
+  %8 = bitcast %class.Array.1** %items15 to %class.Array.0**
+  %constructorReturnValue16 = call dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Array.0** %8, i32 2)
+  store %class.Array* %constructorReturnValue16, %class.Array** %numberArray, align 4
+  ret void
+}
+
+; Function Attrs: alwaysinline
+declare dereferenceable(12) %class.Array.0* @ArrayIi_constructorPiu(i32*, i32) #0
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture readonly, i32, i32, i1) #1
+
+; Function Attrs: alwaysinline
+declare dereferenceable(12) %class.Array* @ArrayIPv_constructorPPvu(%class.Array.0**, i32) #0
+
+; Function Attrs: alwaysinline
+declare dereferenceable(12) %class.Array.1* @ArrayId_constructorPdu(double*, i32) #0
+
+declare void @speedyJsGc()
+
+attributes #0 = { alwaysinline }
+attributes #1 = { argmemonly nounwind }
+"
+`;
+
 exports[`Array assignment 1`] = `
 "; ModuleID = 'array/assignment.ts'
 source_filename = \\"array/assignment.ts\\"
@@ -312,7 +397,7 @@ target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
 %class.Array.1 = type { double*, double*, i32 }
-%class.Array = type { i8*, i8*, i32 }
+%class.Array = type { i1*, i1*, i32 }
 %class.Array.0 = type { i32*, i32*, i32 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
@@ -618,7 +703,7 @@ entry:
   %sortReturnValue = call dereferenceable(12) %class.Array* @ArrayIi_sort(%class.Array* %array2)
   store %class.Array* %sortReturnValue, %class.Array** %ascending, align 4
   %array3 = load %class.Array*, %class.Array** %array, align 4
-  %sortReturnValue4 = call dereferenceable(12) %class.Array* @ArrayIi_sortPFdii(%class.Array* %array3, double (i32, i32)* @\\"array/sort.ts$$20descendingComparatorii\\")
+  %sortReturnValue4 = call dereferenceable(12) %class.Array* @ArrayIi_sortPFdii(%class.Array* %array3, double (i32, i32)* @\\"array/sort.ts$20descendingComparatorii\\")
   store %class.Array* %sortReturnValue4, %class.Array** %descending, align 4
   ret void
 }
@@ -632,7 +717,7 @@ declare void @llvm.memcpy.p0i8.p0i8.i32(i8* nocapture writeonly, i8* nocapture r
 ; Function Attrs: alwaysinline
 declare dereferenceable(12) %class.Array* @ArrayIi_sort(%class.Array* readonly dereferenceable(12)) #0
 
-define linkonce_odr hidden double @\\"array/sort.ts$$20descendingComparatorii\\"(i32 %a, i32 %b) {
+define linkonce_odr hidden double @\\"array/sort.ts$20descendingComparatorii\\"(i32 %a, i32 %b) {
 entry:
   %b.addr = alloca i32, align 4
   %a.addr = alloca i32, align 4

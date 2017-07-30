@@ -42,7 +42,7 @@ function assignFromConstantArray(arrayAllocation: llvm.AllocaInst,
     const global = new llvm.GlobalVariable(context.module, array.type, true, llvm.LinkageTypes.PrivateLinkage, array, name || "values");
     global.setUnnamedAddr(llvm.UnnamedAddr.Local);
 
-    const pointerType = llvm.Type.getInt8Ty(context.llvmContext).getPointerTo();
+    const pointerType = llvm.Type.getInt8PtrTy(context.llvmContext);
     const arrayValue = context.builder.createBitCast(arrayAllocation, pointerType);
     const globalValue = context.builder.createBitCast(global, pointerType);
 
