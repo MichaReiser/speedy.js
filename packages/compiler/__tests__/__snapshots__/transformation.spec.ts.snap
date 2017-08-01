@@ -413,7 +413,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -851,7 +851,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -1291,7 +1291,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -1729,7 +1729,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -2214,7 +2214,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -2653,7 +2653,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -3092,7 +3092,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -3530,7 +3530,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -3968,7 +3968,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
@@ -4406,7 +4406,7 @@ function __moduleLoader(wasmUri, options) {
         }
     }
     var loaded;
-    var loader = function loader() {
+    var loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }

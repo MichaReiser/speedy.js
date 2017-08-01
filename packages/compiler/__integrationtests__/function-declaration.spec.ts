@@ -20,15 +20,15 @@ async function variadicFunctionCall() {
 function max(first: number, ...others: number[]) {
     "use speedyjs";
 
-    let max = first;
+    let largest = first;
 
     for (let i = 0; i < others.length; ++i) {
-        if (others[i] > max) {
-            max = others[i];
+        if (others[i] > largest) {
+            largest = others[i];
         }
     }
 
-    return max;
+    return largest;
 }
 
 describe("FunctionDeclaration", () => {

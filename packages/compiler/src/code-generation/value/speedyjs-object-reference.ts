@@ -25,13 +25,13 @@ export class SpeedyJSObjectReference implements ObjectReference {
         const symbol = context.typeChecker.getSymbolAtLocation(property);
 
         if (symbol.flags & ts.SymbolFlags.Property) {
-            const type = context.typeChecker.getTypeAtLocation(property);
-            return ObjectPropertyReference.createFieldProperty(type, this, symbol);
+            const propertyType = context.typeChecker.getTypeAtLocation(property);
+            return ObjectPropertyReference.createFieldProperty(propertyType, this, symbol);
         }
 
         // otherwise it is a method
-        const type = context.typeChecker.getTypeAtLocation(property);
-        const apparentType = context.typeChecker.getApparentType(type);
+        const methodType = context.typeChecker.getTypeAtLocation(property);
+        const apparentType = context.typeChecker.getApparentType(methodType);
         const signatures = context.typeChecker.getSignaturesOfType(apparentType, ts.SignatureKind.Call);
 
         return UnresolvedMethodReference.createMethod(this, signatures, context);

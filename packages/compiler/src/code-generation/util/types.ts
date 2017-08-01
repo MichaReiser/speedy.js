@@ -96,6 +96,6 @@ export function sizeof(type: llvm.Type, context: CodeGenerationContext) {
  */
 export function offset(type: llvm.PointerType, field: number, context: CodeGenerationContext) {
     const fieldIndex = [ llvm.ConstantInt.get(context.llvmContext, 0), llvm.ConstantInt.get(context.llvmContext, field)];
-    const offset = context.builder.createInBoundsGEP(llvm.ConstantPointerNull.get(type), fieldIndex);
-    return context.builder.createPtrToInt(offset, llvm.Type.getInt32Ty(context.llvmContext), "offset");
+    const fieldOffset = context.builder.createInBoundsGEP(llvm.ConstantPointerNull.get(type), fieldIndex);
+    return context.builder.createPtrToInt(fieldOffset, llvm.Type.getInt32Ty(context.llvmContext), "offset");
 }

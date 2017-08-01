@@ -17,14 +17,14 @@ export class BuildDirectory {
 
     /**
      * Creates a new build directory that safes the intermediate files at the given path
-     * @param path a path or a temp object that points to a directory
+     * @param directory a path or a temp object that points to a directory
      */
-    constructor(path: string | TempFsObject) {
-        if (typeof(path) === "string") {
-            this.path = path;
+    constructor(directory: string | TempFsObject) {
+        if (typeof(directory) === "string") {
+            this.path = directory;
         } else {
-            this.path = path.name;
-            this.tempObjects.push(path);
+            this.path = directory.name;
+            this.tempObjects.push(directory);
         }
     }
 

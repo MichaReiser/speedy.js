@@ -99,8 +99,8 @@ export class PerFileCodeGenerator implements CodeGenerator {
         const plainFileName = path.basename(sourceFile.fileName.replace(".ts", ""));
 
         if (context.compilationContext.compilerOptions.emitLLVM) {
-            const llc = context.module.print();
-            context.compilationContext.compilerHost.writeFile(getOutputFileName(sourceFile, context, ".ll"), llc, false);
+            const llvmIR = context.module.print();
+            context.compilationContext.compilerHost.writeFile(getOutputFileName(sourceFile, context, ".ll"), llvmIR, false);
         } else {
             const transforms = PerFileCodeGenerator.createTransformationChain(context);
             const transformationContext = {

@@ -496,7 +496,7 @@ function __moduleLoader(this: any, wasmUri: string, options: Options): ModuleLoa
     }
 
     let loaded: Promise<WebAssemblyInstance> | undefined;
-    const loader = function loader() {
+    const loader = function moduleLoader() {
         if (loaded) {
             return loaded;
         }
