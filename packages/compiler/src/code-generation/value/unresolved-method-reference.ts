@@ -22,7 +22,7 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
      * @return {UnresolvedMethodReference} the reference to this method
      */
     static createRuntimeMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext, properties?: Partial<FunctionProperties>) {
-        const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
+        const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext), context.runtimeTypeConverter);
         properties = Object.assign({ linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true }, properties);
         return new UnresolvedMethodReference(object, signatures, functionFactory, properties);
     }
@@ -35,7 +35,7 @@ export class UnresolvedMethodReference extends UnresolvedFunctionReference {
      * @return the reference to the method
      */
     static createMethod(object: ObjectReference, signatures: ts.Signature[], context: CodeGenerationContext) {
-        return new UnresolvedMethodReference(object, signatures, new SpeedyJSFunctionFactory(context.compilationContext));
+        return new UnresolvedMethodReference(object, signatures, new SpeedyJSFunctionFactory(context));
     }
 
     protected constructor(private object: ObjectReference,

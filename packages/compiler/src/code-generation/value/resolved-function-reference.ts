@@ -26,7 +26,7 @@ export class ResolvedFunctionReference extends AbstractFunctionReference {
      */
     static createRuntimeFunction(resolvedFunction: ResolvedFunction, context: CodeGenerationContext, functionProperties?: Partial<FunctionProperties>) {
         functionProperties = Object.assign({}, DEFAULT_RUNTIME_FUNCTION_PROPERTIES, functionProperties);
-        const llvmFunctionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
+        const llvmFunctionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext), context.runtimeTypeConverter);
         const fn = llvmFunctionFactory.getOrCreate(resolvedFunction, resolvedFunction.parameters.length, context, functionProperties);
         return new ResolvedFunctionReference(fn, resolvedFunction);
     }

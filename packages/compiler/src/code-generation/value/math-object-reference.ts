@@ -33,6 +33,9 @@ export class MathObjectReference extends BuiltInObjectReference {
             case "sin":
             case "cos":
             case "max":
+            case "min":
+            case "round":
+            case "floor":
                 return UnresolvedMethodReference.createRuntimeMethod(this, signatures, context, { readnone: true, noUnwind: true });
             default:
                 throw CodeGenerationDiagnostics.builtInMethodNotSupported(propertyAccessExpression, "Math", symbol.name);

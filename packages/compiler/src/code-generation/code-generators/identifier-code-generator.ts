@@ -11,7 +11,11 @@ class IdentifierCodeGenerator implements SyntaxCodeGenerator<ts.Identifier, Valu
     syntaxKind = ts.SyntaxKind.Identifier;
 
     generate(identifier: ts.Identifier, context: CodeGenerationContext): Value {
-        const symbol = context.typeChecker.getSymbolAtLocation(identifier);
+        let symbol = context.typeChecker.getSymbolAtLocation(identifier);
+
+        if (symbol.flags & ts.SymbolFlags.Alias) {
+            symbol = context.typeChecker.getAliasedSymbol(symbol);
+        }
 
         if (context.typeChecker.isUndefinedSymbol(symbol)) {
             return Undefined.create(context);

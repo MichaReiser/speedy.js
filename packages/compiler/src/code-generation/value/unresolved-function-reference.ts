@@ -31,7 +31,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
                                  classType?: ts.ObjectType,
                                  properties?: Partial<FunctionProperties>) {
         properties = Object.assign({ linkage: llvm.LinkageTypes.ExternalLinkage, alwaysInline: true }, properties);
-        const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext));
+        const functionFactory = new FunctionFactory(new RuntimeSystemNameMangler(context.compilationContext), context.runtimeTypeConverter);
         return new UnresolvedFunctionReference(signatures, functionFactory, classType, properties);
     }
 
@@ -43,7 +43,7 @@ export class UnresolvedFunctionReference extends AbstractFunctionReference {
      * @return the function reference
      */
     static createFunction(signatures: ts.Signature[], context: CodeGenerationContext, classType?: ts.ObjectType) {
-        return new UnresolvedFunctionReference(signatures, new SpeedyJSFunctionFactory(context.compilationContext), classType);
+        return new UnresolvedFunctionReference(signatures, new SpeedyJSFunctionFactory(context), classType);
     }
 
     protected constructor(private signatures: ts.Signature[],

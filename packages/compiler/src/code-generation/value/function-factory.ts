@@ -2,8 +2,8 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {NameMangler} from "../name-mangler";
-import {toLLVMType} from "../util/types";
+import {NameMangler, Parameter} from "../name-mangler";
+import {TypePlace, TypeScriptToLLVMTypeConverter} from "../util/typescript-to-llvm-type-converter";
 import {ObjectReference} from "./object-reference";
 import {ResolvedFunction} from "./resolved-function";
 
@@ -25,8 +25,9 @@ export class FunctionFactory {
     /**
      * Creates a new instance that uses the given name mangler
      * @param nameMangler the name mangler to use
+     * @param typeConverter the type converter used to convert the return and argument types to llvm types
      */
-    constructor(private nameMangler: NameMangler) {
+    constructor(private nameMangler: NameMangler, private typeConverter: TypeScriptToLLVMTypeConverter) {
     }
 
     /**
@@ -107,8 +108,8 @@ export class FunctionFactory {
                              context: CodeGenerationContext,
                              properties: FunctionProperties,
                              objectReference?: ObjectReference) {
-        const llvmArgumentTypes = toLlvmArgumentTypes(resolvedFunction, numberOfArguments, context, objectReference);
-        const functionType = llvm.FunctionType.get(toLLVMType(resolvedFunction.returnType, context), llvmArgumentTypes, false);
+        const llvmArgumentTypes = this.toLlvmArgumentTypes(resolvedFunction, numberOfArguments, context, objectReference);
+        const functionType = llvm.FunctionType.get(this.typeConverter.convert(resolvedFunction.returnType, TypePlace.RETURN_VALUE), llvmArgumentTypes, false);
         const fn = llvm.Function.create(functionType, properties.linkage, mangledName, context.module);
         fn.visibility = properties.visibility;
 
@@ -191,7 +192,7 @@ export class FunctionFactory {
     }
 
     private getMangledFunctionName(resolvedFunction: ResolvedFunction, numberOfArguments: number) {
-        const typesOfUsedParameters: ts.Type[] = [];
+        const usedParameters: Parameter[] = [];
 
         for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
             const parameter = resolvedFunction.parameters[i];
@@ -199,43 +200,46 @@ export class FunctionFactory {
             if (parameter.optional && !parameter.initializer && numberOfArguments <= i) {
                 break; // Optional parameter that is not set. Therefore, this parameter is not actually used
             }
-            typesOfUsedParameters.push(parameter.type);
+            usedParameters.push(parameter);
         }
 
-        return this.mangleFunctionName(resolvedFunction, typesOfUsedParameters);
+        return this.mangleFunctionName(resolvedFunction, usedParameters);
     }
 
-    protected mangleFunctionName(resolvedFunction: ResolvedFunction, typesOfUsedParameters: ts.Type[]) {
+    protected mangleFunctionName(resolvedFunction: ResolvedFunction, usedParameters: Parameter[]) {
         if (resolvedFunction.classType) {
             return this.nameMangler.mangleMethodName(
                 resolvedFunction.classType,
                 resolvedFunction.functionName!,
-                typesOfUsedParameters,
+                usedParameters,
                 resolvedFunction.sourceFile
             );
         }
 
-        return this.nameMangler.mangleFunctionName(resolvedFunction.functionName, typesOfUsedParameters, resolvedFunction.sourceFile);
+        return this.nameMangler.mangleFunctionName(resolvedFunction.functionName, usedParameters, resolvedFunction.sourceFile);
     }
-}
 
-function toLlvmArgumentTypes(resolvedFunction: ResolvedFunction, numberOfArguments: number, context: CodeGenerationContext, objectReference?: ObjectReference) {
-    const argumentTypes = objectReference ? [toLLVMType(objectReference.type, context) ] : [];
+    private toLlvmArgumentTypes(resolvedFunction: ResolvedFunction,
+                                numberOfArguments: number,
+                                context: CodeGenerationContext,
+                                objectReference?: ObjectReference) {
+        const argumentTypes = objectReference ? [this.typeConverter.convert(objectReference.type, TypePlace.THIS)] : [];
 
-    for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
-        const parameter = resolvedFunction.parameters[i];
+        for (let i = 0; i < resolvedFunction.parameters.length; ++i) {
+            const parameter = resolvedFunction.parameters[i];
 
-        if (parameter.variadic) {
-            const elementType = (parameter.type as ts.GenericType).typeArguments[0];
-            argumentTypes.push(toLLVMType(elementType, context).getPointerTo(), llvm.Type.getInt32Ty(context.llvmContext));
-            break;
-        } else if (parameter.optional && !parameter.initializer && numberOfArguments <= i) {
-            // optional argument that is not set, skip
-            break;
-        } else {
-            argumentTypes.push(toLLVMType(parameter.type, context));
+            if (parameter.variadic) {
+                const elementType = (parameter.type as ts.GenericType).typeArguments[0];
+                argumentTypes.push(this.typeConverter.convert(elementType, TypePlace.PARAMETER).getPointerTo(), llvm.Type.getInt32Ty(context.llvmContext));
+                break;
+            } else if (parameter.optional && !parameter.initializer && numberOfArguments <= i) {
+                // optional argument that is not set, skip
+                break;
+            } else {
+                argumentTypes.push(this.typeConverter.convert(parameter.type, TypePlace.PARAMETER));
+            }
         }
-    }
 
-    return argumentTypes;
+        return argumentTypes;
+    }
 }

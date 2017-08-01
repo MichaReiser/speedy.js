@@ -26,6 +26,8 @@
     "d3": "^4.9.1",
     "d3-shape": "^1.2.0",
     "d3-tip": "^0.7.1",
+    "deep-diff": "^0.3.8",
+    "deep-equal": "^1.0.1",
     "exports-loader": "^0.6.4",
     "file-loader": "^0.11.2",
     "speedyjs-loader": "^0.0.17",

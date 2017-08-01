@@ -2,9 +2,9 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
-import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {DefaultNameMangler} from "../default-name-mangler";
+import {Parameter} from "../name-mangler";
 import {FunctionDefinitionBuilder} from "../util/function-definition-builder";
 import {FunctionFactory, FunctionProperties} from "./function-factory";
 import {ObjectReference} from "./object-reference";
@@ -37,17 +37,17 @@ export function verifyIsSupportedSpeedyJSFunction(declaration: ts.Declaration, c
  */
 export class SpeedyJSFunctionFactory extends FunctionFactory {
 
-    constructor(compilationContext: CompilationContext) {
-        super(new DefaultNameMangler(compilationContext));
+    constructor(context: CodeGenerationContext) {
+        super(new DefaultNameMangler(context.compilationContext), context.typeConverter);
     }
 
-    protected mangleFunctionName(resolvedFunction: ResolvedFunction, typesOfUsedParameters: ts.Type[]) {
+    protected mangleFunctionName(resolvedFunction: ResolvedFunction, usedParameters: Parameter[]) {
         if (resolvedFunction.async) {
             assert(resolvedFunction.functionName, "Missing name for entry function");
             return resolvedFunction.functionName!; // entry functions always have a name
         }
 
-        return super.mangleFunctionName(resolvedFunction, typesOfUsedParameters);
+        return super.mangleFunctionName(resolvedFunction, usedParameters);
     }
 
     protected getDefaultFunctionProperties(): FunctionProperties {

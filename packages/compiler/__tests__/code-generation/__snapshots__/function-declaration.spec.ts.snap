@@ -162,7 +162,7 @@ entry:
   %others1 = getelementptr inbounds [3 x double], [3 x double]* %others, i32 0, i32 0
   %0 = bitcast [3 x double]* %others to i8*
   call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* bitcast ([3 x double]* @others to i8*), i32 24, i32 0, i1 false)
-  %variadicFunctionReturnValue = call double @\\"function_declaration/variadic_function.ts$$16variadicFunctiond5ArrayId\\"(double 1.200000e+00, double* %others1, i32 3)
+  %variadicFunctionReturnValue = call double @\\"function_declaration/variadic_function.ts$16variadicFunctiond5ArrayId\\"(double 1.200000e+00, double* %others1, i32 3)
   store double %variadicFunctionReturnValue, double* %return, align 8
   br label %returnBlock
 
@@ -171,7 +171,7 @@ returnBlock:                                      ; preds = %entry
   ret double %return2
 }
 
-define linkonce_odr hidden double @\\"function_declaration/variadic_function.ts$$16variadicFunctiond5ArrayId\\"(double %first, double* %others, i32) {
+define linkonce_odr hidden double @\\"function_declaration/variadic_function.ts$16variadicFunctiond5ArrayId\\"(double %first, double* %others, i32) {
 entry:
   %i = alloca i32, align 4
   %max = alloca double, align 8

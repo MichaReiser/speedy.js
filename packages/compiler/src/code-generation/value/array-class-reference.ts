@@ -3,7 +3,8 @@ import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
-import {getArrayElementType, isMaybeObjectType, toLLVMType} from "../util/types";
+import {getArrayElementType, isMaybeObjectType} from "../util/types";
+import {TypePlace} from "../util/typescript-to-llvm-type-converter";
 import {Address} from "./address";
 
 import {ArrayReference} from "./array-reference";
@@ -13,30 +14,12 @@ import {createResolvedFunction, createResolvedParameter} from "./resolved-functi
 import {ResolvedFunctionReference} from "./resolved-function-reference";
 import {UnresolvedFunctionReference} from "./unresolved-function-reference";
 
-function getLLVMArrayElementType(tsElementType: ts.Type, context: CodeGenerationContext) {
-    if (isMaybeObjectType(tsElementType)) {
-        tsElementType = tsElementType.getNonNullableType();
-    }
-
-    let llvmElementType: llvm.Type;
-
-    if (tsElementType.flags & ts.TypeFlags.Object) {
-        llvmElementType = llvm.Type.getInt8PtrTy(context.llvmContext);
-    } else if (tsElementType.flags & ts.TypeFlags.BooleanLike) {
-        llvmElementType = llvm.Type.getInt8Ty(context.llvmContext);
-    } else {
-        llvmElementType = toLLVMType(tsElementType, context);
-    }
-
-    return llvmElementType;
-}
-
 /**
  * Implements the static methods of the Array<T> class
  */
 export class ArrayClassReference extends ClassReference {
 
-    private llvmTypes = new Map<ts.Type, llvm.StructType>();
+    private llvmTypes = new Map<string, llvm.StructType>();
 
     private constructor(typeInformation: llvm.GlobalVariable, symbol: ts.Symbol, compilationContext: CompilationContext) {
         super(typeInformation, symbol, compilationContext);
@@ -64,14 +47,14 @@ export class ArrayClassReference extends ClassReference {
     }
 
     static fromCArray(type: ts.ObjectType, elementsPtr: llvm.Value, length: llvm.Value, context: CodeGenerationContext): ArrayReference {
-        const constructorName = new RuntimeSystemNameMangler(context.compilationContext).mangleMethodName(type, "constructor", [type]);
+        const constructorName = new RuntimeSystemNameMangler(context.compilationContext).mangleMethodName(type, "constructor", [{ type, variadic: true }]);
 
         let constructorFn = context.module.getFunction(constructorName);
 
         if (!constructorFn) {
-            const elementType = getLLVMArrayElementType(getArrayElementType(type), context);
-            const constructorType = llvm.FunctionType.get(toLLVMType(type, context), [
-                llvm.PointerType.get(elementType, 0),
+            const elementsType = context.toRuntimeLLVMType(getArrayElementType(type), TypePlace.PARAMETER).getPointerTo();
+            const constructorType = llvm.FunctionType.get(context.toRuntimeLLVMType(type, TypePlace.RETURN_VALUE), [
+                elementsType,
                 llvm.Type.getInt32Ty(context.llvmContext)
             ], false);
 
@@ -107,19 +90,19 @@ export class ArrayClassReference extends ClassReference {
             elementType = elementType.getNonNullableType();
         }
 
-        const existing = this.llvmTypes.get(elementType);
+        const elementsPtr = context.toRuntimeLLVMType(elementType, TypePlace.FIELD).getPointerTo();
+
+        const existing = this.llvmTypes.get(elementsPtr.toString());
         if (existing) {
             return existing;
         }
 
         const forwardDeclaration = llvm.StructType.create(context.llvmContext, "class.Array");
-        this.llvmTypes.set(elementType, forwardDeclaration);
-
-        const llvmElementType = getLLVMArrayElementType(elementType, context);
+        this.llvmTypes.set(elementsPtr.toString(), forwardDeclaration);
 
         forwardDeclaration.setBody([
-            llvmElementType.getPointerTo(),
-            llvmElementType.getPointerTo(),
+            elementsPtr,
+            elementsPtr,
             llvm.Type.getInt32Ty(context.llvmContext)
         ]);
 

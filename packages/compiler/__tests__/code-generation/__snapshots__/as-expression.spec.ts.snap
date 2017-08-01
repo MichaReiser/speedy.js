@@ -23,13 +23,13 @@ entry:
   %objectAsBoolean = alloca i1, align 1
   %booleanAsBool = alloca i1, align 1
   store i1 true, i1* %booleanAsBool, align 1
-  %constructorReturnValue = call dereferenceable(1) %class.AsBooleanObject* @\\"as_expression/as_boolean.ts$$AsBooleanObject$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.AsBooleanObject* @\\"as_expression/as_boolean.ts$AsBooleanObject$11constructor\\"()
   %constructorReturnValueAsBool = icmp ne %class.AsBooleanObject* %constructorReturnValue, null
   store i1 %constructorReturnValueAsBool, i1* %objectAsBoolean, align 1
   ret void
 }
 
-define linkonce_odr %class.AsBooleanObject* @\\"as_expression/as_boolean.ts$$AsBooleanObject$11constructor\\"() {
+define linkonce_odr %class.AsBooleanObject* @\\"as_expression/as_boolean.ts$AsBooleanObject$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.AsBooleanObject*
@@ -68,7 +68,7 @@ entry:
   store i32 2, i32* %intAsInt, align 4
   %AsInt32 = call i32 @toInt32d(double 3.212000e+00)
   store i32 %AsInt32, i32* %intValue, align 4
-  %constructorReturnValue = call dereferenceable(1) %class.AsIntObject* @\\"as_expression/as_int.ts$$AsIntObject$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.AsIntObject* @\\"as_expression/as_int.ts$AsIntObject$11constructor\\"()
   store i32 0, i32* %objectAsInt, align 4
   ret void
 }
@@ -76,7 +76,7 @@ entry:
 ; Function Attrs: alwaysinline readnone
 declare i32 @toInt32d(double) #0
 
-define linkonce_odr %class.AsIntObject* @\\"as_expression/as_int.ts$$AsIntObject$11constructor\\"() {
+define linkonce_odr %class.AsIntObject* @\\"as_expression/as_int.ts$AsIntObject$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.AsIntObject*

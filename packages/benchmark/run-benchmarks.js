@@ -3,6 +3,8 @@
 const benchmarkImport = require("benchmark");
 const _ = require("lodash");
 const platform = require("platform");
+const deepEqual = require("deep-equal");
+const deepDiff = require("deep-diff").default;
 
 const Benchmark = window.Benchmark = benchmarkImport.runInContext( { _: _, platform: platform });
 
@@ -78,7 +80,7 @@ const TEST_CASES = {
     }
 };
 
-const jsModules = require.context("ts-loader!./cases", false, /.*^(?:(?!-spdy\.ts$).)*\.ts$/);
+const jsModules = require.context("./cases", false, /.*^(?:(?!-spdy\.ts$).)*\.ts$/);
 
 function getJsFunctionForTestCase(caseName) {
     const testCase = TEST_CASES[caseName];
@@ -130,6 +132,27 @@ async function getEmccFunctionForTestCase(caseName) {
     return emccFunctionWrapper;
 }
 
+function assertExpectedResult(actual, expected, testCase, suite) {
+    let equal;
+    let diff;
+
+    if (typeof(expected) === "object") {
+        equal = deepEqual(actual, expected);
+        if (!equal) {
+            diff = JSON.stringify(deepDiff(actual, expected), undefined, 2);
+        }
+    } else {
+        equal = actual === expected;
+        if (!equal) {
+            diff = `actual: ${actual}, expected: ${expected}`;
+        }
+    }
+
+    if (!equal) {
+        throw new Error(`Actual result for test case ${testCase} differs from expected result for ${suite}:\nDiff: ${diff}`);
+    }
+}
+
 async function addBenchmark(suite, testCase, run) {
     const caseName = suite.name;
 
@@ -146,9 +169,7 @@ async function addBenchmark(suite, testCase, run) {
 
     suite.add(run ? `js-${run}` : "js", function (deferred) {
         jsFn().then(function (result) {
-            if (result !== testCase.result) {
-                throw new Error(`JS Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
-            }
+            assertExpectedResult(result, testCase.result, caseName, "js");
 
             deferred.resolve();
         });
@@ -158,9 +179,7 @@ async function addBenchmark(suite, testCase, run) {
 
     suite.add(run ? `emcc-${run}` : "emcc", function (deferred) {
         emccFn().then(function (result) {
-            if (result !== testCase.result) {
-                throw new Error(`EMCC Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
-            }
+            assertExpectedResult(result, testCase.result, caseName, "emcc");
 
             deferred.resolve();
         });
@@ -170,9 +189,7 @@ async function addBenchmark(suite, testCase, run) {
 
     suite.add(run ? `wasm-${run}` : "wasm", function (deferred) {
             wasmFn().then(function (result) {
-                if (result !== testCase.result) {
-                    throw new Error(`WASM Result for Test Case ${caseName} returned ${result} instead of ${testCase.result}`);
-                }
+                assertExpectedResult(result, testCase.result, caseName, "wasm");
 
                 deferred.resolve();
             });

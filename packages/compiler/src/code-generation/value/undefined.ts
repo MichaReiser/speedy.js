@@ -1,7 +1,7 @@
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {isMaybeObjectType, toLLVMType} from "../util/types";
+import {isMaybeObjectType} from "../util/types";
 import {ObjectReference} from "./object-reference";
 import {Primitive} from "./primitive";
 import {AssignableValue, Value} from "./value";
@@ -50,7 +50,7 @@ export class Undefined implements Value {
 
         // cast pointer
         if (type.flags & ts.TypeFlags.Object || isMaybeObjectType(type) || type.flags & ts.TypeFlags.Undefined) {
-            return new Undefined(context.builder.createBitCast(this.generateIR(context), toLLVMType(type, context)));
+            return new Undefined(context.builder.createBitCast(this.generateIR(context), context.toLLVMType(type)));
         }
 
         return undefined;

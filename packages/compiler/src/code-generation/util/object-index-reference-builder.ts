@@ -5,7 +5,7 @@ import {DefaultNameMangler} from "../default-name-mangler";
 import {RuntimeSystemNameMangler} from "../runtime-system-name-mangler";
 import {ObjectIndexReference} from "../value/object-index-reference";
 import {ObjectReference} from "../value/object-reference";
-import {toLLVMType} from "./types";
+import {TypePlace} from "./typescript-to-llvm-type-converter";
 
 export class ObjectIndexReferenceBuilder {
     private runtimeFn = false;
@@ -21,6 +21,10 @@ export class ObjectIndexReferenceBuilder {
         return llvm.Type.getInt32Ty(this.context.llvmContext);
     }
 
+    get typeConverter() {
+        return this.runtimeFn ? this.context.runtimeTypeConverter : this.context.typeConverter;
+    }
+
     fromRuntime() {
         this.runtimeFn = true;
         return this;
@@ -28,11 +32,10 @@ export class ObjectIndexReferenceBuilder {
 
     build(objectReference: ObjectReference) {
         const elementType = this.context.typeChecker.getTypeAtLocation(this.element);
-        const llvmElementType = toLLVMType(elementType, this.context);
-        const llvmThisType = toLLVMType(objectReference.type, this.context);
+        const llvmThisType = this.typeConverter.convert(objectReference.type, TypePlace.THIS);
 
-        const getter = this.createGetter(llvmThisType, llvmElementType, objectReference);
-        const setter = this.createSetter(llvmThisType, llvmElementType, objectReference);
+        const getter = this.createGetter(llvmThisType, elementType, objectReference);
+        const setter = this.createSetter(llvmThisType, elementType, objectReference);
 
         const index = this.context.generateValue(this.element.argumentExpression!);
 
@@ -43,12 +46,12 @@ export class ObjectIndexReferenceBuilder {
         return this.runtimeFn ? new RuntimeSystemNameMangler(this.context.compilationContext) : new DefaultNameMangler(this.context.compilationContext);
     }
 
-    private createGetter(thisType: llvm.Type, elementType: llvm.Type, objectReference: ObjectReference): llvm.Function {
+    private createGetter(thisType: llvm.Type, elementType: ts.Type, objectReference: ObjectReference): llvm.Function {
         const getterName = this.getNameMangler().mangleIndexer(this.element, false);
         let getter = this.context.module.getFunction(getterName);
 
         if (!getter) {
-            const getterType = llvm.FunctionType.get(elementType, [thisType, this.indexType], false);
+            const getterType = llvm.FunctionType.get(this.typeConverter.convert(elementType, TypePlace.RETURN_VALUE), [thisType, this.indexType], false);
             getter = llvm.Function.create(getterType, llvm.LinkageTypes.ExternalLinkage, getterName, this.context.module);
             getter.addFnAttr(llvm.Attribute.AttrKind.ReadOnly);
             getter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
@@ -63,12 +66,13 @@ export class ObjectIndexReferenceBuilder {
         return getter;
     }
 
-    private createSetter(thisType: llvm.Type, elementType: llvm.Type, objectReference: ObjectReference): llvm.Function {
+    private createSetter(thisType: llvm.Type, elementType: ts.Type, objectReference: ObjectReference): llvm.Function {
         const setterName = this.getNameMangler().mangleIndexer(this.element, true);
         let setter = this.context.module.getFunction(setterName);
 
         if (!setter) {
-            const setterType = llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [thisType, this.indexType, elementType], false);
+            const llvmElementType = this.typeConverter.convert(elementType, TypePlace.PARAMETER);
+            const setterType = llvm.FunctionType.get(llvm.Type.getVoidTy(this.context.llvmContext), [thisType, this.indexType, llvmElementType], false);
             setter = llvm.Function.create(setterType, llvm.LinkageTypes.ExternalLinkage, setterName, this.context.module);
             setter.addFnAttr(llvm.Attribute.AttrKind.AlwaysInline);
 

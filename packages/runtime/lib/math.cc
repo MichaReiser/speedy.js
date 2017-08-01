@@ -56,4 +56,32 @@ ALWAYS_INLINE DLL_PUBLIC int32_t Math_maxPiu(__attribute__((unused)) void* math,
 
     return max;
 }
+
+ALWAYS_INLINE DLL_PUBLIC double Math_minPdu(__attribute__((unused)) void* math, double* values, size_t valueCount) {
+    double min = INFINITY;
+
+    for (size_t i = 0; i < valueCount; ++i) {
+        min = std::min(values[i], min);
+    }
+
+    return min;
+}
+
+ALWAYS_INLINE DLL_PUBLIC int32_t Math_minPiu(__attribute__((unused)) void* math, int32_t* values, size_t valueCount) {
+    int32_t min = 2147483647;
+
+    for (size_t i = 0; i < valueCount; ++i) {
+        min = std::min(values[i], min);
+    }
+
+    return min;
+}
+
+ALWAYS_INLINE DLL_PUBLIC double Math_floord(__attribute__((unused)) void* math, double value) {
+    return std::floor(value);
+}
+
+ALWAYS_INLINE DLL_PUBLIC double Math_roundd(__attribute__((unused)) void* math, double value) {
+    return std::round(value);
+}
 }

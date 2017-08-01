@@ -3,7 +3,7 @@ import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
-import {toLLVMType} from "../util/types";
+import {TypePlace} from "../util/typescript-to-llvm-type-converter";
 import {Address} from "./address";
 import {FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
@@ -144,7 +144,7 @@ export abstract class ClassReference implements Value {
             const forwardDeclaration = llvm.StructType.create(this.compilationContext.llvmContext, `class.${this.symbol.name}`);
             this.llvmType = forwardDeclaration;
 
-            const fieldTypes = this.getFields(type, context).map(field => toLLVMType(field.type, context));
+            const fieldTypes = this.getFields(type, context).map(field => context.toLLVMType(field.type, TypePlace.FIELD));
 
             if (fieldTypes.length === 0) {
                 // LLVM doesn't seem to like empty structs, at least when marked as dereferencaeble (throws value out of range as size is 0).

@@ -108,7 +108,7 @@ export function initializeCompilerOptions(compilerOptions: UninitializedSpeedyJS
         unsafe: true,
         emitLLVM: false,
         saveWast: false,
-        binaryenOpt: true,
+        binaryenOpt: false,
         initialMemory: 16 * 1024 * 1024,
         totalStack: 5 * 1024 * 104,
         globalBase: 8,

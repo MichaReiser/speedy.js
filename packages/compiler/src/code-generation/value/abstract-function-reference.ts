@@ -4,11 +4,14 @@ import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CompilationContext} from "../../compilation-context";
 import {CodeGenerationContext} from "../code-generation-context";
+import {invoke} from "../util/functions";
 import {llvmArrayValue} from "../util/llvm-array-helpers";
-import {getArrayElementType, getCallSignature, isFunctionType, toLLVMType} from "../util/types";
+import {getArrayElementType, getCallSignature, isFunctionType} from "../util/types";
+import {TypePlace} from "../util/typescript-to-llvm-type-converter";
 import {FunctionPointer, FunctionReference} from "./function-reference";
 import {ObjectReference} from "./object-reference";
 import {createResolvedFunctionFromSignature, ResolvedFunction, ResolvedFunctionParameter} from "./resolved-function";
+import {Undefined} from "./undefined";
 import {AssignableValue, Value} from "./value";
 
 /**
@@ -65,17 +68,21 @@ export abstract class AbstractFunctionReference implements FunctionReference {
             name = resolvedFunction.functionName ? `${resolvedFunction.functionName}ReturnValue` : undefined;
         }
 
-        assert(callArguments.length === llvmFunction.type.elementType.getParams().length, "Calling function with less than expected number of arguments");
-        const call = callerContext.builder.createCall(llvmFunction, callArguments, name);
+        const returnType = callerContext.toLLVMType(resolvedFunction.returnType, TypePlace.RETURN_VALUE);
+        let dereferenceableSize: number | undefined;
 
-        if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
-            return;
-        } else if (resolvedFunction.returnType.flags & ts.TypeFlags.Object) {
+        if (resolvedFunction.returnType.flags & ts.TypeFlags.Object) {
             const classReference = callerContext.resolveClass(resolvedFunction.returnType)!;
-            call.addDereferenceableAttr(0, classReference.getTypeStoreSize(resolvedFunction.returnType as ts.ObjectType, callerContext));
+            dereferenceableSize = classReference.getTypeStoreSize(resolvedFunction.returnType as ts.ObjectType, callerContext);
         }
 
-        return callerContext.value(call, resolvedFunction.returnType);
+        const returnValue = invoke(llvmFunction, callArguments, returnType, callerContext, { name, dereferenceableSize });
+
+        if (resolvedFunction.returnType.flags & ts.TypeFlags.Void) {
+            return Undefined.create(callerContext);
+        }
+
+        return callerContext.value(returnValue, resolvedFunction.returnType);
     }
 
     /**
@@ -107,9 +114,11 @@ export abstract class AbstractFunctionReference implements FunctionReference {
             if (parameter.variadic) {
                 const arrayType = (parameter.type as ts.GenericType);
                 const elementType = getArrayElementType(arrayType);
+                const elementLLVMType = callerContext.toLLVMType(elementType, TypePlace.PARAMETER);
+                const elements = llvmArrayValue(passedArguments.slice(i), elementLLVMType, callerContext, parameter.name);
 
                 result.push(
-                    llvmArrayValue(passedArguments.slice(i), toLLVMType(elementType, callerContext), callerContext, parameter.name),
+                    elements,
                     llvm.ConstantInt.get(callerContext.llvmContext, passedArguments.length - i, undefined, false)
                 );
 

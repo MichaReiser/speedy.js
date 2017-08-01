@@ -4,7 +4,7 @@ import * as ts from "typescript";
 
 import {CodeGenerationContext} from "../code-generation-context";
 import {ResolvedFunction} from "../value/resolved-function";
-import {toLLVMType} from "./types";
+import {TypePlace} from "./typescript-to-llvm-type-converter";
 
 /**
  * Builder for declaring llvm functions
@@ -96,11 +96,11 @@ export class FunctionDeclarationBuilder {
      */
     declare(): llvm.Function {
         assert(this.functionName, "Cannot declare a function without a name");
-        const llvmReturnType = toLLVMType(this.returnType, this.context);
+        const llvmReturnType = this.context.typeConverter.convert(this.returnType, TypePlace.RETURN_VALUE);
         const parameters: llvm.Type[] = [];
 
         for (const parameter of this.parameters) {
-            parameters.push(toLLVMType(parameter.type, this.context));
+            parameters.push(this.context.typeConverter.convert(parameter.type, TypePlace.PARAMETER));
         }
 
         const functionType = llvm.FunctionType.get(llvmReturnType, parameters, false);

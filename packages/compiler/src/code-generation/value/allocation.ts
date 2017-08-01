@@ -2,7 +2,6 @@ import * as assert from "assert";
 import * as llvm from "llvm-node";
 import * as ts from "typescript";
 import {CodeGenerationContext} from "../code-generation-context";
-import {toLLVMType} from "../util/types";
 import {ObjectReference} from "./object-reference";
 import {Pointer} from "./pointer";
 
@@ -15,7 +14,7 @@ import {AssignableValue, Value} from "./value";
  */
 export class Allocation implements AssignableValue {
     static create(type: ts.Type, context: CodeGenerationContext, name?: string): Allocation {
-        const allocaInst = Allocation.createAllocaInstInEntryBlock(toLLVMType(type, context), context, name);
+        const allocaInst = Allocation.createAllocaInstInEntryBlock(context.toLLVMType(type), context, name);
         const alignment = Allocation.getPreferredValueAlignment(type, context);
         return new Allocation(allocaInst, type, alignment, name);
     }
@@ -38,7 +37,7 @@ export class Allocation implements AssignableValue {
     }
 
     static getPreferredValueAlignment(type: llvm.Type | ts.Type, context: CodeGenerationContext) {
-        type = type instanceof llvm.Type ? type : toLLVMType(type, context);
+        type = type instanceof llvm.Type ? type : context.toLLVMType(type);
         return context.module.dataLayout.getPrefTypeAlignment(type);
     }
 

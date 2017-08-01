@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../../code-generation-diagnostic";
 import {CodeGenerationContext} from "../code-generation-context";
-import {isMaybeObjectType, toLLVMType} from "../util/types";
+import {isMaybeObjectType} from "../util/types";
 import {Address} from "./address";
 import {AddressLValue} from "./address-lvalue";
 import {FunctionReference} from "./function-reference";
@@ -25,13 +25,13 @@ export class SpeedyJSObjectReference implements ObjectReference {
         const symbol = context.typeChecker.getSymbolAtLocation(property);
 
         if (symbol.flags & ts.SymbolFlags.Property) {
-            const type = context.typeChecker.getTypeAtLocation(property);
-            return ObjectPropertyReference.createFieldProperty(type, this, symbol);
+            const propertyType = context.typeChecker.getTypeAtLocation(property);
+            return ObjectPropertyReference.createFieldProperty(propertyType, this, symbol);
         }
 
         // otherwise it is a method
-        const type = context.typeChecker.getTypeAtLocation(property);
-        const apparentType = context.typeChecker.getApparentType(type);
+        const methodType = context.typeChecker.getTypeAtLocation(property);
+        const apparentType = context.typeChecker.getApparentType(methodType);
         const signatures = context.typeChecker.getSignaturesOfType(apparentType, ts.SignatureKind.Call);
 
         return UnresolvedMethodReference.createMethod(this, signatures, context);
@@ -56,7 +56,7 @@ export class SpeedyJSObjectReference implements ObjectReference {
 
         // casting it to undefined. Casts to other types are not yet supported
         if (type.flags & ts.TypeFlags.Undefined) {
-            const castedPtr = context.builder.createBitCast(this.generateIR(context), toLLVMType(type, context));
+            const castedPtr = context.builder.createBitCast(this.generateIR(context), context.toLLVMType(type));
             return this.clazz.objectFor(new AddressLValue(castedPtr, type), this.type, context);
         }
 
