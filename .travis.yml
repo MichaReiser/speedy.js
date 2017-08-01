@@ -32,8 +32,8 @@ env:
 
 before_install:
 - wget http://famreiser.ch/llvm/cmake-3.8.1.tar.gz && tar -xzf cmake-3.8.1.tar.gz && sudo dpkg -i cmake_3.8.1-1_amd64.deb
-- wget http://famreiser.ch/llvm/llvm-5.0-20170527.tar.gz
-- mkdir llvm && tar -xzf llvm-5.0-20170527.tar.gz -C llvm
+- wget http://famreiser.ch/llvm/llvm-6.0-20170801.tar.gz
+- mkdir llvm && tar -xzf llvm-6.0-20170801.tar.gz -C llvm
 - export CC=$(pwd)/llvm/bin/clang
 - export CXX=$(pwd)/llvm/bin/clang++
 
