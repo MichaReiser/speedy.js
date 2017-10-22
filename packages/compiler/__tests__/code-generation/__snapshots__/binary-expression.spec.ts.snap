@@ -348,14 +348,14 @@ entry:
 "
 `;
 
-exports[`BinaryExpression equals-equals-equals 1`] = `
-"; ModuleID = 'binary-expression/equals-equals-equals.ts'
-source_filename = \\"binary-expression/equals-equals-equals.ts\\"
+exports[`BinaryExpression equals-equals 1`] = `
+"; ModuleID = 'binary-expression/equals-equals.ts'
+source_filename = \\"binary-expression/equals-equals.ts\\"
 target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
-%class.EqualsTest = type { i1 }
+%class.EqualsEqualsTest = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
 @Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
@@ -363,8 +363,59 @@ target triple = \\"wasm32-unknown-unknown\\"
 @Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
 @Math_object = private constant %class.Math zeroinitializer
 @Math_ptr = private constant %class.Math* @Math_object
-@EqualsTest_name = private unnamed_addr constant [11 x i8] c\\"EqualsTest\\\\00\\"
-@EqualsTest_type_descriptor = private constant { [11 x i8]* } { [11 x i8]* @EqualsTest_name }
+@EqualsEqualsTest_name = private unnamed_addr constant [17 x i8] c\\"EqualsEqualsTest\\\\00\\"
+@EqualsEqualsTest_type_descriptor = private constant { [17 x i8]* } { [17 x i8]* @EqualsEqualsTest_name }
+
+define void @_equalsEqualsToken() {
+entry:
+  %trueValue = alloca i1, align 1
+  %threePointFour = alloca double, align 8
+  %four = alloca i32, align 4
+  store i32 4, i32* %four, align 4
+  store double 3.400000e+00, double* %threePointFour, align 8
+  store i1 true, i1* %trueValue, align 1
+  %four1 = load i32, i32* %four, align 4
+  %cmpEQ = icmp eq i32 %four1, 4
+  %threePointFour2 = load double, double* %threePointFour, align 8
+  %cmpEQ3 = fcmp oeq double %threePointFour2, 3.400000e+00
+  %trueValue4 = load i1, i1* %trueValue, align 1
+  %cmpEQ5 = icmp eq i1 %trueValue4, true
+  %constructorReturnValue = call dereferenceable(1) %class.EqualsEqualsTest* @\\"binary_expression/equals_equals.ts$EqualsEqualsTest$11constructor\\"()
+  %constructorReturnValue6 = call dereferenceable(1) %class.EqualsEqualsTest* @\\"binary_expression/equals_equals.ts$EqualsEqualsTest$11constructor\\"()
+  %cmpEQ7 = icmp eq %class.EqualsEqualsTest* %constructorReturnValue, %constructorReturnValue6
+  ret void
+}
+
+define linkonce_odr %class.EqualsEqualsTest* @\\"binary_expression/equals_equals.ts$EqualsEqualsTest$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.EqualsEqualsTest*
+  ret %class.EqualsEqualsTest* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`BinaryExpression equals-equals-equals 1`] = `
+"; ModuleID = 'binary-expression/equals-equals-equals.ts'
+source_filename = \\"binary-expression/equals-equals-equals.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
+%class.EqualsEqualsEqualsTest = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@EqualsEqualsEqualsTest_name = private unnamed_addr constant [23 x i8] c\\"EqualsEqualsEqualsTest\\\\00\\"
+@EqualsEqualsEqualsTest_type_descriptor = private constant { [23 x i8]* } { [23 x i8]* @EqualsEqualsEqualsTest_name }
 
 define void @_equalsEqualsEqualsToken() {
 entry:
@@ -380,17 +431,17 @@ entry:
   %cmpEQ3 = fcmp oeq double %threePointFour2, 3.400000e+00
   %trueValue4 = load i1, i1* %trueValue, align 1
   %cmpEQ5 = icmp eq i1 %trueValue4, true
-  %constructorReturnValue = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsTest$11constructor\\"()
-  %constructorReturnValue6 = call dereferenceable(1) %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsTest$11constructor\\"()
-  %cmpEQ7 = icmp eq %class.EqualsTest* %constructorReturnValue, %constructorReturnValue6
+  %constructorReturnValue = call dereferenceable(1) %class.EqualsEqualsEqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsEqualsEqualsTest$11constructor\\"()
+  %constructorReturnValue6 = call dereferenceable(1) %class.EqualsEqualsEqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsEqualsEqualsTest$11constructor\\"()
+  %cmpEQ7 = icmp eq %class.EqualsEqualsEqualsTest* %constructorReturnValue, %constructorReturnValue6
   ret void
 }
 
-define linkonce_odr %class.EqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsTest$11constructor\\"() {
+define linkonce_odr %class.EqualsEqualsEqualsTest* @\\"binary_expression/equals_equals_equals.ts$EqualsEqualsEqualsTest$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
-  %this = bitcast i8* %\\"thisVoid*\\" to %class.EqualsTest*
-  ret %class.EqualsTest* %this
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.EqualsEqualsEqualsTest*
+  ret %class.EqualsEqualsEqualsTest* %this
 }
 
 declare i8* @malloc(i32)
@@ -406,6 +457,56 @@ target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
 target triple = \\"wasm32-unknown-unknown\\"
 
 %class.Math = type { i1 }
+%class.TestEqualsEquals = type { i1 }
+
+@Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
+@Array_type_descriptor = private constant { [6 x i8]* } { [6 x i8]* @Array_name }
+@Math_name = private unnamed_addr constant [5 x i8] c\\"Math\\\\00\\"
+@Math_type_descriptor = private constant { [5 x i8]* } { [5 x i8]* @Math_name }
+@Math_object = private constant %class.Math zeroinitializer
+@Math_ptr = private constant %class.Math* @Math_object
+@TestEqualsEquals_name = private unnamed_addr constant [17 x i8] c\\"TestEqualsEquals\\\\00\\"
+@TestEqualsEquals_type_descriptor = private constant { [17 x i8]* } { [17 x i8]* @TestEqualsEquals_name }
+
+define void @_equalsEqualsEqualsTokenImplicitCast() {
+entry:
+  %four = alloca i32, align 4
+  store i32 4, i32* %four, align 4
+  %four1 = load i32, i32* %four, align 4
+  %four1AsNumber = sitofp i32 %four1 to double
+  %cmpEQ = fcmp oeq double %four1AsNumber, 4.000000e+00
+  %constructorReturnValue = call dereferenceable(1) %class.TestEqualsEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEqualsEquals$11constructor\\"()
+  %cmpEQ2 = icmp eq %class.TestEqualsEquals* %constructorReturnValue, null
+  %constructorReturnValue3 = call dereferenceable(1) %class.TestEqualsEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEqualsEquals$11constructor\\"()
+  %cmpEQ4 = icmp eq %class.TestEqualsEquals* null, %constructorReturnValue3
+  ret void
+}
+
+define linkonce_odr %class.TestEqualsEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEqualsEquals$11constructor\\"() {
+entry:
+  %\\"thisVoid*\\" = call i8* @malloc(i32 1)
+  %this = bitcast i8* %\\"thisVoid*\\" to %class.TestEqualsEquals*
+  ret %class.TestEqualsEquals* %this
+}
+
+declare i8* @malloc(i32)
+
+declare void @speedyJsGc()
+"
+`;
+
+exports[`BinaryExpression equals-equals-equals-no-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/equals-equals-equals-no-implicit-cast-error.ts(5,20): error TS1000019: No implicit cast for the binary expressions operands (left: TestEqualsEqualsTypeOne, right: TestEqualsEqualsTypeTwo) exists. An explicit cast of either of the operands to the other's type is required.
+"
+`;
+
+exports[`BinaryExpression equals-equals-implicit-cast 1`] = `
+"; ModuleID = 'binary-expression/equals-equals-implicit-cast.ts'
+source_filename = \\"binary-expression/equals-equals-implicit-cast.ts\\"
+target datalayout = \\"e-m:e-p:32:32-i64:64-n32:64-S128\\"
+target triple = \\"wasm32-unknown-unknown\\"
+
+%class.Math = type { i1 }
 %class.TestEquals = type { i1 }
 
 @Array_name = private unnamed_addr constant [6 x i8] c\\"Array\\\\00\\"
@@ -417,21 +518,21 @@ target triple = \\"wasm32-unknown-unknown\\"
 @TestEquals_name = private unnamed_addr constant [11 x i8] c\\"TestEquals\\\\00\\"
 @TestEquals_type_descriptor = private constant { [11 x i8]* } { [11 x i8]* @TestEquals_name }
 
-define void @_equalsEqualsEqualsTokenImplicitCast() {
+define void @_equalsEqualsTokenImplicitCast() {
 entry:
   %four = alloca i32, align 4
   store i32 4, i32* %four, align 4
   %four1 = load i32, i32* %four, align 4
   %four1AsNumber = sitofp i32 %four1 to double
   %cmpEQ = fcmp oeq double %four1AsNumber, 4.000000e+00
-  %constructorReturnValue = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEquals$11constructor\\"()
+  %constructorReturnValue = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_implicit_cast.ts$TestEquals$11constructor\\"()
   %cmpEQ2 = icmp eq %class.TestEquals* %constructorReturnValue, null
-  %constructorReturnValue3 = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEquals$11constructor\\"()
+  %constructorReturnValue3 = call dereferenceable(1) %class.TestEquals* @\\"binary_expression/equals_equals_implicit_cast.ts$TestEquals$11constructor\\"()
   %cmpEQ4 = icmp eq %class.TestEquals* null, %constructorReturnValue3
   ret void
 }
 
-define linkonce_odr %class.TestEquals* @\\"binary_expression/equals_equals_equals_implicit_cast.ts$TestEquals$11constructor\\"() {
+define linkonce_odr %class.TestEquals* @\\"binary_expression/equals_equals_implicit_cast.ts$TestEquals$11constructor\\"() {
 entry:
   %\\"thisVoid*\\" = call i8* @malloc(i32 1)
   %this = bitcast i8* %\\"thisVoid*\\" to %class.TestEquals*
@@ -444,8 +545,8 @@ declare void @speedyJsGc()
 "
 `;
 
-exports[`BinaryExpression equals-equals-equals-no-implicit-cast-error 1`] = `
-"__tests__/code-generation/cases/binary-expression/equals-equals-equals-no-implicit-cast-error.ts(5,20): error TS1000019: No implicit cast for the binary expressions operands (left: TestEqualsTypeOne, right: TestEqualsTypeTwo) exists. An explicit cast of either of the operands to the other's type is required.
+exports[`BinaryExpression equals-equals-no-implicit-cast-error 1`] = `
+"__tests__/code-generation/cases/binary-expression/equals-equals-no-implicit-cast-error.ts(5,20): error TS1000019: No implicit cast for the binary expressions operands (left: TestEqualsTypeOne, right: TestEqualsTypeTwo) exists. An explicit cast of either of the operands to the other's type is required.
 "
 `;
 

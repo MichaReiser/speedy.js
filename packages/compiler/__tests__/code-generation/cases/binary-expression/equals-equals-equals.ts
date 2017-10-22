@@ -1,4 +1,4 @@
-class EqualsTest {}
+class EqualsEqualsEqualsTest {}
 
 async function equalsEqualsEqualsToken() {
     "use speedyjs";
@@ -11,5 +11,5 @@ async function equalsEqualsEqualsToken() {
     threePointFour === 3.4;
     trueValue === true;
     undefined === undefined;
-    new EqualsTest() === new EqualsTest();
+    new EqualsEqualsEqualsTest() === new EqualsEqualsEqualsTest();
 }

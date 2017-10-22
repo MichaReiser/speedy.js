@@ -59,10 +59,6 @@
   version "8.0.17"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.17.tgz#677bc8c118cfb76013febb62ede1f31d2c7222a1"
 
-"@types/node@^7.0.8":
-  version "7.0.39"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.39.tgz#8aced4196387038113f6f9aa4014ab4c51edab3c"
-
 "@types/tmp@0.0.33":
   version "0.0.33"
   resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.0.33.tgz#1073c4bc824754ae3d10cfab88ab0237ba964e4d"
@@ -3939,17 +3935,17 @@ spdx-license-ids@^1.0.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
 
-speedyjs-loader@^0.0.17:
-  version v0.0.17
-  resolved "https://registry.yarnpkg.com/speedyjs-loader/-/speedyjs-loader-0.0.17.tgz#96d97395c09b5e104634bf598540a70836eb8172"
+speedyjs-loader@^0.0.18:
+  version v0.0.18
+  resolved "https://registry.yarnpkg.com/speedyjs-loader/-/speedyjs-loader-0.0.18.tgz#290787f553af634598a190b05139bb5aa40d3fbf"
   dependencies:
     loader-utils "^1.1.0"
 
-speedyjs-runtime@^0.0.17:
-  version v0.0.17
-  resolved "https://registry.yarnpkg.com/speedyjs-runtime/-/speedyjs-runtime-0.0.17.tgz#864a7e8be2defc21e7ef63906f4d1416aeb8d80c"
+speedyjs-runtime@^0.0.18:
+  version v0.0.18
+  resolved "https://registry.yarnpkg.com/speedyjs-runtime/-/speedyjs-runtime-0.0.18.tgz#0d14abae2da19a8615ce620f3c472c501f6de719"
   dependencies:
-    "@types/node" "^7.0.8"
+    "@types/node" "^8.0.1"
 
 sprintf-js@^1.0.3:
   version "1.1.1"

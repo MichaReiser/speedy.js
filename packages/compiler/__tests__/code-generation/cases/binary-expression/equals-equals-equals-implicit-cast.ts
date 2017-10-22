@@ -1,4 +1,4 @@
-class TestEquals {}
+class TestEqualsEquals {}
 
 async function equalsEqualsEqualsTokenImplicitCast() {
     "use speedyjs";
@@ -6,6 +6,6 @@ async function equalsEqualsEqualsTokenImplicitCast() {
     let four = 4;
 
     four === 4.0;
-    new TestEquals() === undefined;
-    undefined === new TestEquals();
+    new TestEqualsEquals() === undefined;
+    undefined === new TestEqualsEquals();
 }

@@ -1,8 +1,8 @@
-class TestEqualsTypeOne {}
-class TestEqualsTypeTwo {}
+class TestEqualsEqualsTypeOne {}
+class TestEqualsEqualsTypeTwo {}
 
 async function equalsEqualsEqualsTokenNoImplicitCastError() {
     "use speedyjs";
 
-    new TestEqualsTypeOne() === new TestEqualsTypeTwo();
+    new TestEqualsEqualsTypeOne() === new TestEqualsEqualsTypeTwo();
 }
