@@ -29,13 +29,13 @@
     "deep-diff": "^0.3.8",
     "deep-equal": "^1.0.1",
     "exports-loader": "^0.6.4",
-    "file-loader": "^0.11.2",
+    "file-loader": "^1.1.5",
     "speedyjs-loader": "^0.0.18",
-    "ts-loader": "^2.2.0",
+    "ts-loader": "^3.0.5",
     "typescript": "MichaReiser/TypeScript#2.3.3-with-int",
     "webpack-dev-server": "^2.5.0"
   },
   "devDependencies": {
-    "webpack": "^2.6.1"
+    "webpack": "^3.8.1"
   }
 }

@@ -39,8 +39,8 @@ before_install:
 
 install:
 - npm config set LLVM_CONFIG $(pwd)/llvm/bin/llvm-config
-- npm install
-- npm run bootstrap
+- yarn
+- yarn run bootstrap
 
 after_success:
 - npm run coverage

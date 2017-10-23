@@ -22,6 +22,7 @@ function max(first: number, ...others: number[]) {
 
     let largest = first;
 
+    /* tslint:disable:prefer-for-of */
     for (let i = 0; i < others.length; ++i) {
         if (others[i] > largest) {
             largest = others[i];

@@ -1,3 +1,4 @@
+import debug = require("debug");
 import * as ts from "typescript";
 import {CodeGenerationDiagnostics} from "../code-generation-diagnostic";
 import {CodeGenerator} from "../code-generation/code-generator";
@@ -6,7 +7,6 @@ import {CompilationContext} from "../compilation-context";
 import {TypeChecker} from "../type-checker";
 import {isSpeedyJSEntryFunction, isSpeedyJSFunction} from "../util/speedyjs-function";
 import {TransformVisitor, TransformVisitorContext} from "./transform-visitor";
-import debug = require("debug");
 
 const LOG = debug("transform/speedyjs-transform-visitor");
 
