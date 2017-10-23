@@ -169,7 +169,8 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
-            // a === b
+            // a === b, a == b
+            case ts.SyntaxKind.EqualsEqualsToken:
             case ts.SyntaxKind.EqualsEqualsEqualsToken: {
                 const unifiedType = BinaryExpressionCodeGenerator.unifyTypes(binaryExpression, context);
 
@@ -186,7 +187,7 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
-            // !==
+            // a !== b
             case ts.SyntaxKind.ExclamationEqualsEqualsToken: {
                 const unifiedType = BinaryExpressionCodeGenerator.unifyTypes(binaryExpression, context);
 
