@@ -187,7 +187,8 @@ class BinaryExpressionCodeGenerator implements SyntaxCodeGenerator<ts.BinaryExpr
                 break;
             }
 
-            // a !== b
+            // a != b, a !== b
+            case ts.SyntaxKind.ExclamationEqualsToken:
             case ts.SyntaxKind.ExclamationEqualsEqualsToken: {
                 const unifiedType = BinaryExpressionCodeGenerator.unifyTypes(binaryExpression, context);
 
